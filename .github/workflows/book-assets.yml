@@ -1,0 +1,33 @@
+# Attach the current book files of the documentation site (PDF and EPUB from
+# the gh-pages branch) to an existing release, e.g. after a new edition of the
+# book was published without a new software version.
+name: book-assets
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag, e.g. v1.0"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  attach:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Attach the book files to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          files=()
+          for ext in pdf epub; do
+            book="fuzzyclust-${TAG#v}-book.$ext"
+            if git show "origin/gh-pages:fuzzyclust-book.$ext" > "$book"; then files+=("$book"); fi
+          done
+          gh release upload "$TAG" "${files[@]}" --clobber
