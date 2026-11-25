@@ -1,0 +1,21 @@
+body { font-family: Georgia, "Times New Roman", serif; line-height: 1.5; color: #1F2A36; }
+h1, h2, h3, h4, .chapterHead, .partHead, .likechapterHead, .sectionHead, .subsectionHead, .likesectionHead, .subsubsectionHead {
+  font-family: "Helvetica Neue", Arial, sans-serif; color: #1F2A36; line-height: 1.2; }
+.chapterHead, .likechapterHead { border-bottom: 2px solid #285780; padding-bottom: 0.3em; }
+.chapterHead .titlemark, .sectionHead .titlemark, .subsectionHead .titlemark { color: #285780; }
+a { color: #285780; text-decoration: none; }
+img { max-width: 100%; height: auto; }
+figure, div.figure { margin: 1.2em 0; text-align: center; }
+figcaption, .caption { font-size: 0.9em; text-align: left; }
+.caption .id, figcaption .id { color: #285780; font-weight: bold; }
+div.box { margin: 1em 0; padding: 0.5em 0.9em; border-left: 3px solid #285780; background: #F1F5F9; }
+div.summarybox { border-left-color: #009E73; background: #EEF8F4; }
+div.hintbox { border-left-color: #E69F00; background: #FDF6E8; }
+div.roadmap { border-left-color: #D55E00; background: #F4F6F8; font-size: 0.95em; }
+div.apibox { border-left-color: #4A8FC4; background: #EFF5FA; font-size: 0.95em; }
+img.algobox, .algobox img { display: block; margin: 1em auto; max-width: 100%; }
+pre, code, .lstinline, .lstlisting, .cmtt-10, .cmtt-9, .cmtt-8 { font-family: Menlo, Consolas, "Courier New", monospace; }
+.lstlisting { font-size: 0.82em; background: #F4F6F8; border-left: 3px solid #7FA3C5; padding: 0.4em 0.6em; overflow-x: auto; white-space: pre-wrap; }
+table { border-collapse: collapse; margin: 0.8em auto; font-size: 0.9em; }
+td, th { padding: 0.2em 0.5em; vertical-align: top; }
+math[display="block"] { margin: 0.6em 0; }

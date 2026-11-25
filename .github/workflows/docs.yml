@@ -1,6 +1,6 @@
 # Build the documentation (executing every gallery example) and publish it on
 # GitHub Pages from the gh-pages branch. The book PDF already on gh-pages
-# (fuzzyclust-book.pdf, updated by the "book" workflow) is kept.
+# (fuzzyclust-book.pdf and fuzzyclust-book.epub) is kept.
 name: docs
 
 on:
@@ -37,11 +37,12 @@ jobs:
       - run: sphinx-build -b html docs docs/_build/html -j auto
         env:
           MPLBACKEND: Agg
-      - name: Keep the published book PDF
+      - name: Keep the published book (PDF and EPUB)
         run: |
           if git rev-parse -q --verify origin/gh-pages >/dev/null; then
-            git show origin/gh-pages:fuzzyclust-book.pdf > docs/_build/html/fuzzyclust-book.pdf \
-              || rm -f docs/_build/html/fuzzyclust-book.pdf
+            for f in fuzzyclust-book.pdf fuzzyclust-book.epub; do
+              git show "origin/gh-pages:$f" > "docs/_build/html/$f" || rm -f "docs/_build/html/$f"
+            done
           fi
       - name: Publish on the gh-pages branch
         env:

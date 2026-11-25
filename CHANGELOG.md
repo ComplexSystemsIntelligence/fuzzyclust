@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+* EPUB edition of the book, generated from the LaTeX source (`book/epub/make_epub.py`); published next to the PDF on the documentation site.
+
 ## 1.0 (2026-11-25) — first public release
 
 Versions 0.1 and 0.2 were internal development versions and were not published. Changes since 0.2:

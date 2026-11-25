@@ -73,8 +73,9 @@ accepts NumPy arrays or pandas DataFrames and works inside a `Pipeline`.
   Jupyter notebook (download button in the gallery).
 * **Book**: *Fuzzy Clustering and Data Analysis in Python: The fuzzyclust
   toolbox*, [PDF](https://complexsystemsintelligence.github.io/fuzzyclust/fuzzyclust-book.pdf)
-  (384 pages, CC BY 4.0; LaTeX source in `book/`, the PDF is also attached to
-  every release). Theory in one notation, algorithm boxes, and the gallery
+  (384 pages) and [EPUB](https://complexsystemsintelligence.github.io/fuzzyclust/fuzzyclust-book.epub),
+  CC BY 4.0; LaTeX source in `book/`, both files are also attached to every
+  release. Theory in one notation, algorithm boxes, and the gallery
   examples as case studies.
 * **Migration from the MATLAB toolbox**: Appendix B of the book and
   `docs/migration.rst`.

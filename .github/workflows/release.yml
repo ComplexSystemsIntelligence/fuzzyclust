@@ -64,6 +64,8 @@ jobs:
           TAG: ${{ github.event.release.tag_name }}
         run: |
           files=(dist/*)
-          book="fuzzyclust-${TAG#v}-book.pdf"
-          if git show origin/gh-pages:fuzzyclust-book.pdf > "$book"; then files+=("$book"); fi
+          for ext in pdf epub; do
+            book="fuzzyclust-${TAG#v}-book.$ext"
+            if git show "origin/gh-pages:fuzzyclust-book.$ext" > "$book"; then files+=("$book"); fi
+          done
           gh release upload "$TAG" "${files[@]}" --clobber

@@ -2,6 +2,8 @@
 
 `main.tex` includes `preamble.tex` and one file per chapter from `chapters/`.
 Build: `book/build.sh` (cover artwork, figures, generated appendices, PDF in `book/_build/`).
+EPUB edition: `python book/epub/make_epub.py` after `book/build.sh` (needs tex4ebook, biber and dvisvgm;
+output in `book/_build_epub/`). It is generated from the same chapters with an e-book preamble.
 
 ## Chapter template (follow exactly)
 
