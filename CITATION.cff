@@ -4,6 +4,7 @@ type: software
 title: "fuzzyclust: fuzzy clustering and data analysis toolbox for Python"
 version: "1.0"
 date-released: 2026-11-25
+doi: 10.5281/zenodo.24543754
 license: MIT
 repository-code: "https://github.com/ComplexSystemsIntelligence/fuzzyclust"
 url: "https://complexsystemsintelligence.github.io/fuzzyclust"

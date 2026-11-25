@@ -6,6 +6,7 @@
 [![docs](https://img.shields.io/badge/docs-gallery%20%2B%20API-285780)](https://complexsystemsintelligence.github.io/fuzzyclust)
 [![PyPI](https://img.shields.io/pypi/v/fuzzyclust.svg)](https://pypi.org/project/fuzzyclust/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/ComplexSystemsIntelligence/fuzzyclust/blob/main/LICENSE)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24543754.svg)](https://doi.org/10.5281/zenodo.24543754)
 
 **fuzzyclust** is a scikit-learn compatible toolbox for fuzzy clustering and the
 data-analysis methods built on it. It succeeds the *Fuzzy Clustering and Data
@@ -94,8 +95,12 @@ and the book (notation, API contract, layout, templates).
 
 ## Citing
 
-See `CITATION.cff`. Please also cite the original publications of the methods
-you use; they are listed in every docstring and chapter.
+Please cite the software through its Zenodo record,
+[doi:10.5281/zenodo.24543754](https://doi.org/10.5281/zenodo.24543754) (all
+versions; version 1.0 is
+[doi:10.5281/zenodo.24543755](https://doi.org/10.5281/zenodo.24543755)), or use
+`CITATION.cff`. Please also cite the original publications of the methods you
+use; they are listed in every docstring and chapter.
 
 ## About
 
