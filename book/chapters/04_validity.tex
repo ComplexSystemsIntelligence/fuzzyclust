@@ -1,0 +1,430 @@
+\chapter[Cluster validity]{Cluster validity and the number of clusters}\label{ch:validity}
+\begin{roadmap}
+The algorithms of the previous chapter return a partition for whatever number of clusters they are given, and they return it with the same confidence whether or not the data contain that many groups. This chapter is about judging a partition and choosing the number of clusters. It distinguishes three routes---scanning $c$ with validity indices, merging compatible clusters, and asking which partition is stable under resampling---and describes every index in \code{fuzzyclust.validity}: partition-based indices that look only at the memberships, compactness and separation indices that relate the within-cluster scatter to the distances between prototypes, crisp indices evaluated on the hardened partition, and the volume and density indices of Gath and Geva. Compatible cluster merging is given as an algorithm with a geometric and a similarity criterion, and the fuzzy Rand and adjusted Rand indices, which compare two fuzzy partitions, are the basis of stability selection. The practical part runs the three routes on the same data and shows how to combine indices and how evaluating new data with \code{predict\_proba} is itself a form of validation; visual validation is the subject of \cref{ch:visualization}.
+\end{roadmap}
+
+\section{Problem and idea}\label{sec:val:problem}
+
+Cluster validity is the question of whether a given partition fits the data at all. A clustering algorithm finds the best fit for a fixed number of clusters and a fixed family of cluster shapes, but the best fit need not be meaningful: the number of clusters may be wrong, the assumed shape may not correspond to the groups in the data, or the data may have no group structure. Since clustering is unsupervised, there are no labels to compare with; the quality of a partition must be read from the partition and the data themselves. There are three routes to the number of clusters; the first two are sketched in \cref{fig:val:routes}.
+\begin{itemize}
+  \item \emph{Validity scans.} The algorithm is run for every $c\in\{2,\dots,c_{\max}\}$, a \emph{validity index} is computed for every partition, and the $c$ at which the index is extremal (or has a knee) is selected. The index may evaluate the whole partition---the usual case, and the one treated here---or the individual clusters, in which case poor clusters are removed and similar ones joined.
+  \item \emph{Compatible cluster merging.} The algorithm starts with a deliberately large $c_{\max}$, and the number of clusters is reduced step by step by merging pairs of clusters that are compatible according to some criterion, re-clustering after every merge, until no compatible pair remains.
+  \item \emph{Stability selection.} The data are resampled, the algorithm is run on every sample for every candidate $c$, and the $c$ whose partitions agree best across the samples is selected; agreement is measured by a fuzzy generalization of the Rand index.
+\end{itemize}
+The scan is general and simple but costs $c_{\max}-1$ complete runs, and its outcome rests on the index. Merging exploits the geometry of the prototypes and is natural when the clusters stand for local models, as in \cref{ch:models,ch:timeseries}, or when they are nodes of a tree, as in \cref{ch:graph}; it needs a compatibility criterion with thresholds. Stability selection makes no assumption about what a good cluster looks like beyond the algorithm's own, but it is the most expensive route, with two fits per resample and per $c$.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[>={Latex[length=2mm]}, node distance=4mm and 8mm]
+  % ---- left: validity scan ----
+  \node[data, text width=4.2cm] (d1) {data $\X$, algorithm,\\ range $c=2,\dots,c_{\max}$};
+  \node[note, anchor=south, font=\small] at (d1.north) {route 1: validity scan};
+  \node[block, text width=4.2cm, below=of d1] (f1) {fit a partition $(\U_c,\V_c)$\\ for every $c$ ($c_{\max}-1$ runs)};
+  \node[block, text width=4.2cm, below=of f1] (i1) {evaluate several indices\\ $I(\X,\U_c,\V_c)$};
+  \node[result, text width=4.2cm, below=of i1] (r1) {$c^*=\argmax_c I$ or $\argmin_c I$,\\ or the knee of $I(c)$;\\ look for agreement};
+  \draw[arrow] (d1) -- (f1); \draw[arrow] (f1) -- (i1); \draw[arrow] (i1) -- (r1);
+  % ---- right: merging ----
+  \node[data, text width=4.4cm, right=12mm of d1] (d2) {fit with a deliberately\\ large $c_{\max}$};
+  \node[note, anchor=south, font=\small] at (d2.north) {route 2: compatible cluster merging};
+  \node[block, text width=4.4cm, below=of d2] (c2) {compatibility of every pair $(i,j)$: parallel axes, close centers, overlapping memberships};
+  \node[result, diamond, aspect=2.6, inner sep=1pt, text width=2.2cm, below=of c2] (q2) {compatible\\ pair left?};
+  \node[block, text width=4.4cm, below=of q2] (m2) {merge the most compatible pair, $c\leftarrow c-1$, re-cluster from the merged partition};
+  \node[result, text width=4.4cm, below=of m2] (r2) {final $c$ and partition};
+  \draw[arrow] (d2) -- (c2); \draw[arrow] (c2) -- (q2);
+  \draw[arrow] (q2) -- node[note, right=1pt] {yes} (m2);
+  \draw[arrow] (q2.east) -- ++(0.55,0) |- node[note, pos=0.25, right=1pt] {no} (r2.east);
+  \draw[arrow] (m2.west) -- ++(-0.45,0) |- (c2.west);
+\end{tikzpicture}
+\caption[Two routes to the number of clusters.]{Two routes to the number of clusters. Left: the algorithm is run for every candidate $c$, and validity indices computed from the data, the partition, and the prototypes select the best one. Right: a deliberately large number of clusters is reduced by merging pairs that are compatible---parallel principal axes, close centers, similar memberships---and re-clustering after every merge. The toolbox implements the scan in \code{fuzzyclust.validity} and merging in \code{fuzzyclust.cluster.CompatibleClusterMerging}; merging also appears in the graph-based methods of \cref{ch:graph} and the time-series segmentation of \cref{ch:timeseries}. A third route, stability selection, is described in \cref{sec:val:stability}.}
+\label{fig:val:routes}
+\end{figure}
+
+\Cref{fig:val:compsep} shows the two quantities from which almost every geometric index is built. \emph{Compactness} is the scatter of the samples about their prototypes, $\sum_k\mik^m\norm{\xk-\vi}^2$ summed over clusters; it is small when the clusters are tight. \emph{Separation} is the distance between the prototypes, $\norm{\vi-\mathbf{v}_j}^2$, aggregated in some way (the minimum over pairs, the sum, or the distance to the grand mean); it is large when the clusters are far apart. A good partition has small compactness and large separation, so most indices are a ratio or a difference of the two. The partition-based indices use only the memberships and ask how fuzzy the partition is, on the grounds that a wrong number of clusters shows up as ambiguous memberships; the volume-based indices of Gath and Geva measure the volume of the clusters through their covariance matrices. No index is perfect, which is why the toolbox implements sixteen and the recommended practice is to look at several.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[scale=1.0, >={Latex[length=2mm]}]
+  \def\ptsA{0.42/1.18,0.70/1.52,0.95/1.05,1.25/1.45,0.60/0.85,1.10/0.80,0.85/1.30,1.35/1.10,0.55/1.40,1.00/1.60}
+  \def\ptsB{4.05/1.30,4.40/1.70,4.70/1.20,4.95/1.55,4.25/0.95,4.80/0.85,4.50/1.35,5.05/1.15,4.15/1.55,4.60/1.75}
+  \coordinate (v1) at (0.9,1.22); \coordinate (v2) at (4.55,1.33);
+  \foreach \x/\y in \ptsA { \fill[fcblue!80!black] (\x,\y) circle (1.6pt); \draw[fcblue!40, thin] (\x,\y) -- (v1); }
+  \foreach \x/\y in \ptsB { \fill[fcverm!80!black] (\x,\y) circle (1.6pt); \draw[fcverm!40, thin] (\x,\y) -- (v2); }
+  \node[black] at (v1) {$\boldsymbol\times$}; \node[black] at (v2) {$\boldsymbol\times$};
+  \node[note, below=3pt] at (v1) {$\mathbf{v}_1$}; \node[note, below=3pt] at (v2) {$\mathbf{v}_2$};
+  \draw[arrow, thick, fcgray!80!black, <->] ($(v1)+(0,0.95)$) -- node[note, above, text=black] {separation $\norm{\mathbf{v}_1-\mathbf{v}_2}$} ($(v2)+(0,0.95)$);
+  \draw[fcgray, dashed] (v1) -- ($(v1)+(0,0.95)$); \draw[fcgray, dashed] (v2) -- ($(v2)+(0,0.95)$);
+  \node[note, anchor=north, text width=3.4cm] at (0.9,0.45) {compactness: $\sum_k\mu_{1k}^m\norm{\xk-\mathbf{v}_1}^2$ (thin lines)};
+  \node[note, anchor=north, text width=3.4cm] at (4.55,0.45) {compactness of cluster 2};
+  \node[note, anchor=west, text width=5.3cm, align=left] at (6.0,1.3) {a good partition: small compactness, large separation. Most geometric indices are a ratio, compactness$/$separation (XB, S, SC), or a difference (FS).};
+\end{tikzpicture}
+\caption[The two ingredients of the geometric validity indices.]{The two ingredients of the geometric validity indices: compactness, the membership-weighted scatter of the samples about their prototypes (thin lines), and separation, the distance between the prototypes (arrow).}
+\label{fig:val:compsep}
+\end{figure}
+
+\section{Theory}\label{sec:val:theory}
+
+Throughout, $\U\in\R^{c\times N}$ is the partition, $\V$ the prototypes, $m$ the exponent the algorithm used, $N_i=\sum_k\mik$ the fuzzy cardinality of cluster $i$, and $\bar{\mathbf{x}}$ the grand mean of the data. Apart from the volume indices, which use the fuzzy covariance matrices, all distances in the indices are Euclidean. This is the convention of the validity literature and makes the indices comparable across algorithms: the norm of the algorithm is \emph{not} used, so GK and GG partitions are judged in the same geometry as FCM partitions. We present the indices in four families (\cref{sec:val:partition,sec:val:geometric,sec:val:crisp,sec:val:volume}), add two further compactness and separation indices (\cref{sec:val:kwon}), and summarize them in \cref{sec:val:table}. The scan and merging procedures (\cref{sec:val:scan}), the comparison of two fuzzy partitions (\cref{sec:val:compare}), and the stability-based selection of the number of clusters (\cref{sec:val:stability}) follow.
+
+\subsection{Partition-based indices}\label{sec:val:partition}
+
+The \emph{partition coefficient}\index{validity index!partition coefficient (PC)} of Bezdek \cite{bezdek:1981},
+\begin{equation}
+  PC=\frac1N\sum_{i=1}^{c}\sum_{k=1}^{N}\mik^2,\qquad \tfrac1c\le PC\le1,
+  \label{eq:val:pc}
+\end{equation}
+measures the amount of overlap between the clusters: it is one for a hard partition and $1/c$ for the fuzziest one, and a larger value is better. The \emph{classification entropy}\index{validity index!classification entropy (CE)}
+\begin{equation}
+  CE=-\frac1N\sum_{i=1}^{c}\sum_{k=1}^{N}\mik\log\mik,\qquad 0\le CE\le\log c,
+  \label{eq:val:ce}
+\end{equation}
+measures the same fuzziness with Shannon's entropy: it is zero for a hard partition and $\log c$ for the fuzziest one; lower is better. Both need nothing but $\U$, which is their appeal and their weakness: they have no direct connection to the geometry of the data, and they tend to change monotonically with $c$---$PC$ decreases and $CE$ increases even for data with clear groups, because more clusters mean more borders and more ambiguous samples. On well-separated data they still have a genuine extremum at the right $c$ (\cref{sec:val:ex:scan}); on overlapping data the \emph{knee} of the curve, not its extremum, is the informative point, which is how the MATLAB toolbox manual read its motorcycle scan. They also depend strongly on $m$, so they cannot compare partitions obtained with different exponents, and they are useless for hard partitions ($PC=1$, $CE=0$ always). Dav\'e's \emph{modified partition coefficient}\index{validity index!modified partition coefficient (MPC)} \cite{dave:1996:mpc},
+\begin{equation}
+  MPC=1-\frac{c}{c-1}(1-PC),\qquad 0\le MPC\le1,
+  \label{eq:val:mpc}
+\end{equation}
+rescales $PC$ from its range $[1/c,1]$ to $[0,1]$ and thereby reduces the monotone trend; higher is better.
+
+\subsection{Compactness and separation indices}\label{sec:val:geometric}
+
+The \emph{partition index}\index{validity index!partition index (SC)} of Bensaid et al.\ \cite{bensaid:1996:validity},
+\begin{equation}
+  SC=\sum_{i=1}^{c}\frac{\sum_{k=1}^{N}\mik^m\norm{\xk-\vi}^2}{N_i\sum_{j=1}^{c}\norm{\mathbf{v}_j-\vi}^2},
+  \label{eq:val:sc}
+\end{equation}
+is a sum of cluster-wise validities, the compactness of cluster $i$ over its separation from all other prototypes, each normalized by the fuzzy cardinality $N_i$ so that a small cluster is not favored merely for being small. Lower is better. Its authors designed it for comparing different partitions with the \emph{same} number of clusters, e.g.\ from different algorithms or initializations; across $c$ it tends to decrease. The \emph{separation index}\index{validity index!separation index (S)}, which the MATLAB manual attributes to the same paper, is the Xie--Beni index in its original form \cite{xie:1991:validity}, with squared memberships,
+\begin{equation}
+  S=\frac{\sum_{i=1}^{c}\sum_{k=1}^{N}\mik^2\norm{\xk-\vi}^2}{N\min_{i\ne j}\norm{\vi-\mathbf{v}_j}^2}.
+  \label{eq:val:s}
+\end{equation}
+It uses the minimum distance between prototypes as separation, which makes it sensitive to any two prototypes that come close; lower is better. The \emph{Xie--Beni index}\index{validity index!Xie--Beni (XB)} of the toolbox weights the scatter with the exponent $m$ of the algorithm instead of the square, the form analyzed by Pal and Bezdek \cite{pal:1995:validity},
+\begin{equation}
+  XB=\frac{\sum_{i=1}^{c}\sum_{k=1}^{N}\mik^m\norm{\xk-\vi}^2}{N\min_{i\ne j}\norm{\vi-\mathbf{v}_j}^2}.
+  \label{eq:val:xb}
+\end{equation}
+It is the compactness ($\J/N$ for Euclidean FCM) over the minimal separation; for $m=2$ it coincides with $S$, and $SC$, $S$, and $XB$ differ mainly in how the separation is aggregated. $XB$ is the most widely used fuzzy validity index. Lower is better, and it is usually inspected for the first pronounced minimum, because it decreases again for large $c$, when the minimal center distance shrinks only slowly while the compactness keeps improving. Pal and Bezdek showed that the index is reliable for $m$ between about $1.5$ and $2.5$. The \emph{Fukuyama--Sugeno index}\index{validity index!Fukuyama--Sugeno (FS)} \cite{fukuyama:1989:validity},
+\begin{equation}
+  FS=\sum_{i=1}^{c}\sum_{k=1}^{N}\mik^m\Bigl(\norm{\xk-\vi}^2-\norm{\vi-\bar{\mathbf{x}}}^2\Bigr),
+  \label{eq:val:fs}
+\end{equation}
+is compactness minus separation, where the separation of cluster $i$ is its distance from the grand mean weighted by its fuzzy mass; lower (more negative) is better. Because it is a difference rather than a ratio, its value depends on the scale of the data, and it tends to prefer small $c$ on data with one dominant group. The \emph{PBM-F index}\index{validity index!PBM-F} of Pakhira, Bandyopadhyay, and Maulik \cite{pakhira:2004:pbmf},
+\begin{align}
+  PBMF&=\Bigl(\frac1c\cdot\frac{E_1}{J_m}\cdot D_c\Bigr)^2,\label{eq:val:pbmf}\\
+  \text{with}\quad E_1&=\sum_{k=1}^{N}\norm{\xk-\bar{\mathbf{x}}},\ \ 
+  J_m=\sum_{i,k}\mik^m\norm{\xk-\vi},\ \ 
+  D_c=\max_{i,j}\norm{\vi-\mathbf{v}_j},\notag
+\end{align}
+combines the ratio of the scatter about the grand mean to the fuzzy within-cluster scatter (both with unsquared distances) with the \emph{maximal} distance between prototypes and penalizes $c$ explicitly by the factor $1/c$; higher is better. The maximal separation makes it insensitive to one pair of close prototypes but also lets it reward a single far-away cluster.
+
+\subsection{Crisp indices on the hardened partition}\label{sec:val:crisp}
+
+Three indices were designed for hard partitions and are evaluated on the hardened partition $\argmax_i\mik$. \emph{Dunn's index}\index{validity index!Dunn's index (DI)} \cite{dunn:1974:validity},
+\begin{equation}
+  DI=\min_{i}\min_{j\ne i}\left\{\frac{\min_{\mathbf{x}\in C_i,\,\mathbf{y}\in C_j}d(\mathbf{x},\mathbf{y})}{\max_{l}\max_{\mathbf{x},\mathbf{y}\in C_l}d(\mathbf{x},\mathbf{y})}\right\},
+  \label{eq:val:di}
+\end{equation}
+is the smallest distance between two clusters (single linkage) over the largest cluster diameter; higher is better. The index was proposed to identify ``compact and well separated'' clusters. Its drawbacks are the cost---all $N(N-1)/2$ pairwise distances are needed, so it is $\mathcal{O}(N^2)$---and its sensitivity: a single pair of close samples from different clusters or a single outlier that inflates a diameter changes the value completely, and for overlapping clusters the hardened partition has no meaningful inter-cluster distance at all. The \emph{alternative Dunn index}\index{validity index!alternative Dunn index (ADI)} of the MATLAB toolbox bounds the inter-cluster distance from below by the triangle inequality, $d(\mathbf{x},\mathbf{y})\ge\abs{d(\mathbf{y},\mathbf{v}_j)-d(\mathbf{x},\mathbf{v}_j)}$, which needs only the distances of the samples to the prototypes:
+\begin{equation}
+  ADI=\min_{i}\min_{j\ne i}\left\{\frac{\min_{\mathbf{x}\in C_i,\,\mathbf{y}\in C_j}\abs{d(\mathbf{y},\mathbf{v}_j)-d(\mathbf{x},\mathbf{v}_j)}}{\max_{l}\max_{\mathbf{x},\mathbf{y}\in C_l}d(\mathbf{x},\mathbf{y})}\right\}.
+  \label{eq:val:adi}
+\end{equation}
+Higher is better; the bound is loose (two samples at the same distance from $\mathbf{v}_j$ but on opposite sides give zero), so $ADI$ is often tiny, and the MATLAB manual itself noted that it ``is not tested enough to know how reliable its results are''. The \emph{silhouette}\index{validity index!silhouette (SIL)} of Rousseeuw \cite{rousseeuw:1987:silhouette} compares, for every sample, its mean distance $a_k$ to the members of its own cluster with the smallest mean distance $b_k$ to the members of another cluster,
+\begin{equation}
+  SIL=\frac1N\sum_{k=1}^{N}\frac{b_k-a_k}{\max(a_k,b_k)}\in[-1,1],
+  \label{eq:val:sil}
+\end{equation}
+higher is better. It is the least sensitive of the three crisp indices because it averages over all samples, but it is also $\mathcal{O}(N^2)$ and, like all crisp indices, ignores the memberships. The toolbox computes it with \code{sklearn.metrics.silhouette\_score}.
+
+\subsection{Volume and density indices}\label{sec:val:volume}
+
+Gath and Geva \cite{gath:1989} introduced three measures that use the fuzzy covariance matrices $\Fi$ of \eqref{eq:part:Agk} and therefore fit the ellipsoidal clusters of GK and GG. The \emph{fuzzy hypervolume}\index{validity index!fuzzy hypervolume (FHV)}\index{fuzzy hypervolume}
+\begin{equation}
+  FHV=\sum_{i=1}^{c}\sqrt{\det\Fi}
+  \label{eq:val:fhv}
+\end{equation}
+is the total volume of the clusters; compact clusters give small values, and lower is better. It is the natural companion of the GG algorithm and serves as the splitting criterion of the MST clustering in \cref{ch:graph}. The \emph{partition density}\index{validity index!partition density (PD)}
+\begin{equation}
+  PD=\frac{\sum_{i=1}^{c}S_i}{FHV},\qquad S_i=\sum_{k:\,(\xk-\vi)\T\Fi^{-1}(\xk-\vi)<1}\mik,
+  \label{eq:val:pd}
+\end{equation}
+is the membership mass inside the unit Mahalanobis ellipsoids of the clusters per unit of volume---how densely the ``central'' members fill the clusters; higher is better. The \emph{average partition density}\index{validity index!average partition density (APD)}
+\begin{equation}
+  APD=\frac1c\sum_{i=1}^{c}\frac{S_i}{\sqrt{\det\Fi}}
+  \label{eq:val:apd}
+\end{equation}
+averages the density cluster by cluster, so that every cluster counts equally whatever its size; higher is better. A single small and very dense cluster can therefore dominate $APD$, whereas $PD$ is dominated by the large clusters. The three indices reward tight, well-filled ellipsoids irrespective of their orientation, which the Euclidean compactness indices cannot do. Their weak point is the determinant, which collapses for nearly singular covariance matrices (a cluster of few points, a collinear cluster) and then makes $FHV$ tiny and $PD$ huge for a degenerate partition. They are computed from the fuzzy (not the hardened) partition, with $\Fi$ weighted by $\mik^m$, whatever algorithm produced $\U$.
+
+\subsection{Two further compactness and separation indices}\label{sec:val:kwon}
+
+The Xie--Beni index decreases again for large $c$ because its separation, the minimal distance between prototypes, shrinks more slowly than the compactness improves. Kwon \cite{kwon:1998:validity} removed this tendency with a \emph{punishing term} in the numerator,
+\begin{equation}
+  KWON=\frac{\sum_{i=1}^{c}\sum_{k=1}^{N}\mik^2\norm{\xk-\vi}^2+\frac1c\sum_{i=1}^{c}\norm{\vi-\bar{\mathbf{x}}}^2}{\min_{i\ne j}\norm{\vi-\mathbf{v}_j}^2},
+  \label{eq:val:kwon}
+\end{equation}
+the mean squared distance of the prototypes from the grand mean, which grows as prototypes are added toward the periphery of the data; lower is better.\index{validity index!Kwon (KWON)} Since the numerator is not divided by $N$, the index equals $N\cdot S$ plus the punishing term divided by the minimal separation; it inherits the reaction of $XB$ and $S$ to a close pair of prototypes but not their decrease at large $c$. Wu and Yang \cite{wu:2005:pcaes} combined a cluster-wise partition coefficient with an \emph{exponential} separation in the \emph{partition coefficient and exponential separation} index,\index{validity index!PCAES}
+\begin{align}
+  PCAES&=\sum_{i=1}^{c}\frac{\sum_{k=1}^{N}\mik^2}{\mu_M}-\sum_{i=1}^{c}\exp\Bigl(-\frac{\min_{j\ne i}\norm{\vi-\mathbf{v}_j}^2}{\beta_T}\Bigr),\label{eq:val:pcaes}\\
+  \text{with}\quad \mu_M&=\min_{1\le i\le c}\sum_{k=1}^{N}\mik^2,\qquad \beta_T=\frac1c\sum_{i=1}^{c}\norm{\vi-\bar{\mathbf{x}}}^2;\notag
+\end{align}
+higher is better. The first sum rates the compactness of every cluster relative to the least compact one; the second charges every cluster up to one unit for a neighbor closer than the typical spread $\sqrt{\beta_T}$ of the prototypes. The index thus judges clusters individually rather than through one global ratio. Since the first sum is at least $c$ and the penalty at most $c$, the index is nonnegative. Its weak point is the normalization by the \emph{smallest} cluster mass $\mu_M$: a spurious cluster with very few members inflates every ratio of the first sum, and the index then favors a large $c$ (\cref{sec:val:ex:routes}), so its curve should be read, not only its maximum.
+
+\subsection{Summary of the indices}\label{sec:val:table}
+
+\Cref{tab:val:indices} collects the sixteen indices. Three practical observations help in reading a scan. First, $PC$, $CE$, and $MPC$ answer a different question from the geometric indices: they ask whether the partition is \emph{confident}, the others whether it is \emph{good}; a wrong number of clusters usually spoils both, but a crisp partition of a bad $c$ is possible (small $m$) and so is a fuzzy partition of the right one (overlapping groups). Second, the ratio indices $XB$ and $S$ react to the \emph{closest} pair of prototypes, so they jump when a scan first places two prototypes into one group; this is what makes their first pronounced minimum informative and their behavior at large $c$ erratic. Third, the crisp indices are the ones to trust least on overlapping data, and the volume indices the ones to trust most on well-separated ellipsoidal clusters.
+
+\begin{table}[htbp]\centering\small
+\caption[Validity indices of \code{fuzzyclust.validity}.]{Validity indices of \code{fuzzyclust.validity}. ``Opt.'' is the direction of the optimum; the last column names the main weakness. The function names are listed in \cref{sec:val:api}.}
+\label{tab:val:indices}
+\begin{tabularx}{\textwidth}{@{}l c >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}\toprule
+Index & Opt. & Measures & Weakness \\\midrule
+PC   & max & fuzziness of $\U$ only, eq.~\eqref{eq:val:pc} & monotone in $c$, no link to the data, depends on $m$ \\
+CE   & min & entropy of $\U$, eq.~\eqref{eq:val:ce} & same as PC \\
+MPC  & max & PC rescaled to $[0,1]$, eq.~\eqref{eq:val:mpc} & no link to the data \\
+SC   & min & compactness / summed separation per cluster, eq.~\eqref{eq:val:sc} & decreases with $c$; meant for equal $c$ \\
+S    & min & compactness ($\mu^2$) / minimal separation, eq.~\eqref{eq:val:s} & sensitive to one close pair of prototypes \\
+XB   & min & compactness ($\mu^m$) / minimal separation, eq.~\eqref{eq:val:xb} & decreases again for large $c$; use the first minimum \\
+FS   & min & compactness $-$ separation from the grand mean, eq.~\eqref{eq:val:fs} & scale-dependent; favors small $c$ \\
+DI   & max & min inter-cluster distance / max diameter (crisp), eq.~\eqref{eq:val:di} & $\mathcal{O}(N^2)$; unreliable for overlapping clusters, outliers \\
+ADI  & max & DI with a triangle-inequality bound, eq.~\eqref{eq:val:adi} & loose bound, often near zero \\
+SIL  & max & mean silhouette of the hardened partition, eq.~\eqref{eq:val:sil} & $\mathcal{O}(N^2)$; ignores memberships \\
+FHV  & min & total cluster volume $\sum_i\sqrt{\det\Fi}$, eq.~\eqref{eq:val:fhv} & collapses for degenerate covariances \\
+PD   & max & central membership mass per volume, eq.~\eqref{eq:val:pd} & same as FHV \\
+APD  & max & mean density per cluster, eq.~\eqref{eq:val:apd} & same as FHV \\
+PBMF & max & scatter ratio $\times$ maximal separation $/\,c$, eq.~\eqref{eq:val:pbmf} & rewards one far-away cluster \\
+KWON & min & XB-type ratio with a prototype-spread penalty, eq.~\eqref{eq:val:kwon} & sensitive to one close pair of prototypes \\
+PCAES & max & cluster-wise PC $-$ exponential separation, eq.~\eqref{eq:val:pcaes} & a tiny spurious cluster inflates it \\\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Scanning the number of clusters and merging clusters}\label{sec:val:scan}
+
+The scan is straightforward (\cref{alg:scan}): clone the estimator, set $c$, fit, evaluate the indices, and tabulate. Two details matter. First, the algorithm should be run with the same settings for every $c$---same $m$, same tolerance, same initialization strategy---and with enough restarts that a poor local optimum at one $c$ does not masquerade as a bad $c$. Second, the suggested optimum of every index should be read together with its curve: an index that decreases monotonically has its extremum at $c_{\max}$ but may point elsewhere with its knee, and an index whose curve is flat over a range of $c$ says that the data do not decide. The plotting helper \code{plot\_validity\_scan} min--max scales every index to $[0,1]$ so that all curves fit one axis and their agreement is visible at a glance.
+
+\begin{algobox}{Selecting the number of clusters by a validity scan}{scan}\index{validity scan}\index{number of clusters!validity scan}\index{scan\_n\_clusters@\code{scan\_n\_clusters}}
+\begin{algorithm}[H]
+\KwIn{data $\X$, estimator with fixed $m$, \code{tol}, \code{n\_init}; range $c=2,\dots,c_{\max}$; set of indices}
+\For{$c=2,\dots,c_{\max}$}{
+  fit the estimator with $c$ clusters; obtain $\U_c$, $\V_c$\;
+  compute every index $I(\X,\U_c,\V_c;m)$ with Euclidean distances\;
+}
+\For{every index}{
+  record $c^*_I=\argmax_c I$ or $\argmin_c I$ according to its direction\;
+  inspect the curve $I(c)$: knee for monotone indices, first pronounced extremum for the ratio indices\;
+}
+\KwOut{table of index values, suggested $c^*_I$ per index; choose the $c$ on which the geometric indices agree and confirm it visually (\cref{ch:visualization})}
+\end{algorithm}
+\end{algobox}
+
+Compatible cluster merging\index{compatible cluster merging} turns the second route of \cref{fig:val:routes} into an algorithm (\cref{alg:ccm}). It was introduced by Krishnapuram and Freg \cite{krishnapuram:1992:merging} for fitting an unknown number of lines and planes and adapted to fuzzy modeling by Kaymak and Babu\v{s}ka \cite{kaymak:1995:merging}. The partition with $c_{\max}$ clusters is computed, every pair of clusters is judged by a compatibility criterion, the most compatible pair is merged, and the algorithm is re-run from the merged partition with one cluster fewer, until no pair passes the thresholds. Merging adds the two membership columns, $\boldsymbol\mu_{(ij)}=\boldsymbol\mu_i+\boldsymbol\mu_j$; the first iteration of the refit then computes the membership-weighted center and covariance of the union, which is what Kelly's merging formulas \cite{kelly:1994:merging} give in closed form. Two families of criteria are implemented.
+\begin{itemize}
+  \item The \emph{geometric} criterion follows Krishnapuram and Freg and suits thin clusters: lines, planes, and local linear models. With $\boldsymbol\phi_i$ the eigenvector of the smallest eigenvalue of $\Fi$ (the normal of the cluster) and $\sigma_i=\sqrt{\lambda_{i,\max}}$ its extent along the main axis, two thin clusters ($\lambda_{\min}/\lambda_{\max}\le\gamma_4$) are compatible if their normals are parallel, $\abs{\boldsymbol\phi_i\T\boldsymbol\phi_j}\ge\gamma_1$, their centers lie on a common hyperplane, $\abs{\tfrac12(\boldsymbol\phi_i+\boldsymbol\phi_j)\T(\vi-\mathbf{v}_j)}\le\gamma_2\cdot\tfrac12(\sigma_i+\sigma_j)$, and the centers are close, $\norm{\vi-\mathbf{v}_j}\le\gamma_3(\sigma_i+\sigma_j)$.
+  \item The \emph{similarity} criterion works for clusters of any shape: two clusters are compatible if their membership functions, seen as fuzzy sets over the samples, are similar. The toolbox measures this with the fuzzy Jaccard similarity of the two columns of $\U$ \cite{setnes:1998:similarity},
+  \begin{equation}
+    S_{ij}=\frac{\sum_{k=1}^{N}\min(\mik,\mu_{jk})}{\sum_{k=1}^{N}\max(\mik,\mu_{jk})}\ge\gamma_S,
+    \label{eq:val:similarity}
+  \end{equation}
+  with a fixed threshold $\gamma_S$, evaluated after every converged fit. Kaymak and Setnes \cite{kaymak:2002:volume}, who introduced adaptive merging by membership similarity, use a fuzzy inclusion measure instead, $S_{ij}=\max(I_{ij},I_{ji})$ with $I_{ij}=\sum_k\min(\mik,\mu_{jk})/\sum_k\mik$, and merge during the iteration: as soon as the largest similarity has stopped changing and exceeds $1/(c-1)$ for the current number of clusters $c$. Two FCM clusters that share one Gaussian group have $S_{ij}\approx0.3$--$0.35$ for $m=2$ and any $c$, two clusters on separate groups less than $0.2$; to make the threshold independent of the exponent, the toolbox evaluates $S_{ij}$ on the partition rescaled to $m=2$, $\mik'\propto\mik^{m-1}$.
+\end{itemize}
+Merging needs at most $c_{\max}-c^*$ refits, each started close to its solution, against $c_{\max}-1$ refits from scratch for a scan, and the clusters it ends with are interpretable as local models. This is why it is also the route taken in the fuzzy segmentation of time series (\cref{sec:ts:segmentation}), with a similarity of local PCA models as criterion, and in the analysis of the MST clustering (\cref{sec:graph:refine}), where the membership similarity of the refined clusters shows which of them may be merged; the volume-prototype clustering of \cref{ch:robust_shape} merges by \eqref{eq:val:similarity} within a single run, each time the partition has converged, without refitting from scratch.
+
+\begin{algobox}{Compatible cluster merging}{ccm}\index{compatible cluster merging}\index{cluster merging|see{compatible cluster merging}}\index{CompatibleClusterMerging@\code{CompatibleClusterMerging}}
+\begin{algorithm}[H]
+\KwIn{data $\X$, base estimator (GK by default), deliberately large $c_{\max}$, minimal $c_{\min}$, criterion (geometric with $\gamma_1,\dots,\gamma_4$, or similarity with $\gamma_S$)}
+fit the base estimator with $c\leftarrow c_{\max}$ clusters\;
+\Repeat{no pair is compatible or $c=c_{\min}$}{
+  compute the compatibility $C_{ij}$ of every pair: geometric degree (zero unless all four conditions hold) or $S_{ij}$ of \eqref{eq:val:similarity} (zero below $\gamma_S$)\;
+  \If{$\max_{ij}C_{ij}>0$ and $c>c_{\min}$}{
+    $(i,j)\leftarrow\argmax C_{ij}$; merge: $\boldsymbol\mu_i\leftarrow\boldsymbol\mu_i+\boldsymbol\mu_j$, delete column $j$; $c\leftarrow c-1$\;
+    refit the base estimator with $c$ clusters, initialized with the merged partition\;
+  }
+}
+\KwOut{final number of clusters $c$, the fitted estimator, the merge history (pairs and compatibilities)}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Compatible cluster merging}
+\begin{itemize}
+  \item Starts with too many clusters and merges the most compatible pair, refitting after every merge, until no compatible pair remains: the number of clusters is a result, not an input.
+  \item Geometric criterion (parallel normals, common hyperplane, close centers) for thin clusters and local linear models; membership similarity $S_{ij}$ for clusters of any shape.
+  \item Cheaper than a scan ($c_{\max}-c^*$ warm-started refits) and insensitive to $c_{\max}$ as long as it is large enough.
+  \item The thresholds are the parameters; for the similarity criterion $\gamma_S=0.2$ separates ``one group'' ($S\approx0.3$--$0.35$) from ``two groups''.
+  \item Parameters: \code{base\_estimator}, \code{start\_n\_clusters}, \code{min\_n\_clusters}, \code{criterion}, \code{parallel\_threshold}, \code{hyperplane\_threshold}, \code{distance\_threshold}, \code{thin\_threshold}, \code{similarity\_threshold}; attributes \code{merge\_history\_}, \code{estimator\_}.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Comparing fuzzy partitions}\label{sec:val:compare}\index{comparing partitions}
+
+The indices so far judge a partition against the data. A different question is how similar two partitions are, for example those of two algorithms, of two numbers of clusters, or of two runs on resampled data, or a partition and a known reference. For hard partitions the Rand index answers it by counting the pairs of samples on which the partitions agree---together in both or apart in both---and the adjusted Rand index of Hubert and Arabie \cite{hubert:1985:ari} removes the agreement expected by chance. Both have fuzzy generalizations, and both reduce to the classical indices when the partitions are hard.
+
+Hüllermeier, Rifqi, Henzgen, and Senge \cite{hullermeier:2012:rand} read a fuzzy partition as a \emph{fuzzy equivalence relation}, the degree to which samples $k$ and $l$ are in the same cluster,\index{fuzzy Rand index}
+\begin{equation}
+  E_{\U}(k,l)=1-\tfrac12\sum_{i=1}^{c}\abs{\mik-\mu_{il}},
+  \label{eq:val:equivalence}
+\end{equation}
+one for identical membership vectors and zero for disjoint ones, and define the fuzzy Rand index as one minus the mean distance between the relations of two partitions $\U_1$ and $\U_2$ (possibly with different numbers of clusters),
+\begin{equation}
+  R(\U_1,\U_2)=1-\frac{\sum_{k<l}\abs{E_1(k,l)-E_2(k,l)}}{N(N-1)/2}.
+  \label{eq:val:fuzzyrand}
+\end{equation}
+The paper defines no adjusted index. For a chance-corrected comparison the toolbox therefore builds fuzzy pair counts from the two relations with the Łukasiewicz t-norm $\top(a,b)=\max(a+b-1,0)$; this construction is the book's own (the Jaccard-type measures of Hüllermeier et al.\ split the pairs differently, with the product t-norm). The degrees to which a pair is together in both partitions, together only in the first, only in the second, and apart in both are $n_{11}=\sum_{k<l}\top(E_1,E_2)$, $n_{10}=\sum_{k<l}\top(E_1,1-E_2)$, $n_{01}=\sum_{k<l}\top(1-E_1,E_2)$ and $n_{00}=\sum_{k<l}\top(1-E_1,1-E_2)$, and they give a count-based Rand index $(n_{11}+n_{00})/n_p$ with $n_p=n_{11}+n_{10}+n_{01}+n_{00}$. For hard partitions $n_p=N(N-1)/2$ and the count-based form equals \eqref{eq:val:fuzzyrand}; for soft partitions it does not, because the four degrees of a pair need not sum to one ($n_{11}+n_{00}$ per pair is $\abs{E_1+E_2-1}$, $n_{10}+n_{01}$ is $\abs{E_1-E_2}$), so the toolbox uses the distance form \eqref{eq:val:fuzzyrand}, the definition of \cite{hullermeier:2012:rand}, as the fuzzy Rand index. With Hubert and Arabie's correction the counts give the \emph{fuzzy adjusted Rand index}\index{fuzzy adjusted Rand index}
+\begin{equation}
+  ARI=\frac{n_{11}-e}{\frac12\bigl((n_{11}+n_{10})+(n_{11}+n_{01})\bigr)-e},\qquad e=\frac{(n_{11}+n_{10})(n_{11}+n_{01})}{n_p},
+  \label{eq:val:fuzzyari}
+\end{equation}
+where $e$ is the agreement expected by chance, and the fuzzy Jaccard index $n_{11}/(n_{11}+n_{10}+n_{01})$. Campello \cite{campello:2007:rand} builds the counts differently, from the degrees that a pair is in the same cluster, $V_{kl}=\sum_i\top(\mik,\mu_{il})$, and in different clusters, $X_{kl}=\sum_{i\ne j}\top(\mik,\mu_{jl})$, combined with a t-norm across the two partitions ($n_{11}=\sum_{k<l}\top(V^{(1)}_{kl},V^{(2)}_{kl})$, $n_{10}=\sum_{k<l}\top(V^{(1)}_{kl},X^{(2)}_{kl})$, and so on). With the product t-norm, Campello's index is not reflexive for fuzzy partitions: a partition compared with itself scores below one, the more so the fuzzier it is. It is useful for ranking partitions against a reference, whereas the index of Hüllermeier et al.\ is a proper metric-based similarity.
+
+The raw fuzzy Rand index is dominated by the pairs that are apart in both partitions, of which there are many when $c$ is large, so it is close to one for almost any pair of reasonable partitions; the adjusted index is the one to read. A fuzzy partition and the hard partition obtained by hardening it do not reach an adjusted index of one: the index measures the agreement of the relations, and memberships below one are a genuine difference.
+
+\begin{summarybox}{Comparing fuzzy partitions}
+\begin{itemize}
+  \item Fuzzy Rand, adjusted Rand, and Jaccard indices compare two partitions of the same samples, with any numbers of clusters, any algorithms, hard or fuzzy.
+  \item Hüllermeier et al.: distance between the fuzzy equivalence relations $E_{\U}(k,l)$; reflexive, reduces to the classical indices for hard partitions.
+  \item Campello: t-norm-based counts of ``same cluster'' and ``different clusters''; not reflexive for fuzzy partitions with the product t-norm.
+  \item Read the adjusted index (zero for chance agreement); the raw index is near one for large $c$.
+  \item Uses: comparing algorithms and numbers of clusters, comparing with a reference partition, and the stability selection below.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Stability-based selection of the number of clusters}\label{sec:val:stability}\index{stability selection}\index{number of clusters!stability selection}
+
+A third route to the number of clusters asks for reproducibility instead of geometry: if the data contain $c^*$ groups, a partition into $c^*$ clusters should be nearly the same on different samples of the data, whereas a partition into too many clusters splits a group at a place that depends on the sample and a partition into too few merges groups in a sample-dependent way. Ben-Hur, Elisseeff, and Guyon \cite{benhur:2002:stability} cluster two random sub-samples of a fraction $f$ of the data and compare the two partitions on the samples they share; Lange, Roth, Braun, and Buhmann \cite{lange:2004:stability} split the data into two halves, cluster both, let the model of the first half \emph{predict} the second half, and compare the prediction with the second half's own partition. For a fuzzy clusterer the prediction is \code{predict\_proba}, and the comparison is the fuzzy adjusted Rand index \eqref{eq:val:fuzzyari}, which is zero for chance agreement and therefore needs no further normalization across $c$ (the raw Rand index increases with $c$). Repeating the procedure gives a distribution of agreements for every $c$; a stable number of clusters has a mean near one \emph{and} a small spread (\cref{alg:stability}). The sub-sample fraction must leave room for variation: with $f$ close to one the sub-samples are nearly identical and every $c$ looks stable.
+
+\begin{algobox}{Stability selection of the number of clusters}{stability}\index{stability selection}\index{stability\_selection@\code{stability\_selection}}
+\begin{algorithm}[H]
+\KwIn{data $\X$, estimator, range $c=2,\dots,c_{\max}$, number of repetitions $B$, protocol (sub-sample with fraction $f$, or split half), comparison index (fuzzy ARI)}
+\For{$c=2,\dots,c_{\max}$}{
+  \For{$b=1,\dots,B$}{
+    \eIf{sub-sample protocol}{
+      draw two random sub-samples $I_1,I_2$ of size $fN$; fit the estimator with $c$ clusters on each\;
+      memberships of the common samples $I_1\cap I_2$ under both models (\code{predict\_proba}): $\U_1$, $\U_2$\;
+    }{
+      split the data randomly into halves $H_1,H_2$; fit on each\;
+      $\U_1\leftarrow$ memberships of $H_2$ predicted by the model of $H_1$; $\U_2\leftarrow$ partition of $H_2$ by its own model\;
+    }
+    $s_{c,b}\leftarrow ARI(\U_1,\U_2)$\;
+  }
+}
+\KwOut{table $s_{c,b}$; the most stable $c$ has the largest mean and a small spread of $s_{c,\cdot}$}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Stability selection}
+\begin{itemize}
+  \item Chooses the $c$ whose partitions are reproducible across resamples: sub-sample pairs (Ben-Hur et al.) or split-half prediction (Lange et al.).
+  \item Needs no assumption about cluster shape beyond the clusterer's own; compares partitions with the fuzzy adjusted Rand index.
+  \item Read mean and spread per $c$; a large spread at a $c$ means that the partition depends on the sample.
+  \item Costs $2B$ fits per $c$ (the most expensive route); the sub-sample fraction should lie between about $0.5$ and $0.8$.
+  \item Parameters: \code{n\_clusters\_range}, \code{n\_splits}, \code{method}, \code{subsample}, \code{index}, \code{random\_state}.
+\end{itemize}
+\end{summarybox}
+
+\begin{summarybox}{Validity indices}
+\begin{itemize}
+  \item Sixteen indices in four families: fuzziness of $\U$ (PC, CE, MPC), compactness/separation (SC, S, XB, FS, PBMF, KWON, PCAES), crisp (DI, ADI, SIL), and volume and density (FHV, PD, APD); all with Euclidean distances.
+  \item Direction of the optimum is in \code{INDEX\_DIRECTION}; PC and CE are monotone in $c$ on overlapping data (read the knee); XB and S jump when two prototypes first share a group (read the first minimum).
+  \item Scan $c$ with identical settings and enough restarts; prefer the $c$ on which the geometric indices agree; confirm visually.
+  \item Compatible cluster merging (\cref{sec:val:scan}) is the alternative when clusters are local models, ordered segments, or nodes of a tree (\cref{ch:models,ch:timeseries,ch:graph}), stability selection (\cref{sec:val:stability}) when reproducibility is the criterion.
+  \item An index extremum is a hint, not a proof: indices measure geometric separation, not agreement with any external labels.
+\end{itemize}
+\end{summarybox}
+
+\section{Using it in fuzzyclust}\label{sec:val:api}
+
+\begin{apibox}{fuzzyclust.validity.<index>(\allowbreak X,\allowbreak\ U,\allowbreak\ V,\allowbreak\ m=2.0)}
+Every index is a function with the same signature: \code{X} $(N,n)$, \code{U} the membership matrix $(N,c)$ as stored by the estimators (i.e.\ $\U\T$), \code{V} the prototypes $(c,n)$ and \code{m} the exponent the algorithm used. PC, CE, and MPC ignore \code{X} and \code{V}; DI, ADI, and SIL harden \code{U} first; FHV, PD, and APD compute the fuzzy covariances from \code{X}, \code{U}, \code{V}, and \code{m}. The functions are \code{partition\_coefficient} (PC), \code{classification\_entropy} (CE), \code{modified\_partition\_coefficient} (MPC), \code{partition\_index} (SC), \code{separation\_index} (S), \code{xie\_beni} (XB), \code{fukuyama\_sugeno} (FS), \code{dunn\_index} (DI), \code{alternative\_dunn\_index} (ADI), \code{silhouette} (SIL), \code{fuzzy\_hypervolume} (FHV), \code{partition\_density} (PD), \code{average\_partition\_density} (APD), \code{pbmf\_index} (PBMF), \code{kwon\_index} (KWON), and \code{pcaes\_index} (PCAES); the indices that need a separation between prototypes (SC, S, XB, KWON, PCAES) return \code{nan} for a single cluster. \code{validity\_indices(X,\allowbreak\ U,\allowbreak\ V,\allowbreak\ m=2.0,\allowbreak\ indices=None)} evaluates a subset or all of them and returns a \code{dict}. \code{INDEX\_DIRECTION} maps every short name to \code{"max"} or \code{"min"}.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.validity.scan\_n\_clusters(\allowbreak estimator,\allowbreak\ X,\allowbreak\ n\_clusters\_range=range(\allowbreak 2,\allowbreak\ 11),\allowbreak\ indices=None)}
+Clones the estimator (any \code{fuzzyclust} clusterer, fitted or not), sets \code{n\_clusters} to every value of the range, fits, and returns a \code{pandas.DataFrame} indexed by \code{n\_clusters} with one column per index. The exponent is taken from the estimator's \code{m}. \code{suggest\_n\_clusters(table)} returns a \code{Series} with the arg-max or arg-min of every column according to \code{INDEX\_DIRECTION}; for PC and CE the knee is often the better reading, so the raw suggestion is reported for completeness only.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.plotting.plot\_validity\_scan(\allowbreak table,\allowbreak\ ax=None,\allowbreak\ normalize=True)}
+Plots every column of a scan table against $c$, min--max scaled to $[0,1]$ by default so that all indices share one axis; the legend states the direction of each optimum. Pass a column subset, e.g.\ \code{table[["XB"}, \code{"S"}, \code{"SIL"]]}, to compare families separately.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.validity.fuzzy\_rand\_index(\allowbreak U1,\allowbreak\ U2,\allowbreak\ method="huellermeier",\allowbreak\ tnorm=None)}
+Fuzzy Rand index \eqref{eq:val:fuzzyrand} of two membership matrices of the same samples, $(N,c_1)$ and $(N,c_2)$; hard partitions are passed as one-hot matrices, which \code{fuzzyclust.\_utils.labels\_to\_membership} builds from labels. \code{method="campello"} uses Campello's counts; \code{tnorm} is \code{"product"}, \code{"minimum"}, or \code{"lukasiewicz"} (\code{None}: the distance form \eqref{eq:val:fuzzyrand} for Hüllermeier, product for Campello; a t-norm selects the count-based form). \code{fuzzy\_adjusted\_rand\_index} \eqref{eq:val:fuzzyari} and \code{fuzzy\_jaccard\_index} take the same arguments. The pairwise relations need $\mathcal{O}(N^2c)$ memory, so compare sub-samples of a few thousand samples at most.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.validity.stability\_selection(\allowbreak estimator,\allowbreak\ X,\allowbreak\ n\_clusters\_range=range(\allowbreak 2,\allowbreak\ 11),\allowbreak\ n\_splits=20,\allowbreak\ method="subsample",\allowbreak\ subsample=0.8,\allowbreak\ index="fuzzy\_ari",\allowbreak\ random\_state=None)}
+Stability selection as in \cref{sec:val:stability}; \code{method} is \code{"subsample"} (Ben-Hur et al.) or \code{"split"} (Lange et al.); \code{index} one of \code{"fuzzy\_ari"}, \code{"fuzzy\_rand"}, \code{"fuzzy\_jaccard"}. Returns a \code{DataFrame} indexed by \code{n\_clusters} with one column per repetition; \code{table.mean(axis=1).idxmax()} is the most stable $c$, and \code{table.T} can be passed to a box plot.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.cluster.CompatibleClusterMerging}
+\code{base\_estimator=None}, \code{start\_n\_clusters=8}, \code{min\_n\_clusters=1}, \code{criterion="geometric"}, \code{parallel\_threshold=0.95}, \code{hyperplane\_threshold=0.5}, \code{distance\_threshold=2.0}, \code{thin\_threshold=0.2}, \code{similarity\_threshold=0.2}. \code{base\_estimator=None} means \code{GK(random\_state=0)}; any \code{fuzzyclust} clusterer is accepted; its \code{n\_clusters} and \code{init} are overridden. The four geometric thresholds are $\gamma_1,\dots,\gamma_4$, \code{similarity\_threshold} is $\gamma_S$. Attributes: \code{n\_clusters\_}, \code{estimator\_} (the final fitted model), \code{merge\_history\_} (one \code{dict} per merge with \code{n\_clusters}, \code{pair}, \code{compatibility}), \code{compatibility\_}, and \code{cluster\_centers\textunderscore}, \code{membership\_}, \code{labels\_}, \code{distances\_} of the final model; \code{predict}, \code{predict\_proba}, and \code{transform} delegate to it. The helper functions \code{cluster\_similarity(U)} and \code{geometric\_compatibility(V, F, ...)} compute the two criteria.
+\end{apibox}
+
+The three routes in a few lines:
+\pysnippet{examples/01_clustering/plot_14_merging_stability.py}{merging}
+\pysnippet{examples/01_clustering/plot_14_merging_stability.py}{scan_stability}
+and the comparison of partitions obtained in different ways:
+\pysnippet{examples/01_clustering/plot_14_merging_stability.py}{compare}
+
+A complete scan with all indices and its plot:
+\begin{lstlisting}
+from fuzzyclust.validity import scan_n_clusters, suggest_n_clusters
+from fuzzyclust.plotting import plot_validity_scan
+
+table = scan_n_clusters(FCM(m=2.0, random_state=0, n_init=5), X, range(2, 10))
+print(suggest_n_clusters(table))
+plot_validity_scan(table[["SC", "S", "XB", "DI", "ADI", "SIL"]])
+\end{lstlisting}
+Because every index is a plain function of \code{(X, U, V, m)}, it can also score held-out data through \code{predict\_proba}, which is how the grid search of \cref{sec:found:ex:sklearn} selects $c$ and $m$ with the Xie--Beni index:
+\begin{lstlisting}
+def neg_xie_beni(estimator, X):            # scikit-learn scorer: higher is better
+    U = estimator.predict_proba(X)
+    return -validity_indices(X, U, estimator.cluster_centers_, m=estimator.m, indices=["XB"])["XB"]
+\end{lstlisting}
+
+\section{Examples}\label{sec:val:examples}
+
+\subsection{A validity scan on five clusters}\label{sec:val:ex:scan}
+
+The script \code{plot\_05\_validity\_scan.py} generates five compact Gaussian clusters and scans FCM for $c=2,\dots,9$. \Cref{tab:val:scan} lists the index values; thirteen of the fourteen indices place their optimum at $c=5$, and only $SC$, which is designed for comparing partitions with equal $c$ and decreases with $c$, suggests $c_{\max}$. The two indices of \cref{sec:val:kwon}, which the script computes as well, disagree: $KWON$ has its minimum at five ($20.8$, against $26.7$ at $c=3$ and above $200$ for $c\ge6$), $PCAES$ its maximum at six ($9.8$ against $3.4$ at five), a jump caused by a small sixth cluster whose mass $\mu_M$ divides the first sum of \eqref{eq:val:pcaes}. On these well-separated data even $PC$ and $CE$ have a genuine extremum at five, whereas on the overlapping motorcycle data of the MATLAB manual they were monotone and only their knee was informative. \Cref{fig:val:ex:scan} shows the normalized curves. The ratio indices $XB$ and $S$ fall steeply from $c=2$ to $c=3$, reach their minimum at $c=5$, and jump to a much larger value at $c=6$, when a prototype is first placed inside an existing group and the minimal center distance collapses. $DI$ has a sharp peak because five is the only $c$ at which every pair of hardened clusters is separated by a clear gap; at every other $c$ some pair nearly touches. The script also scans GK on the same data: with adaptive shapes its $XB$ and $SIL$ values are close to those of FCM, and the two algorithms agree on $c=5$. Finally, it repeats the FCM scan for $m$ from $1.3$ to $3$. $XB$, $DI$, $SIL$, and $MPC$ select five clusters for every exponent, and $S$, $FS$, and $ADI$ deviate only at the ends of the range, whereas $PC$ and $CE$ select $c=5$ for $m\le2$ and $c=2$ for $m\ge2.5$: a softer partition makes fewer clusters look less fuzzy, which is the dependence on $m$ noted in \cref{sec:val:partition}.
+
+\begin{table}[htbp]\centering\footnotesize\setlength{\tabcolsep}{2.4pt}
+\caption[Validity scan of FCM ($m=2$) on five Gaussian clusters, $c=2,\dots,9$ (script \code{plot\_05\_validity\_scan.py}).]{Validity scan of FCM ($m=2$) on five Gaussian clusters, $c=2,\dots,9$ (script \code{plot\_05\_validity\_scan.py}). Bold: optimum of each index. $S$ (not shown) equals $XB$ because $m=2$; $ADI$ (not shown) is $0.006$ at $c=5$ and below $0.0005$ elsewhere.}
+\label{tab:val:scan}
+\begin{tabular}{@{}r rrr rr r rr rrr r@{}}\toprule
+$c$ & PC & CE & MPC & SC & XB & FS & DI & SIL & FHV & PD & APD & PBMF \\\midrule
+2 & 0.733 & 0.416 & 0.466 & 0.507 & 0.254 & 643 & 0.020 & 0.449 & 5.55 & 28.8 & 28.9 & 22.7 \\
+3 & 0.746 & 0.470 & 0.618 & 0.083 & 0.066 & $-2962$ & 0.004 & 0.588 & 3.42 & 43.9 & 45.5 & 51.9 \\
+4 & 0.774 & 0.460 & 0.699 & 0.048 & 0.068 & $-3735$ & 0.012 & 0.619 & 2.33 & 69.5 & 74.5 & 85.9 \\
+5 & \textbf{0.834} & \textbf{0.383} & \textbf{0.793} & 0.021 & \textbf{0.049} & $\mathbf{-4335}$ & \textbf{0.155} & \textbf{0.715} & \textbf{1.52} & \textbf{105.3} & \textbf{105.5} & \textbf{98.4} \\
+6 & 0.767 & 0.516 & 0.720 & 0.021 & 0.617 & $-4150$ & 0.019 & 0.623 & 1.75 & 94.0 & 95.5 & 90.5 \\
+7 & 0.709 & 0.623 & 0.661 & 0.017 & 0.553 & $-3838$ & 0.022 & 0.537 & 1.90 & 85.0 & 86.6 & 85.4 \\
+8 & 0.665 & 0.711 & 0.617 & 0.014 & 0.549 & $-3587$ & 0.019 & 0.459 & 1.93 & 83.4 & 84.9 & 87.6 \\
+9 & 0.626 & 0.780 & 0.579 & \textbf{0.011} & 0.463 & $-3342$ & 0.019 & 0.375 & 1.94 & 81.0 & 82.6 & 98.1 \\\bottomrule
+\end{tabular}
+\end{table}
+
+\exfig{01_clustering/plot_05_validity_scan_2}[{Validity scan of FCM on five Gaussian clusters, indices min--max scaled to $[0,1]$.}]{Validity scan of FCM on five Gaussian clusters, indices min--max scaled to $[0,1]$. Left: the partition-based indices have their extremum at $c=5$ because the clusters are well separated. Right: apart from $SC$, which decreases with $c$, the geometric indices agree on $c=5$; $XB$ and $S$ (identical for $m=2$, so only the $XB$ curve is visible) jump when a sixth prototype enters an existing group, and $DI$ and $ADI$ peak sharply.}{val:ex:scan}
+
+\subsection{Three routes on the same data}\label{sec:val:ex:routes}
+
+The script \code{plot\_14\_merging\_stability.py} runs merging, the validity scan, and stability selection on five Gaussian groups of different sizes and spreads. Compatible cluster merging with the similarity criterion starts from ten FCM clusters (\cref{fig:val:ex:merging}, left), in which three of the groups are covered by two or three prototypes each. The five merges join clusters with similarities between $0.36$ and $0.30$---each time two clusters on one group---and after the fifth merge the largest similarity left is $0.10$, well below the threshold $0.2$: the procedure stops at five clusters, whose partition coincides with that of FCM run directly with $c=5$ (fuzzy adjusted Rand index $1.00$).
+
+\exfig{01_clustering/plot_14_merging_stability_1}[Compatible cluster merging with the similarity criterion on five groups.]{Compatible cluster merging with the similarity criterion on five groups. Left: FCM with $c_{\max}=10$. Middle: the largest similarity $S_{ij}$ before every merge; it falls below the threshold (dashed) after the partition has reached five clusters. Right: the final partition.}{val:ex:merging}
+
+The validity scan and the stability selection are shown in \cref{fig:val:ex:stability}. $XB$, the Kwon index, and the silhouette select five clusters, $PBMF$ six, and $PCAES$ has its maximum at nine, where FCM creates a cluster of a few samples whose small mass inflates the first sum of \eqref{eq:val:pcaes}; up to $c=6$ its curve rises steadily, so it does not reject five either. The stability profile gives the clearest answer: for $c=5$ the twenty sub-sample pairs agree with a mean fuzzy adjusted Rand index of $0.97$ and a standard deviation of $0.008$, while for $c=4$ the mean is $0.88$ and the spread twenty times larger, because which two groups are merged depends on the sub-sample; the split-half protocol peaks at five as well ($0.92$).
+
+\exfig{01_clustering/plot_14_merging_stability_2}[Validity scan (left) and stability selection (right) on the same five groups.]{Validity scan (left) and stability selection (right) on the same five groups. The box plots show the fuzzy adjusted Rand index of twenty pairs of 80\,\% sub-samples for every $c$, the squares the mean of the split-half protocol; both peak at $c=5$, where the box is also the narrowest.}{val:ex:stability}
+
+\Cref{fig:val:ex:compare} compares six partitions of the data: the generating labels as a one-hot matrix, FCM and GK with five clusters, the merged partition, and FCM with four and eight clusters. The raw fuzzy Rand index (left) is above $0.8$ for every pair and hardly discriminates; the adjusted index (middle) does: FCM, GK, and the merged partition agree with each other ($0.95$ to $1.00$) and with the truth ($0.70$, the memberships below one keep the value below one), whereas FCM with four or eight clusters reaches only $0.58$ and $0.56$ against the truth. Campello's index with the product t-norm (right) ranks the partitions against the truth in the same order but is not reflexive: every fuzzy partition compared with itself scores only $0.42$ to $0.54$.
+
+\exfig{01_clustering/plot_14_merging_stability_3}[Fuzzy Rand, fuzzy adjusted Rand, and Campello's fuzzy adjusted Rand index between six partitions of the same data.]{Fuzzy Rand index of Hüllermeier et al., the fuzzy adjusted Rand index from Łukasiewicz pair counts, and Campello's fuzzy adjusted Rand index between six partitions of the same data. Only the adjusted indices separate the good partitions from those with a wrong number of clusters; Campello's index is below one on the diagonal for fuzzy partitions.}{val:ex:compare}
+
+The geometric criterion is demonstrated on three noisy line segments (\cref{fig:val:ex:lines}): Gustafson--Kessel with ten clusters cuts every segment into thin pieces, and merging pieces with parallel normals on a common line leaves three clusters (fuzzy adjusted Rand index $0.83$ with the truth). The parameter study (\cref{fig:val:ex:routes-study}) shows a wide plateau of the similarity threshold: every value from $0.10$ to $0.25$ ends at five clusters, $0.30$ stops one merge early, $0.35$ and above hardly merge at all, and $0.05$ merges distinct groups down to a single cluster. For the stability selection, sub-samples of 50\,\% and 80\,\% both select five clusters, the smaller fraction with lower agreements for every $c$ except four, where the two are equal; with 95\,\% the sub-samples are nearly identical and four clusters appear almost as stable as five ($0.983$ against $0.987$), which is why the fraction must leave room for variation.
+
+\exfig{01_clustering/plot_14_merging_stability_4}{Compatible cluster merging with the geometric criterion on three line segments: GK with ten clusters (left) and the three clusters left after merging pieces with parallel normals on a common line (right).}{val:ex:lines}
+\exfig{01_clustering/plot_14_merging_stability_5}{Parameter study: the final number of clusters of the similarity merging against its threshold (left) and the mean stability profile for three sub-sample fractions (right).}{val:ex:routes-study}
+
+\subsection{Combining indices and reading a scan}\label{sec:val:ex:combine}
+
+The scan above is the easy case. In practice the indices disagree, and the following rules of thumb, distilled from the MATLAB manual's motorcycle study and from the examples of this book, help in reading them. Prefer the $c$ on which $XB$, $S$, and $SIL$ agree, and take the \emph{first} pronounced minimum of $XB$ rather than its global one. Use $SC$ and $PC$/$CE$ to compare partitions with the \emph{same} $c$ and the same $m$---different algorithms or initializations---rather than across $c$. Treat $DI$ and $ADI$ as confirmations for well-separated data and ignore them when the clusters overlap. Use $FHV$, $PD$, and $APD$ for GK and GG partitions of ellipsoidal clusters, and distrust them whenever a covariance matrix is nearly singular. When the differences between neighboring $c$ are minor, choose the smaller $c$. And when the indices leave two candidates, let the picture decide. \Cref{fig:viz:ex4a} in \cref{ch:visualization} shows FCM partitions of the breast cancer data for $c=2,3,4$ projected with the fuzzy Sammon mapping. The indices $PC$, $CE$, and $XB$ favor two clusters ($SC$, which decreases with $c$, points to four); the pictures show \emph{why}---the third prototype splits the large benign group, the fourth the malignant one, and the clusters overlap in the projection---and also \emph{where} the ambiguous cases lie.
+
+\subsection{New data as validation}\label{sec:val:ex:predict}
+
+A partition that describes structure rather than noise should generalize: samples that were not used for fitting should fall into the same regions with the same confidence as the training samples. The script of \cref{sec:part:ex:predict} (\code{plot\_06\_predict\_new\_data.py}) fits GK on 60\,\% of three elongated clusters and evaluates the remaining 40\,\% with \code{predict\_proba} (\cref{fig:val:ex:predict}). The test samples fall into the membership regions learned from the training data; their memberships and their distances to the prototypes (\code{transform}) have the same distribution as those of the training set. Three uses follow. Held-out validity indices computed from \code{predict\_proba} are less optimistic than training indices and can drive a grid search over $c$ and $m$ (\cref{sec:found:ex:sklearn}). The stability of the partition across random train/test splits or bootstrap samples is itself a validity criterion (\cref{sec:val:stability}): a $c$ whose prototypes move little between resamples is supported by the data. Finally, a new sample whose maximal membership is low and whose distance to the nearest prototype is large---the far-away point of the script has a maximal membership of $0.52$ and a distance of $28$, against a training median of $1.2$---is a novelty, which is the basis of clustering-based process monitoring.
+
+\exfig[0.6\textwidth]{01_clustering/plot_06_predict_new_data_1}[Gustafson--Kessel fitted on 60\,\% of the data and evaluated on the rest: the test samples (open markers, colored by predicted label) fall into the membership regions learned from the training data.]{Gustafson--Kessel fitted on 60\,\% of the data and evaluated on the rest: the test samples (open markers, colored by predicted label) fall into the membership regions learned from the training data. Held-out memberships and distances validate the partition and detect novelties.}{val:ex:predict}
+
+\section{Further reading}\label{sec:val:reading}
+\enlargethispage{3\baselineskip}%
+
+The partition coefficient and classification entropy are Bezdek's \cite{bezdek:1981}, the modified partition coefficient Dav\'e's \cite{dave:1996:mpc}; the partition index is from Bensaid et al.\ \cite{bensaid:1996:validity}, the Xie--Beni index, whose original form is the separation index $S$, from \cite{xie:1991:validity}, with the analysis of its dependence on $m$ by Pal and Bezdek \cite{pal:1995:validity}, and the Fukuyama--Sugeno index from \cite{fukuyama:1989:validity}. Dunn's index is in \cite{dunn:1974:validity}, the silhouette in Rousseeuw \cite{rousseeuw:1987:silhouette}, and the PBM-F index in Pakhira, Bandyopadhyay, and Maulik \cite{pakhira:2004:pbmf}; the alternative Dunn index is from the MATLAB toolbox manual \cite{balasko:2005:toolbox}. The fuzzy hypervolume and the partition densities are from Gath and Geva \cite{gath:1989}. Compatible cluster merging goes back to Krishnapuram and Freg \cite{krishnapuram:1992:merging} and was brought to fuzzy modeling by Kaymak and Babu\v{s}ka \cite{kaymak:1995:merging}, with Kelly's merging formulas \cite{kelly:1994:merging}; adaptive merging by membership similarity is from Kaymak and Setnes \cite{kaymak:2002:volume}, and the Jaccard similarity used by the toolbox from Setnes et al.\ \cite{setnes:1998:similarity}. The Kwon index is in \cite{kwon:1998:validity}, the PCAES index in Wu and Yang \cite{wu:2005:pcaes}, who also compare it with many of the indices above. The fuzzy Rand indices are from Hüllermeier et al.\ \cite{hullermeier:2012:rand} and Campello \cite{campello:2007:rand}, the adjustment for chance from Hubert and Arabie \cite{hubert:1985:ari}; stability-based validation is developed by Ben-Hur, Elisseeff, and Guyon \cite{benhur:2002:stability} and Lange et al.\ \cite{lange:2004:stability}. Babu\v{s}ka \cite{babuska:1998:book} discusses validity scans and cluster merging in the context of fuzzy modeling, and H\"oppner et al.\ \cite{hoppner:1999:book} survey validity measures for the whole objective-function family.

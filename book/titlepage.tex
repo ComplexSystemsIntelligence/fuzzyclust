@@ -1,0 +1,39 @@
+% Title page and imprint (verso). Version and date come from main.tex.
+\begin{titlepage}
+\begin{tikzpicture}[remember picture, overlay]
+  \node[anchor=north east, inner sep=0] at ([xshift=-22mm,yshift=-24mm]current page.north east) {\fclogo[0.5]};
+\end{tikzpicture}
+\vspace*{38mm}
+\noindent{\color{fcverm}\rule{1.6cm}{2.2pt}}\par\vspace{14pt}
+\noindent{\fcblack\fontsize{34}{39}\selectfont\color{fcink}Fuzzy Clustering\\and Data Analysis\\in Python\par}
+\vspace{14pt}
+\noindent{\fcmedium\fontsize{16}{20}\selectfont\color{fcbrand}The {\usefont{T1}{IBMPlexMono-TLF}{m}{n}fuzzyclust} toolbox\par}
+\vspace{40mm}
+\noindent{\fcsemi\fontsize{15}{18}\selectfont\color{fcink}J\'anos Abonyi\par}
+\vspace{4pt}
+\noindent{\fclightface\fontsize{11}{14}\selectfont\color{fcgray}University of Pannonia, Veszpr\'em\par}
+\vfill
+\noindent{\fcmedium\small\color{fcgray}Version \fcversion\enspace\textperiodcentered\enspace\fcdate\par}
+\end{titlepage}
+\newpage
+\thispagestyle{empty}
+{\small\raggedright
+\vspace*{\fill}
+\noindent\textbf{Fuzzy Clustering and Data Analysis in Python. The \texttt{fuzzyclust} toolbox}\\
+J\'anos Abonyi, University of Pannonia, Veszpr\'em, Hungary\\
+Version \fcversion, \fcdate
+
+\bigskip
+\noindent\textcopyright~2026 J\'anos Abonyi. This book is licensed under the Creative Commons Attribution 4.0 International License (CC BY 4.0, \url{https://creativecommons.org/licenses/by/4.0/}): it may be copied, redistributed, and adapted for any purpose, provided the source is credited. The \texttt{fuzzyclust} software described in the book is released under the MIT License.
+
+\bigskip
+\noindent Software: \url{https://github.com/ComplexSystemsIntelligence/fuzzyclust}\\
+Documentation: \url{https://complexsystemsintelligence.github.io/fuzzyclust}\\
+Installation: \texttt{pip install fuzzyclust}
+
+\bigskip
+\noindent The research summarized in this book was supported by the National Research, Development and Innovation Office of Hungary (NKFIH) through the OTKA 143482 project.
+
+\bigskip
+\noindent Typeset with \LaTeX\ in Libertinus Serif, Raleway, and IBM Plex Mono. Every figure that shows a computed result was produced by an example script of the package. The cover shows a Gustafson--Kessel partition computed with \texttt{fuzzyclust}: each sample is drawn in the blend of its three membership colors, and the lines are contours of the memberships.
+\par}

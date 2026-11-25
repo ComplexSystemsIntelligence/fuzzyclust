@@ -1,0 +1,518 @@
+\chapter[Relational and mixed data]{Clustering relational, categorical, and mixed data}\label{ch:relational}
+\begin{roadmap}
+All algorithms of the previous chapters work on a matrix of numeric feature vectors: a prototype is a weighted mean, and the distance to it is a norm. This chapter drops that assumption in three directions. When only the pairwise dissimilarities of the objects are known---time series compared by dynamic time warping, records compared by a coefficient of their own---relational fuzzy c-means minimizes the familiar functional through the dissimilarity matrix alone, NERF c-means repairs it for matrices that no point configuration can realize, and fuzzy c-medoids chooses actual objects as prototypes and accepts any dissimilarity. For categorical attributes fuzzy k-modes replaces the mean by the mode, and for mixed records fuzzy k-prototypes combines the two; dissimilarities built for time series and mixed records turn such data into input for the relational methods. The methods extend the medoid idea of the geodesic clustering of \cref{ch:graph} and live in \code{fuzzyclust.relational}.
+\end{roadmap}
+
+\section{Problem and idea}\label{sec:rel:problem}
+
+Fuzzy c-means needs two operations: it averages samples to obtain a prototype, $\vi=\sum_k\mik^m\xk/\sum_k\mik^m$, and it measures the distance of a sample to that average. Both presuppose that the objects are vectors of a common space in which a mean exists and means something. Many data sets violate this. Time series that are shifted and stretched in time can be compared sensibly only after they have been aligned, and the result of the alignment is a number per \emph{pair} of series, not a coordinate per series. Survey answers, diagnoses, and product types are categories: one can say whether two answers agree, but there is no average of ``yes'', ``no'', and ``don't know''. Customer records combine both---age and income next to occupation and region. In some applications the dissimilarities are all there is: subjective ratings of the similarity of products, edit distances between strings, and distances between graphs.
+
+The common way out is to force the objects into a vector space---resample and align the series, code the categories as numbers or 0/1 indicators---and run FCM. The geometry is then an accident of the encoding: the indicator coding makes every categorical mismatch cost the same whatever the attribute, the numeric columns count in their arbitrary units, and the centers are fractional indicator vectors that describe no record. This chapter takes the other route and changes the algorithm instead of the data. Two observations make that possible.
+
+The first is that fuzzy c-means never needs the coordinates themselves, only the squared distances between objects. A prototype that is a weighted mean of the objects can be stored as the vector of its weights, $\mathbf{v}_i\in\R^N$, and the squared distance of an object to such a combination follows from the pairwise squared distances by an identity of elementary geometry. Hathaway, Davenport, and Bezdek \cite{hathaway:1989:rfcm} turned this into \emph{relational} fuzzy c-means (RFCM), which produces the FCM partition of points it has never seen. \Cref{fig:rel:layouts} contrasts the two kinds of data and shows where the prototype lives in each: in the feature space as a point, in the relational setting as a weight vector over the objects or as one of the objects.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[x=1cm, y=1cm, font=\small]
+  % ---------- left: object x feature data ----------
+  \begin{scope}
+    \node[anchor=south] at (1.2,0.55) {object $\times$ feature};
+    \node[note, anchor=south] at (1.2,0.05) {features $1,\dots,n$};
+    \foreach \r in {0,...,5} \foreach \c in {0,...,3} {
+      \draw[fcgray!60, fill=fcgreen!8] (0.6*\c,-0.5*\r) rectangle ++(0.6,-0.5); }
+    \foreach \c in {0,...,3} { \draw[fcgreen!70!black, thick, fill=fcgreen!35] (0.6*\c,-1.0) rectangle ++(0.6,-0.5); }
+    \node[anchor=east, note] at (-0.05,-1.25) {$\xk$};
+    \node[anchor=east, note, text width=1.3cm, align=right] at (-0.05,-2.55) {objects $1,\dots,N$};
+    \node at (1.2,-3.35) {$\X\in\R^{N\times n}$};
+    % prototype
+    \foreach \c in {0,...,3} { \draw[fcblue!70!black, thick, fill=fcblue!25] (0.6*\c,-4.0) rectangle ++(0.6,-0.5); }
+    \node[anchor=east, note] at (-0.05,-4.25) {$\vi$};
+    \node[note, text width=3.6cm, anchor=north] at (1.2,-4.6) {prototype: a point of $\R^n$,\\ the mean $\sum_k\mik^m\xk/\sum_k\mik^m$};
+  \end{scope}
+  % ---------- right: object x object data ----------
+  \begin{scope}[shift={(5.6,0)}]
+    \node[anchor=south] at (1.5,0.55) {object $\times$ object};
+    \node[note, anchor=south] at (1.5,0.05) {objects $1,\dots,N$};
+    \foreach \r in {0,...,5} \foreach \c in {0,...,5} {
+      \pgfmathsetmacro{\shade}{\r==\c ? 0 : 8+5*abs(\r-\c)}
+      \draw[fcgray!60, fill=fcverm!\shade] (0.5*\c,-0.5*\r) rectangle ++(0.5,-0.5); }
+    \draw[fcverm!80!black, very thick] (0,-1.0) rectangle (3.0,-1.5);
+    \node[anchor=east, note] at (-0.05,-1.25) {$r_{k\cdot}$};
+    \node[anchor=west, note, text width=1.9cm, align=left] at (3.1,-1.6) {$r_{jk}=r_{kj}$,\\ $r_{jk}\ge0$,\\ $r_{kk}=0$};
+    \node at (1.5,-3.35) {$\mathbf{R}=[r_{jk}]\in\R^{N\times N}$};
+    % relational prototype: weights over objects
+    \foreach \c/\w in {0/50,1/35,2/45,3/6,4/3,5/4} { \draw[fcblue!70!black, thick, fill=fcblue!\w] (0.5*\c,-4.0) rectangle ++(0.5,-0.5); }
+    \node[anchor=east, note] at (-0.05,-4.25) {$\vi$};
+    \node[note, anchor=north, text width=4.4cm] at (1.5,-4.55) {RFCM, NERF: $\vi\in\R^N$, weights over the objects};
+    % medoid
+    \foreach \c in {0,...,5} { \draw[fcgray!60, fill=white] (0.5*\c,-5.65) rectangle ++(0.5,-0.5); }
+    \draw[fcblue!70!black, very thick, fill=fcblue!50] (0.5,-5.65) rectangle ++(0.5,-0.5);
+    \node[anchor=east, note] at (-0.05,-5.9) {$\vi$};
+    \node[note, anchor=north, text width=4.4cm] at (1.5,-6.2) {FCMdd: $\vi=\mathbf{x}_q$, one of the objects};
+  \end{scope}
+\end{tikzpicture}
+\caption[Object--feature and object--object data.]{Object--feature and object--object data. Left: in the feature setting every object is a row of $\X$ and the prototype is a point of the same space, a weighted mean of the rows. Right: in the relational setting only the symmetric matrix $\mathbf{R}$ of pairwise dissimilarities is known; the prototype of relational c-means is a weight vector over the objects (the shade of a cell is the weight), and that of fuzzy c-medoids is a single object.}
+\label{fig:rel:layouts}
+\end{figure}
+
+The identity behind RFCM holds only if the dissimilarities are squared distances of \emph{some} point configuration, that is, if $\mathbf{R}$ is Euclidean. Dynamic-time-warping matrices, subjective ratings, and most purpose-built dissimilarities are not, and then the relational distance of an object to a prototype can come out negative, a geometric impossibility that breaks the membership formula. \Cref{fig:rel:spread} shows the smallest example: three objects whose dissimilarities violate the triangle inequality, so that no position in any space fits the middle one. Adding the same constant $\beta$ to all off-diagonal dissimilarities pushes the objects apart until a configuration exists. This \emph{$\beta$-spread} is the idea of NERF c-means \cite{hathaway:1994:nerf}, which applies it adaptively: only when a negative distance appears, and only as far as needed to remove it.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[x=1.4cm, y=1.4cm, font=\small]
+  % ---------- left: no configuration ----------
+  \begin{scope}
+    \node[anchor=south] at (1.06,1.3) {$\beta=0$: no configuration exists};
+    \draw[fcgray, dashed] (0,0) circle (1);
+    \draw[fcgray, dashed] (2.121,0) circle (1);
+    \draw[fcverm!80!black, very thick] (0,0) -- (2.121,0);
+    \node[note, text=fcverm!80!black, fill=white, inner sep=1pt] at (1.06,-0.3) {$\sqrt{r_{13}}=2.12$};
+    \fill[fcblue!80!black] (0,0) circle (2.2pt) node[left=2pt, black] {$1$};
+    \fill[fcblue!80!black] (2.121,0) circle (2.2pt) node[right=2pt, black] {$3$};
+    \node[note, text width=5.0cm, anchor=north] at (1.06,-1.1) {object 2 would have to lie on both dashed circles of radius $\sqrt{r_{12}}=\sqrt{r_{23}}=1$, which do not meet};
+    \node[anchor=north] at (1.06,-2.0) {$\mathbf{R}=\begin{pmatrix}0&1&4.5\\1&0&1\\4.5&1&0\end{pmatrix}$};
+    \node[note, anchor=north, text=fcverm!80!black] at (1.06,-3.2) {$d^2_{2}=-\tfrac18$ for $\mathbf{v}=(\tfrac12,0,\tfrac12)\T$};
+  \end{scope}
+  % ---------- right: after the spread ----------
+  \begin{scope}[shift={(4.1,0)}]
+    \node[anchor=south] at (1.08,1.3) {$\beta=\tfrac16$: the triangle becomes flat};
+    \draw[fcgreen!70!black, very thick] (0,0) -- (2.160,0);
+    \node[note, text=fcgreen!50!black, anchor=south] at (0.54,0.03) {$1.08$};
+    \node[note, text=fcgreen!50!black, anchor=south] at (1.62,0.03) {$1.08$};
+    \fill[fcblue!80!black] (0,0) circle (2.2pt) node[left=2pt, black] {$1$};
+    \fill[fcblue!80!black] (2.160,0) circle (2.2pt) node[right=2pt, black] {$3$};
+    \fill[fcblue!80!black] (1.080,0) circle (2.2pt) node[below=3pt, black] {$2$};
+    \draw[black, thick] (1.080,0) ++(-3pt,-3pt) -- ++(6pt,6pt) ++(-6pt,0) -- ++(6pt,-6pt);
+    \node[note, anchor=south, text width=3.6cm] at (1.08,0.45) {the prototype $\mathbf{v}$, midpoint of 1 and 3, coincides with object 2};
+    \node[note, text width=5.0cm, anchor=north] at (1.08,-1.1) {$\mathbf{R}_\beta=\mathbf{R}+\beta(\mathbf{1}\mathbf{1}\T-\mathbf{I})$ is Euclidean, and the shifted distance $d^2_{2}=-\tfrac18+\tfrac34\beta$ is zero};
+    \node[anchor=north] at (1.08,-2.0) {$\mathbf{R}_\beta=\begin{pmatrix}0&7/6&14/3\\7/6&0&7/6\\14/3&7/6&0\end{pmatrix}$};
+  \end{scope}
+\end{tikzpicture}
+\caption[The $\beta$-spread of NERF c-means.]{The $\beta$-spread of NERF c-means. Left: three objects with squared dissimilarities $r_{12}=r_{23}=1$ and $r_{13}=4.5$; the long side exceeds the path through object 2, so no point configuration realizes them, and the relational distance of object 2 to the midpoint prototype of objects 1 and 3 is negative. Right: adding $\beta=1/6$ to every off-diagonal entry makes the matrix Euclidean---the three objects lie on a line---and the distance of object 2 to the prototype becomes exactly zero; this $\beta$ is the smallest admissible spread.}
+\label{fig:rel:spread}
+\end{figure}
+
+The second observation is that a prototype need not be a mean at all. Restricting it to the objects themselves---the \emph{medoid}, the object with the smallest weighted sum of dissimilarities to its cluster---requires only the dissimilarities between objects and therefore works with any dissimilarity, Euclidean or not. Krishnapuram, Joshi, Nasraoui, and Yi \cite{krishnapuram:2001:fcmdd} made the fuzzy c-medoids algorithm (FCMdd) practical for large relational data by searching for the medoid of a cluster only among its most typical members. For categorical attributes the analogous prototype is the \emph{mode}, chosen attribute by attribute as the category that the members of the cluster share most. Huang \cite{huang:1998:kprototypes} introduced it for k-means and Huang and Ng \cite{huang:1999:fuzzykmodes} for fuzzy partitions, where ``most'' is measured in membership mass. \Cref{fig:rel:medoid} shows why both describe a cluster better than a mean when the mean lies outside the data or is undefined.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[font=\small]
+  % ---------- left: mean versus medoid on a curved cluster ----------
+  \begin{scope}[x=1cm, y=1cm]
+    \node[anchor=south] at (0,2.35) {mean versus medoid};
+    \foreach \a in {20,32,44,56,68,80,92,104,116,128,140,152,164} {
+      \fill[fcblue!80!black] ({1.6*cos(\a)},{1.6*sin(\a)}) circle (1.8pt); }
+    \fill[fcblue!80!black] (0.9,-0.1) circle (1.8pt);
+    \draw[black, very thick] (0.03,1.06) ++(-3.5pt,-3.5pt) -- ++(7pt,7pt) ++(-7pt,0) -- ++(7pt,-7pt);
+    \node[note, anchor=north] at (0.03,0.85) {mean};
+    \draw[fcverm!80!black, very thick] ({1.6*cos(92)},{1.6*sin(92)}) ++(-4pt,-4pt) rectangle ++(8pt,8pt);
+    \node[note, anchor=south, text=fcverm!80!black] at (-0.06,1.8) {medoid};
+    \node[note, text width=4.4cm, anchor=north] at (0,-0.4) {the mean of a curved cluster lies where there are no objects and is pulled by the stray point; the medoid is an object on the arc};
+  \end{scope}
+  % ---------- right: membership-weighted mode ----------
+  \begin{scope}[shift={(6.4,0)}]
+    \node[anchor=south] at (0,2.35) {the mode of a fuzzy cluster};
+    \node[anchor=north, font=\footnotesize] (tab) at (0,2.3) {%
+      \renewcommand{\arraystretch}{1.05}%
+      \begin{tabular}{@{}cccc@{}}
+        \toprule
+        $\mik^m$ & color & size & shape\\ \midrule
+        0.9 & red & S & round\\
+        0.8 & red & M & round\\
+        0.3 & blue & M & square\\
+        0.2 & blue & L & square\\
+        0.1 & blue & S & round\\ \midrule
+        mode & \textcolor{fcverm!80!black}{\textbf{red}} & \textcolor{fcverm!80!black}{\textbf{M}} & \textcolor{fcverm!80!black}{\textbf{round}}\\
+        mass & 1.7\,/\,0.6 & 1.0\,/\,1.1\,/\,0.2 & 1.8\,/\,0.5\\ \bottomrule
+      \end{tabular}};
+    \node[note, text width=5.0cm, anchor=north] at (tab.south) {blue is the most frequent color but carries less membership mass than red; the mode takes the category with the largest $\sum_k\mik^m$};
+  \end{scope}
+\end{tikzpicture}
+\caption[Mean, medoid, and mode.]{Mean, medoid, and mode. Left: the weighted mean of a curved cluster lies in empty space; the medoid is one of the objects and summarizes the cluster where it is. Right: for categorical attributes the prototype is the mode, chosen per attribute by membership mass rather than by count; in the color column blue is more frequent but red carries $1.7$ of the mass against $0.6$.}
+\label{fig:rel:medoid}
+\end{figure}
+
+All methods of the chapter keep the c-means functional and its alternating optimization: the memberships follow from the FCM formula with whatever plays the role of the squared distance, and the prototypes from whatever minimizes the functional for fixed memberships. What changes is the prototype (weights over the objects, an object, a mode, or means and modes) and with it the kind of data the algorithm accepts. The last part of the theory constructs dissimilarities that turn time series and mixed records into relational data.
+
+\section{Theory}\label{sec:rel:theory}
+
+The notation is that of the book: the memberships $\mik$ form the matrix $\U\in\R^{c\times N}$ (stored transposed, $N\times c$, in the code), and the index $i$ (or $j$) runs over clusters and $k$ (or $l$, $q$) over objects. Relational data form a matrix $\mathbf{R}=[r_{kl}]\in\R^{N\times N}$ with $r_{kl}=r_{lk}\ge0$ and $r_{kk}=0$. The matrix $\mathbf{R}$ is called \emph{Euclidean}\index{Euclidean dissimilarity matrix} if there are points $\mathbf{x}_1,\dots,\mathbf{x}_N$ of some $\R^p$ with $r_{kl}=\norm{\mathbf{x}_k-\mathbf{x}_l}^2$, that is, if its entries are \emph{squared} distances of a configuration. By the classical result of Schoenberg and of Young and Householder, this is the case exactly when the doubly centered matrix $-\tfrac12\mathbf{H}\mathbf{R}\mathbf{H}$, $\mathbf{H}=\mathbf{I}-\tfrac1N\mathbf{1}\mathbf{1}\T$, is positive semi-definite \cite{gower:1986:euclidean}. The matrix of squared Euclidean distances of any data set is Euclidean in this sense. So is the matrix of \emph{unsquared} distances, because an entrywise power $0<p\le1$ of a Euclidean matrix remains Euclidean, but it belongs to a different configuration. Squared city-block distances, cubed distances, and dynamic-time-warping matrices are in general not Euclidean.
+
+\subsection{Relational fuzzy c-means}\label{sec:rel:rfcm}
+
+Let the prototype of cluster $i$ be a convex combination of the objects, $\mathbf{p}_i=\sum_l v_{il}\mathbf{x}_l$ with weights $v_{il}\ge0$, $\sum_l v_{il}=1$, collected in $\mathbf{v}_i\in\R^N$. For any point $\xk$ and any weights summing to one, expanding the squares gives
+\begin{equation}
+  \norm{\xk-\textstyle\sum_l v_{il}\mathbf{x}_l}^2
+  =\sum_{l}v_{il}\norm{\xk-\mathbf{x}_l}^2-\tfrac12\sum_{l,q}v_{il}v_{iq}\norm{\mathbf{x}_l-\mathbf{x}_q}^2 .
+  \label{eq:rel:identity}
+\end{equation}
+The right-hand side contains only squared distances between objects. Replacing them by the entries of $\mathbf{R}$ defines the \emph{relational distance}
+\begin{equation}
+  d^2_{ik}=(\mathbf{R}\mathbf{v}_i)_k-\tfrac12\,\mathbf{v}_i\T\mathbf{R}\,\mathbf{v}_i ,
+  \label{eq:rel:d2}
+\end{equation}
+which equals the squared Euclidean distance of $\xk$ to the weighted mean whenever $\mathbf{R}$ holds squared Euclidean distances. The FCM prototype is the weighted mean with weights $\mik^m/\sum_l\mu_{il}^m$, so RFCM \cite{hathaway:1989:rfcm} alternates
+\begin{equation}
+  \mathbf{v}_i=\frac{(\mu_{i1}^m,\dots,\mu_{iN}^m)\T}{\sum_{k=1}^{N}\mik^m},\qquad
+  d^2_{ik}\ \text{by \eqref{eq:rel:d2}},\qquad
+  \mik=\frac{1}{\sum_{j=1}^{c}\big(d^2_{ik}/d^2_{jk}\big)^{1/(m-1)}},
+  \label{eq:rel:rfcm}
+\end{equation}
+and minimizes $\J=\sum_i\sum_k\mik^m d^2_{ik}$, which in the Euclidean case is the c-means functional of Bezdek \cite{bezdek:1981}. The \emph{duality theorem} of the paper states that on the matrix of squared Euclidean distances of a data set, RFCM started from the same initial partition generates exactly the iterates of FCM on that data set (memberships, objective values, and number of iterations), and that the dual centers $\sum_l v_{il}\mathbf{x}_l$ are the FCM centers. RFCM is therefore not an approximation but FCM written in the language of $\mathbf{R}$. The relational prototype $\mathbf{v}_i$ is a probability vector over the objects: it states how much each object contributes to the center of cluster $i$, and it is concentrated on the typical members of the cluster.
+
+The price is the matrix: one iteration needs the products $\mathbf{R}\mathbf{v}_i$, that is, $O(cN^2)$ operations, and the matrix itself takes $O(N^2)$ memory. A new object enters through its squared distances to the $N$ training objects. Since \eqref{eq:rel:identity} holds for any point, its relational distance is \eqref{eq:rel:d2} with the row of new dissimilarities in place of the $k$-th row of $\mathbf{R}$, and the membership follows. When $\mathbf{R}$ is not Euclidean, \eqref{eq:rel:d2} has no geometric meaning and can be negative (\cref{fig:rel:spread}); RFCM is then undefined, and the implementation stops with an error that points to NERF.
+
+\begin{algobox}{Relational fuzzy c-means (RFCM)}{rfcm}\index{relational fuzzy c-means}\index{RFCM}\index{duality of FCM and RFCM}\index{RelationalFCM@\code{RelationalFCM}}
+\begin{algorithm}[H]
+\KwIn{Euclidean dissimilarity matrix $\mathbf{R}$ (squared distances), number of clusters $c$, exponent $m>1$, tolerance $\epsilon$}
+initialize the partition $\U$ (random, or from $c$ seed objects)\;
+\Repeat{$\max_{ik}\abs{\mu^{(l)}_{ik}-\mu^{(l-1)}_{ik}}<\epsilon$}{
+  relational prototypes $\mathbf{v}_i=\U_i^m/\sum_k\mik^m$ for $i=1,\dots,c$\;
+  relational distances $d^2_{ik}=(\mathbf{R}\mathbf{v}_i)_k-\tfrac12\mathbf{v}_i\T\mathbf{R}\mathbf{v}_i$ \eqref{eq:rel:d2}\;
+  \lIf{some $d^2_{ik}<0$}{stop: $\mathbf{R}$ is not Euclidean (use NERF)}
+  memberships $\mik$ by the FCM formula \eqref{eq:rel:rfcm}\;
+}
+\KwOut{partition $\U$, relational prototypes $\mathbf{v}_i\in\R^N$, objective $\J$}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Relational fuzzy c-means}
+\begin{itemize}
+  \item FCM on a matrix of squared dissimilarities instead of feature vectors; prototypes are weight vectors over the objects.
+  \item Exact dual of FCM: on squared Euclidean distances it reproduces the FCM iterates and centers.
+  \item Assumes a Euclidean $\mathbf{R}$; otherwise negative relational distances stop it.
+  \item Parameters as in FCM ($c$, $m$, initialization, restarts); $O(N^2)$ memory, $O(cN^2)$ per iteration.
+\end{itemize}
+\end{summarybox}
+
+\subsection{NERF c-means: the \texorpdfstring{$\beta$}{beta}-spread}\label{sec:rel:nerf}
+
+Hathaway and Bezdek \cite{hathaway:1994:nerf} make relational c-means usable on any dissimilarity matrix by transforming it,
+\begin{equation}
+  \mathbf{R}_\beta=\mathbf{R}+\beta\,(\mathbf{1}\mathbf{1}\T-\mathbf{I}),\qquad \beta\ge0,
+  \label{eq:rel:spread}
+\end{equation}
+which adds $\beta$ to every off-diagonal dissimilarity and keeps the zero diagonal. For a large enough $\beta$ the transformed matrix is Euclidean: the doubly centered matrix $-\frac12\mathbf{H}\mathbf{R}_\beta\mathbf{H}=-\frac12\mathbf{H}\mathbf{R}\mathbf{H}+\frac{\beta}{2}\mathbf{H}$ gains $\beta/2$ on every eigenvalue in the subspace orthogonal to $\mathbf{1}$. The effect on the relational distances can be computed without forming $\mathbf{R}_\beta$. Substituting \eqref{eq:rel:spread} into \eqref{eq:rel:d2} and using $\mathbf{1}\T\mathbf{v}_i=1$ gives
+\begin{equation}
+  d^2_{ik}(\beta)=d^2_{ik}(0)+\frac{\beta}{2}\,\norm{\mathbf{e}_k-\mathbf{v}_i}^2,\qquad
+  \norm{\mathbf{e}_k-\mathbf{v}_i}^2=1-2v_{ik}+\norm{\mathbf{v}_i}^2,
+  \label{eq:rel:shift}
+\end{equation}
+with $\mathbf{e}_k$ the $k$-th unit vector. Every distance grows by a positive amount, and the growth is largest for objects that carry little weight in the prototype. The algorithm starts with $\beta=0$, so that a Euclidean matrix gives the RFCM result, and raises $\beta$ only when a negative distance appears, by the smallest increment that removes all of them,
+\begin{equation}
+  \Delta\beta=\max_{i,k}\frac{-2\,d^2_{ik}}{\norm{\mathbf{e}_k-\mathbf{v}_i}^2},\qquad
+  \beta\leftarrow\beta+\Delta\beta,\qquad
+  d^2_{ik}\leftarrow d^2_{ik}+\frac{\Delta\beta}{2}\norm{\mathbf{e}_k-\mathbf{v}_i}^2 .
+  \label{eq:rel:dbeta}
+\end{equation}
+The pair $(i,k)$ that attains the maximum then has distance zero and membership one in cluster $i$, and the iteration continues with the shifted distances. In the example of \cref{fig:rel:spread}, $d^2_{2}(0)=-\frac18$ and $\norm{\mathbf{e}_2-\mathbf{v}}^2=\frac32$, so $\Delta\beta=\frac16$.
+
+The spread has a price. Adding the same constant to all dissimilarities compresses the ratio of far to near dissimilarities, on which the membership formula depends, so a large $\beta$ flattens the partition toward $1/c$. The objective $\J$, in turn, is that of $\mathbf{R}_\beta$, so the objectives of runs that ended with different $\beta$ cannot be compared. The final $\beta$ relative to the mean dissimilarity serves as a diagnostic: zero means that the data behaved as a Euclidean matrix, a large value that the clustering had to distort them considerably. New objects receive the shift with $\norm{\mathbf{e}-\mathbf{v}_i}^2=1+\norm{\mathbf{v}_i}^2$, the value for an object outside the training set.
+
+\begin{algobox}{NERF c-means}{nerf}\index{NERF c-means}\index{non-Euclidean relational fuzzy c-means}\index{beta-spread@$\beta$-spread}\index{NERFCM@\code{NERFCM}}
+\begin{algorithm}[H]
+\KwIn{any dissimilarity matrix $\mathbf{R}$ (used as squared distances), $c$, $m>1$, $\epsilon$}
+initialize $\U$; $\beta\leftarrow0$\;
+\Repeat{$\max_{ik}\abs{\mu^{(l)}_{ik}-\mu^{(l-1)}_{ik}}<\epsilon$}{
+  relational prototypes $\mathbf{v}_i=\U_i^m/\sum_k\mik^m$\;
+  $d^2_{ik}=(\mathbf{R}\mathbf{v}_i)_k-\tfrac12\mathbf{v}_i\T\mathbf{R}\mathbf{v}_i+\tfrac{\beta}{2}\norm{\mathbf{e}_k-\mathbf{v}_i}^2$ \eqref{eq:rel:shift}\;
+  \If{some $d^2_{ik}<0$}{
+    increase $\beta$ by $\Delta\beta$ and shift all distances by \eqref{eq:rel:dbeta}\;
+  }
+  memberships $\mik$ by the FCM formula\;
+}
+\KwOut{partition $\U$, prototypes $\mathbf{v}_i$, final spread $\beta$, objective of $\mathbf{R}_\beta$}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{NERF c-means}
+\begin{itemize}
+  \item Relational c-means for matrices that are not Euclidean (DTW, ratings, squared non-Euclidean metrics).
+  \item The $\beta$-spread adds a constant to all off-diagonal dissimilarities; it is raised adaptively and only as far as needed, so a Euclidean matrix gives the RFCM result.
+  \item A large final $\beta$ flattens the memberships and signals strongly non-Euclidean data; objectives at different $\beta$ are not comparable.
+  \item Same parameters and costs as RFCM.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Fuzzy c-medoids}\label{sec:rel:fcmdd}
+
+Fuzzy c-medoids restricts the prototypes to the objects, $\vi\in\{\mathbf{x}_1,\dots,\mathbf{x}_N\}$, and minimizes the membership-weighted sum of dissimilarities to them,
+\begin{equation}
+  \J=\sum_{i=1}^{c}\sum_{k=1}^{N}\mik^m\,r(\xk,\vi),
+  \label{eq:rel:fcmdd}
+\end{equation}
+where $r$ is any dissimilarity: it need not be squared, Euclidean, or even a metric, and apart from non-negativity only $r(\mathbf{x},\mathbf{x})=0$ is used. For fixed medoids the memberships follow from the FCM formula with $r$ in the role of the squared distance,
+\begin{equation}
+  \mik=\frac{\big(1/r(\xk,\vi)\big)^{1/(m-1)}}{\sum_{j=1}^{c}\big(1/r(\xk,\mathbf{v}_j)\big)^{1/(m-1)}},
+  \label{eq:rel:fcmdd:mu}
+\end{equation}
+with $\mik=1$ when $\xk$ is the medoid of cluster $i$. For fixed memberships the functional splits into one term per cluster, and the best medoid of cluster $i$ is the object with the smallest weighted sum of dissimilarities,
+\begin{equation}
+  \vi=\mathbf{x}_q,\qquad q=\argmin_{l\in C_i}\sum_{k=1}^{N}\mik^m\,r(\xk,\mathbf{x}_l).
+  \label{eq:rel:medoid}
+\end{equation}
+With the candidate set $C_i$ containing all objects, the update is exact and costs $O(N^2)$ per cluster. Krishnapuram et al.\ \cite{krishnapuram:2001:fcmdd} observed that the medoid of a cluster is almost always one of its most typical members; restricting $C_i$ to the $p$ objects with the largest memberships in cluster $i$ makes the update $O(pN)$ and the whole iteration linear in $N$ (the \emph{linear} FCMdd). The price is that a poor initial cluster may not contain its best medoid among its top candidates, so the iteration can stop in a worse local minimum; a moderate number of candidates and a few random restarts are the remedy. Since the medoids are discrete, the iteration terminates when they no longer change, typically after a few iterations. If two clusters select the same object, the implementation gives the second its best unused candidate, so that the medoids stay distinct.
+
+The same paper proposes a robust variant, RFCMdd. It scores every object by a harmonic-mean-type dissimilarity to all medoids, $h_k=\big(\sum_i r(\xk,\vi)^{1/(1-m)}\big)^{1-m}$, keeps only the objects with the smallest scores, and computes the memberships and the medoids from these objects alone, so that a share of badly fitting objects (outliers or noise) cannot pull the medoids. \code{fuzzyclust} implements a simpler rule in the same spirit, which we call fuzzy c-\emph{trimmed} medoids (FCTMdd): in \eqref{eq:rel:medoid} only the $K=\lceil(1-\tau)N\rceil$ smallest terms $\mik^m r(\xk,\mathbf{x}_l)$ are summed for every candidate, the memberships of all objects are kept, and the reported objective is the same trimmed sum. FCMdd is related to the geodesic c-medoids of \cref{sec:graph:geofcm}, which applies the same alternation to graph distances; here, however, the dissimilarity is an input, and the candidate search can be restricted.
+
+\begin{algobox}{Fuzzy c-medoids (FCMdd, linear and trimmed variants)}{fcmdd}\index{fuzzy c-medoids}\index{FCMdd}\index{linear fuzzy c-medoids}\index{fuzzy c-trimmed medoids}\index{FCTMdd}\index{FuzzyCMedoids@\code{FuzzyCMedoids}}
+\begin{algorithm}[H]
+\KwIn{dissimilarity matrix $[r(\xk,\mathbf{x}_l)]$, $c$, $m>1$, number of candidates $p$ (or all), trimming share $\tau$}
+choose $c$ distinct initial medoids (random objects or D$^2$-weighted seeding)\;
+\Repeat{the medoids do not change (or $\max_{ik}\abs{\Delta\mik}<\epsilon$)}{
+  memberships $\mik$ by \eqref{eq:rel:fcmdd:mu}\;
+  \For{$i=1,\dots,c$}{
+    candidates $C_i$: the $p$ objects with the largest $\mik$ (all objects if $p$ is not given)\;
+    cost of each candidate $l$: the sum of the $K=\lceil(1-\tau)N\rceil$ smallest $\mik^m r(\xk,\mathbf{x}_l)$\;
+    new medoid: the cheapest candidate not taken by another cluster \eqref{eq:rel:medoid}\;
+  }
+}
+\KwOut{medoid indices, partition $\U$, objective $\J$}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Fuzzy c-medoids}
+\begin{itemize}
+  \item Prototypes are objects; works with any dissimilarity (no Euclidean assumption, no spread) and returns representative objects that can be shown.
+  \item The linear variant searches for the medoid among the $p$ most typical members: $O(cpN)$ instead of $O(cN^2)$ per iteration, at a small risk of a worse local minimum.
+  \item Trimming the share $\tau$ of worst-fitting objects in the medoid update makes the medoids robust to outliers.
+  \item Parameters $c$, $m$, $p$, and $\tau$; restarts are recommended because the medoids are discrete.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Fuzzy k-modes}\label{sec:rel:kmodes}
+
+Let all $n$ attributes be categorical, attribute $j$ taking values in a finite set $\mathcal{A}_j=\{a_j^{(1)},\dots,a_j^{(n_j)}\}$. The \emph{simple matching dissimilarity} counts the attributes in which two records differ,
+\begin{equation}
+  \delta(\xk,\mathbf{x}_l)=\sum_{j=1}^{n}\delta(x_{kj},x_{lj}),\qquad
+  \delta(a,b)=\begin{cases}0,&a=b,\\1,&a\neq b,\end{cases}
+  \label{eq:rel:matching}
+\end{equation}
+and the prototype of a cluster is a \emph{mode}, a record $\vi\in\mathcal{A}_1\times\dots\times\mathcal{A}_n$ that need not occur in the data. Huang \cite{huang:1998:kprototypes} built k-modes on this pair; Huang and Ng \cite{huang:1999:fuzzykmodes} minimize the fuzzy functional
+\begin{equation}
+  \J=\sum_{i=1}^{c}\sum_{k=1}^{N}\mik^m\,\delta(\xk,\vi).
+  \label{eq:rel:kmodes}
+\end{equation}
+For fixed modes the memberships follow from the FCM formula with $\delta$ in the role of the squared distance ($\mik=1$ for a record identical to mode $i$). For fixed memberships the functional separates into one term per cluster and attribute, $\sum_k\mik^m\delta(x_{kj},v_{ij})$, and by the theorem of Huang and Ng each term is minimized by the category of attribute $j$ that carries the largest membership mass in cluster $i$,
+\begin{equation}
+  v_{ij}=a_j^{(r)}\quad\text{with}\quad
+  \sum_{k:\,x_{kj}=a_j^{(r)}}\mik^m\;\ge\;\sum_{k:\,x_{kj}=a_j^{(t)}}\mik^m\quad\text{for all }t .
+  \label{eq:rel:mode}
+\end{equation}
+This is ``the most frequent category'' with every record counted with its weight $\mik^m$ (\cref{fig:rel:medoid}, right). Ties are broken in favor of the first category in a fixed order. Because $\delta$ is integer-valued, many records are equally far from several modes, and the membership ratio of a record that differs in $a$ attributes from one mode and in $b$ from another is $(b/a)^{1/(m-1)}$. For $a=1$ and $b=2$ the ratio is $4$ at $m=1.5$ but only $1.4$ at $m=3$. The partition is therefore much fuzzier than that of FCM on continuous data at the same $m$, and values of $m$ close to one are appropriate. The update is $O(cNn)$ per iteration, linear in the number of records, which made k-modes popular for large categorical data sets.
+
+\begin{algobox}{Fuzzy k-modes}{kmodes}\index{fuzzy k-modes}\index{k-modes}\index{simple matching dissimilarity}\index{mode of a fuzzy cluster}\index{FuzzyKModes@\code{FuzzyKModes}}
+\begin{algorithm}[H]
+\KwIn{categorical records $\xk$, $c$, $m>1$ (close to one), $\epsilon$}
+choose $c$ distinct records as initial modes; memberships from \eqref{eq:rel:matching}\;
+\Repeat{$\max_{ik}\abs{\mu^{(l)}_{ik}-\mu^{(l-1)}_{ik}}<\epsilon$}{
+  \For{every cluster $i$ and attribute $j$}{
+    $v_{ij}\leftarrow$ the category with the largest membership mass $\sum_{k:\,x_{kj}=a}\mik^m$ \eqref{eq:rel:mode}\;
+  }
+  matching dissimilarities $\delta(\xk,\vi)$ and memberships by the FCM formula\;
+}
+\KwOut{modes $\vi$ (with the original category labels), partition $\U$, objective $\J$}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Fuzzy k-modes}
+\begin{itemize}
+  \item Fuzzy c-means for categorical records: simple matching dissimilarity and modes chosen by membership mass.
+  \item The modes are typical records and read as a table of group profiles.
+  \item The integer-valued dissimilarity makes the partition fuzzy; keep $m$ small (about $1.1$--$2$).
+  \item Linear in the number of records; restarts guard against local minima.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Fuzzy k-prototypes}\label{sec:rel:kprototypes}
+
+Mixed records have numeric attributes $j\in\mathcal{N}$ and categorical attributes $j\in\mathcal{C}$. Huang's k-prototypes dissimilarity \cite{huang:1998:kprototypes} treats each kind in its own terms and adds them with a weight $\gamma\ge0$,
+\begin{equation}
+  d(\xk,\vi)=\sum_{j\in\mathcal{N}}(x_{kj}-v_{ij})^2+\gamma\sum_{j\in\mathcal{C}}\delta(x_{kj},v_{ij}),
+  \label{eq:rel:kproto}
+\end{equation}
+and the fuzzy version minimizes $\J=\sum_i\sum_k\mik^m d(\xk,\vi)$ by the FCM membership formula and a prototype update that combines the two previous cases: the numeric part of $\vi$ is the fuzzy mean $v_{ij}=\sum_k\mik^m x_{kj}/\sum_k\mik^m$ ($j\in\mathcal{N}$), and the categorical part is the membership-mass mode \eqref{eq:rel:mode} ($j\in\mathcal{C}$). Both updates are optimal for their part, so the functional decreases monotonically.
+
+The weight $\gamma$ states how many units of squared numeric distance one categorical mismatch is worth. With $\gamma=0$ the method is FCM on the numeric attributes; as $\gamma\to\infty$ the categorical part dominates and the method becomes fuzzy k-modes on the categorical attributes. Huang relates the scale of $\gamma$ to the average standard deviation of the numeric attributes, and this average is the default $\gamma$ of the implementation; the numeric attributes should be standardized first, so that this scale is meaningful and no attribute dominates through its unit. The prototypes are hybrid records, with means for the measurements and modes for the categories, and remain interpretable.
+
+\begin{algobox}{Fuzzy k-prototypes}{kprototypes}\index{fuzzy k-prototypes}\index{k-prototypes}\index{mixed data}\index{FuzzyKPrototypes@\code{FuzzyKPrototypes}}
+\begin{algorithm}[H]
+\KwIn{mixed records, numeric attributes $\mathcal{N}$ and categorical attributes $\mathcal{C}$, $c$, $m>1$, weight $\gamma$ (default: mean standard deviation of the numeric attributes)}
+choose $c$ distinct records as initial prototypes; memberships from \eqref{eq:rel:kproto}\;
+\Repeat{$\max_{ik}\abs{\mu^{(l)}_{ik}-\mu^{(l-1)}_{ik}}<\epsilon$}{
+  numeric part: $v_{ij}=\sum_k\mik^m x_{kj}/\sum_k\mik^m$ for $j\in\mathcal{N}$\;
+  categorical part: membership-mass mode \eqref{eq:rel:mode} for $j\in\mathcal{C}$\;
+  dissimilarities \eqref{eq:rel:kproto} and memberships by the FCM formula\;
+}
+\KwOut{prototypes (means and modes), partition $\U$, objective $\J$}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Fuzzy k-prototypes}
+\begin{itemize}
+  \item Fuzzy clustering of mixed records: squared Euclidean distance on the numeric part, matching dissimilarity on the categorical part, weighted by $\gamma$.
+  \item Interpolates between FCM on the numeric attributes ($\gamma=0$) and fuzzy k-modes on the categorical ones ($\gamma\to\infty$).
+  \item Default $\gamma$: the mean standard deviation of the numeric attributes; standardize the numeric attributes first.
+  \item Prototypes are records with means and modes; linear in $N$.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Dissimilarities for objects that are not vectors}\label{sec:rel:dissim}
+
+The relational algorithms are only as good as the dissimilarity they receive. Three constructions cover common cases; each also produces the rectangular matrix of new objects against the training objects that the estimators need for prediction.
+
+\paragraph{Dynamic time warping.}\index{dynamic time warping}\index{DTW} Two series $\mathbf{x}=(x_1,\dots,x_T)$ and $\mathbf{y}=(y_1,\dots,y_T)$ of the same shape but with events at slightly different times are far apart in the Euclidean sense, which compares $x_t$ with $y_t$. Dynamic time warping \cite{sakoe:1978:dtw} compares each $x_t$ with a matching $y_s$ instead. A warping path is a sequence of index pairs from $(1,1)$ to $(T,T)$ that advances by one in $t$, in $s$, or in both at every step, and the DTW distance is the square root of the smallest summed local cost along such a path. Dynamic programming computes it through the accumulated cost
+\begin{equation}
+  \begin{gathered}
+  g(t,s)=(x_t-y_s)^2+\min\{g(t-1,s),\,g(t,s-1),\,g(t-1,s-1)\},\\
+  \mathrm{DTW}(\mathbf{x},\mathbf{y})=\sqrt{g(T,T)},
+  \end{gathered}
+  \label{eq:rel:dtw}
+\end{equation}
+with $g(0,0)=0$ and $g=\infty$ outside the admissible region. The Sakoe--Chiba band $\abs{t-s}\le w$ restricts the path to the neighborhood of the diagonal: it limits the warping to plausible displacements, prevents pathological alignments that map one point to a long stretch, and reduces the cost from $O(T^2)$ to $O(Tw)$ per pair. With $w=0$ DTW is the Euclidean distance. DTW is not a metric---the triangle inequality can fail---and its squared matrix is in general not Euclidean, so fuzzy c-medoids (or NERF) is the appropriate partner.
+
+\paragraph{Autocorrelation-based distance.}\index{autocorrelation-based fuzzy clustering}\index{A-FCM} When the series are realizations of stochastic processes, their values cannot be compared point by point, but their dependence structure can. D'Urso and Maharaj \cite{durso:2009:autocorrelation} represent every series by its estimated autocorrelations up to lag $L$,
+\begin{equation}
+  \hat\rho_k(l)=\frac{\sum_{t=l+1}^{T}(x_{k,t}-\bar x_k)(x_{k,t-l}-\bar x_k)}{\sum_{t=1}^{T}(x_{k,t}-\bar x_k)^2},\qquad l=1,\dots,L,
+  \label{eq:rel:acf}
+\end{equation}
+and compare series by the Euclidean distance of these vectors. The implementation adds optional lag weights $w_q$ (all equal to one by default),
+\begin{equation}
+  d_{\mathrm{ACF}}(\mathbf{x}_k,\mathbf{x}_l)=\Big(\sum_{q=1}^{L}w_q\big(\hat\rho_k(q)-\hat\rho_l(q)\big)^2\Big)^{1/2}.
+  \label{eq:rel:dacf}
+\end{equation}
+The representation ignores level, scale, and phase, has the same length for series of any length, and identifies stationary processes of low order by a few lags. D'Urso and Maharaj cluster the vectors with fuzzy c-means (A-FCM); fuzzy c-medoids on the squared distances (A-FCMd) returns representative series instead of centers. Because the representation is a feature vector, the squared matrix of \eqref{eq:rel:dacf} is Euclidean, and RFCM on it reproduces A-FCM. Two choices remain: the number of lags $L$, which must reach the lags at which the processes differ, and the weights $w_q$, which can damp the high lags whose estimates are noisy.
+
+\begin{algobox}{Autocorrelation-based fuzzy clustering of time series (A-FCM, A-FCMd)}{afcm}\index{A-FCMd}\index{autocorrelation\_distance\_matrix@\code{autocorrelation\_distance\_matrix}}
+\begin{enumerate}[leftmargin=*]
+  \item Estimate the autocorrelations $\hat\rho_k(1),\dots,\hat\rho_k(L)$ of every series by \eqref{eq:rel:acf}.
+  \item A-FCM: run fuzzy c-means on the vectors $(\sqrt{w_q}\,\hat\rho_k(q))_{q=1}^{L}$; equivalently RFCM on the matrix of squared distances \eqref{eq:rel:dacf}.
+  \item A-FCMd: run fuzzy c-medoids on the squared distances \eqref{eq:rel:dacf}; the medoids are representative series.
+  \item Assign new series through their autocorrelation vectors (A-FCM) or their distances to the training series (A-FCMd).
+\end{enumerate}
+\end{algobox}
+\begin{summarybox}{Autocorrelation-based clustering}
+\begin{itemize}
+  \item Clusters series by their dependence structure, not their values: invariant to level, scale, and phase, and applicable to series of different lengths.
+  \item A Euclidean representation: FCM, RFCM, and fuzzy c-medoids all apply directly.
+  \item $L$ must cover the lags at which the processes differ, but every extra lag adds estimation noise of order $1/\sqrt{T}$; decaying weights $w_q$ make a generous $L$ safe.
+  \item Meant for (approximately) stationary series; for shapes and events use DTW instead.
+\end{itemize}
+\end{summarybox}
+
+\paragraph{Gower's coefficient.}\index{Gower's coefficient}\index{gower\_distance\_matrix@\code{gower\_distance\_matrix}} Gower \cite{gower:1971:coefficient} defined a general coefficient for records with numeric and categorical attributes. In its dissimilarity form each attribute contributes a score in $[0,1]$: the range-scaled absolute difference $\abs{x_{kj}-x_{lj}}/R_j$ for a numeric attribute with range $R_j$, and the mismatch indicator for a categorical one. The dissimilarity is the weighted mean of the scores over the attributes observed in both records,
+\begin{equation}
+  d_G(\xk,\mathbf{x}_l)=\frac{\sum_{j}w_j\,\delta_{klj}\,s_{klj}}{\sum_{j}w_j\,\delta_{klj}},\qquad
+  \delta_{klj}=\begin{cases}1,&x_{kj}\text{ and }x_{lj}\text{ observed},\\0,&\text{otherwise,}\end{cases}
+  \label{eq:rel:gower}
+\end{equation}
+so missing values need no imputation. By construction every attribute contributes on the same scale, and the weights $w_j$ play the role of $\gamma$ in k-prototypes. Gower showed that the corresponding similarity matrix is positive semi-definite when no values are missing, so that $\sqrt{d_G}$ is a Euclidean distance \cite{gower:1971:coefficient,gower:1986:euclidean}; the matrix $[d_G]$ itself, read as squared distances, is therefore a valid input for RFCM. With missing values this guarantee is lost, and records compared on few attributes can appear close to many others.
+
+\Cref{tab:rel:choice} summarizes which algorithm accepts which data.
+
+\begin{table}[htbp]\centering\small
+\caption[Which algorithm for which data.]{The algorithms of the chapter differ in the data they accept, in their prototypes, and in their requirements. ``any $\mathbf{R}$'' means a symmetric, non-negative matrix with a zero diagonal.}
+\label{tab:rel:choice}
+\begin{tabular}{@{}llll@{}}
+\toprule
+algorithm & input & prototype & requirement\\ \midrule
+RFCM & $\mathbf{R}$ (squared) & object weights & $\mathbf{R}$ Euclidean\\
+NERF c-means & any $\mathbf{R}$ & object weights & none (see $\beta$)\\
+FCMdd & any $\mathbf{R}$ & an object & none\\
+fuzzy k-modes & categorical & mode & none\\
+fuzzy k-prototypes & mixed & means and modes & a sensible $\gamma$\\
+A-FCM / A-FCMd & time series & ACF vector / series & stationarity\\ \bottomrule
+\end{tabular}
+\end{table}
+
+\section{Using it in fuzzyclust}\label{sec:rel:api}
+
+Everything in this chapter is in \code{fuzzyclust.relational}. The five estimators derive from \code{BaseFuzzyClusterer} and have the usual methods \code{fit}, \code{predict}, \code{predict\_proba}, \code{transform}, and \code{score}, so they work in scikit-learn pipelines and with the validity functions of \cref{ch:validity}. The relational estimators follow scikit-learn's convention for precomputed matrices: with \code{metric="precomputed"}, \code{fit} takes the square $N\times N$ matrix and \code{predict\_proba} the rectangular matrix of the new objects against the $N$ training objects. Any other \code{metric} names a SciPy distance, and the matrix is computed from feature vectors; the distances are squared for RFCM and NERF, as in FCM, and used as they are for fuzzy c-medoids.
+
+\begin{apibox}{fuzzyclust.relational.RelationalFCM}
+\code{n\_clusters=3}, \code{metric="euclidean"|\allowbreak "precomputed"|\allowbreak any SciPy metric}, \code{m=2.0}, \code{tol=1e-4}, \code{max\_iter=300}, \code{init="random"|\allowbreak "kmeans++"|\allowbreak partition|\allowbreak object indices}, \code{n\_init=1}, \code{random\_state}, \code{verbose}.\\
+Attributes \code{relational\_centers\_} ($\mathbf{v}_i\in\R^N$), \code{cluster\_centers\_} (dual centers $\sum_l v_{il}\mathbf{x}_l$ with a feature metric, else the relational centers), \code{dissimilarity\_matrix\_}, \code{membership\_}, \code{labels\_}, \code{distances\_} ($\sqrt{d^2_{ik}}$), \code{objective\_}, \code{objective\_history\_}, \code{n\_iter\_}. Raises an error on a negative relational distance.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.relational.NERFCM}
+Same parameters and attributes as \code{RelationalFCM}. Here \code{beta\_} holds the final spread $\beta$ and \code{n\_spread\_updates\_} the number of times $\beta$ was raised (both are always zero for \code{RelationalFCM}); the objective is that of $\mathbf{R}_\beta$.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.relational.FuzzyCMedoids}
+\code{n\_clusters=3}, \code{metric="euclidean"|\allowbreak "precomputed"|\allowbreak any SciPy metric} (dissimilarities used as they are, not squared), \code{n\_candidates=None} (all objects) or $p$ (linear FCMdd), \code{trim=0.0} ($\tau$, FCTMdd), \code{m=2.0}, \code{tol=1e-4}, \code{max\_iter=100}, \code{init="kmeans++"|\allowbreak "random"|\allowbreak index array}, \code{n\_init=1}, \code{random\_state}, \code{verbose}.\\
+Attributes \code{medoid\_indices\_}, \code{cluster\_centers\_} (medoid rows of $\X$, or of $\mathbf{R}$ when precomputed), \code{dissimilarity\_matrix\_}, \code{membership\_}, \code{labels\_}, \code{distances\_} (dissimilarities to the medoids), \code{objective\_}, \code{objective\_history\_}, \code{n\_iter\_}.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.relational.FuzzyKModes,\allowbreak\ FuzzyKPrototypes}
+\code{FuzzyKModes(n\_clusters=3,\allowbreak\ m=1.5,\allowbreak\ tol,\allowbreak\ max\_iter,\allowbreak\ init="random",\allowbreak\ n\_init,\allowbreak\ random\_state,\allowbreak\ verbose)}; all columns categorical (strings, categories, booleans, or integer codes).\\
+\code{FuzzyKPrototypes(n\_clusters=3,\allowbreak\ gamma=None,\allowbreak\ categorical\_features=None,\allowbreak\ m=2.0,\allowbreak\ ...)}; \code{gamma=None} uses the mean standard deviation of the numeric columns; \code{categorical\_features=None} detects the categorical columns from the dtypes of a DataFrame; alternatively, pass \code{"all"}, a boolean mask, or column names or positions.\\
+Attributes \code{modes\_} and \code{prototypes\_} (with the original labels; DataFrames for DataFrame input), \code{numeric\_centers\_}, \code{cluster\_centers\_} (encoded), \code{categorical\_features\_}, \code{numeric\_features\_}, \code{categories\_}, \code{gamma\_}, \code{membership\_}, \code{labels\_}, \code{objective\_}. Unknown categories of new records count as one mismatch.
+\end{apibox}
+
+\begin{apibox}{dissimilarities,\allowbreak\ generators,\allowbreak\ and plot helpers}
+\code{pairwise\_dissimilarity(X,\allowbreak\ Y=None,\allowbreak\ metric)} (any SciPy metric), \code{dtw\_distance\_matrix(X,\allowbreak\ Y=None,\allowbreak\ window)} and \code{dtw\_alignment(x,\allowbreak\ y,\allowbreak\ window)} $\to$ distance, path; \code{autocorrelation\_features(X,\allowbreak\ n\_lags)}, \code{autocorrelation\_distance\_matrix(X,\allowbreak\ Y=None,\allowbreak\ n\_lags,\allowbreak\ weights)}; \code{gower\_distance\_matrix(X,\allowbreak\ Y=None,\allowbreak\ categorical\_features,\allowbreak\ ranges,\allowbreak\ feature\_weights)}; \code{matching\_dissimilarity(A,\allowbreak\ B)}; \code{relational\_distances(R,\allowbreak\ V,\allowbreak\ beta)}; \code{check\_dissimilarity\_matrix(R)}. Generators \code{make\_categorical\_blobs}, \code{make\_mixed\_blobs}, \code{make\_warped\_series}. Plots \code{plot\_dissimilarity\_matrix(R,\allowbreak\ labels)}, \code{plot\_dtw\_alignment(x,\allowbreak\ y)}, \code{plot\_modes(model,\allowbreak\ X)}, \code{plot\_series\_clusters(X,\allowbreak\ labels,\allowbreak\ medoids)}.
+\end{apibox}
+
+The duality of RFCM and FCM, and NERF on a matrix that RFCM rejects:
+\pysnippet{examples/07_relational/plot_01_rfcm_fcm_duality.py}{duality}
+\pysnippet{examples/07_relational/plot_01_rfcm_fcm_duality.py}{nerf}
+Fuzzy c-medoids takes any precomputed dissimilarity, here dynamic time warping, and its linear variant needs only one more parameter, \code{n\_candidates}:
+\pysnippet{examples/07_relational/plot_02_fcmdd_dtw_series.py}{dtw}
+\pysnippet{examples/07_relational/plot_02_fcmdd_dtw_series.py}{fit}
+Categorical and mixed records are clustered directly from a DataFrame:
+\pysnippet{examples/07_relational/plot_03_kmodes_survey.py}{fit}
+\pysnippet{examples/07_relational/plot_04_kprototypes_mixed.py}{fit}
+Gower's coefficient and the autocorrelation distance turn mixed records and time series into relational data:
+\pysnippet{examples/07_relational/plot_05_gower_fcmdd_vs_onehot.py}{gower}
+\pysnippet{examples/07_relational/plot_06_autocorrelation_series.py}{fit}
+
+\section{Examples}\label{sec:rel:examples}
+
+\subsection{RFCM as the dual of FCM, and NERF}
+
+Three Gaussian groups of 100 points are clustered by FCM on the coordinates and by RFCM on the matrix of squared Euclidean distances, both from the same random partition (\cref{fig:rel:ex1a}). The memberships differ by at most $2\cdot10^{-15}$, both runs need eight iterations, the objective trajectories coincide, and the dual centers equal the FCM centers to machine precision. The relational prototypes (\cref{fig:rel:ex1b}) are weight vectors over the 300 objects, nearly uniform on the members of their cluster and close to zero elsewhere; the ordered dissimilarity matrix shows the block structure the algorithm exploits. The squared city-block distances of the same points are not Euclidean: RFCM stops at a negative relational distance, while NERF raises $\beta$ once (to $1.5$) and recovers the three groups exactly. The parameter study (\cref{fig:rel:ex1c}) feeds powers $p$ of the Euclidean distances to NERF. Up to $p=2$ the matrix is Euclidean and $\beta=0$; beyond that the spread grows to $0.21$ of the mean dissimilarity at $p=3$ and to $0.63$ at $p=5$, and the mean maximal membership falls from $0.96$ to $0.57$. The spread flattens the partition, but the hard labels stay correct. (Below $p=2$ the partition is softer for a different reason: a small power compresses the ratio of far to near distances.) The printed study shows the usual effect of $m$, and that both initializations find the groups; their objectives differ because the runs end with different $\beta$.
+
+\exfig{07_relational/plot_01_rfcm_fcm_duality_1}{FCM on the coordinates (left) and RFCM on the matrix of squared distances with its dual centers (middle) give the same partition; the objective trajectories coincide (right).}{rel:ex1a}
+\exfig{07_relational/plot_01_rfcm_fcm_duality_2}{The relational prototypes are weight vectors over the objects (left); the squared-distance matrix ordered by cluster shows three blocks (right).}{rel:ex1b}
+\exfig{07_relational/plot_01_rfcm_fcm_duality_3}[NERF on powers of the Euclidean distances.]{NERF on powers $p$ of the Euclidean distances. Left: the final spread relative to the mean dissimilarity is zero up to $p=2$ and grows beyond it. Right: the partition flattens with the spread while the groups are kept.}{rel:ex1c}
+
+\subsection{Fuzzy c-medoids on dynamic time warping}
+
+Three shape classes (a bell, a step, and a double bump) are generated with random time warps and shifts, 25 series of length 60 per class (\cref{fig:rel:ex2a}). In the Euclidean matrix the class blocks are blurred, because shifted peaks produce large distances within a class; in the DTW matrix with a band of $w=12$ samples they are clear, and the alignment of two bells reduces their dissimilarity from $1.73$ to $0.65$ (\cref{fig:rel:ex2b}). Fuzzy c-medoids with five restarts reaches an adjusted Rand index (ARI) of $0.92$ on the DTW matrix and $0.49$ on the Euclidean one, whose clusters group the series by \emph{when} the peak occurs rather than by its shape; the medoids of the DTW clustering are typical, well-centered members of the classes (\cref{fig:rel:ex2c}). The memberships (\cref{fig:rel:ex2d}) are crisp for the steps and shared between bells and double bumps, whose warped versions can resemble each other. On 360 series, the candidate study (\cref{fig:rel:ex2e}) shows that one or two candidates leave the search in clearly worse optima ($J=186$ and $176$), five come within 1.5\,\% of the full search ($J=170.7$ against $168.5$), and fifty reach it in about a quarter of the time. The printed band study shows the ARI rising from $0.49$ at $w=0$ (Euclidean) and $w=4$ through $0.85$ at $w=8$ to $1.0$ at $w=20$ and without a band: the band must cover the displacements in the data. The medoids hardly move with $m$, while the mean maximal membership falls from $0.95$ at $m=1.3$ to $0.52$ at $m=3$.
+
+\exfig{07_relational/plot_02_fcmdd_dtw_series_1}{Three shape classes with random time warps and shifts: a bell, a step, and a double bump.}{rel:ex2a}
+\exfig{07_relational/plot_02_fcmdd_dtw_series_2}{Euclidean (left) and DTW (middle) dissimilarities ordered by the true class, and the DTW alignment of two bells (right): the class blocks are clear only under DTW.}{rel:ex2b}
+\exfig{07_relational/plot_02_fcmdd_dtw_series_3}{Fuzzy c-medoid clusters on the DTW matrix (top) and on the Euclidean matrix (bottom), with the medoid series in black.}{rel:ex2c}
+\exfig[0.85\textwidth]{07_relational/plot_02_fcmdd_dtw_series_4}{Memberships of the DTW c-medoid clustering, with the series ordered by the true class.}{rel:ex2d}
+\exfig{07_relational/plot_02_fcmdd_dtw_series_5}{Linear fuzzy c-medoids: final objective (left) and time of thirty restarts (right) against the number of medoid candidates.}{rel:ex2e}
+
+\subsection{Fuzzy k-modes on survey data}
+
+Three hundred respondents answer six questions with four possible answers each. Each of three groups has a typical answer pattern, and every answer is replaced by a uniformly random one with probability $0.25$. Fuzzy k-modes with $m=1.5$ recovers the three planted modes exactly (ARI $0.98$), and the table of modes (\cref{fig:rel:ex3a}) reads directly as a table of group profiles; the shade of a cell is the share of the membership mass on the modal answer, between $75$ and $85$\,\%. Most respondents differ from their own mode in one or two answers. \Cref{fig:rel:ex3b} illustrates the mode theorem for one question: the modal answer of each cluster is the one with the largest membership mass. The exponent study (\cref{fig:rel:ex3c}) confirms the sensitivity predicted by the integer dissimilarity: the planted modes are found up to $m=2.5$, while the mean maximal membership falls from $0.99$ to $0.68$; at $m=3$ the modes drift and the ARI drops to $0.72$, and at $m=4$ to $0.41$. The printed noise study shows that the modes are recovered even when $65$\,\% of the answers are replaced at random, although the assignment of individual respondents degrades (ARI $0.45$). The objective against $c$ (\cref{fig:rel:ex3d}) has a clear knee at three groups.
+
+\exfig{07_relational/plot_03_kmodes_survey_1}{Fitted modes with the share of the membership mass on the mode (left) and the matching dissimilarity of the respondents to their group's mode (right).}{rel:ex3a}
+\exfig{07_relational/plot_03_kmodes_survey_2}{Membership mass of the answers to question q1 in each cluster; the mode is the answer with the largest mass.}{rel:ex3b}
+\exfig[0.62\textwidth]{07_relational/plot_03_kmodes_survey_3}{Agreement with the groups and mean maximal membership of fuzzy k-modes against the exponent $m$.}{rel:ex3c}
+\exfig[0.55\textwidth]{07_relational/plot_03_kmodes_survey_4}{The objective of fuzzy k-modes against the number of clusters has its knee at the three planted groups.}{rel:ex3d}
+
+\subsection{Fuzzy k-prototypes and the weight \texorpdfstring{$\gamma$}{gamma}}
+
+Mixed records with two numeric and three categorical attributes are generated so that neither part separates the three groups alone: the numeric centers are three units apart with unit spread, and every categorical entry is replaced by a random category with probability $0.25$ (\cref{fig:rel:ex4a}). Fuzzy k-prototypes with the default $\gamma=1.64$ (the mean standard deviation of the numeric columns) reaches an ARI of $0.94$ and returns prototypes with means and modes (\cref{fig:rel:ex4b}). The $\gamma$ study (\cref{fig:rel:ex4c}) traces the interpolation: at $\gamma=0$ the partition is that of FCM on the numeric columns (agreement $1.0$, ARI $0.75$), for $\gamma=100$ it approaches fuzzy k-modes on the categorical columns (agreement $0.97$, ARI $0.83$), and in between the two parts correct each other, with the best ARI of $0.97$ at $\gamma=5$. The default lies on the rising flank just below this optimum. The exponent softens the partition as usual (mean maximal membership $0.91$, $0.76$, and $0.58$ for $m=1.5$, $2$, and $3$) while the ARI stays at $0.93$--$0.94$, all five random starts reach the same objective, and a new record with an unseen category is assigned with one mismatch to every mode.
+
+\exfig{07_relational/plot_04_kprototypes_mixed_1}{Mixed data: the numeric part colored by the true group, with the planted centers as crosses (left), and the planted modes of the categorical part with their frequencies (right).}{rel:ex4a}
+\exfig{07_relational/plot_04_kprototypes_mixed_2}{Fuzzy k-prototypes with the default weight: the numeric part of the partition with the prototypes (left) and the modes of the categorical part (right).}{rel:ex4b}
+\exfig[0.75\textwidth]{07_relational/plot_04_kprototypes_mixed_3}[The weight $\gamma$ interpolates between fuzzy c-means and fuzzy k-modes.]{The weight $\gamma$ interpolates between fuzzy c-means on the numeric part ($\gamma=0$) and fuzzy k-modes on the categorical part ($\gamma\to\infty$); the combination outperforms both.}{rel:ex4c}
+
+\subsection{Gower's coefficient versus one-hot encoding}
+
+Data of the same kind, now with four categorical attributes whose entries are replaced at random with probability $0.3$, are clustered along two routes. In the Gower matrix every attribute counts equally; in the Euclidean distance of the one-hot encoded records the two numeric columns dominate the twelve indicator columns (\cref{fig:rel:ex5a}). On these complete data the routes agree: Gower with fuzzy c-medoids reaches an ARI of $0.89$, Gower with RFCM $0.90$, one-hot FCM $0.91$, and k-prototypes $0.92$ (\cref{fig:rel:ex5b}); the difference is that the medoids are real records. NERF on the Gower matrix never needs a spread ($\beta=0$), as Gower's theorem predicts. Scaling the weight of the numeric attributes (\cref{fig:rel:ex5c}) traces the same path as $\gamma$: zero weight (categories only) gives an ARI of about $0.8$, equal weights $0.89$--$0.90$, a moderately larger weight up to $0.97$, and a weight of 100 (practically numeric only) falls back to $0.78$. Gower's coefficient is defined without imputation, and in the printed missing-value study NERF on it keeps an ARI of $0.86$ with $10$\,\% and $0.84$ with $20$\,\% missing entries. Fuzzy c-medoids, however, collapses to about $0.45$ from $10$\,\% on, because a record compared on only two or three attributes looks close to many others and is chosen as a medoid; the medoids carry up to four missing entries out of six. The one-hot route has to discard incomplete records and keeps its accuracy only on the shrinking remainder (165 of 300 records at $10$\,\%, 34 at $30$\,\%).
+
+\exfig{07_relational/plot_05_gower_fcmdd_vs_onehot_1}{Gower's dissimilarity (left) and the Euclidean distance of the one-hot encoded records (right), ordered by the true group.}{rel:ex5a}
+\exfig{07_relational/plot_05_gower_fcmdd_vs_onehot_2}{Gower with fuzzy c-medoids (left, medoids as crosses), one-hot encoding with FCM (middle), and fuzzy k-prototypes (right), shown in the numeric plane.}{rel:ex5b}
+\exfig[0.62\textwidth]{07_relational/plot_05_gower_fcmdd_vs_onehot_3}{Agreement with the groups against the weight of the numeric attributes in Gower's coefficient, for fuzzy c-medoids and NERF c-means.}{rel:ex5c}
+
+\subsection{Autocorrelation-based clustering of time series}
+
+Twenty-five series of length 200 are drawn from each of three processes: an AR(1) process with $\phi=0.5$, an MA(1) process with $\theta=0.9$, and an AR(1) process with $\phi=-0.6$ (\cref{fig:rel:ex6a}). The first two have practically the same lag-1 autocorrelation ($0.5$ against $0.497$) and differ from lag 2 on; the estimated autocorrelation functions scatter around the theoretical ones by about $1/\sqrt{T}$. With $L=5$ lags, A-FCM reaches an ARI of $0.88$ and A-FCMd $0.85$, RFCM on the squared autocorrelation distances reproduces A-FCM, and fuzzy c-medoids on the Euclidean distances of the raw values finds no structure (ARI $0.02$), because independent realizations of one process are as far apart as realizations of different processes. In the plane of the first two autocorrelations (\cref{fig:rel:ex6b}) the alternating class lies far from the others, while the AR(1) and MA(1) classes are separated only along $\hat\rho(2)$, and their memberships are correspondingly shared. New AR(1) series with $\phi$ swept from $-0.9$ to $0.9$ (\cref{fig:rel:ex6c}) receive graded memberships: the alternating cluster dominates for negative $\phi$, the three clusters share the membership near white noise, the MA(1) cluster peaks at $\phi\approx0.2$--$0.3$, and the persistent cluster takes over toward $\phi=0.5$. The parameter study (\cref{fig:rel:ex6d}) shows the roles of $L$ and $T$. With one lag the AR(1) and MA(1) classes are merged (ARI at most $0.55$ for every length), from two lags on they are separated, and beyond a few lags every additional coordinate adds estimation noise, flattens the memberships, and, for short series, lowers the ARI. Longer series improve the result throughout; with $T=400$ the ARI reaches $0.96$. The printed study runs A-FCMd with $L=20$: uniform weights give an ARI of $0.70$, and decaying lag weights $w_q=0.8^{\,q-1}$ raise it to $0.88$, slightly above the $0.85$ of A-FCMd with five lags.
+
+\exfig{07_relational/plot_06_autocorrelation_series_1}{Two series of each process (top) and the estimated autocorrelation functions of all series of a class with the theoretical one (bottom).}{rel:ex6a}
+\exfig{07_relational/plot_06_autocorrelation_series_2}{A-FCM in the plane of the first two autocorrelations, with centers, A-FCMd medoids, and the theoretical values (left), and the memberships ordered by the true class (right).}{rel:ex6b}
+\exfig[0.7\textwidth]{07_relational/plot_06_autocorrelation_series_3}{Mean memberships of new AR(1) series in the fitted clusters against their coefficient $\phi$.}{rel:ex6c}
+\exfig{07_relational/plot_06_autocorrelation_series_4}{Agreement with the processes (left) and mean maximal membership (right) against the number of lags $L$ for four series lengths $T$.}{rel:ex6d}
+
+\section{Further reading}\label{sec:rel:reading}
+\enlargethispage{2\baselineskip}%
+
+Relational fuzzy c-means and its duality with FCM are due to Hathaway, Davenport, and Bezdek \cite{hathaway:1989:rfcm}, the non-Euclidean extension with the $\beta$-spread to Hathaway and Bezdek \cite{hathaway:1994:nerf}; both rest on the c-means functional of Bezdek \cite{bezdek:1981}, and the relational methods are surveyed in the broader context of fuzzy pattern recognition in \cite{bezdek:1999:models}. The Euclidean property of dissimilarity matrices, the double centering, and the effect of additive constants are treated thoroughly by Gower and Legendre \cite{gower:1986:euclidean}. Fuzzy c-medoids, its linear-complexity candidate search, and the robust variant RFCMdd are due to Krishnapuram et al.\ \cite{krishnapuram:2001:fcmdd}; the crisp medoid methods PAM and CLARA and the fuzzy relational method FANNY are described in the book of Kaufman and Rousseeuw \cite{kaufman:1990:groups}, which also uses Gower's coefficient \cite{gower:1971:coefficient} for mixed data. Huang introduced k-modes and k-prototypes in \cite{huang:1998:kprototypes}, and Huang and Ng the fuzzy k-modes algorithm and the theorem on the fuzzy mode in \cite{huang:1999:fuzzykmodes}. Dynamic time warping with the band constraint goes back to Sakoe and Chiba \cite{sakoe:1978:dtw}, the autocorrelation-based fuzzy clustering of time series to D'Urso and Maharaj \cite{durso:2009:autocorrelation}. The geodesic c-medoids of \cref{ch:graph} and the kernel fuzzy c-means of \cref{ch:robust_shape} are close relatives of the methods of this chapter: both replace the Euclidean geometry of FCM by one derived from pairwise relations of the samples.

@@ -1,0 +1,43 @@
+# Build the book (figures from the example scripts, appendices, PDF) and
+# publish the PDF as fuzzyclust-book.pdf on the documentation site.
+name: book
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gh-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e ".[graph]"
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends texlive-latex-extra texlive-fonts-extra \
+            texlive-science texlive-pictures biber latexmk poppler-utils
+      - run: book/build.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: book
+          path: book/_build/main.pdf
+      - name: Publish the PDF on gh-pages
+        run: |
+          git fetch -q origin gh-pages
+          git worktree add -q ../site origin/gh-pages
+          cp book/_build/main.pdf ../site/fuzzyclust-book.pdf
+          cd ../site
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add fuzzyclust-book.pdf
+          git commit -q -m "Book PDF for ${GITHUB_SHA::7}" || exit 0
+          git push -q origin HEAD:gh-pages

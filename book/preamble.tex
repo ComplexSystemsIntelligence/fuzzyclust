@@ -1,0 +1,275 @@
+% ---------------------------------------------------------------------------
+% fuzzyclust book — shared preamble and macros
+% Every chapter uses ONLY these macros for algorithms, code and figures so
+% that the book stays uniform. See book/README.md for the conventions.
+% Visual identity (colors, display face, logo): cover/brand.tex.
+% ---------------------------------------------------------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+% --- type: Libertinus Serif and Libertinus Math for text and formulas,
+%     Raleway for display, IBM Plex Mono for code ----------------------------
+\usepackage{amsmath,amsthm}
+\usepackage[lining]{libertinus}
+\usepackage{libertinust1math}
+\usepackage{bm,mathtools}
+\usepackage[type1,lining]{raleway}
+\usepackage[scale=0.86]{plex-mono}
+\usepackage[letterspace=120]{microtype}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{booktabs,tabularx,array,multirow,longtable,float}
+\usepackage{enumitem}
+\usepackage{caption,subcaption}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,calc,fit,backgrounds,decorations.pathreplacing,matrix,fadings}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage[plain,vlined,linesnumbered]{algorithm2e}
+\usepackage{listings}
+\usepackage[most]{tcolorbox}
+\usepackage{pdfpages}
+\usepackage{titlesec,titletoc}
+\usepackage{fancyhdr,emptypage}
+\usepackage{needspace}
+\usepackage{makeidx}
+\input{cover/brand}
+\usepackage[colorlinks=true,linktoc=page,linkcolor=fcbrand,citecolor=fcgreen!80!black,urlcolor=fcbrand]{hyperref}
+\usepackage{cleveref}
+\usepackage{csquotes}
+\usepackage[backend=biber,style=numeric,sorting=none,sortcites=true,maxbibnames=6,doi=true,url=false,isbn=false,eprint=false]{biblatex}
+\usepackage{imakeidx}
+\makeindex[columns=2]
+\renewcommand*{\bibfont}{\small\raggedright}
+\setcounter{biburlnumpenalty}{100}
+\setcounter{biburllcpenalty}{100}
+\setcounter{biburlucpenalty}{100}
+
+% --- page layout ---------------------------------------------------------------
+% text block of the standard book class (360 pt measure, which the TikZ figures
+% are drawn for); raggedbottom keeps the interline spacing constant
+\raggedbottom
+\widowpenalty=10000
+\clubpenalty=10000
+\displaywidowpenalty=3000
+\setlength{\parskip}{3pt plus 1pt}
+\setlength{\emergencystretch}{1.5em}
+
+% --- chapter and section headings ---------------------------------------------
+\titleformat{\chapter}[display]
+  {\raggedright\color{fcink}}
+  {\fcsemi\footnotesize\color{fcgray}\textls[200]{\MakeUppercase{\chaptertitlename}}\\[2pt]%
+   {\fcblack\fontsize{58}{58}\selectfont\color{fcbrand}\thechapter}\hfill\raisebox{2pt}{\fclogo[0.21]}}
+  {10pt}
+  {\fcbold\fontsize{25}{30}\selectfont}
+  [\vspace{10pt}{\color{fcverm}\rule[0.25pt]{1.6cm}{2.2pt}}{\color{fcbrand!45}\rule[1.2pt]{\dimexpr\linewidth-1.6cm\relax}{0.5pt}}]
+\titleformat{name=\chapter,numberless}[display]
+  {\raggedright\color{fcink}}
+  {}
+  {0pt}
+  {\fcbold\fontsize{25}{30}\selectfont}
+  [\vspace{10pt}{\color{fcverm}\rule[0.25pt]{1.6cm}{2.2pt}}{\color{fcbrand!45}\rule[1.2pt]{\dimexpr\linewidth-1.6cm\relax}{0.5pt}}]
+\titlespacing*{\chapter}{0pt}{0pt}{30pt}
+\titleformat{\section}
+  {\fcbold\Large\color{fcink}\raggedright}
+  {\color{fcbrand}\thesection}{0.75em}{}
+\titleformat{\subsection}
+  {\fcbold\large\color{fcink}\raggedright}
+  {\color{fcbrand}\thesubsection}{0.7em}{}
+\titleformat{\subsubsection}
+  {\fcsemi\normalsize\color{fcink}\raggedright}
+  {\thesubsubsection}{0.6em}{}
+\titleformat{\paragraph}[runin]
+  {\fcsemi\normalsize\color{fcink}}{}{0pt}{}
+\titlespacing*{\section}{0pt}{18pt plus 4pt minus 2pt}{8pt plus 2pt}
+\titlespacing*{\subsection}{0pt}{14pt plus 3pt minus 2pt}{6pt plus 2pt}
+\titlespacing*{\subsubsection}{0pt}{10pt plus 3pt minus 2pt}{4pt plus 1pt}
+\titlespacing*{\paragraph}{0pt}{6pt plus 2pt minus 1pt}{0.6em}
+% a heading keeps at least three lines of text below it on its page (\Needspace
+% measures the page exactly; \needspace misbehaves with \raggedbottom)
+\preto\section{\Needspace{5\baselineskip}}
+\preto\subsection{\Needspace{4\baselineskip}}
+
+% --- table of contents and lists of figures and tables -------------------------
+\setcounter{tocdepth}{1}
+\contentsmargin{2.55em}
+\titlecontents{chapter}[2.2em]
+  {\addvspace{9pt}\fcbold\color{fcink}}
+  {\contentslabel[\color{fcbrand}\thecontentslabel]{2.2em}}
+  {\hspace*{-2.2em}}
+  {\hfill\color{fcbrand}\contentspage}
+\titlecontents{section}[5.0em]
+  {\small}
+  {\contentslabel[\color{fcgray}\thecontentslabel]{2.8em}}
+  {\hspace*{-2.8em}}
+  {\titlerule*[0.7pc]{\color{fcgray!60}.}\contentspage}
+\titlecontents{figure}[2.8em]
+  {\small}
+  {\contentslabel[\color{fcbrand}\thecontentslabel]{2.8em}}
+  {\hspace*{-2.8em}}
+  {\titlerule*[0.7pc]{\color{fcgray!60}.}\contentspage}
+\titlecontents{table}[2.8em]
+  {\small}
+  {\contentslabel[\color{fcbrand}\thecontentslabel]{2.8em}}
+  {\hspace*{-2.8em}}
+  {\titlerule*[0.7pc]{\color{fcgray!60}.}\contentspage}
+
+% --- running heads -------------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE]{\fcsemi\footnotesize{\color{fcbrand}\thepage}\hspace{1.2em}{\color{fcgray}\leftmark}}
+\fancyhead[RO]{\fcsemi\footnotesize{\color{fcgray}\rightmark}\hspace{1.2em}{\color{fcbrand}\thepage}}
+\renewcommand{\headrulewidth}{0pt}
+\makeatletter
+\renewcommand{\chaptermark}[1]{\markboth{\ifnum\c@secnumdepth>\m@ne\if@mainmatter\@chapapp\ \thechapter\hspace{0.6em}\fi\fi #1}{\ifnum\c@secnumdepth>\m@ne\if@mainmatter\@chapapp\ \thechapter\hspace{0.6em}\fi\fi #1}}
+\makeatother
+\renewcommand{\sectionmark}[1]{\markright{\thesection\hspace{0.6em}#1}}
+\fancypagestyle{plain}{\fancyhf{}\fancyfoot[C]{\fcsemi\footnotesize\color{fcgray}\thepage}}
+
+% --- captions ------------------------------------------------------------------
+\DeclareCaptionFont{fclabel}{\fcbold\color{fcbrand}}
+\captionsetup{font=small,labelfont=fclabel,labelsep=period,skip=6pt}
+\captionsetup[table]{position=top}
+
+% --- notation macros ---------------------------------------------------------
+\newcommand{\X}{\mathbf{X}}
+\newcommand{\xk}{\mathbf{x}_k}
+\newcommand{\vi}{\mathbf{v}_i}
+\newcommand{\V}{\mathbf{V}}
+\newcommand{\U}{\mathbf{U}}
+\newcommand{\mik}{\mu_{ik}}
+\newcommand{\A}{\mathbf{A}}
+\newcommand{\Ai}{\mathbf{A}_i}
+\newcommand{\Fi}{\mathbf{F}_i}
+\newcommand{\Dik}{D_{ik}}
+\newcommand{\Dsq}{D^2_{ik}}
+\newcommand{\J}{J}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\T}{^{\mathsf{T}}}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\abs}[1]{\left\lvert #1 \right\rvert}
+\DeclareMathOperator{\argmin}{arg\,min}
+\DeclareMathOperator{\argmax}{arg\,max}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\tr}{tr}
+% \code: typewriter identifiers; a line may break after an underscore (long
+% snake_case names would otherwise produce overfull lines in the narrow measure)
+\makeatletter
+% break after an underscore only when more of the name follows (a trailing
+% underscore, as in cluster_centers_, must not be followed by a line break)
+\def\fc@us{\textunderscore\futurelet\fc@next\fc@usbreak}
+\def\fc@usbreak{\ifx\fc@next\egroup\else\allowbreak\fi}
+\DeclareRobustCommand{\code}[1]{{\ttfamily\let\_\fc@us#1}}
+\makeatother
+\pdfstringdefDisableCommands{\def\code#1{#1}} % plain text in PDF bookmarks
+\newcommand{\py}[1]{\lstinline[language=Python]|#1|}
+
+% --- theorem-like environments ----------------------------------------------
+\newtheoremstyle{fcdef}{8pt}{8pt}{\normalfont}{}{\fcbold\color{fcbrand}}{.}{0.5em}{}
+\newtheoremstyle{fcrem}{8pt}{8pt}{\normalfont}{}{\fcsemi\color{fcink}}{.}{0.5em}{}
+\theoremstyle{fcdef}
+\newtheorem{definition}{Definition}[chapter]
+\newtheorem{example}{Example}[chapter]
+\theoremstyle{fcrem}
+\newtheorem{remark}{Remark}[chapter]
+
+% --- listings ----------------------------------------------------------------
+\lstdefinestyle{fcpython}{
+  language=Python,
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{fcbrand}\bfseries,
+  stringstyle=\color{fcgreen!85!black},
+  commentstyle=\color{fcgray}\itshape,
+  showstringspaces=false,
+  breaklines=true,
+  breakatwhitespace=true,
+  columns=fullflexible,
+  keepspaces=true,
+  frame=leftline,
+  framerule=1.6pt,
+  rulecolor=\color{fcbrand!65},
+  framesep=6pt,
+  backgroundcolor=\color{fcpaper},
+  xleftmargin=8pt, xrightmargin=0pt,
+  aboveskip=8pt, belowskip=8pt,
+  rangebeginprefix=\#\ [snippet:,
+  rangebeginsuffix=],
+  rangeendprefix=\#\ [/snippet:,
+  rangeendsuffix=],
+  includerangemarker=false,
+  morekeywords={self,None,True,False},
+}
+\lstset{style=fcpython}
+
+% \pysnippet{examples/01_clustering/plot_01_fcm_basics.py}{fit}
+%   -> code between "# [snippet:fit]" and "# [/snippet:fit]" in that script
+% a listing never starts with fewer than four lines at the foot of a page
+\newcommand{\pysnippet}[2]{\Needspace{5\baselineskip}\lstinputlisting[linerange=#2-#2]{../#1}}
+% \pyfile{examples/...py} -> whole script (used in the example appendix)
+\newcommand{\pyfile}[1]{\Needspace{5\baselineskip}\lstinputlisting{../#1}}
+\AtBeginEnvironment{lstlisting}{\Needspace{5\baselineskip}}
+
+% --- figures from the example scripts ----------------------------------------
+% \exfig[width]{01_clustering/plot_03_gk_ellipses_1}{caption}{label}
+% Files are produced by book/build_figures.py into book/figures/<section>/<script>_<n>.pdf
+% \exfig[width]{path}[short caption]{caption}{label}; the short caption goes to the list of figures
+\NewDocumentCommand{\exfig}{O{\textwidth} m o m m}{%
+  \begin{figure}[htbp]\centering
+    \includegraphics[width=#1]{figures/#2.pdf}
+    \IfNoValueTF{#3}{\caption{#4}}{\caption[{#3}]{#4}}\label{fig:#5}
+  \end{figure}}
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\bottomfraction}{0.6}
+\renewcommand{\textfraction}{0.12}
+\renewcommand{\floatpagefraction}{0.75}
+\setcounter{topnumber}{2}
+\setcounter{totalnumber}{3}
+
+% --- boxes --------------------------------------------------------------------
+% One geometry for every box: a colored rule on the left, a light tint, the
+% title in the display face. Only the color changes with the kind of box.
+\tcbset{
+  fcbase/.style={enhanced, breakable, sharp corners, frame hidden, boxrule=0pt,
+    borderline west={2.2pt}{0pt}{#1}, colback=#1!6!white,
+    left=9pt, right=8pt, top=6pt, bottom=6pt, before skip=10pt, after skip=10pt,
+    detach title, before upper={\tcbtitle\par\vspace{3pt}}, lines before break=4,
+    fonttitle=\fcbold\small, coltitle=#1!75!black},
+}
+% algorithm box: \begin{algobox}{Title}{label} <algorithm2e body> \end{algobox}
+% (a float: an algorithm that does not fit moves to the next page and the text
+% continues instead of leaving the foot of the page empty)
+% numbered per chapter, so that \cref{alg:...} prints "algorithm 3.2"
+\newtcolorbox[auto counter, number within=chapter, crefname={algorithm}{algorithms},
+  Crefname={Algorithm}{Algorithms}]{algobox}[2]{fcbase=fcbrand, unbreakable, float=tbp,
+  title={Algorithm \thetcbcounter\enspace\textcolor{fcink}{#1}}, label={alg:#2}}
+% summary box at the end of a theory section
+% (a float like the algorithm boxes, in whose order it stays: the text flows on
+% instead of leaving the foot of a page empty)
+\newtcolorbox{summarybox}[1]{fcbase=fcgreen, unbreakable, float=tbp,
+  title={In a nutshell\enspace\textcolor{fcink}{#1}}}
+% practical hints
+\newtcolorbox{hintbox}[1]{fcbase=fcorange, unbreakable,
+  title={#1}}
+% roadmap at the beginning of every chapter
+\newtcolorbox{roadmap}{enhanced, sharp corners, frame hidden, boxrule=0pt,
+  borderline west={2.2pt}{0pt}{fcverm}, colback=fcpaper,
+  left=10pt, right=10pt, top=7pt, bottom=7pt, before skip=0pt, after skip=14pt,
+  fontupper=\small\color{fcink}}
+% API box: parameters of an estimator
+\newtcolorbox{apibox}[1]{fcbase=fcsky!80!fcbrand,
+  title={\code{#1}}, fonttitle=\small\bfseries\ttfamily,
+  before upper={\tcbtitle\par\vspace{3pt}\emergencystretch=2.5em\hbadness=10000}}
+
+% --- TikZ styles for concept figures -----------------------------------------
+\tikzset{
+  block/.style={draw=fcbrand, fill=fcbrand!7, rounded corners=2pt, thick, minimum height=8mm, minimum width=22mm, align=center, font=\small},
+  data/.style={draw=fcgreen!70!black, fill=fcgreen!8, rounded corners=2pt, thick, minimum height=8mm, align=center, font=\small},
+  result/.style={draw=fcverm!70!black, fill=fcverm!8, rounded corners=2pt, thick, minimum height=8mm, align=center, font=\small},
+  note/.style={font=\footnotesize\itshape, text=fcgray, align=center},
+  arrow/.style={-{Latex[length=2mm]}, thick, fcgray!80!black},
+  every node/.append style={execute at begin node={\hyphenpenalty=10000\exhyphenpenalty=10000}},
+}
+
+\graphicspath{{figures/}}
+\captionsetup{font=small}
+\setlist{nosep}

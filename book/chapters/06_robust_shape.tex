@@ -1,0 +1,654 @@
+\chapter[Robust and shape-oriented variants]{Robust and shape-oriented variants of fuzzy c-means}\label{ch:robust_shape}
+\begin{roadmap}
+Fuzzy c-means rests on three assumptions: the memberships of every sample sum to one, every cluster is a point in the data space, and the distance to that point is Euclidean. This chapter relaxes them one at a time, each time by a small change to the FCM template of \cref{ch:partitioning}---a different membership formula, distance, or prototype update---and all methods live in \code{fuzzyclust.extensions} with the common interface of the toolbox. Possibilistic c-means, possibilistic fuzzy c-means, and noise clustering drop or loosen the sum-to-one constraint, so that outliers are recognized instead of being shared out among the clusters. Kernel fuzzy c-means measures the distance in the feature space of a kernel, where rings and moons become spheres; fuzzy c-varieties and c-shells replace the point by a line or a circle; volume prototypes replace it by a core of zero distance, which removes the bias toward clusters of equal size and, with adaptive merging, finds the number of clusters during the iteration; and feature weights learned with the partition adapt the distance to the features that matter. The graph-based methods of the next chapter take the opposite route and abandon the prototype altogether.
+\end{roadmap}
+
+\section{Problem and idea}\label{sec:robust:problem}
+
+Two things can go wrong when fuzzy c-means meets real data. The first is the \emph{partition}. The constraint $\sum_i\mik=1$ makes every membership a relative quantity: it says to which prototype a sample is closer, not whether it is close to any of them. A sample far from all prototypes still shares a total membership of one among them and, since the prototype update \eqref{eq:part:vfcm} weighs every sample by $\mik^m$, such an outlier pulls the prototypes toward itself. The second is the \emph{prototype}. A point prototype with a fixed norm describes spherical clusters (\cref{sec:part:fcm}), one with an adaptive norm ellipsoidal clusters (\cref{sec:part:gk,sec:part:gg}); a group of points along a line, a ring, or a curved arc has no useful center, and the algorithm tiles it into spherical or ellipsoidal pieces.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[scale=1.0]
+  \tikzset{pt/.style={fill=fcblue!80!black, draw=none}, proto/.style={black, font=\small}}
+  % ---------- panel A: point prototype ----------
+  \begin{scope}
+    \def\ptsA{2.18/1.67,1.54/0.79,1.39/1.37,1.47/1.26,1.48/1.32,1.00/1.84,1.83/2.15,1.52/1.35,1.29/0.91,1.87/1.08,1.05/1.42,2.06/1.59,1.11/1.23,1.74/1.44}
+    \foreach \r in {0.4,0.8,1.2} { \draw[fcgray!60, thin, dashed] (1.5,1.5) circle (\r); }
+    \foreach \x/\y in \ptsA { \fill[pt] (\x,\y) circle (1.5pt); }
+    \draw[fcverm, thick] (1.5,1.5) -- (2.55,2.55) node[midway, above left=-1pt, note, text=fcverm!80!black] {$\Dik$};
+    \fill[fcverm!80!black] (2.55,2.55) circle (1.8pt) node[right, note] {$\xk$};
+    \node[proto] at (1.5,1.5) {$\boldsymbol\times$};
+    \node[note, below right=-2pt and -1pt] at (1.5,1.5) {$\vi$};
+    \node[note, anchor=north, text width=3.3cm, font=\small] at (1.5,-0.05) {\textbf{point} (FCM, GK, GG):\\ $\Dsq=\norm{\xk-\vi}^2$};
+  \end{scope}
+  % ---------- panel B: line prototype ----------
+  \begin{scope}[shift={(4.4,0)}]
+    \def\ptsB{2.53/2.19,1.89/1.72,2.46/1.93,2.26/1.99,1.24/1.32,0.64/0.86,1.87/1.66,1.65/1.54,1.22/1.27,0.88/1.14,1.37/1.24,1.44/1.44,0.94/1.26,1.00/1.28}
+    \draw[fcgreen!80!black, thick] ($(1.5,1.5)+(-150:1.65)$) -- ($(1.5,1.5)+(30:1.65)$);
+    \foreach \d in {0.3,0.6} { \draw[fcgray!60, thin, dashed] ($(1.5,1.5)+(120:\d)+(-150:1.65)$) -- ($(1.5,1.5)+(120:\d)+(30:1.65)$); \draw[fcgray!60, thin, dashed] ($(1.5,1.5)+(-60:\d)+(-150:1.65)$) -- ($(1.5,1.5)+(-60:\d)+(30:1.65)$); }
+    \foreach \x/\y in \ptsB { \fill[pt] (\x,\y) circle (1.5pt); }
+    \coordinate (xk) at ($(1.5,1.5)+(30:0.9)+(120:0.95)$);
+    \coordinate (foot) at ($(1.5,1.5)+(30:0.9)$);
+    \draw[fcverm, thick] (xk) -- (foot) node[midway, right=1pt, note, text=fcverm!80!black] {$\Dik$};
+    \fill[fcverm!80!black] (xk) circle (1.8pt) node[above, note] {$\xk$};
+    \draw[-{Latex[length=1.6mm]}, thick, black] (1.5,1.5) -- ($(1.5,1.5)+(30:0.55)$) node[below right=-3pt and -2pt, note] {$\mathbf{s}_{i}$};
+    \node[proto] at (1.5,1.5) {$\boldsymbol\times$};
+    \node[note, below left=-2pt and -2pt] at (1.5,1.5) {$\vi$};
+    \node[note, anchor=north, text width=3.7cm, font=\small] at (1.5,-0.05) {\textbf{line / variety} (FCV):\\ $\Dsq=\norm{\xk-\vi}^2-\big((\xk-\vi)\T\mathbf{s}_i\big)^2$};
+  \end{scope}
+  % ---------- panel C: shell prototype ----------
+  \begin{scope}[shift={(8.8,0)}]
+    \def\ptsC{1.11/0.51,1.09/0.47,0.72/2.29,0.98/0.59,0.90/2.45,0.43/0.97,1.02/2.43,0.42/1.89,2.51/1.91,1.55/2.69,2.61/1.30,1.64/2.63,1.09/0.44,0.85/0.60,1.33/0.48,0.34/1.68}
+    \draw[fcorange!90!black, thick] (1.5,1.5) circle (1.1);
+    \draw[fcgray!60, thin, dashed] (1.5,1.5) circle (0.8);
+    \draw[fcgray!60, thin, dashed] (1.5,1.5) circle (1.4);
+    \foreach \x/\y in \ptsC { \fill[pt] (\x,\y) circle (1.5pt); }
+    \draw[-{Latex[length=1.6mm]}, thick, black] (1.5,1.5) -- ($(1.5,1.5)+(200:1.1)$) node[midway, above, note] {$r_i$};
+    \coordinate (xk) at ($(1.5,1.5)+(45:1.62)$);
+    \draw[fcverm, thick] ($(1.5,1.5)+(45:1.1)$) -- (xk) node[midway, below right=-2pt, note, text=fcverm!80!black] {$\Dik$};
+    \fill[fcverm!80!black] (xk) circle (1.8pt) node[above, note] {$\xk$};
+    \node[proto] at (1.5,1.5) {$\boldsymbol\times$};
+    \node[note, below right=-2pt and -1pt] at (1.5,1.5) {$\vi$};
+    \node[note, anchor=north, text width=3.4cm, font=\small] at (1.5,-0.05) {\textbf{shell} (FCS, FCSS):\\ $\Dsq=\big(\norm{\xk-\vi}-r_i\big)^2$};
+  \end{scope}
+\end{tikzpicture}
+\caption[Three prototypes and the distance each of them induces; the dashed curves are level sets of the distance.]{Three prototypes and the distance each of them induces; the dashed curves are level sets of the distance. A point prototype measures how far a sample is from the center, so it detects compact groups. A linear variety---here a line through $\vi$ with unit direction $\mathbf{s}_i$---measures only the orthogonal distance to the line, so samples anywhere along the line are equally close to it. A shell prototype, a center with a radius $r_i$, measures the radial deviation from the circle, so every point of a hollow ring is at zero distance from it. The membership formula of FCM is used unchanged with each of these distances.}
+\label{fig:robust:prototypes}
+\end{figure}
+
+The methods of this chapter attack both problems from inside the FCM template. \Cref{fig:robust:prototypes} shows the prototype side: a line and a shell are prototypes just as a point is, each with its own distance, and the alternating optimization of \cref{sec:found:ao} needs nothing but that distance and a rule to update the prototype from the memberships. A kernel reaches the same end by a different route: it keeps the point prototype but places it in a feature space in which the Euclidean distance is a curved function of the input coordinates, so that one sphere there can enclose a ring.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}
+\begin{axis}[width=0.98\textwidth, height=5.4cm, xmin=-2.5, xmax=11.6, ymin=-0.03, ymax=1.08,
+  xlabel={position along the line through the two prototypes}, ylabel={membership / typicality},
+  xtick={0,4,9}, xticklabels={$\mathbf{v}_1$,$\mathbf{v}_2$,outlier}, ytick={0,0.5,1},
+  legend style={at={(0.5,1.03)}, anchor=south, legend columns=4, draw=none, font=\small, /tikz/every even column/.append style={column sep=6pt}},
+  tick label style={font=\small}, label style={font=\small}, grid=major, grid style={fcgray!25}, samples=300, domain=-2.5:11.6]
+  \addplot[fcblue, very thick] {(x-4)^2/(x^2+(x-4)^2)};
+  \addlegendentry{FCM $\mu_{1k}$}
+  \addplot[fcverm, very thick] {x^2/(x^2+(x-4)^2)};
+  \addlegendentry{FCM $\mu_{2k}$}
+  \addplot[fcblue, very thick, dashed] {1/(1+x^2)};
+  \addlegendentry{PCM $t_{1k}$}
+  \addplot[fcverm, very thick, dashed] {1/(1+(x-4)^2)};
+  \addlegendentry{PCM $t_{2k}$}
+  \draw[fcgray, thin] (axis cs:9,0) -- (axis cs:9,1.08);
+  \node[fill=fcverm!80!black, circle, inner sep=1.8pt] at (axis cs:9,0.764) {};
+  \node[fill=fcblue!80!black, circle, inner sep=1.8pt] at (axis cs:9,0.236) {};
+  \node[draw=fcverm!80!black, fill=white, circle, inner sep=1.6pt] at (axis cs:9,0.038) {};
+  \node[draw=fcblue!80!black, fill=white, circle, inner sep=1.6pt] at (axis cs:9,0.012) {};
+  \node[note, anchor=west, text=fcverm!80!black] at (axis cs:9.15,0.80) {$\mu_{2k}=0.76$};
+  \node[note, anchor=west, text=fcblue!80!black] at (axis cs:9.15,0.31) {$\mu_{1k}=0.24$};
+  \node[note, anchor=west, text=fcverm!80!black] at (axis cs:9.15,0.13) {$t_{2k}=0.04$};
+  \node[note, anchor=west, text=fcblue!80!black] at (axis cs:9.15,0.02) {$t_{1k}=0.01$};
+\end{axis}
+\end{tikzpicture}
+\caption[Relative versus absolute membership along the line through two prototypes at $0$ and $4$ (both with $m=2$ and, for PCM, $\eta_i=1$).]{Relative versus absolute membership along the line through two prototypes at $0$ and $4$ (both with $m=2$ and, for PCM, $\eta_i=1$). The FCM memberships cross at the midpoint and decay only slowly beyond the prototypes: an outlier at $9$ is a member of cluster~2 with membership $0.76$ and shifts its prototype. The PCM typicalities are bumps of width $\sqrt{\eta_i}$ around the prototypes and decay to zero on both sides, so the outlier is atypical of both clusters and has almost no weight in either prototype.}
+\label{fig:robust:membership}
+\end{figure}
+
+\Cref{fig:robust:membership} shows the partition side. Along the line through two prototypes, the FCM membership of either cluster crosses $1/2$ at the midpoint and, on the far side of its own prototype, \emph{stays above $1/2$} however far away the sample lies, because out there that prototype is always the closer one. A membership that expresses how typical a sample is of a cluster must instead decay with the distance to that cluster alone. This is the \emph{possibilistic} membership of Krishnapuram and Keller \cite{krishnapuram:1993:pcm}, introduced in \cref{sec:found:partitions} as the partition space $M_{pc}$. Decoupling the clusters has a price---they may coincide---and two further designs keep the coupling: the possibilistic fuzzy c-means \cite{pal:2005:pfcm} carries both kinds of membership, and Davé's noise clustering \cite{dave:1991:noise} keeps the sum-to-one constraint but adds one more cluster to share with, a \emph{noise cluster} at the same distance $\delta$ from every sample (\cref{fig:robust:noise}). A sample farther than about $\delta$ from all real prototypes gives most of its membership to the noise cluster, and the real clusters receive only what is left.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[scale=1.12]
+  \tikzset{pt/.style={fill=fcblue!80!black, draw=none}}
+  \def\ptsG{1.35/1.18,2.05/1.21,1.24/1.85,0.88/1.09,1.27/1.18,0.78/1.23,1.07/1.51,0.62/1.05,1.60/1.95,0.67/1.53,0.86/1.00,0.89/1.15,1.55/1.55,1.22/1.17,1.20/1.26,1.48/1.08}
+  \def\ptsH{4.20/2.16,4.18/2.29,4.27/2.67,4.17/2.75,4.09/2.03,4.24/2.32,4.29/2.65,4.60/2.37,4.08/2.16,4.69/2.28,3.74/1.96,4.00/2.60,4.16/2.99,4.43/2.24,4.05/2.54,4.12/1.91}
+  \draw[fcgray!60, dashed, thick] (1.17,1.31) circle (1.35);
+  \draw[fcgray!60, dashed, thick] (4.21,2.37) circle (1.35);
+  \foreach \x/\y in \ptsG { \fill[pt] (\x,\y) circle (1.5pt); }
+  \foreach \x/\y in \ptsH { \fill[fcverm!80!black] (\x,\y) circle (1.5pt); }
+  \node[black, font=\small] at (1.17,1.31) {$\boldsymbol\times$};
+  \node[note, below=1pt] at (1.17,1.31) {$\mathbf{v}_1$};
+  \node[black, font=\small] at (4.21,2.37) {$\boldsymbol\times$};
+  \node[note, below=1pt] at (4.21,2.37) {$\mathbf{v}_2$};
+  \draw[-{Latex[length=1.6mm]}, thick, fcgray!80!black] (1.17,1.31) -- (1.17+0.955,1.31+0.955) node[midway, above left=-2pt, note] {$\delta$};
+  % outlier
+  \coordinate (o) at (3.0,0.35);
+  \fill[black] (o) circle (2pt) node[below, note] {outlier $\xk$};
+  \draw[fcblue!70, thick] (o) -- (1.17,1.31) node[midway, below left=-3pt and 2pt, note, text=fcblue!80!black] {$D_{1k}>\delta$};
+  \draw[fcverm!70, thick] (o) -- (4.21,2.37) node[midway, below right=-3pt and 2pt, note, text=fcverm!80!black] {$D_{2k}>\delta$};
+  % noise prototype box
+  \node[result, text width=3.1cm, font=\small] (noise) at (7.6,0.9) {noise prototype $\mathbf{v}_*$\\[2pt] no position;\\ $D_{*k}=\delta$ for every $k$};
+  \draw[arrow, dashed] (o) to[bend right=14] node[midway, below, note] {$\delta$} (noise.west);
+  \draw[arrow, dashed] (4.75,2.2) to[bend left=10] node[midway, above right=-2pt, note] {$\delta$} (noise.north west);
+  \node[note, text width=4.6cm, anchor=north west, font=\small] at (5.8,4.0) {$\displaystyle\mu_{*k}=1-\sum_{i=1}^{c}\mu_{ik}$ is the membership in the noise cluster; samples outside every dashed circle are more noise than member};
+\end{tikzpicture}
+\caption[Noise clustering adds a fictitious prototype $\mathbf{v}_*$ that has no position but is at the same distance $\delta$ from every sample.]{Noise clustering adds a fictitious prototype $\mathbf{v}_*$ that has no position but is at the same distance $\delta$ from every sample. The real memberships keep the FCM form and, together with the noise membership $\mu_{*k}$, still sum to one; the dashed circles of radius $\delta$ mark where a sample is as close to the noise prototype as to a real one. The outlier is farther than $\delta$ from both real prototypes, so most of its membership goes to the noise cluster and it no longer moves $\mathbf{v}_1$ or $\mathbf{v}_2$, while the real clusters still compete for every sample near the groups.}
+\label{fig:robust:noise}
+\end{figure}
+
+\section{Theory}\label{sec:robust:theory}
+
+The notation is that of the book: $\X\in\R^{N\times n}$ with rows $\xk$, memberships $\mik$ in $\U\in\R^{c\times N}$ (stored transposed in the code), prototypes $\vi$ with index $i$ or $j$, samples with index $k$, squared distances $\Dsq$. The reference point throughout is fuzzy c-means (\cref{sec:part:fcm}): the functional $\J=\sum_i\sum_k\mik^m\Dsq$ \eqref{eq:part:Jfcm}, the membership formula \eqref{eq:part:mufcm}, and the prototype update \eqref{eq:part:vfcm}. For each method we state which of the three it changes. \Cref{sec:robust:pcm,sec:robust:pfcm,sec:robust:noise} change the partition, \cref{sec:robust:kernel} the distance, \cref{sec:robust:fcv,sec:robust:shells} the prototype; \cref{sec:robust:volume} turns the point prototype into a volume and \cref{sec:robust:weights} learns the distance as a weighting of the features.
+
+\subsection{Possibilistic c-means}\label{sec:robust:pcm}
+
+Krishnapuram and Keller \cite{krishnapuram:1993:pcm} drop the constraint $\sum_i\mik=1$. Without it the FCM functional is minimized by the trivial partition $\mik=0$, so a term is added that rewards memberships close to one, with a cluster-specific weight $\eta_i>0$:
+\begin{equation}
+  \J(\X;\mathbf{T},\V)=\sum_{i=1}^{c}\sum_{k=1}^{N}t_{ik}^m\Dsq+\sum_{i=1}^{c}\eta_i\sum_{k=1}^{N}(1-t_{ik})^m .
+  \label{eq:robust:Jpcm}
+\end{equation}
+The memberships are now called \emph{typicalities} and written $t_{ik}$; the matrix $\mathbf{T}$ replaces $\U$. Setting the derivative with respect to $t_{ik}$ to zero gives $m\,t_{ik}^{m-1}\Dsq=m\,\eta_i(1-t_{ik})^{m-1}$, hence
+\begin{equation}
+  t_{ik}=\frac{1}{1+\big(\Dsq/\eta_i\big)^{1/(m-1)}},\qquad
+  \vi=\frac{\sum_k t_{ik}^m\xk}{\sum_k t_{ik}^m}.
+  \label{eq:robust:pcm}
+\end{equation}
+The prototype update is \eqref{eq:part:vfcm} with typicalities in place of memberships; the typicality replaces \eqref{eq:part:mufcm}. Three properties follow directly. First, $t_{ik}$ depends on $\Dsq$ and $\eta_i$ only, not on the distances to the other prototypes: it is an absolute measure, $t_{ik}=1/2$ exactly at $\Dsq=\eta_i$, and $\sqrt{\eta_i}$ is the radius of the zone of influence of cluster $i$. Second, $m$ no longer controls the fuzziness of a partition but the \emph{decay} of the typicality: for large distances $t_{ik}\approx(\eta_i/\Dsq)^{1/(m-1)}$, so an outlier at three times the radius $\sqrt{\eta_i}$ keeps a typicality of about $0.1$ with $m=2$ and of about $0.01$ with $m=1.5$. The follow-up paper \cite{krishnapuram:1996:pcm} therefore recommends $m$ around $1.5$ for PCM, smaller than the FCM default. Third, \eqref{eq:robust:Jpcm} is a sum of $c$ terms, each involving only the typicalities $\mathbf{t}_i$ and the prototype $\vi$ of one cluster: the clusters are optimized independently, PCM amounts to $c$ separate mode-seeking procedures, and nothing prevents two of them from converging to the same dense region. These \emph{coincident clusters}\index{coincident clusters} are the characteristic failure of PCM \cite{krishnapuram:1996:pcm}, and they are the reason the method is best used as a robust refinement of a partition that FCM has already found rather than as a stand-alone clusterer.
+
+The scales $\eta_i$ govern the result. The original paper estimates them from a probabilistic partition---in practice from an FCM run, which also initializes the typicalities---as the fuzzy intra-cluster mean squared distance,
+\begin{equation}
+  \eta_i=K\,\frac{\sum_k\mik^m\Dsq}{\sum_k\mik^m},\qquad K=1,
+  \label{eq:robust:eta}
+\end{equation}
+or alternatively as the mean squared distance of the samples whose membership exceeds an $\alpha$-cut. The factor $K$ widens ($K>1$) or narrows ($K<1$) the zones of influence: too large a $K$ lets the outliers back in and draws the prototypes together, too small a $K$ leaves the tails of a cluster atypical. The original paper already proposes an optional second phase: after convergence, the scales are re-estimated from the $\alpha$-cut of the typicalities and PCM is run once more. The 1996 paper recommends keeping the scales fixed during the iterations, since re-estimating them from the typicalities shrinks the clusters. \code{fuzzyclust} follows this recommendation: $\eta_i$ is computed once from the FCM partition with the factor \py{eta_scale} and then kept fixed; explicit scales can be passed through \py{eta}, which is also the way to run the second phase. Since the rows of $\mathbf{T}$ do not sum to one, \py{predict_proba} returns typicalities, and the hard label $\argmax_i t_{ik}$ of a sample that is atypical everywhere means little; the maximal typicality $\max_i t_{ik}$ is a natural outlier score.
+
+\begin{algobox}{Possibilistic c-means (PCM)}{pcm}\index{possibilistic c-means (PCM)}\index{typicality}\index{PCM@\code{PCM}}
+\begin{algorithm}[H]
+\KwIn{data $\X$, number of clusters $c$, exponent $m$ ($\approx1.5$), scale factor $K$ (or scales $\eta_i$), tolerance $\epsilon$}
+run FCM on $\X$ (same $c$ and $m$) to obtain $\U$ and $\V$\;
+\lIf{no scales are given}{compute $\eta_i$ from $\U$ and $\V$ by \eqref{eq:robust:eta}}
+initial typicalities $\mathbf{T}$ by \eqref{eq:robust:pcm} from the FCM distances\;
+\Repeat{$\max_{ik}\abs{t^{(l)}_{ik}-t^{(l-1)}_{ik}}<\epsilon$}{
+  prototypes $\vi$ by \eqref{eq:robust:pcm} with weights $t_{ik}^m$\;
+  distances $\Dsq=\norm{\xk-\vi}^2$\;
+  typicalities $t_{ik}$ by \eqref{eq:robust:pcm} with the fixed $\eta_i$\;
+}
+\KwOut{prototypes $\V$, typicalities $\mathbf{T}$ (rows not normalized), scales $\eta_i$, $\J$ \eqref{eq:robust:Jpcm}}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Possibilistic c-means}
+\begin{itemize}
+  \item Drops the sum-to-one constraint: the typicality $t_{ik}$ depends only on the distance to prototype $i$ relative to the scale $\eta_i$; outliers are atypical of every cluster and do not move the prototypes.
+  \item Same prototype update as FCM; the typicality formula \eqref{eq:robust:pcm} replaces the membership formula. $m$ sets the decay of the typicality ($1.5$ is a good value), $\eta_i$ the zone of influence, estimated once from an FCM run with a factor $K$.
+  \item The clusters do not interact: two prototypes may coincide when the scales are too wide or the groups are close---initialize with FCM, keep $K\le1$, and use PCM as a robust refinement and outlier detector.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Possibilistic fuzzy c-means}\label{sec:robust:pfcm}
+
+Pal, Pal, Keller, and Bezdek \cite{pal:2005:pfcm} keep both descriptions. Every sample has a probabilistic membership $\mik$ (constrained, $\sum_i\mik=1$) \emph{and} a typicality $t_{ik}$ (unconstrained), and both enter the functional,
+\begin{equation}
+  \J=\sum_{i=1}^{c}\sum_{k=1}^{N}\big(a\,\mik^m+b\,t_{ik}^{\eta}\big)\Dsq+\sum_{i=1}^{c}\gamma_i\sum_{k=1}^{N}(1-t_{ik})^{\eta},
+  \label{eq:robust:Jpfcm}
+\end{equation}
+with weights $a,b\ge0$ (not both zero), the FCM exponent $m>1$ for the memberships, an exponent $\eta>1$ for the typicalities (the paper's symbol; it plays the role of $m$ in PCM), and scales $\gamma_i$ as in PCM. The necessary conditions separate: the memberships follow the FCM formula \eqref{eq:part:mufcm}, the typicalities the PCM formula with the scale $\gamma_i/b$, and the prototypes are weighted by both,
+\begin{equation}
+  t_{ik}=\frac{1}{1+\big(b\,\Dsq/\gamma_i\big)^{1/(\eta-1)}},\qquad
+  \vi=\frac{\sum_k\big(a\,\mik^m+b\,t_{ik}^{\eta}\big)\xk}{\sum_k\big(a\,\mik^m+b\,t_{ik}^{\eta}\big)}.
+  \label{eq:robust:pfcm}
+\end{equation}
+With $b=0$ the method is FCM, with $a=0$ it is PCM. The membership term keeps the prototypes apart: every sample has to be shared, so two prototypes on the same group would each receive half of its membership mass, while the samples of the other group, which must give their membership to one of the two, pull one of them away. The typicality term keeps the outliers out of the prototype update. The ratio $b/a$ sets the balance, and the paper recommends $b>a$ for noisy data. Two details matter in practice. First, the weight $b$ also appears inside the typicality, so raising $b$ alone \emph{tightens} the zone of influence to $\gamma_i/b$ instead of reproducing PCM; it is the membership weight $a$ relative to the effective scale that decides whether the prototypes stay separated, and PFCM tolerates scales several times wider than PCM before clusters coincide (\cref{sec:robust:ex:pfcm}). Second, with tight scales the typicalities of the core samples themselves fall below one, the weight $b\,t_{ik}^\eta$ of the robust term shrinks, and the membership term, which the outliers still contaminate, regains influence; the scales should therefore not be made tighter than the clusters. The scales are set as in PCM, $\gamma_i=K\sum_k\mik^m\Dsq/\sum_k\mik^m$, from the FCM partition that also initializes the method.
+
+\begin{algobox}{Possibilistic fuzzy c-means (PFCM)}{pfcm}\index{possibilistic fuzzy c-means (PFCM)}\index{PFCM@\code{PFCM}}
+\begin{algorithm}[H]
+\KwIn{data $\X$, $c$, exponents $m$ and $\eta$, weights $a$ and $b$, scale factor $K$ (or scales $\gamma_i$), tolerance $\epsilon$}
+run FCM on $\X$ to obtain $\U$ and $\V$; scales $\gamma_i$ from $\U$ and $\V$ as in \eqref{eq:robust:eta} unless given\;
+\Repeat{$\max_{ik}\abs{\mu^{(l)}_{ik}-\mu^{(l-1)}_{ik}}<\epsilon$}{
+  typicalities $t_{ik}$ by \eqref{eq:robust:pfcm} from the current distances\;
+  prototypes $\vi$ by \eqref{eq:robust:pfcm} with weights $a\,\mik^m+b\,t_{ik}^\eta$\;
+  distances $\Dsq=\norm{\xk-\vi}^2$; memberships $\mik$ by the FCM formula \eqref{eq:part:mufcm}\;
+}
+\KwOut{prototypes $\V$, memberships $\U$ (rows sum to one), typicalities $\mathbf{T}$, scales $\gamma_i$, $\J$ \eqref{eq:robust:Jpfcm}}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Possibilistic fuzzy c-means}
+\begin{itemize}
+  \item Memberships (relative, FCM formula) and typicalities (absolute, PCM formula) side by side; both enter the prototype update, with weights $a$ and $b$.
+  \item The memberships keep the prototypes apart, the typicalities keep the outliers out; $b/a\approx2$--$5$ with scales from FCM is a sound choice, and a large $a$ keeps the prototypes separated over a wide range of scales.
+  \item $\eta$ sets the decay of the typicality as $m$ does in PCM; $b$ also tightens the effective scale $\gamma_i/b$. \py{predict_proba} returns memberships, \py{predict_typicality} typicalities.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Noise clustering}\label{sec:robust:noise}
+
+Davé \cite{dave:1991:noise} keeps the probabilistic constraint and adds a $(c+1)$-th cluster: the \emph{noise prototype} $\mathbf{v}_*$, which has no position and is defined to be at the same distance $\delta$ from every sample. The functional is the FCM functional with this extra cluster,
+\begin{equation}
+  \J=\sum_{i=1}^{c}\sum_{k=1}^{N}\mik^m\Dsq+\sum_{k=1}^{N}\mu_{*k}^m\,\delta^2,\qquad
+  \mu_{*k}=1-\sum_{i=1}^{c}\mik ,
+  \label{eq:robust:Jnc}
+\end{equation}
+and the Lagrange conditions give the FCM membership formula extended by the noise term in the denominator,
+\begin{equation}
+  \mik=\frac{1}{\sum_{j=1}^{c}\big(\Dsq/D^2_{jk}\big)^{1/(m-1)}+\big(\Dsq/\delta^2\big)^{1/(m-1)}},
+  \label{eq:robust:munc}
+\end{equation}
+while the prototypes of the real clusters are the FCM weighted means \eqref{eq:part:vfcm}. Only the membership formula changes. A sample much closer than $\delta$ to some prototype hardly notices the extra term; a sample farther than $\delta$ from all of them has $\Dsq/\delta^2>1$ for every $i$, so its real memberships shrink and the remainder $\mu_{*k}$ goes to the noise cluster (\cref{fig:robust:noise}). The real clusters still compete for every sample through the constraint, so the coincident clusters of PCM do not occur, and the memberships of the real clusters \emph{close} around the groups instead of tiling the whole plane. The only parameter is $\delta$, which acts as a radius beyond which a sample is more noise than member. Davé tied it to the scale of the data through the mean squared distance of all samples to all current prototypes,
+\begin{equation}
+  \delta^2=\lambda\,\frac{1}{Nc}\sum_{i=1}^{c}\sum_{k=1}^{N}\Dsq ,
+  \label{eq:robust:delta}
+\end{equation}
+with a user-chosen multiplier $\lambda$. Since that mean is dominated by the distances \emph{between} the groups, $\lambda$ has to be well below one to catch outliers near a group, while a very small $\lambda$ starts to declare the tails of the groups noise; $\lambda\approx0.1$--$0.5$ is the range worth scanning, and a fixed $\delta$ can be given when the noise radius is known. When $\delta$ is not given, \code{fuzzyclust} re-estimates it from the current prototypes at every iteration, so the functional changes slightly between iterations and $\J$ need not decrease monotonically. Davé and Krishnapuram \cite{dave:1997:robust} later unified the two approaches: PCM is noise clustering with one noise cluster \emph{per} real cluster and $\delta_i^2=\eta_i$, and both are instances of the robust M-estimators of statistics \cite{huber:1981:robust}, in which the typicality weight $t_{ik}^m$ and the noise-reduced membership act as redescending weight functions that give far samples a vanishing influence.
+
+\begin{algobox}{Noise clustering (NC)}{nc}\index{noise clustering}\index{noise prototype}\index{NoiseClustering@\code{NoiseClustering}}
+\begin{algorithm}[H]
+\KwIn{data $\X$, $c$ real clusters, exponent $m$, multiplier $\lambda$ (or a fixed $\delta$), tolerance $\epsilon$}
+initial partition as in FCM; provisional $\delta$ by \eqref{eq:robust:delta}\;
+\Repeat{$\max_{ik}\abs{\mu^{(l)}_{ik}-\mu^{(l-1)}_{ik}}<\epsilon$}{
+  prototypes $\vi$ of the real clusters by \eqref{eq:part:vfcm}\;
+  \lIf{$\delta$ is not fixed}{$\delta$ by \eqref{eq:robust:delta} from the current distances}
+  memberships $\mik$ by \eqref{eq:robust:munc}; noise membership $\mu_{*k}=1-\sum_i\mik$\;
+}
+labels: $\argmax_i\mik$, or ``noise'' where $\mu_{*k}$ exceeds every $\mik$\;
+\KwOut{prototypes $\V$, memberships $\U$ of the real clusters (rows sum to $1-\mu_{*k}$), noise memberships $\mu_{*k}$, $\delta$, $\J$ \eqref{eq:robust:Jnc}}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Noise clustering}
+\begin{itemize}
+  \item FCM with one extra, position-less prototype at distance $\delta$ from every sample; only the membership formula \eqref{eq:robust:munc} changes.
+  \item Samples farther than $\delta$ from all real prototypes migrate to the noise cluster, the real memberships close around the groups, and the prototypes are protected; the clusters keep competing, so they do not coincide.
+  \item $\delta^2=\lambda\overline{D^2}$ with $\lambda\approx0.1$--$0.5$, or a fixed $\delta$; the noise membership $\mu_{*k}$ is an outlier score, and noise-dominated samples are labeled $-1$. PCM is NC with one noise cluster per real cluster.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Kernel fuzzy c-means}\label{sec:robust:kernel}
+
+A Mercer kernel $K(\mathbf{x},\mathbf{y})=\langle\Phi(\mathbf{x}),\Phi(\mathbf{y})\rangle$ is an inner product in a feature space $\mathcal{H}$ reached by a map $\Phi$ that is never computed \cite{scholkopf:2002:kernels}; the Gaussian kernel $K(\mathbf{x},\mathbf{y})=\exp(-\gamma\norm{\mathbf{x}-\mathbf{y}}^2)$ is the usual choice. Kernel fuzzy c-means runs FCM in $\mathcal{H}$: the functional and the membership formula are those of FCM, and the distance is the feature-space distance $\norm{\Phi(\xk)-\mathbf{w}_i}^2$ to a prototype $\mathbf{w}_i\in\mathcal{H}$. Spheres in $\mathcal{H}$ are curved regions in the input space, which is how a ring or a moon can become one cluster. Following the comparative study of Graves and Pedrycz \cite{graves:2010:kernel}, we distinguish two variants by where the prototype lives.
+
+\paragraph{Prototypes in the feature space.} The prototype is the weighted mean of the mapped samples, $\mathbf{w}_i=\sum_k \omega_{ik}\Phi(\xk)$ with $\omega_{ik}=\mik^m/\sum_l\mu_{il}^m$---the minimizer of $\sum_k\mik^m\norm{\Phi(\xk)-\mathbf{w}_i}^2$ over $\mathcal{H}$. Expanding the squared distance and replacing every inner product by a kernel value gives
+\begin{equation}
+  \Dsq=K(\xk,\xk)-2\sum_{l=1}^{N}\omega_{il}K(\xk,\mathbf{x}_l)+\sum_{l,l'=1}^{N}\omega_{il}\omega_{il'}K(\mathbf{x}_l,\mathbf{x}_{l'}),
+  \label{eq:robust:dkernel}
+\end{equation}
+the fuzzy counterpart of kernel k-means \cite{girolami:2002:kernel}. The prototype never appears explicitly: it is represented by its weights $\omega_{il}$ over the training samples, the $N\times N$ kernel matrix is computed once, and \eqref{eq:robust:dkernel} with a new sample $\mathbf{x}$ in place of $\xk$ gives its distances and memberships. Any Mercer (positive semidefinite) kernel can be used; the price is $\mathcal{O}(N^2)$ memory and prototypes that have no exact pre-image in the input space (\code{fuzzyclust} reports the weighted means $\sum_l \omega_{il}\mathbf{x}_l$ for plotting only). The code also accepts the sigmoid kernel $\tanh(\gamma\,\mathbf{x}\T\mathbf{y}+c_0)$, which is not positive semidefinite in general: \eqref{eq:robust:dkernel} can then turn negative, the toolbox clips it at zero, and the result is no longer a distance in any feature space.
+
+\paragraph{Prototypes in the input space.} Zhang and Chen \cite{zhang:2004:kfcm} keep $\vi$ in the input space and use the distance between the mapped sample and the \emph{mapped prototype}, which for the Gaussian kernel is
+\begin{equation}
+  \Dsq=\norm{\Phi(\xk)-\Phi(\vi)}^2=2\big(1-K(\xk,\vi)\big),\qquad
+  \vi=\frac{\sum_k\mik^m K(\xk,\vi)\,\xk}{\sum_k\mik^m K(\xk,\vi)},
+  \label{eq:robust:kfcmf}
+\end{equation}
+where the prototype update, obtained by setting the gradient to zero, is a fixed-point iteration in which every sample is additionally weighted by its kernel similarity to the current prototype. The distance saturates at $2$ for far samples, so outliers lose their influence: this variant is a \emph{robust} FCM. The distance is, however, a monotone function of $\norm{\xk-\vi}$, so its hard partition boundaries are the same bisecting hyperplanes as those of FCM, and it cannot find rings.
+
+For both variants the decisive parameter is $\gamma$, which sets the width of the kernel (a large $\gamma$ means a narrow kernel). As $\gamma\to0$ the Gaussian kernel becomes linear in the squared distance and kernel FCM collapses to FCM; as $\gamma\to\infty$ all mapped samples become mutually orthogonal, every sample is equally far from every prototype, and the partition is arbitrary. The usable window, where $1/\sqrt{\gamma}$ is about the gap between the structures to be separated, spans less than a decade, and inside it the exponent $m$ must be close to one, because in the nearly orthogonal feature space a fuzzy exponent spreads the memberships out and makes every prototype the mean of all samples. Graves and Pedrycz found over many data sets that kernel FCM is not uniformly better than FCM and that the kernel parameter is hard to set, and the examples of \cref{sec:robust:ex:kernel} agree. Kernel FCM separates rings that no point prototype can, but for data on clear manifolds the geodesic methods of \cref{ch:graph} are the more forgiving tool.
+
+\begin{algobox}{Kernel fuzzy c-means (feature-space prototypes)}{kfcm}\index{kernel fuzzy c-means}\index{kernel trick}\index{KernelFCM@\code{KernelFCM}}
+\begin{algorithm}[H]
+\KwIn{data $\X$, $c$, exponent $m$ (close to one), kernel and its parameters ($\gamma$), tolerance $\epsilon$, restarts}
+kernel matrix $\mathbf{K}=[K(\xk,\mathbf{x}_l)]$ once; initial partition as in FCM (Euclidean)\;
+\Repeat{$\max_{ik}\abs{\mu^{(l)}_{ik}-\mu^{(l-1)}_{ik}}<\epsilon$}{
+  weights $\omega_{ik}=\mik^m/\sum_l\mu_{il}^m$ (the implicit prototypes $\mathbf{w}_i=\sum_k \omega_{ik}\Phi(\xk)$)\;
+  distances $\Dsq$ by \eqref{eq:robust:dkernel} from $\mathbf{K}$ and the weights\;
+  memberships $\mik$ by the FCM formula \eqref{eq:part:mufcm}\;
+}
+keep the restart with the smallest $\J=\sum_i\sum_k\mik^m\Dsq$\;
+\KwOut{weights $\omega_{ik}$ (prototypes), memberships $\U$, approximate pre-images $\sum_k \omega_{ik}\xk$; new samples $\mathbf{x}$ by \eqref{eq:robust:dkernel} with $\mathbf{x}$ in place of $\xk$. Input-space variant: replace the distance and the update by \eqref{eq:robust:kfcmf}}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Kernel fuzzy c-means}
+\begin{itemize}
+  \item FCM in the feature space of a kernel: same functional and membership formula, the distance is evaluated through kernel values only.
+  \item Feature-space prototypes (weights over the samples) find rings and moons, at $\mathcal{O}(N^2)$ memory; input-space prototypes with the Gaussian kernel give a robust FCM whose cells are still convex.
+  \item $1/\sqrt{\gamma}$ must match the gap between the structures, and the usable window is narrow; use a nearly crisp $m$, several restarts, and a scan over $\gamma$.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Fuzzy c-varieties and c-elliptotypes}\label{sec:robust:fcv}
+
+Bezdek, Coray, Gunderson, and Watson \cite{bezdek:1981:fcv1,bezdek:1981:fcv2} replace the point prototype by an $r$-dimensional \emph{linear variety} (affine subspace)
+\begin{equation}
+  V_i=\Big\{\vi+\sum_{j=1}^{r}\tau_j\mathbf{s}_{ij}\;:\;\tau\in\R^r\Big\},\qquad \mathbf{s}_{ij}\T\mathbf{s}_{il}=\delta_{jl},
+\end{equation}
+which is a point for $r=0$ (FCM), a line for $r=1$ (\emph{fuzzy c-lines}, FCL), and a hyperplane for $r=n-1$. The squared distance of a sample to the cluster is its squared orthogonal distance to the variety, that is, the squared distance to the center minus the squared projections onto the directions,
+\begin{equation}
+  \Dsq=\norm{\xk-\vi}^2-\sum_{j=1}^{r}\big((\xk-\vi)\T\mathbf{s}_{ij}\big)^2 ,
+  \label{eq:robust:dfcv}
+\end{equation}
+and the functional is the c-means functional with this distance. Fixing the prototypes gives the FCM membership formula; fixing the memberships, the center is again the fuzzy mean \eqref{eq:part:vfcm}, and the directions that minimize $\J$ are the $r$ unit eigenvectors belonging to the largest eigenvalues of the fuzzy scatter matrix of the cluster,
+\begin{equation}
+  \mathbf{S}_i=\sum_{k=1}^{N}\mik^m(\xk-\vi)(\xk-\vi)\T ,
+  \label{eq:robust:scatter}
+\end{equation}
+because $\sum_k\mik^m\Dsq=\tr\mathbf{S}_i-\sum_j\mathbf{s}_{ij}\T\mathbf{S}_i\mathbf{s}_{ij}$ is minimized by directing the $\mathbf{s}_{ij}$ along the largest spread. The prototype step is a membership-weighted principal component analysis per cluster; the retained eigenvalues measure the spread \emph{along} the variety, the discarded ones the scatter \emph{around} it, and their ratio tells how line-like the cluster is. The ellipsoids of Gustafson--Kessel (\cref{sec:part:gk}) stretch along a line but still measure the position along it; a line prototype measures only the distance from the line, so it separates lines that cross at a point, which GK and FCM have to cut into pieces (\cref{fig:robust:ex:fcv}).
+
+The price of a prototype without extent is that collinear groups merge into one cluster: two segments on the same line, however far apart, lie at zero distance from the same line prototype. Bezdek et al.\ \cite{bezdek:1981:fcv2} therefore consider convex combinations $\sum_r\alpha_r\J_r$ of the FCV functionals of different dimension, whose prototypes are ``elliptotypes'' between a point and a line. The two-term combination of $r=0$ and $r=1$ is the \emph{fuzzy c-elliptotypes} algorithm (FCE): for the same center and direction its distance is the convex combination of the point and the line distance,
+\begin{equation}
+  D^2_{ik,\mathrm{FCE}}=\alpha\norm{\xk-\vi}^2+(1-\alpha)\,D^2_{ik,\mathrm{FCL}},\qquad \alpha\in[0,1],
+  \label{eq:robust:fce}
+\end{equation}
+so that the position along the line counts with weight $\alpha$ and collinear groups separate; $\alpha=1$ is FCM. The weight should be as small as the data allow. In the example of \cref{sec:robust:ex:fcv}, $\alpha=0.05$ already separates two collinear segments, whereas three crossing lines lose accuracy at $\alpha=0.1$ and are no longer found from $\alpha=0.2$ on, because near a crossing the position along a line must not count. Lines through a common point are hard for a random start, since a single run often puts two prototypes on one line, so restarts are advisable.
+
+\begin{algobox}{Fuzzy c-varieties (FCV) and c-elliptotypes}{fcv}\index{fuzzy c-varieties (FCV)}\index{fuzzy c-lines}\index{fuzzy c-elliptotypes}\index{FuzzyCVarieties@\code{FuzzyCVarieties}}
+\begin{algorithm}[H]
+\KwIn{data $\X$, $c$, exponent $m$, variety dimension $r<n$, elliptotype weight $\alpha$ ($0$ for pure FCV), tolerance $\epsilon$, restarts}
+initial partition as in FCM\;
+\Repeat{$\max_{ik}\abs{\mu^{(l)}_{ik}-\mu^{(l-1)}_{ik}}<\epsilon$}{
+  centers $\vi$ by the fuzzy mean \eqref{eq:part:vfcm}\;
+  scatter matrices $\mathbf{S}_i$ \eqref{eq:robust:scatter}; directions $\mathbf{s}_{i1},\dots,\mathbf{s}_{ir}$ = eigenvectors of the $r$ largest eigenvalues\;
+  distances by \eqref{eq:robust:dfcv}, mixed with the point distance by \eqref{eq:robust:fce} if $\alpha>0$\;
+  memberships $\mik$ by the FCM formula \eqref{eq:part:mufcm}\;
+}
+\KwOut{centers $\V$, directions $\mathbf{s}_{ij}$, eigenvalues (spread along / around), memberships $\U$, $\J$}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Fuzzy c-varieties}
+\begin{itemize}
+  \item Prototype = $r$-dimensional linear variety (line, plane) through the fuzzy mean, spanned by the leading eigenvectors of the fuzzy scatter matrix; distance = squared orthogonal distance to it; membership formula unchanged.
+  \item Groups samples by the subspace they lie on, not by position: separates crossing lines that FCM and GK cut into pieces; the discarded eigenvalues measure the scatter around the variety.
+  \item Merges collinear groups---a small elliptotype weight $\alpha$ of the point distance ($0.05$ in the example) is the remedy, but $\alpha\ge0.1$ already spoils crossing lines; use restarts for lines through a common point.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Fuzzy c-shells and c-spherical shells}\label{sec:robust:shells}
+
+A ring has no samples in its interior, so the point prototype at its center is far from every member, and two concentric rings have the \emph{same} center: no point prototype can tell them apart. Shell clustering describes cluster $i$ by a center $\vi$ \emph{and} a radius $r_i$ and measures the distance of a sample as its deviation from the sphere. The two published algorithms implemented here differ in this distance. Davé's fuzzy c-shells algorithm (FCS) \cite{dave:1990:shells} uses the squared \emph{radial} (geometric) deviation, and the fuzzy c-spherical shells algorithm (FCSS) of Krishnapuram, Nasraoui, and Frigui \cite{krishnapuram:1992:fcss} the squared \emph{algebraic} distance,
+\begin{equation}
+  D^2_{ik,\mathrm{FCS}}=\big(\norm{\xk-\vi}-r_i\big)^2,\qquad
+  D^2_{ik,\mathrm{FCSS}}=\big(\norm{\xk-\vi}^2-r_i^2\big)^2 ,
+  \label{eq:robust:dshell}
+\end{equation}
+both used in the c-means functional with the FCM membership formula. The two algorithms differ in the prototype update. For FCS the necessary conditions,
+\begin{equation}
+  r_i=\frac{\sum_k\mik^m\norm{\xk-\vi}}{\sum_k\mik^m},\qquad
+  \sum_k\mik^m\Big(1-\frac{r_i}{\norm{\xk-\vi}}\Big)(\xk-\vi)=\mathbf{0},
+  \label{eq:robust:fcs}
+\end{equation}
+are coupled and nonlinear in $\vi$, and Davé solved them by Newton's method in every iteration. FCSS avoids this inner iteration: the algebraic distance is $\norm{\xk}^2+\mathbf{p}_i\T\mathbf{y}_k$ with the reparametrized prototype $\mathbf{p}_i=[-2\vi\T,\;\vi\T\vi-r_i^2]\T$ and the regressors $\mathbf{y}_k=[\xk\T,\,1]\T$, i.e.\ \emph{linear} in $\mathbf{p}_i$, so the weighted least-squares minimizer is in closed form,
+\begin{equation}
+  \begin{aligned}
+  \mathbf{p}_i&=-\Big(\sum_k\mik^m\mathbf{y}_k\mathbf{y}_k\T\Big)^{-1}\sum_k\mik^m\norm{\xk}^2\mathbf{y}_k ,\\
+  \vi&=-\tfrac12\mathbf{p}_{i,1:n},\qquad r_i^2=\vi\T\vi-p_{i,n+1},
+  \end{aligned}
+  \label{eq:robust:fcss}
+\end{equation}
+one $(n+1)\times(n+1)$ solve per cluster and iteration. Near the shell the two distances are related by $\norm{\mathbf{x}}^2-r^2=(\norm{\mathbf{x}}-r)(\norm{\mathbf{x}}+r)\approx2r(\norm{\mathbf{x}}-r)$: the algebraic distance is about $2r_i$ times the radial deviation, so the same radial deviation counts more on a large shell than on a small one, and FCSS memberships favor small shells. The bias shows when nested shells of similar radius have to be separated or when only arcs are observed; FCS does not have it. \code{fuzzyclust} implements both: \py{algorithm="fcss"} is the default, and \py{algorithm="fcs"} refines the closed-form fit in every iteration by \py{newton_steps} Gauss--Newton steps on the radial residuals, a numerically convenient form of Davé's Newton solution. The initialization deserves attention. Shell clustering has a notorious local minimum---one big circle through everything, with the other shells fitting noise---and a random start rarely escapes it when the shells intersect; the hardened partition of an FCM run is then a good start, because the FCM groups lie on different shells. For \emph{concentric} shells FCM halves every ring and both shells converge to the mean radius; here the further restarts of \py{n_init}, which start from random point prototypes and are selected by $\J$, find the rings.
+
+\begin{algobox}{Fuzzy c-(spherical) shells (FCSS / FCS)}{shells}\index{fuzzy c-shells (FCS)}\index{fuzzy c-spherical shells (FCSS)}\index{FuzzyCShells@\code{FuzzyCShells}}
+\begin{algorithm}[H]
+\KwIn{data $\X$, $c$ shells, exponent $m$, algorithm (FCSS or FCS with Newton steps), tolerance $\epsilon$, restarts}
+initial partition: hardened FCM partition (first start) or random point prototypes\;
+\Repeat{$\max_{ik}\abs{\mu^{(l)}_{ik}-\mu^{(l-1)}_{ik}}<\epsilon$}{
+  \For{every shell $i$}{
+    closed-form fit $(\vi,r_i)$ by \eqref{eq:robust:fcss} with weights $\mik^m$\;
+    \lIf{FCS}{refine $(\vi,r_i)$ by Gauss--Newton steps on the residuals $\norm{\xk-\vi}-r_i$}
+  }
+  distances by \eqref{eq:robust:dshell} (algebraic for FCSS, radial for FCS); memberships by the FCM formula\;
+}
+keep the restart with the smallest $\J$\;
+\KwOut{centers $\V$, radii $r_i$, memberships $\U$, $\J$; signed radial deviations $\norm{\xk-\vi}-r_i$}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Fuzzy c-shells}
+\begin{itemize}
+  \item Prototype = center and radius; distance = deviation from the sphere (radial in FCS, algebraic in FCSS); the membership formula is that of FCM.
+  \item FCSS has a closed-form least-squares update and is the default; FCS needs Newton steps but is unbiased with respect to the shell size (FCSS favors small shells).
+  \item Start from the hardened FCM partition for separate or intersecting shells and use restarts for concentric shells; the results are the radii and the signed radial residuals.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Volume prototypes and adaptive cluster merging}\label{sec:robust:volume}\index{volume prototype}
+
+A point prototype measures how far a sample is from the \emph{center} of a cluster. A sample in the outer part of a large cluster can therefore be closer to the prototype of a small neighboring cluster than to its own, and the membership formula hands it to the neighbor: FCM and GK equalize the clusters, splitting a large diffuse group and letting small groups absorb its pieces (\cref{sec:part:ex:gg}). Gath--Geva solves the problem with densities and priors at the price of a sensitive iteration. Kaymak and Setnes \cite{kaymak:2002:volume} keep the stable FCM iteration and change the prototype: a \emph{volume prototype} is a hypersphere (or, in the adaptive norm of GK, a hyperellipsoid) of radius $r_i$ around $\vi$, and only the distance to its surface counts,
+\begin{equation}
+  \tilde D_{ik}=\max\bigl(0,\;D_{ik\Ai}-r_i\bigr),\qquad D^2_{ik\Ai}=(\xk-\vi)\T\Ai(\xk-\vi),
+  \label{eq:robust:volume}
+\end{equation}
+with $\Ai=\mathbf{I}$ or the GK norm \eqref{eq:part:Agk}. The functional is the c-means functional with $\tilde D^2_{ik}$; the memberships follow the FCM formula \eqref{eq:part:mufcm} with $\tilde D_{ik}$ in place of $D_{ik}$, so a sample inside exactly one core belongs fully to that cluster; and the centers are the $\mik^m$-weighted means. The radius adapts to the cluster. Kaymak and Setnes derive it from the fuzzy covariance matrix as $(\det\Fi)^{1/(2n)}$, the geometric mean of the standard deviations along the principal axes, so that a sphere of that radius has the volume of the cluster, and they multiply it by a factor that grows as the clusters merge. The toolbox uses a simpler estimate, recomputed at every iteration: the membership-weighted mean distance of the data from the center,
+\begin{equation}
+  r_i=\kappa\,\frac{\sum_{k}\mik^m D_{ik\Ai}}{\sum_{k}\mik^m},
+  \label{eq:robust:radius}
+\end{equation}
+with a fixed scale factor $\kappa$ (default one); $\kappa=0$ recovers FCM or GK. A large cluster thus has a large core, its outer members are near the surface of that core, and they stay with it. Cores that grow too large are the failure mode of the method: a core that reaches across a neighboring group swallows it, so $\kappa$ should not be raised above one (\cref{sec:robust:ex:volume}).
+
+\paragraph{Adaptive cluster merging.}\index{adaptive cluster merging} Kaymak and Setnes combine the volume prototypes with merging during the iteration. The algorithm starts with a deliberately large number of clusters. They measure the similarity of two clusters by the fuzzy inclusion measure $I_{ij}=\sum_k\min(\mik,\mu_{jk})/\sum_k\mik$, symmetrized as $S_{ij}=\max(I_{ij},I_{ji})$, and in every iteration in which the largest similarity has changed by less than a tolerance they merge the most similar pair, provided that its similarity exceeds the threshold $1/(c-1)$, which rises as the number $c$ of clusters falls; the iteration continues with one cluster fewer. The toolbox uses a variant that is the similarity criterion of compatible cluster merging (\cref{sec:val:scan}) built into the iteration: it merges only when the partition has converged for the current number of clusters, it measures the similarity by the ratio of fuzzy intersection and union, $S_{ij}=\sum_k\min(\mik,\mu_{jk})/\sum_k\max(\mik,\mu_{jk})$ \eqref{eq:val:similarity}, and its threshold is fixed. Inside the cores the memberships are nearly crisp, which would hide the overlap of two clusters that share a group, so the toolbox evaluates the similarity on the memberships that the center distances alone would give, rescaled to $m=2$; two clusters on one group then have $S_{ij}\approx0.25$--$0.35$, and the default threshold is $0.2$.
+
+\begin{algobox}{Fuzzy clustering with volume prototypes and adaptive merging (toolbox form)}{volume}\index{volume prototype}\index{adaptive cluster merging}\index{VolumePrototypeFCM@\code{VolumePrototypeFCM}}
+\begin{algorithm}[H]
+\KwIn{data $\X$, initial (maximal) number of clusters $c$, exponent $m>1$, norm (Euclidean or adaptive), radius scale $\kappa$, merging on/off with threshold $\gamma_S$, tolerance $\epsilon$}
+initialize $\U$\;
+\Repeat{converged and (merging off or no pair with $S_{ij}\ge\gamma_S$)}{
+  \Repeat{$\max_{ik}\abs{\Delta\mik}<\epsilon$ (or the iteration budget of this $c$ is spent)}{
+    centers $\vi=\sum_k\mik^m\xk/\sum_k\mik^m$; covariances $\Fi$ and norms $\Ai$ (identity or GK)\;
+    radii $r_i$ by \eqref{eq:robust:radius}; core distances $\tilde D_{ik}$ by \eqref{eq:robust:volume}\;
+    memberships by the FCM formula with $\tilde D_{ik}$\;
+  }
+  \If{merging}{
+    $S_{ij}$ of \eqref{eq:val:similarity} from the center distances, rescaled to $m=2$\;
+    \lIf{$\max_{i\ne j}S_{ij}\ge\gamma_S$}{add the two membership columns, $c\leftarrow c-1$}
+  }
+}
+\KwOut{$\V$, radii $r_i$, $\U$, final number of clusters, merge history}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Volume prototypes and adaptive merging}
+\begin{itemize}
+  \item A prototype is a core of radius $r_i$ with zero distance inside; only the distance to the core surface counts, which removes the size-equalizing bias of point prototypes.
+  \item Spherical (Euclidean) or ellipsoidal (GK norm) cores; the radius is re-estimated from the cluster, $\kappa=0$ is FCM/GK; keep $\kappa\le1$.
+  \item Adaptive merging starts with too many clusters and merges similar pairs during the iteration; the final number is insensitive to the starting number.
+  \item Stays within the stable FCM iteration; a lighter alternative to Gath--Geva for clusters of different size.
+  \item Parameters: \code{n\_clusters}, \code{m}, \code{norm}, \code{radius}, \code{radius\_scale}, \code{merge}, \code{similarity\_threshold}, \code{gamma}, \code{beta}; attributes \code{radii\_}, \code{n\_clusters\_}, \code{merge\_history\_}.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Learning which features matter}\label{sec:robust:weights}\index{feature weighting}
+
+The Euclidean distance of FCM gives every feature the same weight. After standardization, a feature of pure noise contributes as much to $\Dsq$ as a feature that separates the clusters, and enough such features drown the structure. Clusters that are defined by different features, one tight along $x_1$ and another along $x_2$, cannot be described by one shared norm at all. The two methods of this section learn feature weights together with the partition. Both use the per-feature squared distances $d^2_{ikj}=(x_{kj}-v_{ij})^2$ and the membership-weighted scatter of a cluster along a feature,
+\begin{equation}
+  s_{ij}=\sum_{k=1}^{N}\mik^m d^2_{ikj},
+  \label{eq:robust:featscatter}
+\end{equation}
+and both reward a feature along which the members of the clusters scatter little.
+
+\paragraph{Weighted fuzzy c-means.}\index{feature-weighted fuzzy c-means} The simpler of the two gives all clusters a common weight vector $\boldsymbol\alpha$, $\sum_j\alpha_j=1$, raised to an exponent $t>1$,
+\begin{equation}
+  \J=\sum_{i=1}^{c}\sum_{k=1}^{N}\mik^m\sum_{j=1}^{n}\alpha_j^t\,d^2_{ikj},\qquad
+  \alpha_j=\frac{1}{\sum_{l=1}^{n}\bigl(s_j/s_l\bigr)^{1/(t-1)}},\quad s_j=\sum_{i=1}^{c}s_{ij}.
+  \label{eq:robust:wfcm}
+\end{equation}
+This is the fuzzy form of the automated variable weighting that Huang, Ng, Rong, and Li \cite{huang:2005:wkmeans} proposed for k-means; Keller and Klawonn \cite{keller:2000:weighting} had introduced the same kind of functional with one weight for each variable \emph{and each cluster}, which is the form of SCAD-2 below. The weight update has the form of the FCM membership formula with the total scatter of a feature in place of the distance to a prototype. The weights define the diagonal of a learned norm-inducing matrix $\A=\diag(\alpha_j^t)$, which places the method between FCM with the fixed diagonal norm and GK with its full, cluster-specific norm. As $m$ does for the memberships, the exponent $t$ controls how sharply the weight concentrates: $t\to1$ puts all weight on the feature of smallest scatter, and $t\to\infty$ gives uniform weights.
+
+\paragraph{SCAD.}\index{simultaneous clustering and attribute discrimination (SCAD)} Frigui and Nasraoui's \emph{simultaneous clustering and attribute discrimination} \cite{frigui:2004:scad} gives every cluster its own weights $w_{ij}$, $\sum_jw_{ij}=1$, as Keller and Klawonn did, so that different clusters can live in different subspaces. \emph{SCAD-1} uses the weights linearly and prevents the trivial solution---all weight on the single feature of smallest scatter---by a quadratic term with a cluster-specific coefficient $\delta_i$,
+\begin{align}
+  \J_1&=\sum_{i=1}^{c}\sum_{k=1}^{N}\mik^m\sum_{j=1}^{n}w_{ij}d^2_{ikj}+\sum_{i=1}^{c}\delta_i\sum_{j=1}^{n}w_{ij}^2,\notag\\
+  w_{ij}&=\frac1n+\frac{1}{2\delta_i}\Bigl(\frac1n\sum_{l=1}^{n}s_{il}-s_{ij}\Bigr),\qquad
+  \delta_i=K\,\frac{\sum_k\mik^m\sum_jw_{ij}d^2_{ikj}}{\sum_jw_{ij}^2},
+  \label{eq:robust:scad1}
+\end{align}
+where the weight of a feature rises above $1/n$ when the cluster scatters less along it than on average. Negative weights are set to zero and the row is renormalized, and $\delta_i$ is re-estimated from the current partition so that the two terms of the functional stay balanced ($K$ is a scale factor, default one). \emph{SCAD-2} raises the weights to an exponent $q>1$ instead and needs no $\delta_i$,
+\begin{equation}
+  \J_2=\sum_{i=1}^{c}\sum_{k=1}^{N}\mik^m\sum_{j=1}^{n}w_{ij}^q d^2_{ikj},\qquad
+  w_{ij}=\frac{1}{\sum_{l=1}^{n}\bigl(s_{ij}/s_{il}\bigr)^{1/(q-1)}};
+  \label{eq:robust:scad2}
+\end{equation}
+its weights are never exactly zero. In both versions the memberships follow the FCM formula with the weighted distance $\Dsq=\sum_jw_{ij}d^2_{ikj}$ (or $w_{ij}^q$), and the centers are the $\mik^m$-weighted means, since each coordinate of a center minimizes its own weighted sum of squares. The level sets of the weighted distance are axis-parallel ellipsoids, stretched along the features a cluster ignores.
+
+Two cautions apply to both methods. First, the weights reward a small within-cluster scatter, so the features must be on comparable scales: a feature of small variance attracts the weight regardless of its relevance, and even among standardized features one along which the data can be cut into $c$ thin slices may attract all of it when the exponent is close to one. Second, the weights are learned from the partition: if the noise features already dominate the first iterations, the partition carries no information and the weights stay uniform. Feature weighting raises the number of noise features that FCM tolerates; it does not replace feature selection when most features are irrelevant (\cref{sec:robust:ex:weights}).
+
+\begin{algobox}{Weighted fuzzy c-means (global feature weights)}{fwfcm}\index{feature-weighted fuzzy c-means}\index{feature weighting}\index{FeatureWeightedFCM@\code{FeatureWeightedFCM}}
+\begin{algorithm}[H]
+\KwIn{standardized data $\X$, number of clusters $c$, exponents $m>1$ and $t>1$, tolerance $\epsilon$}
+initialize $\U$; weights $\alpha_j\leftarrow1/n$\;
+\Repeat{$\max_{ik}\abs{\Delta\mik}<\epsilon$}{
+  centers $\vi=\sum_k\mik^m\xk/\sum_k\mik^m$\;
+  scatters $s_j=\sum_{i,k}\mik^m(x_{kj}-v_{ij})^2$; weights $\alpha_j$ by \eqref{eq:robust:wfcm}\;
+  distances $\Dsq=\sum_j\alpha_j^t(x_{kj}-v_{ij})^2$; memberships by the FCM formula\;
+}
+\KwOut{$\V$, $\U$, feature weights $\boldsymbol\alpha$}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Weighted fuzzy c-means}
+\begin{itemize}
+  \item One weight vector for all clusters, learned with the partition: a learned diagonal norm $\diag(\alpha_j^t)$.
+  \item Down-weights features along which the clusters scatter widely (noise features); reports a global feature relevance.
+  \item Standardize first; keep $t$ well above one ($t\approx3$), otherwise the weight concentrates on one feature.
+  \item Parameters: \code{n\_clusters}, \code{m}, \code{t}; attribute \code{feature\_weights\_}.
+\end{itemize}
+\end{summarybox}
+
+\begin{algobox}{SCAD: simultaneous clustering and attribute discrimination}{scad}\index{simultaneous clustering and attribute discrimination (SCAD)}\index{feature weighting!cluster-specific}\index{SCAD@\code{SCAD}}
+\begin{algorithm}[H]
+\KwIn{standardized data $\X$, number of clusters $c$, exponent $m>1$; SCAD-1 with scale $K$ (or fixed $\delta_i$), or SCAD-2 with exponent $q>1$; tolerance $\epsilon$}
+initialize $\U$; weights $w_{ij}\leftarrow1/n$\;
+\Repeat{$\max_{ik}\abs{\Delta\mik}<\epsilon$}{
+  centers $\vi=\sum_k\mik^m\xk/\sum_k\mik^m$; scatters $s_{ij}$ by \eqref{eq:robust:featscatter}\;
+  \eIf{SCAD-1}{
+    $\delta_i$ from the current partition; $w_{ij}$ by \eqref{eq:robust:scad1}; clip at zero and renormalize every row\;
+  }{
+    $w_{ij}$ by \eqref{eq:robust:scad2}\;
+  }
+  distances $\Dsq=\sum_jw_{ij}d^2_{ikj}$ (SCAD-2: $w_{ij}^q$); memberships by the FCM formula\;
+}
+\KwOut{$\V$, $\U$, weights $w_{ij}$ of every cluster}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{SCAD}
+\begin{itemize}
+  \item A weight vector per cluster: clusters may be defined by different features (subspace clusters), and an irrelevant feature is down-weighted in every cluster.
+  \item SCAD-1: linear weights with a balancing quadratic term, may give exact zeros; SCAD-2: weights with an exponent $q$, never zero, sharper for $q$ near one.
+  \item Same cost as FCM plus $\mathcal{O}(Ncn)$ for the scatters; standardize first.
+  \item Parameters: \code{n\_clusters}, \code{m}, \code{variant}, \code{q}, \code{delta}, \code{delta\_scale}; attributes \code{feature\_weights\_} $(c,n)$, \code{delta\_}.
+\end{itemize}
+\end{summarybox}
+
+\section{Using it in fuzzyclust}\label{sec:robust:api}
+
+The nine estimators of this chapter live in \code{fuzzyclust.extensions}. They derive from \code{BaseFuzzyClusterer} and share the common interface: \code{fit}, \code{predict}, \code{predict\_proba}, \code{transform}, \code{score}, the \code{n\_init} restarts, and pandas input. What \code{predict\_proba} returns depends on the method and is stated in every docstring: memberships that sum to one (kernel FCM, FCV, shells, volume prototypes, the feature-weighted methods, and PFCM), typicalities that do not (PCM), or real memberships whose rows sum to $1-\mu_{*k}$ (noise clustering).
+
+\begin{apibox}{fuzzyclust.extensions.PCM}
+\code{n\_clusters=3}, \code{m=2.0}, \code{eta=None}, \code{eta\_scale=1.0}, \code{tol}, \code{max\_iter}, \code{init="fcm"|\allowbreak "random"|\allowbreak "kmeans++"|\allowbreak array}, \code{n\_init=1}, \code{random\_state}, \code{verbose}.\\
+Attributes \code{cluster\_centers\_}, \code{typicality\_} (= \code{membership\_}, rows not normalized), \code{labels\_}, \code{eta\_}. \code{predict\_proba} and \code{predict\_typicality} return typicalities. Use $m\approx1.5$; \code{eta\_scale} is the factor $K$ of \eqref{eq:robust:eta}. An \code{init} array holds either initial FCM prototypes $(c,n)$ or an initial partition $(N,c)$, such as the \code{membership\_} of a fitted FCM or GK model.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.extensions.PFCM}
+\code{n\_clusters=3}, \code{m=2.0}, \code{eta=2.0}, \code{a=1.0}, \code{b=1.0}, \code{gamma=None}, \code{gamma\_scale=1.0}, \code{tol}, \code{max\_iter}, \code{init="fcm"}, \code{n\_init=1}, \code{random\_state}, \code{verbose}.\\
+Attributes \code{membership\_} (rows sum to one), \code{typicality\_}, \code{gamma\_}, \code{labels\textunderscore}. \code{predict\_proba} gives memberships, \code{predict\_typicality} typicalities. $b=0$ is FCM, $a=0$ is PCM.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.extensions.NoiseClustering}
+\code{n\_clusters=3}, \code{m=2.0}, \code{delta=None}, \code{delta\_scale=0.5}, \code{tol}, \code{max\_iter}, \code{init}, \code{n\_init=1}, \code{random\_state}, \code{verbose}.\\
+Attributes \code{membership\_} (real clusters, rows sum to $1-\mu_{*k}$), \code{noise\_membership\_}, \code{delta\_}, \code{labels\_} ($-1$ for noise-dominated samples). \code{delta\_scale} is $\lambda$ of \eqref{eq:robust:delta}; \code{predict\_noise\_membership(X)} for new data.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.extensions.KernelFCM}
+\code{n\_clusters=3}, \code{m=2.0}, \code{kernel="rbf"|\allowbreak "poly"|\allowbreak "linear"|\allowbreak "sigmoid"|\allowbreak "cosine"|\allowbreak "laplacian"}, \code{gamma=None}, \code{degree=3}, \code{coef0=1.0}, \code{prototypes="feature"|\allowbreak "input"}, \code{tol}, \code{max\_iter}, \code{init}, \code{n\_init=1}, \code{random\_state}, \code{verbose}.\\
+Kernels through \code{sklearn.metrics.pairwise}; \code{gamma=None} uses $1/(n\,\mathrm{Var}(\X))$. \code{prototypes="input"} is the Zhang--Chen variant (Gaussian kernel only). Attributes \code{membership\_}, \code{cluster\_centers\_} (approximate pre-images for \code{"feature"}), \code{gamma\_}; \code{predict\_proba} uses the kernelized distance \eqref{eq:robust:dkernel}.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.extensions.FuzzyCVarieties}
+\code{n\_clusters=3}, \code{m=2.0}, \code{n\_dims=1}, \code{alpha=0.0}, \code{tol}, \code{max\_iter}, \code{init}, \code{n\_init=1}, \code{random\_state}, \code{verbose}.\\
+Attributes \code{cluster\_centers\_}, \code{directions\_} ($c\times r\times n$), \code{scatter\_matrices\_}, \code{covariances\_}, \code{eigenvalues\_} (descending), \code{membership\_}. \code{n\_dims=0} is FCM, \code{alpha} the elliptotype weight of \eqref{eq:robust:fce}.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.extensions.FuzzyCShells}
+\code{n\_clusters=3}, \code{m=2.0}, \code{algorithm="fcss"|\allowbreak "fcs"}, \code{newton\_steps=2}, \code{tol}, \code{max\_iter}, \code{init="fcm"|\allowbreak "random"|\allowbreak "kmeans++"|\allowbreak array}, \code{n\_init=1}, \code{random\_state}, \code{verbose}.\\
+Attributes \code{cluster\_centers\_}, \code{radii\_}, \code{membership\_}; \code{distances\_} and \code{transform} are $|\,\norm{\xk-\vi}^2-r_i^2|$ for FCSS and $|\,\norm{\xk-\vi}-r_i|$ for FCS; \code{radial\_deviation(X)} gives the signed radial deviation for both.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.extensions.VolumePrototypeFCM}
+\code{n\_clusters=3}, \code{m=2.0}, \code{norm="euclidean"|\allowbreak "adaptive"}, \code{radius="fuzzy\_mean"}, \code{radius\_scale=1.0}, \code{merge=False}, \code{similarity\_threshold=0.2}, \code{gamma=0.0}, \code{beta=1e15}, \code{tol}, \code{max\_iter}, \code{init}, \code{n\_init=1}, \code{random\_state}, \code{verbose}.\\
+\code{radius} is \code{"fuzzy\_mean"} \eqref{eq:robust:radius}, a number or an array of $c$ fixed radii; \code{gamma}, \code{beta} regularize the adaptive norm as in GK. With \code{merge=True}, \code{n\_clusters} is the starting number and \code{max\_iter} applies per number of clusters. Attributes \code{radii\_}, \code{n\_clusters\_}, \code{merge\_history\_} (iteration, number of clusters, pair, similarity), \code{covariances\_}, \code{norm\_matrices\_}; \code{distances\_} and \code{transform} return $\tilde D_{ik}$, zero inside the cores.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.extensions.FeatureWeightedFCM}
+\code{n\_clusters=3}, \code{m=2.0}, \code{t=2.0}, \code{tol}, \code{max\_iter}, \code{init}, \code{n\_init=1}, \code{random\_state}, \code{verbose}.\\
+\code{t}$>1$ is the weight exponent of \eqref{eq:robust:wfcm}. Attributes \code{feature\_weights\_} $(n,)$ summing to one, \code{covariances\_} (unweighted); \code{distances\_} and \code{transform} return the weighted distances.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.extensions.SCAD}
+\code{n\_clusters=3}, \code{m=2.0}, \code{variant="scad1"|\allowbreak "scad2"}, \code{q=2.0}, \code{delta=None}, \code{delta\_scale=1.0}, \code{tol}, \code{max\_iter}, \code{init}, \code{n\_init=1}, \code{random\_state}, \code{verbose}.\\
+\code{delta=None} re-estimates $\delta_i$ by \eqref{eq:robust:scad1} with the factor \code{delta\_scale}$=K$; a number or an array fixes it (SCAD-1). \code{q} is the exponent of SCAD-2. Attributes \code{feature\_weights\_} $(c,n)$ with rows summing to one, \code{delta\_}, \code{covariances\_}.
+\end{apibox}
+
+\begin{apibox}{data generators and plot helpers}
+In \code{fuzzyclust.extensions}: \code{make\_circles} (intersecting circles, arcs, outliers), \code{make\_close\_blobs} (coincident-cluster test case), \code{make\_crossing\_lines}, and \code{make\_collinear\_segments}; the examples also use \code{make\_noisy\_blobs}, \code{make\_rings}, \code{make\_two\_moons}, and \code{make\_different\_densities} from \code{fuzzyclust.datasets}. Plots: \code{plot\_typicality(X,\allowbreak\ T)} (scatter colored by $\max_i t_{ik}$, also for $1-\mu_{*k}$), \code{plot\_varieties(X,\allowbreak\ model)}, and \code{plot\_shells(X,\allowbreak\ model)}; the generic \code{fuzzyclust.plotting.plot\_membership\_contours} works for all estimators of the chapter through \code{predict\_proba}.
+\end{apibox}
+
+The robust variants are drop-in replacements for FCM; the possibilistic ones are seeded by FCM internally:
+\pysnippet{examples/06_extensions/plot_01_pcm_typicality.py}{fit}
+\pysnippet{examples/06_extensions/plot_02_pfcm_trade_off.py}{fit}
+\pysnippet{examples/06_extensions/plot_03_noise_clustering.py}{fit}
+The kernel and shape variants change the distance or the prototype and expose what they find (the kernel parameter, the line orientations, the radii):
+\pysnippet{examples/06_extensions/plot_04_kernel_fcm.py}{fit}
+\pysnippet{examples/06_extensions/plot_05_fuzzy_c_varieties.py}{fit}
+\pysnippet{examples/06_extensions/plot_06_fuzzy_c_shells.py}{fit}
+Volume prototypes are a drop-in replacement for FCM, and with \code{merge=True} the number of clusters becomes a result:
+\pysnippet{examples/06_extensions/plot_08_volume_prototypes.py}{fit}
+\pysnippet{examples/06_extensions/plot_08_volume_prototypes.py}{merge}
+The feature-weighted methods return the learned weights next to the partition:
+\pysnippet{examples/06_extensions/plot_07_feature_weighting.py}{fit}
+\pysnippet{examples/06_extensions/plot_07_feature_weighting.py}{subspace}
+
+\section{Examples}\label{sec:robust:examples}
+
+The first three examples share one data set, generated by \code{make\_noisy\_blobs}: three Gaussian groups of 100 points ($\sigma=0.6$, centers $4.2$ to $7.5$ apart) with 60 uniformly scattered outliers. The ``center error'' reported is the largest distance between an estimated prototype and the sample mean of the matched true group. FCM, pulled outward by the outliers, has a center error of $0.20$ on this data set; without the outliers it would be $0.02$.
+
+\subsection{PCM: typicalities, scales, and coincident clusters}\label{sec:robust:ex:pcm}
+
+With $m=1.5$ and scales $\eta_i=(2.7,3.4,2.6)$ from the FCM run, PCM brings the center error down to $0.04$ (\cref{fig:robust:ex:pcm1}). The maximal typicality separates the two populations cleanly---median $0.97$ for the inliers, $0.09$ for the outliers---and the 44 samples below a threshold of $0.2$ are all true outliers. The contour maps show the difference in kind: the FCM maximal membership never drops below $1/3$ and rises again far from the data, whereas the PCM typicality is a bump of width $\sqrt{\eta_i}$ around every prototype and vanishes elsewhere. \Cref{fig:robust:ex:pcm2} shows the same along a probe line through two centers, the empirical counterpart of \cref{fig:robust:membership}. The parameter study (\cref{fig:robust:ex:pcm3}) varies the scale factor $K$ and the exponent. For $m=1.5$ the center error is below $0.05$ for $K=0.5$ and $K=1$ ($0.08$ at $K=0.25$) and rises to $0.28$ at $K=2$; for $m=2$ it is already $0.17$ at $K=1$; and for $m=3$ the typicality decays so slowly that the outliers keep a mean maximal typicality of $0.3$ at $K=1$ and PCM is worse than FCM for every $K$ (center error $0.24$ or more). The coincident-cluster failure (\cref{fig:robust:ex:pcm4}) appears on a group of 200 points next to a group of 40 at a distance of $2.5$. With $K=0.5$ the two prototypes are $2.5$ apart; with $K=1$ they coincide ($|\mathbf{v}_1-\mathbf{v}_2|=0.00$) and the small group is lost. FCM never shows this failure, because its memberships compete.
+
+\exfig{06_extensions/plot_01_pcm_typicality_1}[FCM memberships (left) and PCM typicalities (middle) on three groups with 60 outliers: the FCM contours tile the plane and the centers are pulled outward, the PCM contours are bumps around the prototypes.]{FCM memberships (left) and PCM typicalities (middle) on three groups with 60 outliers: the FCM contours tile the plane and the centers are pulled outward, the PCM contours are bumps around the prototypes. The maximal typicality of every sample (right) singles out the outliers; stars are the true group means.}{robust:ex:pcm1}
+\exfig[0.9\textwidth]{06_extensions/plot_01_pcm_typicality_2}{Along a line from one center through another and beyond, the FCM memberships cross at the midpoint and stay high beyond the prototypes, whereas the PCM typicalities peak at the prototypes and vanish on both sides.}{robust:ex:pcm2}
+\exfig[0.9\textwidth]{06_extensions/plot_01_pcm_typicality_3}{Center error (left) and mean maximal typicality of the outliers (right) against the scale factor $K$ for three exponents: $m=1.5$ with $K\le1$ is robust, too large a $K$ lets the outliers back in, and too large an $m$ makes the typicality decay too slowly.}{robust:ex:pcm3}
+\exfig{06_extensions/plot_01_pcm_typicality_4}[Coincident clusters: a large group next to a small, close one.]{Coincident clusters: a large group next to a small, close one. With $K=0.5$ the two PCM prototypes are separated, with $K=1$ and beyond they drift into the large group together; the dashed circles have radius $\sqrt{\eta_i}$.}{robust:ex:pcm4}
+
+\subsection{PFCM: the \texorpdfstring{$a/b$}{a/b} trade-off}\label{sec:robust:ex:pfcm}
+
+PFCM with $a=1$ and $b=4$ returns both matrices on the noisy blobs (\cref{fig:robust:ex:pfcm1}): memberships whose rows sum to one and whose contours are the familiar FCM cells, and typicalities that sum to $0.60$ per inlier against $0.13$ per outlier and flag the outliers as PCM does. The study of the weights (\cref{fig:robust:ex:pfcm2}, left) shows the center error dropping from the FCM value $0.20$ as soon as the typicalities enter the update ($b\ge0.5$ gives $0.05$--$0.09$). The right panel shows what the memberships buy on the coincident-cluster data: PCM merges the two prototypes at $K=1$, PFCM with $a=b=1$ keeps them apart at $K=1$, halves their distance at $K=2$, and nearly merges them at $K=4$, and with $a=20$ the prototypes stay about $2$ apart for every scale factor up to $16$; \cref{fig:robust:ex:pfcm3} shows the three partitions at $K=4$. Raising $b$ alone does not reproduce PCM, because $b$ also tightens the effective scale $\gamma_i/b$ inside the typicality. The printed study of $\eta$ and the scale factor confirms that a smaller $\eta$ makes the outliers less typical (mean maximal typicality $0.05$ at $\eta=1.5$ against $0.22$ at $\eta=3$, for $K=1$). It also reveals the second effect discussed in \cref{sec:robust:pfcm}: with tight scales ($K=0.5$) the center error rises to $0.12$--$0.13$ for every $\eta$, because the typicalities of the core samples shrink and the membership term regains weight, whereas $K=2$ with $\eta=2$ gives $0.045$.
+
+\exfig{06_extensions/plot_02_pfcm_trade_off_1}{PFCM on the noisy blobs: the memberships (left) sum to one and partition the plane, the typicalities (right) are bumps around the prototypes and flag the outliers.}{robust:ex:pfcm1}
+\exfig[0.9\textwidth]{06_extensions/plot_02_pfcm_trade_off_2}[Left: center error on the noisy blobs against the typicality weight $b$ (with $a=1$); $b=0$ is FCM.]{Left: center error on the noisy blobs against the typicality weight $b$ (with $a=1$); $b=0$ is FCM. Right: distance between the two prototypes on the coincident-cluster data against the scale factor $K$ for PCM and for PFCM with increasing membership weight $a$.}{robust:ex:pfcm2}
+\exfig{06_extensions/plot_02_pfcm_trade_off_3}{Partitions of the coincident-cluster data at $K=4$: PCM merges the prototypes, PFCM with $a=b=1$ nearly merges them, and PFCM with $a=20$ keeps them on their groups.}{robust:ex:pfcm3}
+
+\subsection{Noise clustering: the multiplier \texorpdfstring{$\lambda$}{lambda}}\label{sec:robust:ex:nc}
+
+With $\lambda=0.3$ the noise distance comes out at $\delta=3.0$ (\cref{fig:robust:ex:nc1}): 31 samples are labeled noise, all of them true outliers, the center error is $0.06$, and the membership contours of the real clusters close around the groups where those of FCM tile the plane. Along the probe line (\cref{fig:robust:ex:nc2}) the real memberships decay and the noise membership takes over beyond $\delta$. The scan over $\lambda$ (\cref{fig:robust:ex:nc3}) maps the trade-off. With $\lambda=0.1$ ($\delta=1.7$), 50 of the 60 outliers and one inlier are labeled noise, with a center error of $0.03$; $\lambda=0.02$ declares 128 inliers noise, and the partition of the inliers degrades (ARI $0.34$); $\lambda\ge2$ ($\delta\ge7.8$) labels nothing noise, and the center error climbs back to $0.14$--$0.17$. The outliers that escape at moderate $\lambda$ are those that fell inside a group. \Cref{fig:robust:ex:nc4} shows three of these partitions with the circles of radius $\delta$. A fixed $\delta=10^6$ reproduces FCM exactly (largest noise membership $3\cdot10^{-11}$, center error $0.20$).
+
+\exfig{06_extensions/plot_03_noise_clustering_1}[FCM (left) and noise clustering with $\lambda=0.3$ (middle) on the noisy blobs; the dashed circles have radius $\delta$ and the gray samples are labeled noise.]{FCM (left) and noise clustering with $\lambda=0.3$ (middle) on the noisy blobs; the dashed circles have radius $\delta$ and the gray samples are labeled noise. Right: the membership $1-\mu_{*k}$ in the real clusters.}{robust:ex:nc1}
+\exfig[0.9\textwidth]{06_extensions/plot_03_noise_clustering_2}{Memberships along a probe line through two centers: in noise clustering the real memberships decay and the noise membership (dashed) takes over beyond $\delta$.}{robust:ex:nc2}
+\exfig[0.9\textwidth]{06_extensions/plot_03_noise_clustering_3}{Number of true outliers and of inliers labeled noise (left) and center error (right) against the multiplier $\lambda$.}{robust:ex:nc3}
+\exfig{06_extensions/plot_03_noise_clustering_4}{Partitions for $\lambda=0.05$, $0.3$, and $2$: a small $\lambda$ peels the tails off the groups, a large one lets every outlier back in.}{robust:ex:nc4}
+
+\subsection{Kernel FCM on rings and moons}\label{sec:robust:ex:kernel}
+
+The data are two concentric rings of radii 1 and 3 and two moons with a gap of about $0.3$. FCM reaches adjusted Rand indices of $0.00$ and $0.26$; kernel FCM with feature-space prototypes recovers both exactly, with $\gamma=0.3$ and $m=1.2$ on the rings and $\gamma=15$ and $m=1.1$ on the moons, each with five restarts (\cref{fig:robust:ex:kfcm1}). The contours of the maximal membership, evaluated on a grid through the kernelized distance \eqref{eq:robust:dkernel}, follow the rings and bend around the moons. The crosses are the approximate pre-images of the prototypes and play no role in the distances; on the rings both lie near the origin. The scan over $\gamma$ (\cref{fig:robust:ex:kfcm2}) shows the narrow window: on the rings only $\gamma\in[0.2,0.5]$ succeeds ($\gamma\le0.1$ behaves like FCM, $\gamma\ge1$ fragments the rings), on the moons $\gamma\in[10,30]$. At the chosen values $1/\sqrt{\gamma}$ is $1.8$ and $0.26$, the gap between the structures in each case. \Cref{fig:robust:ex:kfcm3} shows the rings at $\gamma=0.05$, $0.3$, and $5$, the last with a mean maximal membership of $0.5$, that is, an uninformative partition. The exponent matters as much: at $\gamma=0.3$ the rings are found for $m\le1.5$, whereas with $m=2$ the agreement drops to $0.96$ and with $m=3$ to $0.27$, because every feature-space prototype approaches the mean of all mapped samples. A polynomial kernel of degree two or three does not recover the rings (ARI $0.19$ and $0.18$). In the quadratic monomials a circle is a hyperplane, and one such hyperplane does separate the two rings, but the outer ring is spread over that space far more widely than the inner one, and a partition that splits it has the smaller $\J$; the linear kernel is FCM. The input-space variant (\cref{fig:robust:ex:kfcm4}) cannot find rings but is a robust FCM: on the noisy blobs its center error is $0.03$--$0.04$ for $\gamma$ between $0.1$ and $0.3$ and below $0.09$ from $\gamma=0.03$ to $1$, against $0.20$ for FCM.
+
+\exfig[0.85\textwidth]{06_extensions/plot_04_kernel_fcm_1}{FCM (left) and kernel FCM with feature-space prototypes (right) on two rings (top) and two moons (bottom); contours of the maximal membership evaluated through the kernelized distance.}{robust:ex:kfcm1}
+\exfig[0.9\textwidth]{06_extensions/plot_04_kernel_fcm_2}{Agreement with the true groups against the kernel parameter $\gamma$ on the rings ($m=1.2$) and the moons ($m=1.1$); the dashed line is FCM.}{robust:ex:kfcm2}
+\exfig{06_extensions/plot_04_kernel_fcm_3}{The rings with $\gamma=0.05$ (FCM-like halves), $\gamma=0.3$ (the rings), and $\gamma=5$ (orthogonal feature space, arbitrary partition).}{robust:ex:kfcm3}
+\exfig{06_extensions/plot_04_kernel_fcm_4}{Kernel FCM with input-space prototypes on the noisy blobs: the saturating distance makes it a robust FCM (left), for a wide range of $\gamma$ (right).}{robust:ex:kfcm4}
+
+\subsection{Fuzzy c-varieties on crossing lines, and the elliptotype \texorpdfstring{$\alpha$}{alpha}}\label{sec:robust:ex:fcv}
+
+The data are three lines of 80 points through a common point, at $0^\circ$, $60^\circ$, and $120^\circ$ (\cref{fig:robust:ex:fcv}). FCM tiles the plane into three cells (ARI $0.09$); GK stretches its ellipsoids but cannot align one with each line without swallowing the centers of the others (ARI $0.33$); fuzzy c-lines recovers the three lines (ARI $0.96$) with orientations $60.2^\circ$, $120.2^\circ$, and $179.8^\circ\equiv-0.2^\circ$. The only ambiguous points are those near the crossing, which are close to all three lines. The membership contours are bands around the lines, and the eigenvalues of the scatter matrices show a spread along each line about 600 times larger than the scatter around it (\cref{fig:robust:ex:fcv2}). The elliptotype study (\cref{fig:robust:ex:fcv3}) uses two collinear segments with a gap and an oblique third segment. Pure fuzzy c-lines ($\alpha=0$) sees the collinear segments as one line and spends a prototype on noise (ARI $0.49$), and $\alpha=0.05$ already separates them (ARI $1.0$). On the crossing lines, in contrast, the agreement falls from $0.96$ at $\alpha=0$ and $0.95$ at $\alpha=0.05$ to $0.83$ at $\alpha=0.1$ and to $0.2$ or less for $\alpha\ge0.2$: where lines cross, the position along the line must not count. The printed studies show the need for restarts (mean ARI over ten seeds $0.73$ with one start, $0.96$ with ten), the usual role of $m$, and two planes in three dimensions recovered with \py{n_dims=2} (ARI $0.95$, normals along the $y$ and $z$ axes).
+
+\exfig{06_extensions/plot_05_fuzzy_c_varieties_1}{Three lines through one point: FCM tiles the plane (left), GK cuts the lines into ellipsoidal pieces (middle), and fuzzy c-lines finds the lines (right).}{robust:ex:fcv}
+\exfig{06_extensions/plot_05_fuzzy_c_varieties_2}{Fuzzy c-lines: the maximal membership is a band around each line (left); the eigenvalues of the fuzzy scatter matrices separate the spread along the lines from the scatter around them (right).}{robust:ex:fcv2}
+\exfig{06_extensions/plot_05_fuzzy_c_varieties_3}{Two collinear segments and an oblique one, clustered with $\alpha=0$ (left; the collinear segments form one line) and with $\alpha=0.3$ (middle), and the agreement against $\alpha$ for these data and for the crossing lines (right).}{robust:ex:fcv3}
+
+\subsection{Fuzzy c-shells: radius recovery}\label{sec:robust:ex:shells}
+
+FCM halves two concentric rings (ARI $0.00$), whereas FCSS with five restarts recovers them with radii $1.00$ and $3.00$. On three circles of radii $2$, $1.2$, and $1$, two of which intersect, FCSS started from the FCM-hardened partition finds the centers to within $0.015$ and the radii to within $0.007$, with an ARI of $0.97$; the points near the intersections have shared memberships (\cref{fig:robust:ex:shells1}). The membership contours are rings around the fitted circles, and the signed radial residuals of the samples from their own shell are centered at zero, with a spread close to the generating noise level (\cref{fig:robust:ex:shells2}). The initialization study (\cref{fig:robust:ex:shells3}) shows the two faces of the FCM start. On the concentric rings a single run converges to two circles of radius $2.1$ and $2.2$ through both rings ($\J=746$), five restarts find the rings ($\J=62$), and over ten seeds the FCM start needs ten restarts to succeed every time, while random point prototypes need three. On the intersecting circles, conversely, the FCM start succeeds at once (ARI $0.97$) and a single random start fails (ARI $0.08$). The comparison of the two algorithms on three concentric rings of radii $1$, $1.6$, and $3$ (\cref{fig:robust:ex:shells4}) exposes the small-shell bias of the algebraic distance: both find the rings from the best of ten restarts, but over five seeds FCS reaches a mean ARI of $0.90$ against $0.80$ for FCSS, because the algebraic distance weights the same radial deviation about three times more on the outer ring than on the inner one. On the intersecting circles the two algorithms agree to within $0.01$ in centers and radii for every $m$, and $m$ only sets how strongly the memberships are shared at the intersections.
+
+\exfig{06_extensions/plot_06_fuzzy_c_shells_1}{FCM on two concentric rings (left) and FCSS on the same rings (middle) and on three circles, two of which intersect (right); the fitted circles and their centers are drawn.}{robust:ex:shells1}
+\exfig{06_extensions/plot_06_fuzzy_c_shells_2}{Maximal membership around the two fitted rings (left) and the signed radial residuals of the samples from their own shell on the intersecting circles (right).}{robust:ex:shells2}
+\exfig{06_extensions/plot_06_fuzzy_c_shells_3}{Concentric rings from the FCM-hardened start with a single run (left; two circles through both rings) and with five restarts (middle), and the agreement over ten seeds against the number of restarts for three initializations (right).}{robust:ex:shells3}
+\exfig[0.85\textwidth]{06_extensions/plot_06_fuzzy_c_shells_4}{Three concentric rings of radii 1, 1.6, and 3 with FCSS (left) and FCS (right), both from the best of ten restarts.}{robust:ex:shells4}
+
+\subsection{Volume prototypes on clusters of different size}\label{sec:robust:ex:volume}
+
+The script \code{plot\_08\_volume\_prototypes.py} returns to the data of \cref{sec:part:ex:gg}: a large diffuse group of 300 samples next to two small dense ones. FCM splits the large group and gives a slice of it to each small cluster (adjusted Rand index $0.70$); with volume prototypes the cores grow to radii $1.65$, $0.83$, and $0.56$, and the large cluster keeps its members (ARI $0.85$; \cref{fig:robust:ex:volume1}). The membership profile along the line from the center of the large group to that of the smallest one (\cref{fig:robust:ex:volume2}) shows the mechanism. The memberships are one inside both cores, and the border between the clusters, where the two memberships cross, lies at $0.61$ of the way instead of $0.43$ for FCM, whose small-cluster prototype has in addition been pulled toward the large group.
+
+\exfig{06_extensions/plot_08_volume_prototypes_1}{FCM (left) and fuzzy clustering with volume prototypes (right) on a large diffuse group and two small dense ones; the dashed circles are the cores, inside which the distance is zero.}{robust:ex:volume1}
+\exfig[0.75\textwidth]{06_extensions/plot_08_volume_prototypes_2}{Memberships along the line from the center of the large group to the center of the smallest one: with volume prototypes (solid) the memberships are one inside the shaded cores and the border moves toward the small cluster; FCM (dotted) for comparison.}{robust:ex:volume2}
+
+Started with eight clusters, adaptive merging performs five merges, at similarities between $0.26$ and $0.34$: the first joins the two clusters that share the wider of the two small groups, the other four join pieces of the large group. It ends with three clusters and the same partition as before (\cref{fig:robust:ex:volume3}). The parameter study (\cref{fig:robust:ex:volume4}) confirms the recommendations of \cref{sec:robust:volume}. The agreement rises with the radius scale from the FCM value $0.70$ at $\kappa=0$ to $0.85$ at $\kappa=1$ and collapses beyond it ($0.29$ at $\kappa=1.25$), when a core grows over a neighboring group. The merging threshold has a plateau at three clusters from $0.15$ to $0.25$; a threshold of $0.30$ stops at five clusters, thresholds of $0.35$ and above do not merge at all, and $0.10$ merges distinct groups down to one cluster. Started with any number of clusters from four to twelve, the merging ends at three.
+
+\exfig{06_extensions/plot_08_volume_prototypes_3}{Adaptive cluster merging: eight volume prototypes before merging (left) and the three clusters with their cores after five merges (right).}{robust:ex:volume3}
+\exfig{06_extensions/plot_08_volume_prototypes_4}{Parameter study: agreement with the true groups against the radius scale $\kappa$ (left), final number of clusters against the similarity threshold (middle) and against the starting number of clusters (right).}{robust:ex:volume4}
+
+\subsection{Feature weights: noise features and subspace clusters}\label{sec:robust:ex:weights}
+
+The script \code{plot\_07\_feature\_weighting.py} adds six standardized noise features to three groups in two informative features ($m=1.3$ for all methods, because in eight dimensions the FCM memberships with $m=2$ are nearly uniform). FCM still finds the groups, but with errors (ARI $0.92$); the weighted FCM with $t=3$ and SCAD-1 recover them exactly (\cref{fig:robust:ex:weights1}). The global weights of the weighted FCM are $0.24$ and $0.25$ for the informative features and $0.09$ for every noise feature. The SCAD-1 weights show the same pattern in every cluster, but less sharply ($0.16$ to $0.18$ against $0.09$ to $0.12$), because the automatic $\delta_i$ keeps the weights near uniform unless the scatters differ strongly.
+
+\exfig{06_extensions/plot_07_feature_weighting_1}[Two informative and six noise features.]{Two informative and six noise features. Left: the weighted FCM partition in the informative features. Middle: the global weights $\alpha_j$ concentrate on $x_1$ and $x_2$. Right: the SCAD-1 weights of every cluster.}{robust:ex:weights1}
+
+On three clusters that live in different subspaces (a band tight along $x_1$, a band tight along $x_2$, and a compact blob), SCAD-2 assigns $0.98$ and $0.99$ of the weight to the feature along which each band is tight and splits the weight of the blob evenly ($0.49$, $0.51$); the level sets of the weighted distances are ellipses stretched along the feature a cluster ignores (\cref{fig:robust:ex:weights2}). The partition itself is no better than that of FCM (ARI $0.90$ for both, because the ends of the bands are ambiguous); what SCAD adds is the description of every cluster by its relevant features. The parameter study (\cref{fig:robust:ex:weights3}) varies the number of noise features. FCM degrades steadily (ARI $0.96$ with four, $0.81$ with eight), the weighted FCM stays at $1.00$ and SCAD-1 at $0.98$ or above up to eight, and from ten noise features on all methods fail, because the partition of the first iterations is already dominated by noise and the weights are learned from it. The exponent study shows the concentration trap: with $t=1.5$ or $2$ the weighted FCM puts $0.98$ or $0.80$ of the weight on the informative features but cuts the data along a single one of them (ARI $0.47$), while every $t\ge2.5$ finds the groups.
+
+\exfig{06_extensions/plot_07_feature_weighting_2}{SCAD-2 on clusters in different subspaces: level sets of the weighted distance of every cluster (left) and the weights (right); each band weights the feature along which it is tight.}{robust:ex:weights2}
+\exfig{06_extensions/plot_07_feature_weighting_3}{Parameter study: agreement with the true groups against the number of noise features for FCM, the weighted FCM, and SCAD-1 (left), and agreement and total weight of the informative features against the weight exponent $t$ of the weighted FCM with four noise features (right).}{robust:ex:weights3}
+
+\section{Further reading}\label{sec:robust:reading}
+
+The possibilistic c-means was introduced in \cite{krishnapuram:1993:pcm}, and its insights and recommendations (the exponent, the fixed scales, the coincident clusters) are in \cite{krishnapuram:1996:pcm}; the possibilistic fuzzy c-means is from \cite{pal:2005:pfcm}. Noise clustering is from \cite{dave:1991:noise}, and the unified view of PCM, noise clustering, and robust statistics \cite{huber:1981:robust} is given in \cite{dave:1997:robust}. Kernel fuzzy c-means with input-space prototypes is from \cite{zhang:2004:kfcm}, and its application to incomplete data from \cite{zhang:2003:kfcm}; the feature-space variant is the fuzzy counterpart of the kernel k-means of \cite{girolami:2002:kernel}; the comparative study of both against FCM is \cite{graves:2010:kernel}; and kernels in general are treated in \cite{scholkopf:2002:kernels}. Fuzzy c-lines and fuzzy c-varieties with their convex combinations are introduced in the two papers \cite{bezdek:1981:fcv1,bezdek:1981:fcv2}, within the framework of Bezdek's book \cite{bezdek:1981}. Fuzzy c-shells is from \cite{dave:1990:shells} and the fuzzy c-spherical shells algorithm from \cite{krishnapuram:1992:fcss}; the family of shell algorithms for ellipses and quadrics, together with their possibilistic versions, is surveyed in \cite{krishnapuram:1995:shells}. The Gustafson--Kessel algorithm \cite{gustafson:1979}, with which the c-varieties are compared, is treated in \cref{sec:part:gk}, and the graph-based methods that find arbitrary shapes without a prototype follow in \cref{ch:graph}. Volume prototypes and adaptive cluster merging are due to Kaymak and Setnes \cite{kaymak:2002:volume}; the similarity by which the toolbox merges is that of \cite{setnes:1998:similarity}. The weighted fuzzy c-means with global attribute weights is the fuzzy form of the variable-weighted k-means of Huang et al.\ \cite{huang:2005:wkmeans}; cluster-specific weights with an exponent are due to Keller and Klawonn \cite{keller:2000:weighting}, and simultaneous clustering and attribute discrimination, with its regularized and exponent forms, to Frigui and Nasraoui \cite{frigui:2004:scad}.

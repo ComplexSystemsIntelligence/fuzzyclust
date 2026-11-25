@@ -1,0 +1,185 @@
+\chapter{Introduction}\label{ch:introduction}
+\begin{roadmap}
+This chapter explains what clustering is good for, why fuzzy partitions are often the more honest description of data, and where the \code{fuzzyclust} toolbox comes from. The toolbox is the Python successor of the \emph{Fuzzy Clustering and Data Analysis Toolbox for MATLAB} and puts two decades of clustering-based research of the author's group (model identification, time-series analysis, visualization, and graph-based methods) and the classical methods of the literature behind one scikit-learn compatible interface. The chapter then describes how the book is organized and how to read it, and closes with the installation and a short first session. The mathematics starts in \cref{ch:foundations}.
+\end{roadmap}
+
+\section{What clustering is for}\label{sec:intro:purpose}
+
+Cluster analysis groups objects by their mutual similarity: objects in the same group should resemble each other more than objects in different groups. It is \emph{unsupervised}---no class labels are used---and this is its main asset. Where a classifier reproduces categories that somebody has already defined, clustering reveals a structure nobody has defined yet: the operating regimes of a chemical reactor, the types of customers behind a sales table, the segments of a long measured signal, the local linear behaviors of a nonlinear system. Ruspini \cite{ruspini:1969}, Dunn \cite{dunn:1973:fcm}, and Bezdek \cite{bezdek:1981} formulated fuzzy clustering as the minimization of an objective function, and the monographs by Bezdek \cite{bezdek:1981}, by Jain and Dubes \cite{jain:1988:book}, by Kaufman and Rousseeuw \cite{kaufman:1990:groups}, and by H\"oppner et al.\ \cite{hoppner:1999:book} remain the standard references.
+
+In this book the objects are the $N$ rows $\xk\in\R^n$ of a data matrix $\X\in\R^{N\times n}$; the columns are measured variables (\emph{features}). What the rows mean depends on the application, and so does the meaning of a cluster:
+\begin{itemize}
+  \item In \emph{exploratory data analysis} the rows are independent observations (patients, products, samples), and a cluster is a group of similar observations. The analyst wants to know how many groups there are, how they differ, and which observations lie between them.
+  \item In \emph{pattern recognition and data reduction} the prototypes of the clusters stand in for the data: a few hundred prototypes summarize a million samples, and the memberships of a new sample in the clusters serve as features for a subsequent classifier or regression model.
+  \item In \emph{system identification} the rows $[\mathbf{x}_k\T\,y_k]\T$ join a regression vector, built from lagged inputs and outputs of a dynamic system, with the corresponding output. A cluster in this product space is a region where one local linear model fits, and the fuzzy clustering of the product space yields a Takagi--Sugeno model with the memberships as rule firing strengths \cite{babuska:1998:book,abonyi:2007:book}. Here clustering is not the end result but the structure-identification step of a model.
+  \item In \emph{time-series analysis} the rows are consecutive samples or delay vectors of a signal; a cluster is a segment with homogeneous behavior, and the memberships along time show when one regime gives way to the next.
+\end{itemize}
+The toolbox and the book cover all four uses. Chapters~\ref{ch:foundations}--\ref{ch:validity} develop the partitioning algorithms and their validation for the first two uses, \cref{ch:models} the identification use, and \cref{ch:timeseries} the time-series use; the visualization and graph methods of \cref{ch:visualization,ch:graph} serve all of them.
+
+\section{Hard and fuzzy partitions in one picture}\label{sec:intro:hardfuzzy}
+
+A \emph{hard} (crisp) partition assigns every sample to exactly one cluster; the clusters are disjoint subsets of the data. A \emph{fuzzy} partition \cite{zadeh:1965:fuzzysets,ruspini:1969} assigns every sample a membership degree $\mik\in[0,1]$ in every cluster, with $\sum_i\mik=1$. \Cref{fig:intro:hardfuzzy} shows why the second description is often the more faithful one. Two groups of points overlap. The hard partition (top left) draws a boundary and puts every sample on one side of it, although the samples near the boundary are no more similar to their own prototype than to the other one. The fuzzy partition (top right) preserves the degree of ambiguity of every sample. Along the line through the prototypes (bottom), the hard partition is a step function at the midpoint, whereas the fuzzy partition is a smooth membership function whose steepness is set by the fuzziness exponent $m$ of \cref{ch:partitioning}.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[>={Latex[length=2mm]}]
+  \def\hardpts{1.13/1.87/fcblue,0.55/1.98/fcblue,0.87/0.73/fcblue,0.74/1.93/fcblue,1.28/0.97/fcblue,1.44/1.55/fcblue,1.33/1.78/fcblue,0.46/1.79/fcblue,0.77/2.45/fcblue,1.50/1.63/fcblue,0.56/1.63/fcblue,1.19/0.94/fcblue,2.32/1.82/fcverm,2.03/0.99/fcverm,2.00/0.85/fcverm,0.74/1.90/fcblue,1.13/0.30/fcblue,0.49/2.06/fcblue,2.25/2.10/fcverm,0.95/2.04/fcblue,0.47/1.88/fcblue,0.36/1.59/fcblue,3.03/1.84/fcverm,2.93/2.06/fcverm,2.99/1.86/fcverm,3.53/0.39/fcverm,3.12/1.42/fcverm,2.67/1.50/fcverm,2.30/1.71/fcverm,3.38/1.57/fcverm,4.05/1.59/fcverm,3.14/1.00/fcverm,3.26/0.87/fcverm,3.80/1.04/fcverm,3.19/2.49/fcverm,3.74/1.53/fcverm,3.86/1.37/fcverm,3.54/1.41/fcverm,2.60/1.64/fcverm,3.61/1.21/fcverm,2.50/1.11/fcverm,1.79/1.07/fcblue,2.51/2.51/fcverm,2.79/0.55/fcverm}
+  \def\fuzzypts{1.13/1.87/98,0.55/1.98/96,0.87/0.73/87,0.74/1.93/98,1.28/0.97/87,1.44/1.55/93,1.33/1.78/96,0.46/1.79/96,0.77/2.45/90,1.50/1.63/91,0.56/1.63/97,1.19/0.94/88,2.32/1.82/30,2.03/0.99/48,2.00/0.85/49,0.74/1.90/98,1.13/0.30/75,0.49/2.06/94,2.25/2.10/40,0.95/2.04/97,0.47/1.88/96,0.36/1.59/95,3.03/1.84/4,2.93/2.06/10,2.99/1.86/5,3.53/0.39/14,3.12/1.42/0,2.67/1.50/7,2.30/1.71/30,3.38/1.57/1,4.05/1.59/9,3.14/1.00/4,3.26/0.87/6,3.80/1.04/7,3.19/2.49/17,3.74/1.53/5,3.86/1.37/6,3.54/1.41/3,2.60/1.64/10,3.61/1.21/4,2.50/1.11/16,1.79/1.07/66,2.51/2.51/33,2.79/0.55/17}
+  % ---------- top left: hard partition ----------
+  \begin{scope}
+    \node[note, anchor=south, font=\small] at (2.1,3.1) {hard partition: $\mik\in\{0,1\}$};
+    \draw[fcgray!50, thin] (0,0) rectangle (4.2,3.0);
+    \draw[dashed, thick, fcgray] (2.23,3.0) -- (1.91,0.0);
+    \foreach \x/\y/\c in \hardpts { \fill[\c] (\x,\y) circle (2.1pt); }
+    \node[black] at (0.98,1.63) {$\boldsymbol\times$}; \node[note, below=2pt] at (0.98,1.55) {$\mathbf{v}_1$};
+    \node[black] at (3.11,1.44) {$\boldsymbol\times$}; \node[note, below=2pt] at (3.11,1.36) {$\mathbf{v}_2$};
+    \node[note, anchor=north, text width=4.1cm] at (2.1,-0.1) {every sample on one side of the boundary; the ambiguity of the samples near it is lost};
+  \end{scope}
+  % ---------- top right: fuzzy partition ----------
+  \begin{scope}[shift={(5.4,0)}]
+    \node[note, anchor=south, font=\small] at (2.1,3.1) {fuzzy partition: $\mik\in[0,1]$, $\sum_i\mik=1$};
+    \draw[fcgray!50, thin] (0,0) rectangle (4.2,3.0);
+    \foreach \x/\y/\p in \fuzzypts { \fill[fcblue!\p!fcverm] (\x,\y) circle (2.1pt); }
+    \node[black] at (0.98,1.63) {$\boldsymbol\times$}; \node[note, below=2pt] at (0.98,1.55) {$\mathbf{v}_1$};
+    \node[black] at (3.11,1.44) {$\boldsymbol\times$}; \node[note, below=2pt] at (3.11,1.36) {$\mathbf{v}_2$};
+    \node[note, anchor=north, text width=4.3cm] at (2.1,-0.1) {color $=\mu_{1k}\cdot$\textcolor{fcblue}{blue}$+\mu_{2k}\cdot$\textcolor{fcverm}{vermilion}; the overlap is a gradient};
+  \end{scope}
+  % ---------- bottom: membership functions along the line v1--v2 ----------
+  \begin{scope}[shift={(0,-5.4)}]
+    \begin{axis}[at={(0.6cm,0)}, anchor=south west, width=9.6cm, height=3.6cm,
+      xmin=-0.3, xmax=4.5, ymin=-0.05, ymax=1.1, axis lines=left, xlabel={position $x$ on the line through $\mathbf{v}_1$ and $\mathbf{v}_2$}, ylabel={$\mu_1(x)$},
+      xlabel style={font=\small}, ylabel style={font=\small}, tick label style={font=\footnotesize},
+      xtick={0.98,2.05,3.11}, xticklabels={$v_1$,midpoint,$v_2$}, ytick={0,0.5,1}, samples=300, domain=-0.3:4.5, clip=false,
+      legend style={font=\small, draw=none, fill=none, at={(0.98,0.55)}, anchor=east, legend columns=1}]
+      \addplot[fcgray, thick, dashed, const plot] coordinates {(-0.3,1) (2.05,1) (2.05,0) (4.5,0)};
+      \addplot[fcblue, thick] {(x-3.11)^2/((x-0.98)^2+(x-3.11)^2)};
+      \addplot[fcgreen, thick] {1/(1+(abs(x-0.98)/abs(x-3.11))^(2/(1.3-1)))};
+      \legend{hard partition, fuzzy $m=2$, fuzzy $m=1.3$}
+    \end{axis}
+  \end{scope}
+\end{tikzpicture}
+\caption[Hard and fuzzy partitions of two overlapping groups.]{Hard and fuzzy partitions of two overlapping groups. Top left: a hard partition assigns every sample to the nearer prototype; the dashed boundary is the perpendicular bisector of $\mathbf{v}_1\mathbf{v}_2$. Top right: the fuzzy c-means partition of the same data, with every sample colored by the blend of its two memberships; the cores are pure, and the overlap region is a gradient. Bottom: along the line through the prototypes, a hard partition is a step and a fuzzy partition is a smooth membership function whose steepness grows as the fuzziness exponent $m$ approaches one.}
+\label{fig:intro:hardfuzzy}
+\end{figure}
+
+Three practical consequences follow, and they are the reasons this book is about \emph{fuzzy} clustering. First, the memberships carry information that a label cannot: the sample with memberships $(0.49, 0.51)$ and the sample with $(0.02, 0.98)$ receive the same hard label but mean different things, and a downstream model (a classifier, a local linear model, a monitoring rule) can use the difference. Second, the fuzzy objective function is differentiable in the memberships, which makes closed-form update equations and convergence proofs possible \cite{bezdek:1980:convergence,bezdek:1987:convergence}; hard partitions have to be searched combinatorially. Third, fuzzy prototypes are weighted means over \emph{all} samples, so they move smoothly when the data change, which matters for identification and for tracking slowly drifting processes.
+
+\section{From the MATLAB toolbox to fuzzyclust}\label{sec:intro:lineage}
+
+\code{fuzzyclust} descends from the \emph{Fuzzy Clustering and Data Analysis Toolbox for MATLAB} of Balaskó, Abonyi, and Feil \cite{balasko:2005:toolbox}. That toolbox implemented, in the notation of Babu\v{s}ka's monograph \cite{babuska:1998:book}, the hard k-means and k-medoids algorithms; the fuzzy c-means (FCM), Gustafson--Kessel (GK), and Gath--Geva (GG) algorithms; the evaluation of new data with fitted prototypes (\code{clusteval}); seven validity indices; data normalization; and three projection methods for the visualization of clustering results: principal component analysis, Sammon mapping, and the fuzzy Sammon mapping (FUZZSAM) of Kov\'acs and Abonyi. It became the companion of the book \emph{Cluster Analysis for Data Mining and System Identification} \cite{abonyi:2007:book} and the basis of a line of research in which clustering is the engine of other tasks.
+
+\Cref{fig:intro:lineage} shows how the Python toolbox grew out of it. The core of the MATLAB toolbox maps one-to-one onto the sub-packages \code{cluster}, \code{validity}, \code{preprocessing}, \code{plotting}, and \code{viz} (\cref{app:migration} gives the mapping function by function). Around this core, four research threads of the group are collected:
+\begin{description}[style=nextline]
+  \item[Identification (\code{fuzzyclust.models}).] Takagi--Sugeno fuzzy models identified by clustering the product space of inputs and outputs with a modified Gath--Geva algorithm, fuzzy c-regression models, supervised fuzzy clustering for classification, fuzzy partitions for decision trees, and hinging-hyperplane trees.
+  \item[Time series (\code{fuzzyclust.timeseries}).] Fuzzy segmentation of multivariate time series by clustering with time as an extra dimension, model-order selection with false nearest neighbors and clustering, state-space reconstruction of chaotic systems, and structure selection for mixed-input models.
+  \item[Visualization (\code{fuzzyclust.viz}).] FUZZSAM and its quality measures, the fuzzy self-organizing map as a regularized FCM, and projection diagnostics for the number of clusters.
+  \item[Graph methods (\code{fuzzyclust.graph}).] Minimal-spanning-tree clustering with fuzzy hypervolume splitting and Gath--Geva refinement, and geodesic-distance fuzzy c-medoids on neighborhood graphs.
+\end{description}
+A fifth sub-package, \code{fuzzyclust.extensions}, adds classical variants that the MATLAB toolbox did not have: possibilistic c-means, noise clustering, kernel FCM, fuzzy c-varieties and c-shells, volume prototypes, and feature weighting. Eight further sub-packages take the methods beyond a complete numeric data matrix and a single unsupervised run: \code{relational}, \code{incomplete}, \code{large}, \code{image}, \code{semisupervised}, \code{coclustering}, \code{collaborative}, and \code{ensemble} (\cref{ch:relational,ch:data_realities,ch:beyond}).
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[>={Latex[length=2mm]}, node distance=4mm]
+  % MATLAB toolbox
+  \node[data, text width=3.0cm, align=left, font=\small, inner sep=3pt] (mat) at (0,0) {%
+    \textbf{MATLAB toolbox (2005)}\\[2pt]
+    \texttt{Kmeans, Kmedoid}\\
+    \texttt{FCMclust, GKclust,}\\ \texttt{GGclust}\\
+    \texttt{clusteval}\\
+    \texttt{validity} (7 indices)\\
+    \texttt{clust\_normalize}\\
+    \texttt{PCA, Sammon,}\\ \texttt{FuzSam, projeval}};
+  % python core
+  \node[block, text width=3.4cm, align=left, font=\small, inner sep=3pt, right=17mm of mat] (core) {%
+    \textbf{fuzzyclust core}\\[2pt]
+    \texttt{cluster}: KMeans, KMedoids, FCM, GK, GG\\
+    \texttt{predict\_proba}, \texttt{transform}\\
+    \texttt{validity}: 16 indices, scans\\
+    \texttt{preprocessing}, \texttt{plotting}\\
+    \texttt{viz}: PCA, Sammon, FuzzySammon};
+  \draw[arrow, very thick] (mat) -- node[note, above=1pt, text width=1.6cm] {rewritten on numpy and scikit-learn} (core);
+  % research threads
+  \node[result, text width=2.3cm, font=\small, inner sep=3pt, anchor=west] (models) at ($(core.east)+(0.7,2.55)$) {\texttt{models}\\ TS identification, FCRM, classifiers, trees};
+  \node[result, text width=2.3cm, font=\small, inner sep=3pt, below=2.5mm of models] (ts) {\texttt{timeseries}\\ segmentation, FNN, reconstruction};
+  \node[result, text width=2.3cm, font=\small, inner sep=3pt, below=2.5mm of ts] (viz) {\texttt{viz}\\ FUZZSAM quality, fuzzy SOM};
+  \node[result, text width=2.3cm, font=\small, inner sep=3pt, below=2.5mm of viz] (graph) {\texttt{graph}\\ MST + GG, geodesic FCM};
+  \node[result, text width=2.3cm, font=\small, inner sep=3pt, below=2.5mm of graph] (ext) {\texttt{extensions}\\ PCM, PFCM, noise, kernel, shells};
+  \foreach \n in {models,ts,viz,graph,ext} { \draw[arrow] (core.east) -- (\n.west); }
+  \node[note, anchor=north, text width=3.6cm] at ($(core.south)+(0,-0.25)$) {one base class, one alternating-optimization loop, one notation (\cref{ch:foundations})};
+  \node[note, anchor=south, text width=2.6cm] at ($(models.north)+(0,0.08)$) {research threads, built on the core};
+\end{tikzpicture}
+\caption[Lineage of the toolbox.]{Lineage of the toolbox. The functions of the MATLAB toolbox became the core sub-packages of \code{fuzzyclust}; the clustering-based research of the group (identification, time series, visualization, and graph methods) and the classical extensions are built on the same base class and the same notation.}
+\label{fig:intro:lineage}
+\end{figure}
+
+Two design decisions shape the package. First, almost every clustering algorithm is a class derived from one base class that implements the alternating optimization once; an algorithm only defines how its prototypes are updated and how its distances are measured (\cref{ch:foundations}). Second, the estimators follow the scikit-learn conventions \cite{pedregosa:2011:sklearn}: \code{fit}, \code{predict}, \code{predict\_proba}, and \code{transform} behave as in scikit-learn; pipelines, cloning, grid search, and pickling work without extra code; and a \code{pandas} data frame is accepted as input and, on request, returned by \code{transform}. The MATLAB function \code{clusteval}, which evaluated new data with fitted prototypes, has become \code{predict\_proba}.
+
+\section{How the book is organized}\label{sec:intro:organisation}
+
+\Cref{ch:foundations} lays the common ground: the data matrix; the distance norms; the hard, fuzzy, and possibilistic partition spaces; the objective-function view of clustering, with alternating optimization as the template of all algorithms; initialization, termination, and scaling; and the notation used throughout. It ends with the scikit-learn interface that the estimators of the toolbox share.
+
+\Cref{ch:partitioning} presents the partitioning algorithms that carry the toolbox: k-means and k-medoids as hard reference methods; fuzzy c-means, with the derivation of its update equations and the role of the fuzziness exponent; the Gustafson--Kessel algorithm, with its adaptive norm, its volume constraint, and the covariance regularization of Babu\v{s}ka, van der Veen, and Kaymak; and the Gath--Geva algorithm, with its exponential distance, its priors, and its need for a good initialization. It closes with alternative fuzzifiers and with mountain and subtractive clustering, which estimate the number and location of the clusters.
+
+\Cref{ch:validity} asks how many clusters there are. It describes the sixteen validity indices of the toolbox (partition-based, compactness and separation, crisp, and volume-based) with their optimum directions and weaknesses, the scan over the number of clusters, compatible cluster merging and stability-based selection as alternatives to the scan, and the evaluation of new data as a form of validation.
+
+\Cref{ch:visualization} puts a clustering on paper: principal component projection, Sammon mapping, the fuzzy Sammon mapping that preserves the sample--prototype distances of the algorithm, measures of projection quality, and the fuzzy self-organizing map.
+
+\Cref{ch:robust_shape} extends the prototype and the partition: possibilistic and noise clustering for data with outliers, kernel FCM, fuzzy c-varieties and c-shells for linear and circular clusters, volume prototypes, and feature weighting.
+
+\Cref{ch:graph} abandons the prototype as the starting point: minimal-spanning-tree clustering with fuzzy hypervolume splitting and Gath--Geva refinement, and fuzzy c-medoids with geodesic distances on neighborhood graphs for clusters that follow a manifold.
+
+\Cref{ch:models} turns clustering into model identification: Takagi--Sugeno models from Gath--Geva clustering of the product space, fuzzy c-regression models, supervised fuzzy classifiers, fuzzy partitions for decision trees, and hinging-hyperplane trees.
+
+\Cref{ch:timeseries} applies clustering to signals: fuzzy segmentation of multivariate time series, model-order selection by false nearest neighbors, state-space reconstruction of chaotic systems, and structure selection for models with mixed inputs.
+
+\Cref{ch:relational} gives up the numeric feature vector: relational and NERF c-means work from a dissimilarity matrix alone, fuzzy c-medoids accepts any dissimilarity, and fuzzy k-modes and k-prototypes cluster categorical and mixed records.
+
+\Cref{ch:data_realities} adapts fuzzy c-means to incomplete data, to very large data sets and streams, and to image segmentation, where the neighborhood of a pixel enters the objective function.
+
+\Cref{ch:beyond} goes beyond a single unsupervised run: partial supervision by class labels or pairwise constraints, co-clustering of objects and items, collaborative clustering across data sites, and fuzzy cluster ensembles.
+
+Three appendices complete the book: a compact reference of every public class and function (\cref{app:api}), the migration table from the MATLAB toolbox (\cref{app:migration}), and the catalog of example scripts (\cref{app:examples}).
+
+\section{How to read this book}\label{sec:intro:reading}
+
+Every chapter has the same structure. A \emph{roadmap} says what the chapter covers and how it connects to the previous one. \emph{Problem and idea} motivates the methods in words and with one concept figure. \emph{Theory} develops the methods in the unified notation, states every algorithm in an algorithm box, and closes with a summary box. \emph{Using it in fuzzyclust} lists the parameters and attributes of the classes in API boxes, with code snippets taken verbatim from the example scripts. \emph{Examples} discusses the figures that the example scripts produce, with emphasis on what happens when the main parameters change. \emph{Further reading} points to the original papers. Theory and experiments are kept apart on purpose: the theory sections can be read without running anything, and the example sections can be run without reading the theory.
+
+\begin{hintbox}{Notation at a glance}
+$\X\in\R^{N\times n}$ is the data matrix with $N$ samples $\xk$ as rows and $n$ features; $c$ is the number of clusters; $\vi$ is the prototype of cluster $i$ and $\V$ the matrix of prototypes; $\mik$ is the membership of sample $k$ in cluster $i$ and $\U=[\mik]\in\R^{c\times N}$ the partition matrix; $m>1$ is the fuzziness exponent; $\Dsq$ is the squared distance of $\xk$ to $\vi$ in the norm of the algorithm; and $\J$ is the objective. Index $i$ (and $j$) always runs over clusters, $k$ over samples. In code the partition is stored transposed as \code{membership\_} of shape \code{(n\_samples, n\_clusters)}, in line with \code{predict\_proba}. The full table is in \cref{tab:found:notation}.
+\end{hintbox}
+
+The figures that show computed results are produced by the example scripts in the \code{examples/} directory of the repository (see the preface). The text names the script behind each such figure, and \cref{app:examples} lists all scripts.
+
+\section{Installation and a first session}\label{sec:intro:install}
+
+The package is installed from the Python Package Index with
+\begin{lstlisting}[language=bash]
+pip install fuzzyclust
+\end{lstlisting}
+and depends only on \code{numpy}, \code{scipy}, \code{scikit-learn}, \code{pandas}, and \code{matplotlib}. A first session generates three Gaussian clusters, fits fuzzy c-means, and inspects the result:
+\begin{lstlisting}
+import matplotlib.pyplot as plt
+from fuzzyclust import FCM
+from fuzzyclust.datasets import make_fuzzy_blobs
+from fuzzyclust.plotting import plot_clusters, plot_membership_contours
+
+X, y_true = make_fuzzy_blobs(n_clusters=3, n_samples_per_cluster=100, random_state=0)
+fcm = FCM(n_clusters=3, m=2.0, random_state=0).fit(X)
+
+print(fcm.cluster_centers_)          # prototypes v_i, shape (3, 2)
+print(fcm.membership_[:5].round(3))  # memberships mu_ik of the first samples
+print(fcm.labels_[:5])               # hard labels, argmax of the memberships
+
+fig, axes = plt.subplots(1, 2, figsize=(11, 4.5))
+plot_clusters(X, fcm.labels_, fcm.cluster_centers_, ax=axes[0])
+plot_membership_contours(fcm, X, ax=axes[1])
+plt.show()
+\end{lstlisting}
+The two central lines, which generate the data and fit the model, appear verbatim in the first example script, \code{plot\_01\_fcm\_basics.py}:
+\pysnippet{examples/01_clustering/plot_01_fcm_basics.py}{fit}
+\Cref{fig:intro:first} shows the result. The level curves of the maximal membership $\max_i\mu_i(\mathbf{x})$ are nearly circular around the prototypes because fuzzy c-means measures every distance in the Euclidean norm. The MATLAB toolbox drew the same kind of map with \code{clusteval}, and in \cref{ch:partitioning} such maps show how differently the algorithms shape their clusters.
+
+\exfig{01_clustering/plot_01_fcm_basics_1}[The first session: fuzzy c-means on three Gaussian clusters.]{The first session: fuzzy c-means on three Gaussian clusters. Left: hard labels and prototypes. Right: level curves of the maximal membership, nearly circles around the prototypes.}{intro:first}
+
+\section{Further reading}\label{sec:intro:reading-further}
+\enlargethispage{2\baselineskip}%
+
+The classical monograph on objective-function clustering is Bezdek's \cite{bezdek:1981}. H\"oppner, Klawonn, Kruse, and Runkler \cite{hoppner:1999:book} cover the fuzzy algorithms, including shells and varieties; Jain and Dubes \cite{jain:1988:book} and Kaufman and Rousseeuw \cite{kaufman:1990:groups} cover the hard and hierarchical methods. Babu\v{s}ka's \emph{Fuzzy Modeling for Control} \cite{babuska:1998:book} is the source of the notation of this book and a standard reference on clustering-based identification; Abonyi and Feil \cite{abonyi:2007:book} collect the research threads that became the sub-packages of the toolbox. The MATLAB toolbox manual \cite{balasko:2005:toolbox} documents the predecessor, and scikit-learn is described in \cite{pedregosa:2011:sklearn}. Zadeh introduced fuzzy sets \cite{zadeh:1965:fuzzysets}, Ruspini fuzzy partitions \cite{ruspini:1969}, and Dunn the fuzzy c-means functional \cite{dunn:1973:fcm}.

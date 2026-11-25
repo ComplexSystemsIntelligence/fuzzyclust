@@ -1,0 +1,330 @@
+\chapter{Graph-based fuzzy clustering}\label{ch:graph}
+\begin{roadmap}
+Every algorithm so far described a cluster by a prototype (a point, an ellipsoid, a shell, a linear variety) and measured the distance of the samples to it. This chapter starts instead from a \emph{graph} over the samples and presents two methods of the Abonyi group that find clusters of arbitrary shape and return to a prototype description where one is useful. The first builds the minimal spanning tree of the data, removes inconsistent edges by Zahn's criteria, splits the subtrees further as long as the total fuzzy hypervolume decreases, and hands the crisp partition to Gath--Geva clustering, which turns it into a mixture of Gaussians with memberships, covariances and a similarity structure among the clusters. The second keeps the c-means functional but replaces the Euclidean distance by the geodesic distance along a nearest-neighbor graph and the centers by medoids, so that the clusters follow the manifold the data lie on. Both are in \code{fuzzyclust.graph}, need only SciPy's sparse-graph routines, and reuse the Gath--Geva clusterer and the volume-based validity indices of earlier chapters.
+\end{roadmap}
+
+\section{Problem and idea}\label{sec:graph:problem}
+
+Prototype-based clustering answers the question ``which prototype is this sample closest to?'' and therefore inherits the geometry of the prototype: fuzzy c-means finds spheres, Gustafson--Kessel and Gath--Geva find ellipsoids, and the shell and variety algorithms find shells and subspaces. When the groups have none of these shapes (a chain of points, a bent arm, two interleaved spirals, rings), the prototypes can only tile the groups into pieces, and the pieces are not the clusters a human sees. Hierarchical and graph-theoretic clustering take the opposite view: a cluster is a set of samples that are connected to each other through short steps and separated from the rest by long ones, whatever the shape of the set. Zahn's classical formulation \cite{zahn:1971} uses the \emph{minimal spanning tree} (MST) of the data: the tree connects all $N$ samples with $N-1$ edges of minimal total length, so that removing $k$ edges leaves $k+1$ subtrees that are candidate clusters (\cref{fig:graph:mst}, top). The tree keeps only $N-1$ of the $N(N-1)/2$ pairwise distances, which makes the method cheap, and single-linkage clustering amounts to removing its edges in decreasing order of length \cite{gower:1969:mst}.
+
+Two problems arise. The first is deciding which edges are ``inconsistent''. The longest edges separate clusters only when all clusters have the same density: a global threshold either leaves tight groups merged or shatters diffuse ones, and the local comparison with neighboring edges that Zahn proposed requires the user to choose a factor and a neighborhood depth. The second is that no length criterion can detect a \emph{chain}: a thin sequence of points between two groups keeps every edge short, so the groups remain connected (\cref{fig:graph:mst}, bottom); this is the chaining effect of single linkage. Vathy-Fogarassy, Feil and Abonyi \cite{vathy:2005:mst} solve both problems by combining the tree with fuzzy clustering. The tree is first cut by Zahn's criteria; the subtrees are then split further at the edge that minimizes the total \emph{fuzzy hypervolume} of the resulting clusters, which is Gath and Geva's validity measure \cite{gath:1989} used as a splitting criterion. A union of two compact groups, with or without a chain between them, has a far larger volume than its parts, whereas halving a Gaussian group increases the summed volume, so chains and bends are cut and Gaussian groups are left alone. Finally, the crisp tree partition initializes Gath--Geva clustering, which is too sensitive to its start to be run from a random partition on such data but turns a good start into a fuzzy, parametric description: centers, covariance matrices, memberships, and a similarity among the clusters that organizes them into a dendrogram.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[scale=1.2, >={Latex[length=2mm]}]
+  % ---------- top: MST with an inconsistent edge ----------
+  \begin{scope}
+    \node[note, anchor=west, font=\small] at (-1.0,1.55) {minimal spanning tree and Zahn's local criterion};
+    \def\ptsA{0.80/0.18,0.04/-0.75,-0.12/-0.14,-0.04/-0.25,-0.02/-0.19,-0.59/0.36,0.40/0.69,0.02/-0.16,-0.25/-0.63,4.04/-0.09,3.07/0.28,4.27/0.46,3.14/0.07,3.88/0.29,3.25/0.27,3.94/1.16,3.04/0.11,3.24/-0.62}
+    \def\treeA{-0.04/-0.25/-0.02/-0.19,-0.12/-0.14/-0.02/-0.19,0.04/-0.75/-0.25/-0.63,4.04/-0.09/3.88/0.29,4.27/0.46/3.88/0.29,-0.04/-0.25/-0.25/-0.63,3.88/0.29/3.25/0.27,-0.12/-0.14/-0.59/0.36,4.27/0.46/3.94/1.16}
+    \def\nearA{-0.02/-0.19/0.02/-0.16,3.14/0.07/3.04/0.11,3.07/0.28/3.04/0.11,3.07/0.28/3.25/0.27,0.80/0.18/0.40/0.69,3.14/0.07/3.24/-0.62,0.80/0.18/0.02/-0.16}
+    \foreach \xa/\ya/\xb/\yb in \treeA { \draw[fcgray, thick] (\xa,\ya) -- (\xb,\yb); }
+    \foreach \xa/\ya/\xb/\yb in \nearA { \draw[fcorange, very thick] (\xa,\ya) -- (\xb,\yb); }
+    \draw[fcverm, very thick, dashed] (0.80,0.18) -- (3.04,0.11);
+    \foreach \x/\y in \ptsA { \fill[fcblue!80!black] (\x,\y) circle (1.6pt); }
+    \fill[black] (0.80,0.18) circle (2pt) node[above, note] {$a$};
+    \fill[black] (3.04,0.11) circle (2pt) node[above, note] {$b$};
+    \node[note, text=fcverm!80!black, anchor=north] at (1.92,-0.05) {$w(e_{ab})$};
+    \node[note, text width=5.2cm, anchor=west] at (4.7,0.2) {\textcolor{fcverm!80!black}{dashed}: edge $e_{ab}$ is inconsistent when $w(e_{ab})\ge f\cdot\overline{w}$, with $\overline{w}$ the mean length of the \textcolor{fcorange!80!black}{nearby edges} within $k$ tree steps of $a$ and $b$ (here $k=2$ and $w(e_{ab})/\overline{w}\approx5.8$)};
+  \end{scope}
+  % ---------- bottom: the chain and the volume criterion ----------
+  \begin{scope}[shift={(1.25,-4.1)}]
+    \node[note, anchor=west, font=\small] at (-2.25,1.5) {a chain defeats every length criterion; the volume criterion cuts it};
+    \def\ptsB{-0.37/-0.41,0.45/-0.05,-0.65/0.26,-0.14/-0.70,-0.24/-0.24,-0.35/0.01,-0.90/-0.11,0.41/0.34,4.64/0.45,4.80/-0.45,4.54/-0.74,3.96/-0.77,4.62/0.53,4.12/0.71,3.93/0.06,4.26/-0.43,0.80/0.02,1.32/0.10,1.84/-0.05,2.36/0.04,2.88/-0.01,3.40/0.09}
+    \def\treeB{4.64/0.45/4.62/0.53,-0.37/-0.41/-0.24/-0.24,-0.24/-0.24/-0.35/0.01,0.45/-0.05/0.80/0.02,-0.37/-0.41/-0.14/-0.70,-0.65/0.26/-0.35/0.01,4.80/-0.45/4.54/-0.74,0.45/-0.05/0.41/0.34,4.54/-0.74/4.26/-0.43,-0.65/0.26/-0.90/-0.11,3.96/-0.77/4.26/-0.43,2.36/0.04/2.88/-0.01,0.80/0.02/1.32/0.10,4.62/0.53/4.12/0.71,2.88/-0.01/3.40/0.09,1.84/-0.05/2.36/0.04,3.93/0.06/3.40/0.09,1.32/0.10/1.84/-0.05,3.93/0.06/4.26/-0.43,4.12/0.71/3.93/0.06,0.45/-0.05/-0.24/-0.24}
+    % ellipses: whole (large) and the two parts after the best cut
+    \begin{scope}[rotate around={-0.6:(2.08,-0.06)}] \draw[fcverm!70, thick, dashed] (2.08,-0.06) ellipse (4.3 and 0.95); \end{scope}
+    \begin{scope}[rotate around={4.9:(0.20,-0.07)}] \draw[fcgreen!80!black, thick, fill=fcgreen!10, fill opacity=0.5] (0.20,-0.07) ellipse (1.85 and 0.62); \end{scope}
+    \begin{scope}[rotate around={-4.4:(3.96,-0.05)}] \draw[fcgreen!80!black, thick, fill=fcgreen!10, fill opacity=0.5] (3.96,-0.05) ellipse (1.7 and 1.05); \end{scope}
+    \foreach \xa/\ya/\xb/\yb in \treeB { \draw[fcgray, thick] (\xa,\ya) -- (\xb,\yb); }
+    \draw[fcorange, very thick, dashed] (1.84,-0.05) -- (2.36,0.04);
+    \foreach \x/\y in \ptsB { \fill[fcblue!80!black] (\x,\y) circle (1.6pt); }
+    \node[note, text width=10.5cm, anchor=north] at (2.08,-1.2) {every chain edge is as short as its neighbors, so no length criterion fires; the \textcolor{fcorange!80!black}{cut} minimizing the summed hypervolume $\sqrt{\det\mathbf{F}_a}+\sqrt{\det\mathbf{F}_b}$ (\textcolor{fcgreen!60!black}{solid}: $0.22+0.35$) beats the \textcolor{fcverm!80!black}{whole} ($0.80$)};
+  \end{scope}
+\end{tikzpicture}
+\caption[Clustering with the minimal spanning tree.]{Clustering with the minimal spanning tree. Top: the tree of two groups; the long edge $e_{ab}$ between them is inconsistent because it is much longer than the edges in its tree neighborhood (Zahn's local criterion), which also works when the groups have different densities. Bottom: a chain of points between two groups keeps every edge short and defeats all length criteria; the hybrid algorithm cuts the edge whose removal minimizes the summed fuzzy hypervolume of the two parts, because two compact groups have a much smaller volume than their elongated union.}
+\label{fig:graph:mst}
+\end{figure}
+
+The second method addresses a different failure of the prototype. Even where the groups are clear, the \emph{distance} may be wrong: when the data lie on a curved low-dimensional manifold, such as a spiral arm (\cref{fig:graph:geodesic}) or an S-shaped sheet (\cref{fig:graph:ex5b}), two samples that are close in the Euclidean sense may be far apart \emph{along} the manifold, and a center that is the mean of samples on both sides of a fold lies in empty space. Feil and Abonyi \cite{feil:2007:geodesic} replace the Euclidean distance by the \emph{geodesic} distance: the length of the shortest path in a graph that links every sample with its $k$ nearest neighbors, with the edges weighted by their Euclidean lengths. This is the distance Isomap \cite{tenenbaum:2000:isomap} uses to unfold manifolds, and it converges to the true geodesic as the sampling becomes dense \cite{bernstein:2000:geodesic}. Because geodesic distances exist only between samples, the prototypes are restricted to samples, which makes the algorithm a fuzzy c-medoid method in the spirit of Kaufman and Rousseeuw \cite{kaufman:1990:groups} and places the medoids on the manifold automatically. The only structural parameter is $k$: if it is too small, the manifold falls apart into several graph components; if it is too large, edges ``short-circuit'' arms that come close to each other.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[scale=0.9, >={Latex[length=2mm]}]
+  \def\ptsC{-0.26/0.81,-0.48/0.82,-0.70/0.78,-0.92/0.67,-1.13/0.50,-1.30/0.28,-1.43/0.00,-1.49/-0.32,-1.48/-0.66,-1.39/-1.01,-1.21/-1.34,-0.95/-1.65,-0.62/-1.90,-0.22/-2.08,0.23/-2.18,0.71/-2.17,1.19/-2.06,1.66/-1.84,2.08/-1.51,2.44/-1.08,2.70/-0.57,2.86/-0.00,0.26/-0.81,0.48/-0.82,0.70/-0.78,0.92/-0.67,1.13/-0.50,1.30/-0.28,1.43/-0.00,1.49/0.32,1.48/0.66,1.39/1.01,1.21/1.34,0.95/1.65,0.62/1.90,0.22/2.08,-0.23/2.18,-0.71/2.17,-1.19/2.06,-1.66/1.84,-2.08/1.51,-2.44/1.08,-2.70/0.57,-2.86/0.00}
+  \def\graphC{-0.26/0.81/-0.70/0.78,-0.26/0.81/-0.48/0.82,-0.48/0.82/-0.70/0.78,-0.70/0.78/-0.92/0.67,-0.92/0.67/-1.13/0.50,-1.13/0.50/-1.30/0.28,-1.30/0.28/-1.43/0.00,-1.43/0.00/-1.49/-0.32,-1.49/-0.32/-1.48/-0.66,-1.48/-0.66/-1.39/-1.01,-1.39/-1.01/-1.21/-1.34,-1.21/-1.34/-0.95/-1.65,-0.95/-1.65/-0.62/-1.90,-0.62/-1.90/-0.22/-2.08,-0.22/-2.08/0.23/-2.18,0.23/-2.18/0.71/-2.17,0.71/-2.17/1.19/-2.06,1.19/-2.06/1.66/-1.84,1.66/-1.84/2.08/-1.51,2.08/-1.51/2.44/-1.08,2.44/-1.08/2.86/-0.00,2.44/-1.08/2.70/-0.57,2.70/-0.57/2.86/-0.00,0.26/-0.81/0.70/-0.78,0.26/-0.81/0.48/-0.82,0.48/-0.82/0.70/-0.78,0.70/-0.78/0.92/-0.67,0.92/-0.67/1.13/-0.50,1.13/-0.50/1.30/-0.28,1.30/-0.28/1.43/-0.00,1.43/-0.00/1.49/0.32,1.49/0.32/1.48/0.66,1.48/0.66/1.39/1.01,1.39/1.01/1.21/1.34,1.21/1.34/0.95/1.65,0.95/1.65/0.62/1.90,0.62/1.90/0.22/2.08,0.22/2.08/-0.23/2.18,-0.23/2.18/-0.71/2.17,-0.71/2.17/-1.19/2.06,-1.19/2.06/-1.66/1.84,-1.66/1.84/-2.08/1.51,-2.08/1.51/-2.44/1.08,-2.44/1.08/-2.86/0.00,-2.44/1.08/-2.70/0.57,-2.70/0.57/-2.86/0.00}
+  % ---------- left: kNN graph, geodesic path vs chord ----------
+  \begin{scope}
+    \node[note, anchor=south, font=\small, align=center] at (0,2.4) {$k$-nearest-neighbor graph ($k=2$):\\ geodesic versus Euclidean distance};
+    \foreach \xa/\ya/\xb/\yb in \graphC { \draw[fcgray!70, thick] (\xa,\ya) -- (\xb,\yb); }
+    \draw[fcgreen!80!black, line width=1.8pt] (-0.70,0.78) -- (-0.92,0.67) -- (-1.13,0.50) -- (-1.30,0.28) -- (-1.43,0.00) -- (-1.49,-0.32) -- (-1.48,-0.66) -- (-1.39,-1.01) -- (-1.21,-1.34) -- (-0.95,-1.65) -- (-0.62,-1.90) -- (-0.22,-2.08) -- (0.23,-2.18) -- (0.71,-2.17) -- (1.19,-2.06) -- (1.66,-1.84) -- (2.08,-1.51) -- (2.44,-1.08) -- (2.86,-0.00);
+    \draw[black, thick, dotted] (-0.70,0.78) -- (2.86,0.00);
+    \foreach \x/\y in \ptsC { \fill[fcblue!80!black] (\x,\y) circle (1.5pt); }
+    \fill[black] (-0.70,0.78) circle (2.2pt) node[above left, note] {$\mathbf{x}_k$};
+    \fill[black] (2.86,0.00) circle (2.2pt) node[right, note] {$\mathbf{x}_l$};
+    \node[note, anchor=north, text width=5.4cm] at (0,-2.4) {\textcolor{fcgreen!60!black}{geodesic} $d_g(\mathbf{x}_k,\mathbf{x}_l)=$ length of the shortest path $=7.97$;\\ Euclidean $\norm{\mathbf{x}_k-\mathbf{x}_l}=3.64$ (dotted chord)};
+  \end{scope}
+  % ---------- right: components and a bridge ----------
+  \begin{scope}[shift={(7.6,0)}, scale=0.78]
+    \node[note, anchor=south, font=\small, align=center] at (0,3.1) {two graph components,\\ bridged with a penalty};
+    \foreach \xa/\ya/\xb/\yb in \graphC { \draw[fcgray!70, thick] (\xa,\ya) -- (\xb,\yb); }
+    \foreach \x/\y in \ptsC { \fill[fcblue!80!black] (\x,\y) circle (1.5pt); }
+    \draw[fcverm, very thick, dashed] (-0.26,0.81) -- (0.22,2.08);
+    \fill[black] (-1.49,-0.32) circle (2.6pt);
+    \fill[black] (1.49,0.32) circle (2.6pt);
+    \node[note, text=fcverm!80!black, anchor=east] at (-0.45,1.55) {bridge: $d+$penalty};
+    \node[note, anchor=north, text width=5.0cm] at (0,-3.05) {black dots: the two medoids; a path across the bridge is longer than any path inside an arm, so each arm keeps its medoid while all distances stay finite};
+  \end{scope}
+\end{tikzpicture}
+\caption[Geodesic distance on a neighborhood graph.]{Geodesic distance on a neighborhood graph. Left: two spiral arms sampled by 22 points each, linked to their two nearest neighbors. The samples $\mathbf{x}_k$ and $\mathbf{x}_l$ are 3.6 apart in the plane but 8.0 along the arm; a Euclidean prototype between them would sit in empty space, whereas a medoid with geodesic distances stays on the arm. Right: with $k=2$ the arms are separate components of the graph. They are bridged through their closest pair of points with a penalty equal to the largest within-component distance, so that all distances are finite but the two arms remain geodesically far apart.}
+\label{fig:graph:geodesic}
+\end{figure}
+
+\section{Theory}\label{sec:graph:theory}
+
+The notation is that of the rest of the book: $\X\in\R^{N\times n}$ with rows $\xk$, memberships $\mik$ in the matrix $\U\in\R^{c\times N}$ (stored transposed in the code), prototypes $\vi$ with index $i$ (or $j$), samples with index $k$. We treat the hybrid MST--GG algorithm first (\cref{sec:graph:mst,sec:graph:volume,sec:graph:refine}), then the geodesic distance (\cref{sec:graph:geodist}) and the two clustering algorithms built on it (\cref{sec:graph:geofcm,sec:graph:isomap}).
+
+\subsection{The minimal spanning tree and Zahn's cutting criteria}\label{sec:graph:mst}
+
+Let $G=(V,E)$ be the complete weighted graph on the samples, with edge weights $w(e_{kl})=d(\xk,\mathbf{x}_l)$ (Euclidean here; any metric would do). A spanning tree is a connected subgraph without cycles that reaches every vertex; the minimal spanning tree $T=(V,E_T)$ is the one with the smallest total weight,
+\begin{equation}
+  \sum_{e\in E_T} w(e)\;=\;\min,\qquad |E_T|=N-1,
+  \label{eq:graph:mst}
+\end{equation}
+computable by Prim's algorithm in $O(N^2)$ time or by Kruskal's in $O(N^2\log N)$ \cite{prim:1957,kruskal:1956} (\code{fuzzyclust} uses SciPy's implementation on the dense distance matrix). Removing $k$ edges from $T$ leaves $k+1$ subtrees, and the sets of their vertices are the clusters; if $\delta$ is the length of a removed edge, no point on one side of it is closer than $\delta$ to a point on the other side. Clustering with the MST is therefore divisive hierarchical clustering, and the whole question is \emph{which} edges to remove.
+
+\paragraph{Criterion 1 (global threshold).} Remove every edge longer than a multiple of the mean edge length,
+\begin{equation}
+  w(e)>\delta=\lambda\,\frac{1}{N-1}\sum_{e'\in E_T}w(e'),
+  \label{eq:graph:crit1}
+\end{equation}
+or remove the longest edges one by one until the desired number of clusters is reached. Both forms presuppose a single density: the mean is dominated by the largest group, and a tight pair of groups sits below the threshold while the tails of a diffuse group are cut off (\cref{fig:graph:ex2a}).
+
+\paragraph{Criterion 2 (local inconsistency).} Zahn \cite{zahn:1971} compares an edge with its surroundings instead. Let $\mathcal{N}_k(e_{ab})$ be the set of tree edges within $k$ steps of either endpoint $a$ or $b$ of the edge (not counting $e_{ab}$ itself), with mean length $\overline{w}$ and standard deviation $\sigma_w$. The edge is \emph{inconsistent} when
+\begin{equation}
+  w(e_{ab})\ge f\,\overline{w}\quad\text{(ratio form)}\qquad\text{or}\qquad
+  w(e_{ab})>\overline{w}+s\,\sigma_w\quad\text{(deviation form)},
+  \label{eq:graph:crit2}
+\end{equation}
+with a factor $f$ (typically $2$--$3$) or a number of standard deviations $s$. The hybrid algorithm uses the ratio form; the deviation form, Zahn's second proposal, needs a deeper neighborhood, because the standard deviation of a handful of edges is a poor reference. The reference length adapts to the surroundings of every edge, so groups of widely different density are separated (\cref{fig:graph:mst}, top), at the price of two parameters that interact: the deeper the neighborhood, the more stable the reference and the wider the range of factors that works. Both criteria cut edges in one pass; \code{fuzzyclust} applies the flagged cuts longest first and refuses a cut that would create a component smaller than \py{min_cluster_size}, which keeps single outliers from becoming clusters.
+
+\subsection{Criterion 3: splitting by the fuzzy hypervolume}\label{sec:graph:volume}
+
+Length criteria compare distances and are blind to chains. The hybrid algorithm therefore judges a candidate partition by the \emph{quality of the clusters it produces}, using a validity measure as the splitting criterion. Varma and Simon \cite{varma:2004:mst} used the Fukuyama--Sugeno measure \cite{fukuyama:1989:validity} in this role; Vathy-Fogarassy, Feil and Abonyi take the fuzzy hypervolume of Gath and Geva \cite{gath:1989}, because the clusters will be refined by Gath--Geva clustering, to which the hypervolume belongs. For a partition $\U$ with centers $\mathbf{v}_j$, the fuzzy covariance matrix, the hypervolume of cluster $j$ and the total hypervolume are
+\begin{equation}
+  \mathbf{F}_j=\frac{\sum_{k=1}^{N}\mu_{jk}^m(\xk-\mathbf{v}_j)(\xk-\mathbf{v}_j)\T}{\sum_{k=1}^{N}\mu_{jk}^m},\qquad
+  V_j=\sqrt{\det\mathbf{F}_j},\qquad
+  FHV=\sum_{j=1}^{c}V_j ,
+  \label{eq:graph:fhv}
+\end{equation}
+evaluated during the tree phase with the crisp memberships of the tree partition. The alternative criterion of Varma and Simon, in its crisp form,
+\begin{equation}
+  FS=\sum_{j=1}^{c}\sum_{\xk\in S_j}\Big(\norm{\xk-\mathbf{v}_j}^2-\norm{\mathbf{v}_j-\bar{\mathbf{v}}}^2\Big),
+  \label{eq:graph:fs}
+\end{equation}
+with $\bar{\mathbf{v}}$ the global mean, rewards compact clusters with distant centers and is available as \py{criterion="fukuyama_sugeno"}.
+
+The splitting starts with the subcluster of largest volume $V_i$. Each of its $N_i-1$ tree edges is removed in turn, which produces a binary split into $a$ and $b$ and a candidate partition with total volume $FHV-V_i+V_a+V_b$; the cut with the smallest total volume is the best split of this subcluster. \code{fuzzyclust} accepts the best split when its \emph{relative} gain,
+\begin{equation}
+  \frac{V_i-V_a-V_b}{V_i}>\text{\py{min_gain}},
+  \label{eq:graph:gain}
+\end{equation}
+exceeds a threshold ($0.15$ by default) and each part has at least \py{min_cluster_size} samples; otherwise the next largest subcluster is tried, and the procedure stops when no subcluster can be improved or \py{max_clusters} is reached. The threshold is the toolbox's reading of the paper's ``special parameters that control the generalization level of the hierarchical clustering tree'': cutting a few tail points off a compact group always lowers the volume a little, and the relative gain separates such cosmetic cuts from real structure. The criterion spares Gaussian groups and breaks chains. Halving a Gaussian group along its principal axis reduces the variance along that axis to $(1-2/\pi)\sigma^2\approx0.36\,\sigma^2$, so each half keeps about $0.6$ of the volume and the two halves together have $1.2$ times the volume of the whole; the split brings no gain. For two compact groups joined by a chain, the determinant of the union is inflated by the distance between the groups, and the parts are much smaller (\cref{fig:graph:mst}, bottom). A curved group is split into arcs for the same reason, and this is intended: every final cluster is then well approximated by one Gaussian, which is the representation the refinement needs. Evaluating all $N_i-1$ cuts is cheap: with the subtree rooted at any vertex, the count, the sum of $\xk$ and the sum of $\xk\xk\T$ below every vertex are accumulated in one pass from the leaves to the root, and the statistics of both sides of any edge follow by subtraction, so the statistics of all candidate cuts cost $O(N_i n^2)$, plus two $n\times n$ determinants (one for each side) per cut.
+
+When the number of clusters is \emph{given} (\py{n_clusters=c}), the same machinery is steered toward it: coarse cuts of Criteria 1--2 beyond $c$ are undone shortest first, and the volume splitting continues with the best available cut, gain or no gain, until $c$ clusters exist. This makes the estimator usable in the validity scans of the toolbox; the scan of the volume indices over $c$ shows a knee at the number where the automatic rule stops (\cref{fig:graph:ex3a}).
+
+\subsection{Gath--Geva refinement and the analysis of the result}\label{sec:graph:refine}
+
+The tree partition is crisp and carries no model. In Step 4 of the algorithm it initializes Gath--Geva clustering with as many clusters as the tree partition has: the crisp membership matrix is the starting $\U$, and the GG iterations (prior $\alpha_i$, center $\vi$, fuzzy covariance $\Fi$, exponential distance, membership update) run to convergence as in \cref{sec:part:gg}. GG is a maximum-likelihood estimator of a Gaussian mixture and is notoriously sensitive to its initialization: started from FCM or at random on a chained or curved data set, it merges a group with a chain or splits a group. Here, however, it only has to \emph{polish} the tree partition, and it does so without leaving it (\cref{fig:graph:ex1c}). The result is a fuzzy partition with centers, covariance matrices and priors: a compact parametric description of clusters whose shapes the tree found, and the basis of the membership contours and covariance ellipses in the figures. (FCM as refinement, \py{refine="fcm"}, is pulled off the tree partition by the chain points; \py{refine=None} keeps the crisp partition with the covariances of the tree clusters.)
+
+Two measures evaluate the result. The adequacy of a cut $e_{ab}$ that produced clusters $C_a\ni a$ and $C_b\ni b$ is read off the refined memberships,
+\begin{equation}
+  CP(e_{ab})=\sum_{k\in\{a,b\}}\abs{\mu_{ik}-\mu_{jk}},\qquad i=\text{cluster of }a,\; j=\text{cluster of }b,
+  \label{eq:graph:cp}
+\end{equation}
+which is $2$ when the two endpoints belong firmly to different clusters and $0$ when the refinement has re-united them (\py{cut_quality_}). The clusters themselves are compared as fuzzy sets over the samples by the ratio of fuzzy intersection and union,
+\begin{equation}
+  S_{ij}=\frac{\sum_{k=1}^{N}\min(\mu_{ik},\mu_{jk})}{\sum_{k=1}^{N}\max(\mu_{ik},\mu_{jk})}=\frac{|A_i\cap A_j|}{|A_i\cup A_j|},
+  \label{eq:graph:similarity}
+\end{equation}
+a symmetric matrix with unit diagonal (\py{cluster_similarity_}). Used as the distance $1-S_{ij}$ in single-linkage clustering, it yields a dendrogram of the clusters: pieces of one nonconvex group share samples with intermediate memberships and join at a low level, while pieces of different groups do not, so the dendrogram shows which clusters may be merged and how they are related in the original space (\cref{fig:graph:ex3c}). GG memberships are nearly crisp, so the similarities are small (the dendrogram in the paper also spans only the range from $0.96$ to $1$), but their order carries the structure.
+
+\begin{algobox}{Hybrid MST--GG clustering}{mstgg}\index{minimal spanning tree clustering}\index{hybrid MST--GG clustering}\index{Zahn's criteria}\index{fuzzy hypervolume!as splitting criterion}\index{MSTClustering@\code{MSTClustering}}
+\begin{algorithm}[H]
+\KwIn{data $\X$; threshold $\lambda$ and/or factor $f$ (or $s$) with depth $k$; minimum gain and minimum cluster size; optional number of clusters $c$; exponent $m$ for the refinement}
+build the minimal spanning tree $T$ of $\X$ \eqref{eq:graph:mst}\;
+\tcp{Step 0: Criteria 1 and 2}
+flag the edges that satisfy \eqref{eq:graph:crit1} or \eqref{eq:graph:crit2}; remove them longest first, skipping cuts that would create a component below the minimum size\;
+\lIf{$c$ is given and there are more components}{restore the shortest removed edges until $c$ remain}
+\tcp{Steps 1--3: volume-based binary splitting}
+\Repeat{no split is accepted (or $c$ clusters exist)}{
+  \For{the subtrees in decreasing order of $V_i=\sqrt{\det\mathbf{F}_i}$}{
+    for every edge of the subtree compute $V_a+V_b$ of the two sides from the subtree sums \eqref{eq:graph:fhv}\;
+    take the edge with the smallest $V_a+V_b$ whose parts are large enough\;
+    \lIf{$(V_i-V_a-V_b)/V_i>$ \py{min_gain} (or $c$ is given and not yet reached)}{cut it and restart the loop}
+  }
+}
+\tcp{Step 4: refinement and analysis}
+initialize Gath--Geva with the crisp tree partition and iterate to convergence\;
+cut adequacies $CP(e)$ \eqref{eq:graph:cp}, cluster similarities $S_{ij}$ \eqref{eq:graph:similarity}\;
+\KwOut{tree partition, fuzzy partition $\U$, centers $\vi$, covariances $\Fi$, removed edges with phase and adequacy, similarity matrix}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Hybrid MST--GG clustering}
+\begin{itemize}
+  \item Divisive clustering on the minimal spanning tree: Zahn's global and local length criteria separate distinct groups (also of different density); the fuzzy hypervolume criterion cuts chains and bends that length criteria cannot see and spares Gaussian groups.
+  \item The tree partition initializes Gath--Geva clustering, which turns it into a mixture of Gaussians with memberships and covariances without destroying it; nonconvex groups come out as Gaussian pieces.
+  \item Parameters: factor $f$ and depth $k$ of the local criterion ($f=3$--$4$ with $k\ge3$ in the examples), or a global $\lambda$; \py{min_gain} and \py{min_cluster_size} for the splitting; \py{n_clusters} to steer toward a given number.
+  \item Analysis: cut adequacy $CP(e)$, similarity $S_{ij}$ of the fuzzy clusters and its dendrogram for merging and visualization; $O(N^2)$ memory for the distance matrix.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Geodesic distances on a neighborhood graph}\label{sec:graph:geodist}
+
+Let the samples lie on (or near) a smooth manifold $M\subset\R^n$ of lower dimension. The intrinsic distance between two samples is the length of the shortest curve \emph{on $M$} connecting them, the geodesic distance $d_M$, which can differ arbitrarily from the Euclidean chord (\cref{fig:graph:geodesic}, left). Isomap \cite{tenenbaum:2000:isomap} approximates it in two steps. A neighborhood graph links each sample with its $k$ nearest neighbors ($k$-Isomap) or with all samples within a radius $\varepsilon$ ($\varepsilon$-Isomap), every edge weighted by its Euclidean length; the graph distance $d_g(\xk,\mathbf{x}_l)$, the length of the shortest path found by Dijkstra's or Floyd's algorithm \cite{dijkstra:1959,floyd:1962}, then stands in for $d_M$. Bernstein et al.\ \cite{bernstein:2000:geodesic} prove that $d_g\to d_M$ as the sampling density grows: short edges follow the manifold, and the shortest path cannot cut through empty space because there are no edges there. The approximation is good when $k$ (or $\varepsilon$) is large enough for the graph to be connected along the manifold and small enough that no edge jumps across a gap between folds or arms (a ``short-circuit''). The scale-free $k$ is easier to set than $\varepsilon$, and the number of connected components of the graph is the first diagnostic.
+
+Components are the practical difficulty: if the graph is disconnected, the geodesic distance between components is undefined (infinite). The paper treats the components of the spiral as distinct manifolds that the clustering should keep apart. \code{fuzzyclust} follows this and makes it operational: components are linked through their closest pair of points by a \emph{bridge} whose length is the Euclidean gap plus a penalty, by default equal to the largest finite geodesic distance of the unbridged graph (\cref{fig:graph:geodesic}, right). Every distance is then finite, and a path across a bridge is longer than any path inside a component, so clusters do not span components, while a component without a medoid still receives memberships through its bridge instead of being lost. The penalty can be set to zero when the components are known to be fragments of one manifold ($k$ too small), in which case the plain bridge re-joins them at their natural junctions (\cref{fig:graph:ex5d}).
+
+\subsection{Algorithm II: geodesic distance based fuzzy c-medoids}\label{sec:graph:geofcm}
+
+The clustering minimizes the c-means functional of Bezdek \cite{bezdek:1981} with geodesic distances and prototypes restricted to samples,
+\begin{equation}
+  \J=\sum_{i=1}^{c}\sum_{k=1}^{N}\mik^m\,d_g(\xk,\vi)^2,\qquad \vi\in\{\mathbf{x}_1,\dots,\mathbf{x}_N\},
+  \label{eq:graph:J}
+\end{equation}
+under the usual constraints $\sum_i\mik=1$. The restriction is forced by the distance, since $d_g$ exists only between samples, and it is welcome: a medoid lies on the manifold by construction, whereas a mean of samples on both sides of a fold does not (\cref{fig:graph:ex5b}). The alternating optimization has the two familiar steps. For fixed medoids, the Lagrange conditions give the FCM membership formula with $d_g$,
+\begin{equation}
+  \mik=\frac{1}{\sum_{j=1}^{c}\big(d_g(\xk,\vi)/d_g(\xk,\mathbf{v}_j)\big)^{2/(m-1)}},
+  \label{eq:graph:mu}
+\end{equation}
+and for fixed memberships every sample is tried as the medoid of every cluster, and the one with the smallest weighted sum of squared geodesic distances is taken,
+\begin{equation}
+  \vi=\mathbf{x}_j,\qquad j=\argmin_{l}\sum_{k=1}^{N}\mik^m\,d_g(\xk,\mathbf{x}_l)^2 ,
+  \label{eq:graph:medoid}
+\end{equation}
+which is one matrix product $\mathbf{D}_g^{(2)}(\U^{m})\T$ of the squared distance matrix with the powered memberships, $O(cN^2)$ per iteration. The iterations stop when the medoids no longer change (or $\max|\Delta\mik|<\epsilon$). The paper starts from $c$ arbitrary samples. \code{fuzzyclust} defaults to a D$^2$-weighted seeding on geodesic distances (\py{init="kmeans++"}), because a medoid rarely migrates across a penalized bridge during the iterations: a random start that puts every medoid into one graph component leaves the other components without a prototype. Random starts with restarts are available as well. The dense geodesic distance matrix and the exhaustive medoid search limit the method to a few thousand samples; the paper points to sampling schemes such as CLARA \cite{kaufman:1990:groups} for larger data sets. A new sample has no geodesic distance of its own; \code{fuzzyclust} enters the graph at the nearest training sample and adds the Euclidean distance to it, which is exact for training points and adequate close to the manifold.
+
+\begin{algobox}{Geodesic distance based fuzzy c-medoid clustering (Algorithm II)}{geofcm}\index{geodesic fuzzy c-medoids}\index{geodesic distance}\index{GeodesicFCM@\code{GeodesicFCM}}
+\begin{algorithm}[H]
+\KwIn{data $\X$, number of clusters $c$, neighbors $k$ (or radius $\varepsilon$), exponent $m$, tolerance $\epsilon$}
+build the $k$-nearest-neighbor graph with Euclidean weights; find its connected components\;
+\lIf{several components}{bridge them through their closest pairs with the penalized length}
+geodesic distances $d_g(\xk,\mathbf{x}_l)$ for all pairs by shortest paths\;
+choose $c$ samples as initial medoids (D$^2$ seeding or arbitrary)\;
+\Repeat{the medoids do not change or $\max_{ik}\abs{\mu^{(l)}_{ik}-\mu^{(l-1)}_{ik}}<\epsilon$}{
+  memberships $\mik$ by \eqref{eq:graph:mu} from the geodesic distances to the medoids\;
+  \For{every cluster $i$}{new medoid by \eqref{eq:graph:medoid}: the sample minimizing $\sum_k\mik^m d_g(\xk,\cdot)^2$}
+}
+\KwOut{medoids $\vi$ (indices into $\X$), partition $\U$, $\J$, the graph and the geodesic distance matrix}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Geodesic fuzzy c-medoids}
+\begin{itemize}
+  \item The c-means functional with the geodesic (shortest-path) distance of a $k$-nearest-neighbor graph and medoids as prototypes: clusters follow the manifold, and memberships fade along it, not across it.
+  \item One structural parameter, $k$: large enough to keep each manifold connected, small enough not to connect different ones; the component count and the plateau of the result over $k$ show the usable range.
+  \item Disconnected components are bridged with a penalty (kept apart, all distances finite) or, when they are fragments of one manifold, with plain bridges; $m$ plays its usual role.
+  \item $O(N^2)$ memory and $O(cN^2)$ time per iteration, which suits small and medium data sets; new samples enter through their nearest training sample.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Algorithm I: clustering of the Isomap projection}\label{sec:graph:isomap}
+
+The paper's first route leaves the manifold entirely to Isomap and clusters its output. Classical multidimensional scaling \cite{torgerson:1952:mds} of the geodesic distance matrix $\mathbf{D}_g$ gives coordinates $\mathbf{y}_k\in\R^q$ that reproduce the geodesic distances as well as possible: with $\mathbf{H}=\mathbf{I}-\tfrac1N\mathbf{1}\mathbf{1}\T$, the matrix $\mathbf{B}=-\tfrac12\mathbf{H}\mathbf{D}_g^{(2)}\mathbf{H}$ is decomposed, and $\mathbf{Y}=\mathbf{Q}_q\boldsymbol\Lambda_q^{1/2}$ is formed from its $q$ largest eigenpairs. The discarded share of the eigenvalue mass is the residual variance, and its decrease with $q$ indicates the intrinsic dimension of the manifold. Fuzzy c-means is run on $\mathbf{Y}$, and each center is ``re-projected'' into the feature space as the sample whose projection is closest to it, so that the prototypes lie on the manifold here too; the cost \eqref{eq:graph:J} evaluated with geodesic distances to the re-projected centers compares the two routes. The weakness is the projection: Isomap can only embed a connected graph (hence the bridges), and a projection that folds the manifold spoils the clustering. The paper found Algorithm II slightly better on the S-curve and the spiral; in \code{fuzzyclust} the two reach nearly the same geodesic cost (\cref{fig:graph:ex5b}).
+
+\begin{algobox}{Clustering of the Isomap projection (Algorithm I)}{isomapfcm}\index{Isomap}\index{IsomapFCM@\code{IsomapFCM}}
+\begin{enumerate}[leftmargin=*]
+  \item Neighborhood graph, bridges and geodesic distances $\mathbf{D}_g$ as in Algorithm II.
+  \item Classical MDS of $\mathbf{D}_g$: $\mathbf{B}=-\tfrac12\mathbf{H}\mathbf{D}_g^{(2)}\mathbf{H}$, $\mathbf{Y}=\mathbf{Q}_q\boldsymbol\Lambda_q^{1/2}$; residual variance from the discarded eigenvalues.
+  \item Fuzzy c-means on $\mathbf{Y}$ with $c$ clusters and exponent $m$ (random restarts allowed).
+  \item Re-project every center $\mathbf{z}_i$ as the sample whose $\mathbf{y}_k$ is closest to it; report $\U$, the projected and re-projected centers and $\J$ with geodesic distances.
+\end{enumerate}
+\end{algobox}
+\begin{summarybox}{Clustering of the Isomap projection}
+\begin{itemize}
+  \item Isomap unfolds the manifold, FCM clusters the flat picture, and the centers return to the data space as the closest samples.
+  \item Needs a connected (or bridged) graph and a good projection; the residual variance tells how much of the geodesic geometry $q$ dimensions keep.
+  \item The graph parameters of Algorithm II (components are always bridged) plus the embedding dimension $q$; the FCM step inherits \py{init} and \py{n_init}.
+\end{itemize}
+\end{summarybox}
+
+\section{Using it in fuzzyclust}\label{sec:graph:api}
+
+Everything in this chapter is in \code{fuzzyclust.graph}. The three estimators derive from \code{BaseFuzzyClusterer} and have the usual methods \code{fit}, \code{predict}, \code{predict\_proba}, \code{transform} and \code{score}. The graph utilities are functions built on the sparse-graph routines of SciPy, so no optional dependency is needed; \code{networkx} is accepted only as an alternative backend for the tree.
+
+\begin{apibox}{fuzzyclust.graph.MSTClustering}
+\code{n\_clusters=None}, \code{threshold=None}, \code{inconsistency=2.5}, \code{inconsistency\_std=None}, \code{n\_hops=2}, \code{criterion="hypervolume"|\allowbreak "fukuyama\_sugeno"}, \code{min\_gain=0.15}, \code{min\_cluster\_size=5}, \code{max\_clusters=20}, \code{refine="gg"|\allowbreak "fcm"|\allowbreak None}, \code{m=2.0}, \code{gamma=0.0}, \code{tol}, \code{max\_iter}, \code{backend="scipy"|\allowbreak "networkx"}, \code{random\_state}, \code{verbose}.\\
+Attributes \code{n\_clusters\_}, \code{tree\_labels\_} (crisp tree partition), \code{labels\_}, \code{membership\_}, \code{cluster\_centers\_}, \code{covariances\_}, \code{mst\_edges\_}, \code{mst\_weights\_}, \code{cut\_edges\_}, \code{cut\_phases\_} (0: length criteria, 1: volume), \code{cut\_quality\_} ($CP$), \code{hypervolumes\_}, \code{cluster\_similarity\_} ($S_{ij}$), \code{refiner\_} (the fitted GG or FCM). \code{min\_gain=1.0} disables the splitting phase (unless \code{n\_clusters} is given); \code{threshold=None} and \code{inconsistency=None}, with the default \code{inconsistency\_std=None}, disable the length criteria.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.graph.GeodesicFCM}
+\code{n\_clusters=3}, \code{n\_neighbors=10}, \code{radius=None}, \code{connect\_components=True}, \code{bridge\_penalty=1.0}, \code{m=2.0}, \code{tol}, \code{max\_iter}, \code{init="kmeans++"|\allowbreak "random"|\allowbreak index array}, \code{n\_init=1}, \code{random\_state}, \code{verbose}.\\
+Attributes \code{medoid\_indices\_}, \code{cluster\_centers\_} (the medoids), \code{membership\_}, \code{labels\_}, \code{geodesic\_distances\_}, \code{neighbors\_graph\_}, \code{n\_components\_}, \code{component\_labels\_}, \code{bridge\_edges\_}, \code{objective\_}, \code{objective\_history\_}, \code{n\_iter\_}. New samples enter the graph through their nearest training sample.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.graph.IsomapFCM}
+\code{n\_clusters=3}, \code{n\_components=2}, \code{n\_neighbors=10}, \code{radius=None}, \code{bridge\_penalty=1.0}, \code{m}, \code{tol}, \code{max\_iter}, \code{init}, \code{n\_init}, \code{random\_state}, \code{verbose}.\\
+Attributes \code{embedding\_} ($\mathbf{Y}$), \code{embedded\_centers\_}, \code{medoid\_indices\_}, \code{cluster\_centers\_} (re-projected), \code{membership\_}, \code{labels\_}, \code{geodesic\_objective\_}, \code{residual\_variance\_}, \code{fcm\_} and the graph attributes of \code{GeodesicFCM}.
+\end{apibox}
+
+\begin{apibox}{graph utilities,\allowbreak\ data generators and plot helpers}
+\code{minimum\_spanning\_tree(X,\allowbreak\ backend)} $\to$ edges, lengths; \code{neighbors\_graph(X,\allowbreak\ n\_neighbors,\allowbreak\ radius)} $\to$ sparse adjacency; \code{geodesic\_distances(X,\allowbreak\ n\_neighbors,\allowbreak\ radius,\allowbreak\ connect\_components,\allowbreak\ bridge\_penalty)} $\to$ \code{Bunch(distances,\allowbreak\ graph,\allowbreak\ n\_components,\allowbreak\ component\_labels,\allowbreak\ bridges)}; \code{isomap\_embedding(D,\allowbreak\ n\_components)} $\to$ coordinates, eigenvalues; \code{fuzzy\_cluster\_similarity(U)} $\to$ $S_{ij}$. Generators \code{make\_chained\_blobs}, \code{make\_density\_blobs}, \code{make\_s\_curve} (with \code{make\_rings}, \code{make\_two\_moons}, \code{make\_curved\_manifold} of \code{fuzzyclust.datasets}). Plots \code{plot\_mst(X,\allowbreak\ model)}, \code{plot\_neighbors\_graph(X,\allowbreak\ graph\_or\_model)}, \code{plot\_geodesic\_path(X,\allowbreak\ graph,\allowbreak\ source,\allowbreak\ target)}, \code{plot\_similarity\_dendrogram(S)}.
+\end{apibox}
+
+The classical tree clusterer and the hybrid one differ in two parameters:
+\pysnippet{examples/05_graph/plot_01_mst_clustering.py}{tree}
+\pysnippet{examples/05_graph/plot_01_mst_clustering.py}{fit}
+The refinement and its adequacy measures are part of the fit, and the number of clusters can be prescribed and scanned with the validity functions of the toolbox:
+\pysnippet{examples/05_graph/plot_01_mst_clustering.py}{refine}
+\pysnippet{examples/05_graph/plot_03_mst_validation.py}{scan}
+The geodesic clusterer is a drop-in replacement for FCM, and the geodesic distances and paths are available on their own:
+\pysnippet{examples/05_graph/plot_04_geodesic_fcm.py}{fit}
+\pysnippet{examples/05_graph/plot_05_geodesic_path_isomap.py}{path}
+\pysnippet{examples/05_graph/plot_05_geodesic_path_isomap.py}{scurve}
+
+\section{Examples}\label{sec:graph:examples}
+
+\subsection{Cutting, splitting and refining the tree}
+
+Two Gaussian groups of 120 points are joined by a chain of 25 points (\cref{fig:graph:ex1a}). Without any criterion the tree is one cluster. Zahn's local criterion with $f=2.5$ and $k=2$ flags one edge, inside the chain close to the left group, so most of the chain stays attached to the right group: the length criteria cannot separate the groups from the chain. The volume criterion (\cref{fig:graph:ex1b}) makes two further cuts, one where the chain meets the right group and one in the middle of the chain. The result is four tree clusters, the two groups with hypervolumes $0.29$ and $0.25$ (the left one with the six chain points left of the length cut) and two chain pieces with $0.02$ and $0.05$, and the points of the two groups are separated exactly. Started from this partition, Gath--Geva keeps it (agreement $0.98$ with the tree partition) and delivers the membership contours and covariance ellipses of \cref{fig:graph:ex1c}; the same GG started from a random partition with four clusters spends one Gaussian on the whole chain and collapses another onto a few points at the edge of the left group. The cut adequacies are $0$ for the cut of the length criterion, whose endpoints the refinement re-united in the neighboring chain piece, and $1.5$ and $2.0$ for the two volume cuts. The parameter study (\cref{fig:graph:ex1d}) shows the number of tree clusters falling as the required relative gain rises from $0.05$ to $0.6$: from twenty to six with \py{min_cluster_size=2}, from five to two with the default size of five, and from three to two with sizes of ten and twenty, which remove the small fragments altogether. The printed comparison of the refinements shows FCM pulled off the tree partition (agreement $0.63$) while GG stays on it.
+
+\exfig{05_graph/plot_01_mst_clustering_1}{The minimal spanning tree of two groups joined by a chain (left) and the single edge that Zahn's local criterion removes (right, dashed): the chain stays attached to one group.}{graph:ex1a}
+\exfig[0.62\textwidth]{05_graph/plot_01_mst_clustering_2}{The volume criterion cuts the chain (orange dashed edges) and separates it from the groups; the length-criterion cut is drawn in vermilion.}{graph:ex1b}
+\exfig{05_graph/plot_01_mst_clustering_3}{Gath--Geva clustering initialized with the tree partition (left) polishes it into a fuzzy partition with covariance ellipses; the same GG from a random start (right) spends one Gaussian on the chain and collapses another onto a few points of the left group.}{graph:ex1c}
+\exfig{05_graph/plot_01_mst_clustering_4}[Left: the number of tree clusters against the required relative volume gain for several minimum cluster sizes.]{Left: the number of tree clusters against the required relative volume gain for several minimum cluster sizes. Right: FCM as refinement is pulled off the tree partition by the chain points.}{graph:ex1d}
+
+\subsection{Which edges are inconsistent?}
+
+The data are a diffuse group of 200 points next to two tight groups of 40 points (\cref{fig:graph:ex2a}). A global threshold of twice the mean edge length cuts eight clusters out of the tree, mostly tails of the diffuse group; four times the mean leaves the two tight groups merged, and the printed scan shows that no threshold in between returns the three groups: the edge between the tight groups is no longer than the longest edges inside the diffuse group (\cref{fig:graph:ex2b}). The local criterion with $f=2.5$ and $k=3$ finds the three groups exactly, because each separating edge is far longer than its own neighbors. \Cref{fig:graph:ex2c} varies the factor and the depth: with $k=1$ no factor returns the three groups ($f\le3$ fragments the diffuse group, $f=4$ already misses a separation), with $k=3$ or $5$ every $f$ between $2.5$ and $4$ works (with $k=8$ from $f=3$ on), and $f=6$ misses a separation for every depth; the deviation form needs $k\ge5$ at three standard deviations and $k\ge2$ at four. Raising \py{min_cluster_size} tames an eager criterion ($f=2$, $k=2$: from ten clusters at size 5 to four at size 20).
+
+\exfig{05_graph/plot_02_mst_cut_criteria_1}[Length criteria on a diffuse group and two tight groups.]{Length criteria on a diffuse group and two tight groups. A global threshold of twice the mean edge length shatters the diffuse group (left), four times the mean merges the tight groups (middle), and Zahn's local criterion separates the three groups (right).}{graph:ex2a}
+\exfig[0.7\textwidth]{05_graph/plot_02_mst_cut_criteria_2}{Edge lengths of the tree with the two global thresholds (dashed) and the two edges removed by the local criterion (vermilion): the edge between the tight groups lies among the long edges of the diffuse group.}{graph:ex2b}
+\exfig{05_graph/plot_02_mst_cut_criteria_3}{Number of clusters found by the ratio form (left) and the deviation form (right) of Criterion 2 as a function of the factor and the neighborhood depth; the dotted line is the true number.}{graph:ex2c}
+
+\subsection{How many clusters?}
+
+Four Gaussian groups of different sizes are clustered with \py{n_clusters} from 2 to 8, and the volume indices of Gath and Geva are computed from the refined partitions (\cref{fig:graph:ex3a}). The fuzzy hypervolume falls by 38\,\% from three to four clusters and by less than 3\,\% for every further split; the partition density rises steeply up to four and then stays flat; the average partition density peaks at four but is overtaken at eight, where small dense fragments appear. The knee, not the extremum, carries the information, and the relative decrease of $FHV$ drops below the default \py{min_gain} of $0.15$ exactly where the automatic run stops, at four. Two concentric rings (\cref{fig:graph:ex3b}) show the limits of the refinement: the tree partition with two clusters separates the rings perfectly, but a Gath--Geva refinement of two clusters fails (ARI $0.09$), because one Gaussian cannot describe a hollow ring and the inner ring is absorbed by the broad outer Gaussian. Without a prescribed number, the volume criterion keeps splitting the rings into arcs that are approximately Gaussian until \py{max_clusters} is reached; with \py{max_clusters=12} it produces twelve arcs, and the refinement of the arcs is faithful. Their fuzzy similarity matrix (\cref{fig:graph:ex3c}) has its large entries between neighboring arcs of the same ring, the single-linkage dendrogram of $1-S_{ij}$ has two main branches, and cutting it into two groups merges the arcs back into the rings (ARI $1.0$). The similarities grow with the exponent $m$ of the refinement (the largest same-ring entry rises from $0.007$ at $m=1.5$ to $0.05$ at $m=4$) while the merge stays correct, and the number of arcs follows \py{max_clusters}.
+
+\exfig[0.85\textwidth]{05_graph/plot_03_mst_validation_1}{Volume-based validity indices of the MST--GG partitions of four groups against the number of clusters: fuzzy hypervolume, partition density, average partition density and the relative decrease of the hypervolume with the default minimum gain (dashed); the dotted line is the number the automatic run picks.}{graph:ex3a}
+\exfig{05_graph/plot_03_mst_validation_2}{Two rings: the tree partition with two clusters (left), the failed Gath--Geva refinement of two clusters (middle) and the twelve Gaussian arcs the volume criterion produces (right).}{graph:ex3b}
+\exfig{05_graph/plot_03_mst_validation_3}{Fuzzy similarity of the twelve arcs (left) and its single-linkage dendrogram (right): the two branches are the two rings.}{graph:ex3c}
+
+\subsection{Geodesic c-medoids versus fuzzy c-means}
+
+The data sets are two spiral arms, two moons and two rings, each with two clusters (\cref{fig:graph:ex4a}). FCM reaches adjusted Rand indices of only $0.02$, $0.24$ and $0.00$, because its centers cut straight across the manifolds, while the geodesic c-medoids with $k=8$ recover all three groupings exactly in three to five iterations. The spiral forms one graph component in which the path between the arms runs through the center; the moons and the rings fall into two components that are bridged with a penalty. The memberships (\cref{fig:graph:ex4b}) fade along the arm from the medoid toward its ends, while a point of the other arm that is close in the Euclidean sense keeps a membership near zero. The scan over $k$ (\cref{fig:graph:ex4c}) shows the two failure modes. A small $k$ fragments the sparsely sampled outer parts of the arms into components that have to be bridged, and the result degrades; a large $k$ connects the arms where they come close, and the geodesic distance loses its meaning. On the spiral the plateau spans $k=8$ to $15$, on the moons $5$ to $8$. Moons whose gap is narrower than the sample spacing form one component already at $k=3$ (\cref{fig:graph:ex4c}, right) and cannot be separated for any $k$ (\cref{fig:graph:ex4d}): the graph cannot resolve a gap the sampling does not resolve. The printed study shows the usual effect of $m$ on the softness of the partition. It also shows that on the rings a plain Euclidean bridge (\py{bridge_penalty=0}) lets the far side of the outer ring switch to the inner medoid through the bridge (ARI $0.28$), whereas both the penalized bridge and infinite distances (\py{connect_components=False}) keep the rings apart.
+
+\exfig{05_graph/plot_04_geodesic_fcm_1}{Fuzzy c-means (top) and geodesic c-medoids with $k=8$ (bottom, with the neighborhood graph and the bridge of the two-component cases) on two spiral arms, two moons and two rings: only the geodesic clusters follow the manifolds.}{graph:ex4a}
+\exfig[0.85\textwidth]{05_graph/plot_04_geodesic_fcm_2}{Memberships of the spiral samples in the two geodesic clusters: they fade along the arm, not across it.}{graph:ex4b}
+\exfig{05_graph/plot_04_geodesic_fcm_3}{Agreement with the true groups (left) and number of graph components (right) against the number of neighbors $k$ for the four data sets: good results need a $k$ between fragmentation and short-circuits.}{graph:ex4c}
+\exfig{05_graph/plot_04_geodesic_fcm_4}{Noisier moons with $k=4$ and $k=15$: the gap is bridged by the graph itself, and the tips of the moons follow the other medoid.}{graph:ex4d}
+
+\subsection{Geodesic paths, the S-curve and the Isomap route}
+
+\Cref{fig:graph:ex5a} traces shortest paths through the $k=8$ graph of the spiral: between the inner and the outer end of one arm the geodesic distance is $32$ against a chord of $8.4$, and the closest outer pair of samples of different arms, $1.7$ apart in the plane, is $38$ apart along the graph. On the three-dimensional S-curve with eight clusters (\cref{fig:graph:ex5b}) the FCM centers float between the layers of the S (up to $0.19$ from the nearest sample), while the medoids of Algorithm II and the re-projected centers of Algorithm I lie on the sheet. The geodesic cost of the partitions is $334$ for FCM against $269$ and $273$ for the two geodesic routes, which thus reach nearly the same solution by different means. The Isomap projection unrolls the S into a rectangle that FCM tiles regularly, and the geodesic clusters cover the sheet in the same way (\cref{fig:graph:ex5c}). The study of Algorithm I on the spiral (\cref{fig:graph:ex5d}) shows the role of the bridges when the graph is fragmented: with $k=4$ the arms break into seven components. The penalized bridges keep every fragment apart in the projection, and two clusters cannot collect them (ARI $0.86$ for both algorithms), whereas plain bridges re-join the fragments of an arm at their natural junctions, and both algorithms recover the arms. With $k=10$ the graph is connected and the bridges play no role. On the S-curve, two and three Isomap dimensions give nearly the same geodesic cost ($269$ and $272$), whereas a single dimension raises it to $665$; the residual variance drops from $0.09$ with one component to $0.04$ with two.
+
+\exfig{05_graph/plot_05_geodesic_path_isomap_1}{Shortest paths in the neighborhood graph of the spiral: along one arm from its inner to its outer end (left) and between the closest outer pair of samples of different arms (right); the dotted lines are the Euclidean chords.}{graph:ex5a}
+\exfig{05_graph/plot_05_geodesic_path_isomap_2}{Eight clusters on the S-curve: FCM centers float between the layers (left), the re-projected centers of the Isomap route (middle) and the geodesic medoids (right) lie on the sheet.}{graph:ex5b}
+\exfig{05_graph/plot_05_geodesic_path_isomap_3}{The Isomap projection of the S-curve with the FCM centers (left) and the geodesic c-medoid clusters in the same projection (right): both tile the unrolled sheet regularly.}{graph:ex5c}
+\exfig{05_graph/plot_05_geodesic_path_isomap_4}{Isomap projection of the spiral with $k=4$, where the arms are fragmented into seven components: penalized bridges keep the fragments apart (left), plain bridges re-join the fragments of each arm (right); colors are the true arms, crosses the FCM centers.}{graph:ex5d}
+
+\section{Further reading}\label{sec:graph:reading}
+\enlargethispage{3\baselineskip}%
+
+The hybrid MST--GG algorithm was published in \cite{vathy:2005:mst}; it builds on Zahn's graph-theoretical clustering \cite{zahn:1971}, on the relation between the minimal spanning tree and single linkage \cite{gower:1969:mst}, on the tree algorithms of Prim and Kruskal \cite{prim:1957,kruskal:1956}, on the hypervolume and density indices of Gath and Geva \cite{gath:1989}, on the Fukuyama--Sugeno measure \cite{fukuyama:1989:validity} as used by Varma and Simon \cite{varma:2004:mst}, and on compatible cluster merging \cite{kaymak:1995:merging} for the idea of merging similar fuzzy clusters; the Gath--Geva refinement may use the covariance regularization of \cite{babuska:2002:covariance}. Graph-theoretic and hierarchical clustering in general are covered by \cite{jain:1988:book}. The geodesic clustering algorithms are from \cite{feil:2007:geodesic}, which rests on Isomap \cite{tenenbaum:2000:isomap} and the convergence of graph distances to geodesics \cite{bernstein:2000:geodesic}, on shortest paths \cite{dijkstra:1959,floyd:1962}, on classical multidimensional scaling \cite{torgerson:1952:mds}, on the c-means functional \cite{bezdek:1981} and on the medoid methods of Kaufman and Rousseeuw \cite{kaufman:1990:groups}; locally linear embedding \cite{roweis:2000:lle} is the other classical manifold method the paper mentions. The fuzzy Sammon mapping of \cref{ch:visualization} \cite{feil:2007:fuzzsam} is the natural tool for inspecting the clusters found here when the data have more than two dimensions.

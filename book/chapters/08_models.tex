@@ -1,0 +1,630 @@
+\chapter{Clustering for model identification}\label{ch:models}
+\begin{roadmap}
+So far the clusters were the result. In this chapter they are a means: a fuzzy cluster in the joint space of inputs and outputs is a region of the data in which one simple model holds, so every cluster can be turned into an \emph{if--then rule} with a local linear model as consequent. We start from the Takagi--Sugeno fuzzy model and show how product-space clustering with Gath--Geva or Gustafson--Kessel prototypes yields its antecedents and consequents, why the projection of oblique clusters onto the input axes costs accuracy, and how the modified Gath--Geva algorithm avoids this by clustering with a prototype that \emph{is} a rule and that carries over to multi-output dynamic systems. Three further algorithms exploit the cluster-as-model view: fuzzy c-regression models (clusters are hyperplanes), supervised fuzzy clustering (clusters are rules with class probabilities, and their projections give fuzzy partitions for decision trees), and the hinging-hyperplane regression tree, which grows a binary tree by clustering with two regression prototypes at every node; all of them are in \code{fuzzyclust.models}.
+\end{roadmap}
+
+\section{Problem and idea}\label{sec:models:problem}
+
+A nonlinear function $y=f(\mathbf{x})$, $\mathbf{x}\in\R^n$, is rarely known in closed form, but it is often approximately linear in small regions. \emph{Operating regime based modeling} builds a global model from local linear models $\hat y_i=\mathbf{a}_i\T\mathbf{x}+b_i$, each valid in a region of the input space described by a validity function, and interpolates between them. When the regions are fuzzy sets, the model is the Takagi--Sugeno (TS) fuzzy model\index{Takagi--Sugeno model} \cite{takagi:1985}
+\begin{equation}
+  \begin{aligned}
+  R_i:\ &\text{If } x_1 \text{ is } A_{i1}(x_1) \text{ and } \dots \text{ and } x_n \text{ is } A_{in}(x_n)\\
+        &\text{then } \hat y_i = \mathbf{a}_i\T\mathbf{x}+b_i,\quad [w_i],\qquad i=1,\dots,c,
+  \end{aligned}
+  \label{eq:models:tsrule}
+\end{equation}
+whose rules fire with the strength $\beta_i(\mathbf{x})=w_i\prod_{j=1}^{n}A_{ij}(x_j)$ and whose output is the fuzzy mean
+\begin{equation}
+  \hat y(\mathbf{x})=\frac{\sum_{i=1}^{c}\beta_i(\mathbf{x})\,(\mathbf{a}_i\T\mathbf{x}+b_i)}{\sum_{i=1}^{c}\beta_i(\mathbf{x})}.
+  \label{eq:models:tsout}
+\end{equation}
+The model output is linear in the consequent parameters $\boldsymbol\theta_i=[\mathbf{a}_i\T\ b_i]\T$, which are therefore estimated by least squares once the antecedents are known. The bottleneck is the antecedent part, that is, the location and the width of the operating regions. Gradient-based neuro-fuzzy tuning and evolutionary search find them at a high computational price and tend to destroy the local meaning of the rules.
+
+Fuzzy clustering in the \emph{product space} of inputs and outputs offers a cheaper and more transparent solution \cite{babuska:1997:productspace,babuska:1998:book}. Collect every sample as $\mathbf{z}_k=[\mathbf{x}_k\T\ y_k]\T\in\R^{n+1}$ and cluster the $\mathbf{z}_k$. Where the function is approximately linear, the samples lie close to a hyperplane; a cluster that adapts its shape (Gustafson--Kessel, Gath--Geva) becomes a flat ellipsoid stretched along that hyperplane. The hyperplane is the local linear model, and the extent of the cluster along the inputs is its operating region. \Cref{fig:models:concept} shows the idea: three clusters along a curve, each projected onto the input axis to give a membership function $A_i(x)$ and each carrying a line $a_ix+b_i$. The fuzzy partition matrix of the clustering then serves two purposes: it defines the antecedents and weights the least-squares problems of the consequents. The fuzziness also regularizes the local models, because neighboring rules share data.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[scale=0.9, >={Latex[length=2mm]}]
+  % ---------- product space -----------
+  \begin{scope}
+    \node[note, anchor=south] at (3.4,4.25) {product space $\mathbf{z}=[x\ y]\T$};
+    \draw[fcgray, thin, ->] (-0.2,0) -- (7.0,0) node[below left, note] {$x$};
+    \draw[fcgray, thin, ->] (0,-0.2) -- (0,4.1) node[left, note] {$y$};
+    % the unknown function
+    \draw[black!60, thick, domain=0.3:6.7, samples=80, smooth] plot (\x, {1.0 + 1.6*sin(deg(0.55*\x)) + 0.9});
+    % clusters (ellipses along the curve) with local lines
+    \begin{scope}[rotate around={33:(1.3,2.82)}]
+      \draw[fcblue, thick, fill=fcblue!10, opacity=0.85] (1.3,2.82) ellipse (1.05 and 0.28);
+    \end{scope}
+    \draw[fcblue, very thick] (0.35,2.2) -- (2.25,3.42);
+    \begin{scope}[rotate around={-11:(3.3,3.2)}]
+      \draw[fcverm, thick, fill=fcverm!10, opacity=0.85] (3.3,3.2) ellipse (1.1 and 0.26);
+    \end{scope}
+    \draw[fcverm, very thick] (2.2,3.4) -- (4.4,2.97);
+    \begin{scope}[rotate around={-40:(5.45,2.1)}]
+      \draw[fcgreen, thick, fill=fcgreen!10, opacity=0.85] (5.45,2.1) ellipse (1.1 and 0.28);
+    \end{scope}
+    \draw[fcgreen, very thick] (4.6,2.82) -- (6.3,1.39);
+    % samples
+    \foreach \x in {0.4,0.6,0.9,1.1,1.4,1.7,1.9,2.1} { \fill[fcblue] (\x, {1.9 + 1.6*sin(deg(0.55*\x)) + 0.12*sin(deg(37*\x))}) circle (1.3pt); }
+    \foreach \x in {2.4,2.7,3.0,3.3,3.6,3.9,4.2} { \fill[fcverm] (\x, {1.9 + 1.6*sin(deg(0.55*\x)) + 0.12*cos(deg(41*\x))}) circle (1.3pt); }
+    \foreach \x in {4.5,4.8,5.1,5.4,5.7,6.0,6.3,6.6} { \fill[fcgreen] (\x, {1.9 + 1.6*sin(deg(0.55*\x)) + 0.12*sin(deg(29*\x))}) circle (1.3pt); }
+    % projections onto the x axis
+    \foreach \c/\col in {1.3/fcblue, 3.3/fcverm, 5.4/fcgreen} {
+      \draw[\col!70, dashed, thin] (\c, 0) -- (\c, 1.6);
+    }
+    \node[note, anchor=north, text width=6.4cm] at (3.4,-0.3) {cluster $i$: flat ellipsoid along the local linear model $y=a_i x+b_i$};
+  \end{scope}
+  % ---------- membership functions -----------
+  \begin{scope}[shift={(0,-3.4)}]
+    \draw[fcgray, thin, ->] (-0.2,0) -- (7.0,0) node[below left, note] {$x$};
+    \draw[fcgray, thin, ->] (0,-0.1) -- (0,1.6) node[left, note] {$A_i(x)$};
+    \draw[fcgray, thin] (-0.08,1.2) -- (0.08,1.2); \node[note, left] at (-0.05,1.2) {1};
+    \draw[fcblue, very thick, domain=0:3.6, samples=60, smooth] plot (\x, {1.2*exp(-0.5*((\x-1.3)/0.7)^2)});
+    \draw[fcverm, very thick, domain=1.2:5.6, samples=60, smooth] plot (\x, {1.2*exp(-0.5*((\x-3.3)/0.75)^2)});
+    \draw[fcgreen, very thick, domain=3.0:7.0, samples=60, smooth] plot (\x, {1.2*exp(-0.5*((\x-5.4)/0.75)^2)});
+    \node[note, fcblue!70!black] at (1.3,1.45) {$A_1$}; \node[note, fcverm!70!black] at (3.3,1.45) {$A_2$}; \node[note, fcgreen!70!black] at (5.4,1.45) {$A_3$};
+    \node[note, anchor=north, text width=6.4cm] at (3.4,-0.3) {projection onto the input: Gaussian antecedent sets with center $v_i$ and width $\sigma_i$};
+  \end{scope}
+  % ---------- arrow and rules -----------
+  \draw[arrow, very thick] (7.2,2.0) -- (7.7,2.0);
+  \node[result, anchor=west, align=left, text width=4.3cm, font=\footnotesize, inner sep=4pt] at (7.75,2.0) {%
+    $R_1$: If $x$ is {\color{fcblue}$A_1(x)$}\\ \hphantom{$R_1$: }then $\hat y_1={\color{fcblue}a_1 x+b_1}$\\[3pt]
+    $R_2$: If $x$ is {\color{fcverm}$A_2(x)$}\\ \hphantom{$R_2$: }then $\hat y_2={\color{fcverm}a_2 x+b_2}$\\[3pt]
+    $R_3$: If $x$ is {\color{fcgreen}$A_3(x)$}\\ \hphantom{$R_3$: }then $\hat y_3={\color{fcgreen}a_3 x+b_3}$\\[6pt]
+    $\displaystyle \hat y=\frac{\sum_i \beta_i(x)\,\hat y_i}{\sum_i\beta_i(x)}$,\\[3pt] $\beta_i(x)=w_iA_i(x)$};
+  \node[note, text width=4.2cm, anchor=north] at (10.2,-1.9) {the fuzzy partition $\U$ of the clustering weights the least-squares estimate of every $\boldsymbol\theta_i=[a_i\ b_i]\T$};
+\end{tikzpicture}
+\caption[Product-space clustering for Takagi--Sugeno model identification.]{Product-space clustering for Takagi--Sugeno model identification. Top left: the samples $\mathbf{z}_k=[x_k\ y_k]\T$ of an unknown function are clustered; where the function is nearly linear, the clusters are flat ellipsoids whose main axis is the local linear model. Bottom left: the projection of each cluster onto the input gives a Gaussian antecedent set. Right: cluster $i$ becomes rule $R_i$, and the memberships weight the least-squares estimation of the consequents.}
+\label{fig:models:concept}
+\end{figure}
+
+Two difficulties remain, and they motivate the algorithms of this chapter. First, a Gaussian cluster found by Gath--Geva clustering is an \emph{oblique} ellipsoid in $\R^{n+1}$ (the input block $\mathbf{F}^{xx}_i$ of its covariance matrix has off-diagonal elements), whereas rule \eqref{eq:models:tsrule} needs univariate sets $A_{ij}(x_j)$; projecting the ellipsoid onto the axes loses its orientation and introduces a \emph{decomposition error}\index{decomposition error}, which can be compensated only by re-estimating the consequents globally, at the price of their local meaning. The exact alternative, a linear transformation of the inputs (eigenvector projection), yields rules on transformed variables that are hard to interpret. The modified Gath--Geva algorithm of Abonyi, Babu\v{s}ka and Szeifert \cite{abonyi:2002:mgg} resolves this by changing the prototype: a cluster is an \emph{axis-parallel} Gaussian in the inputs together with a local linear model and the variance of its error, so the clusters are rules by construction. Second, point-like prototypes cannot cope with data in which the local laws cross each other; for such \emph{switching regression} problems the prototype must be the hyperplane itself, which is the fuzzy c-regression model of Hathaway and Bezdek \cite{hathaway:1993:fcrm}. Both ideas, a prototype that includes a model and a distance that includes the class label or the output, recur in the supervised clustering of classifiers \cite{abonyi:2003:supervised}, in the supervised partitions for decision trees \cite{abonyi:2010:partition} and in the hinging-hyperplane trees \cite{kenesei:2013:hinge}.
+
+\section{Theory}\label{sec:models:theory}
+
+Throughout the chapter $\X\in\R^{N\times n}$ collects the inputs (regressors) $\xk$, $\mathbf{y}\in\R^N$ the outputs $y_k$ (or $\mathbf{Y}\in\R^{N\times n_y}$ for several outputs), $\mathbf{z}_k=[\xk\T\ y_k]\T$ the joint samples, $\U=[\mik]\in\R^{c\times N}$ the fuzzy partition (stored transposed in the code, as everywhere in \code{fuzzyclust}), $\mathbf{X}_e=[\X\ \mathbf{1}]$ the regressor matrix extended by a column of ones and $\boldsymbol\theta_i=[\mathbf{a}_i\T\ b_i]\T$ the parameters of the local linear models. We first recall how TS models follow from Gath--Geva clusters and derive the modified algorithm (\cref{sec:models:ggts,sec:models:mgg}), extend it to multi-output dynamic systems (\cref{sec:models:mimo}), and then treat fuzzy c-regression (\cref{sec:models:fcrm}), supervised clustering for classifiers and partitions (\cref{sec:models:supervised,sec:models:partition}) and the hinging-hyperplane tree (\cref{sec:models:hinge}).
+
+\subsection{From Gath--Geva clusters to Takagi--Sugeno rules}\label{sec:models:ggts}
+
+Gath--Geva clustering (\cref{sec:part:gg}) has a probabilistic interpretation \cite{gath:1989,abonyi:2002:mgg}. Let $p(\eta_i)$ be the prior probability of cluster $i$ and $p(\mathbf{z}\mid\eta_i)=\mathcal N(\vi,\Fi)$ its domain of influence; the algorithm identifies the mixture $p(\mathbf{z})=\sum_i p(\mathbf{z}\mid\eta_i)p(\eta_i)$, with $\alpha_i=p(\eta_i)$ and the distance $1/D^2_{ik}=p(\mathbf{z}_k\mid\eta_i)p(\eta_i)$. Partition the prototype and the covariance into input and output blocks,
+\begin{equation}
+  \vi=\begin{bmatrix}\mathbf{v}^x_i\\ v^y_i\end{bmatrix},\qquad
+  \Fi=\begin{bmatrix}\mathbf{F}^{xx}_i & \mathbf{F}^{xy}_i\\ \mathbf{F}^{yx}_i & F^{yy}_i\end{bmatrix}.
+  \label{eq:models:partitionF}
+\end{equation}
+The regression function is the conditional expectation $E[y\mid\mathbf{x}]$ of the mixture, and because every component is Gaussian it is a weighted sum of linear functions,
+\begin{equation}
+  \begin{aligned}
+  E[y\mid\mathbf{x}]&=\sum_{i=1}^{c}p(\eta_i\mid\mathbf{x})\,[\mathbf{x}\T\ 1]\,\boldsymbol\theta_i,\qquad
+  p(\eta_i\mid\mathbf{x})=\frac{g_i(\mathbf{x})}{\sum_{j=1}^{c}g_j(\mathbf{x})},\\
+  g_i(\mathbf{x})&=\frac{p(\eta_i)\exp\!\big(-\tfrac12(\mathbf{x}-\mathbf{v}^x_i)\T(\mathbf{F}^{xx}_i)^{-1}(\mathbf{x}-\mathbf{v}^x_i)\big)}{(2\pi)^{n/2}\sqrt{\det\mathbf{F}^{xx}_i}}.
+  \end{aligned}
+  \label{eq:models:ggposterior}
+\end{equation}
+This is exactly the TS model \eqref{eq:models:tsout} with multivariate Gaussian antecedents $A_i(\mathbf{x})=\exp(-\tfrac12(\mathbf{x}-\mathbf{v}^x_i)\T(\mathbf{F}^{xx}_i)^{-1}(\mathbf{x}-\mathbf{v}^x_i))$ and rule weights
+\begin{equation}
+  w_i=\frac{p(\eta_i)}{(2\pi)^{n/2}\sqrt{\det\mathbf{F}^{xx}_i}},
+  \label{eq:models:ggweights}
+\end{equation}
+the \emph{Gaussian mixture of regressors} \cite{gershenfeld:1999:cwm}. The consequents can be estimated in two ways \cite{abonyi:2002:mgg,abonyi:2000:localglobal}:
+\begin{itemize}
+  \item \emph{Local weighted least squares}: one problem per rule with the memberships as weights, $\boldsymbol\Phi_i=\diag(\mu_{i1},\dots,\mu_{iN})$,
+  \begin{equation}
+    \boldsymbol\theta_i=\big(\mathbf{X}_e\T\boldsymbol\Phi_i\mathbf{X}_e\big)^{-1}\mathbf{X}_e\T\boldsymbol\Phi_i\mathbf{y},
+    \label{eq:models:wls}
+  \end{equation}
+  which can also be read off the cluster, $\mathbf{a}_i=(\mathbf{F}^{xx}_i)^{-1}\mathbf{F}^{xy}_i$, $b_i=v^y_i-\mathbf{a}_i\T\mathbf{v}^x_i$, when the center and the covariance of the cluster are computed with the same weights $\mik$ (with the $\mik^m$-weighted $\Fi$ of Gath--Geva clustering the two estimates differ slightly). The local models are local linearizations of the function; they can be read and used one by one (the model is a lookup table of linearizations), but the overall prediction error is not minimal.
+  \item \emph{Global least squares}: all consequents in one problem with the normalized firing strengths as regressor weights, which minimizes the prediction error of \eqref{eq:models:tsout} but lets the local models compensate each other where rules overlap, so that they lose their meaning.
+\end{itemize}
+A third estimate, \emph{total least squares}, takes the hyperplane the cluster lies on: with $\mathbf{t}_i=[(\mathbf{t}^x_i)\T\ t^y_i]\T$ the eigenvector of the smallest eigenvalue of $\Fi$, $\mathbf{a}_i=-\mathbf{t}^x_i/t^y_i$ and $b_i=\mathbf{t}_i\T\vi/t^y_i$. It is appropriate when the inputs are noisy, but it does not minimize the prediction error, and it fails when the inputs are locally collinear, because the eigenvector of the smallest eigenvalue then reflects the dependency among the inputs rather than the regression.
+
+The antecedents of \eqref{eq:models:ggposterior} are multivariate. For the conjunctive rule \eqref{eq:models:tsrule} they have to be decomposed into univariate sets, and this is where the difficulty lies (\cref{fig:models:projection}). The product of the univariate Gaussians $A_{ij}(x_j)=\exp(-\tfrac12(x_j-v_{ij})^2/\sigma_{ij}^2)$ equals $A_i(\mathbf{x})$ only if $\mathbf{F}^{xx}_i$ is diagonal. An oblique cluster can be projected onto the axes ($\sigma^2_{ij}=[\mathbf{F}^{xx}_i]_{jj}$), which widens its footprint and loses the orientation (the \emph{decomposition error}), or the inputs can be rotated into the eigenvector basis of $\mathbf{F}^{xx}_i$ (the transformed input-domain approach \cite{kim:1998:transformed}), which is exact but yields rules on linear combinations of the inputs.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[scale=0.88]
+  % ---- left: oblique GG cluster and its projection ----
+  \begin{scope}
+    \node[note, anchor=south] at (2.4,3.9) {Gath--Geva cluster in the input space};
+    \draw[fcgray, thin, ->] (-0.3,0) -- (5.0,0) node[below left, note] {$x_1$};
+    \draw[fcgray, thin, ->] (0,-0.3) -- (0,3.6) node[left, note] {$x_2$};
+    \begin{scope}[rotate around={35:(2.4,1.9)}]
+      \draw[fcverm, thick, fill=fcverm!12] (2.4,1.9) ellipse (1.6 and 0.45);
+      \draw[fcverm!60!black, thin, dashed] (2.4,1.9) ellipse (0.8 and 0.225);
+    \end{scope}
+    \fill[fcverm!60!black] (2.4,1.9) circle (1.5pt);
+    % projection onto x1
+    \draw[fcgray, dashed] (1.0,1.0) -- (1.0,0); \draw[fcgray, dashed] (3.8,2.8) -- (3.8,0);
+    \draw[fcblue, very thick, |-|] (1.0,-0.45) -- (3.8,-0.45) node[midway, below, note, text=fcblue!70!black, text width=3.4cm] {projected width $\sigma_{i1}=\sqrt{[\mathbf{F}^{xx}_i]_{11}}$};
+    % axis parallel box of the projected sets
+    \draw[fcblue, thick, dash pattern=on 3pt off 2pt] (1.0,0.9) rectangle (3.8,2.9);
+    \node[note, text width=4.6cm, anchor=north, text=fcblue!70!black] at (2.4,-1.35) {$\prod_j A_{ij}(x_j)$ covers the dashed box: the orientation of the cluster is lost (decomposition error)};
+  \end{scope}
+  % ---- right: modified GG cluster ----
+  \begin{scope}[shift={(7.6,0)}]
+    \node[note, anchor=south] at (2.4,3.9) {modified Gath--Geva cluster};
+    \draw[fcgray, thin, ->] (-0.3,0) -- (5.0,0) node[below left, note] {$x_1$};
+    \draw[fcgray, thin, ->] (0,-0.3) -- (0,3.6) node[left, note] {$x_2$};
+    \draw[fcgreen, thick, fill=fcgreen!12] (2.4,1.9) ellipse (1.5 and 0.9);
+    \draw[fcgreen!60!black, thin, dashed] (2.4,1.9) ellipse (0.75 and 0.45);
+    \fill[fcgreen!60!black] (2.4,1.9) circle (1.5pt);
+    \draw[fcgray, dashed] (0.9,1.9) -- (0.9,0); \draw[fcgray, dashed] (3.9,1.9) -- (3.9,0);
+    \draw[fcgreen!60!black, very thick, |-|] (0.9,-0.45) -- (3.9,-0.45) node[midway, below, note, text=fcgreen!50!black, text width=3.4cm] {$\sigma_{i1}$ is a parameter of the cluster};
+    \node[note, text width=4.6cm, anchor=north, text=fcgreen!50!black] at (2.4,-1.35) {axis-parallel Gaussian: $A_i(\mathbf{x})=\prod_j A_{ij}(x_j)$ exactly; the local model $y=\mathbf{a}_i\T\mathbf{x}+b_i$ and its error variance $\sigma_i^2$ are part of the prototype};
+    \node[note, anchor=west] at (3.95,1.9) {$+\ \{\boldsymbol\theta_i,\sigma^2_i\}$};
+  \end{scope}
+\end{tikzpicture}
+\caption[Projected Gath--Geva cluster and modified Gath--Geva prototype.]{Projected Gath--Geva cluster and modified Gath--Geva prototype. Left: a Gath--Geva cluster is an oblique Gaussian in the input space; the univariate sets obtained by projection cover the dashed box and no longer describe the cluster. Right: the modified Gath--Geva prototype is an axis-parallel Gaussian whose widths $\sigma_{ij}$ are cluster parameters, completed by a local linear model and the variance of its error, so the cluster is a conjunctive rule without any projection.}
+\label{fig:models:projection}
+\end{figure}
+
+\subsection{Modified Gath--Geva clustering}\label{sec:models:mgg}
+
+The modified algorithm \cite{abonyi:2002:mgg} describes each cluster by an input distribution, a local model and an output distribution,
+\begin{equation}
+  p(\mathbf{x},y)=\sum_{i=1}^{c}p(y\mid\mathbf{x},\eta_i)\,p(\mathbf{x}\mid\eta_i)\,p(\eta_i),
+  \label{eq:models:mixture}
+\end{equation}
+with the axis-parallel Gaussian input density and the Gaussian output error
+\begin{align}
+  p(\mathbf{x}\mid\eta_i)&=\prod_{j=1}^{n}\frac{1}{\sqrt{2\pi\sigma^2_{ij}}}\exp\!\Big(-\frac12\frac{(x_j-v_{ij})^2}{\sigma^2_{ij}}\Big),
+  \label{eq:models:densities}\\
+  p(y\mid\mathbf{x},\eta_i)&=\frac{1}{\sqrt{2\pi\sigma^2_i}}\exp\!\Big(-\frac{(y-\mathbf{x}_e\T\boldsymbol\theta_i)^2}{2\sigma^2_i}\Big).
+  \label{eq:models:outputdensity}
+\end{align}
+The parameters $\{\alpha_i,\mathbf{v}_i,\sigma^2_{ij},\boldsymbol\theta_i,\sigma^2_i\}$ of cluster $\eta_i$ are those of the TS rule \eqref{eq:models:tsrule} plus the two variances. The expectation-maximization (EM) algorithm for the mixture alternates the E-step, in which the posterior probability $p(\eta_i\mid\mathbf{x}_k,y_k)$ of every sample is computed by Bayes' rule, and the M-step, in which the parameters are re-estimated with these posteriors as weights: the priors $\alpha_i=\frac1N\sum_k p(\eta_i\mid\mathbf{x}_k,y_k)$, the centers and variances as weighted means, the local models by weighted least squares \eqref{eq:models:wls} with the posteriors on the diagonal of $\boldsymbol\Phi_i$, and the error variances as weighted mean squared residuals. Written as a fuzzy clustering algorithm with the memberships $\mik$ in the role of the posteriors and the distance
+\begin{equation}
+  \frac{1}{D^2_{ik}}=\alpha_i\prod_{j=1}^{n}\frac{1}{\sqrt{2\pi\sigma^2_{ij}}}\exp\!\Big(-\frac12\frac{(x_{jk}-v_{ij})^2}{\sigma^2_{ij}}\Big)\cdot
+  \frac{1}{\sqrt{2\pi\sigma^2_i}}\exp\!\Big(-\frac{(y_k-\mathbf{x}_{e,k}\T\boldsymbol\theta_i)^2}{2\sigma^2_i}\Big),
+  \label{eq:models:mggdist}
+\end{equation}
+the algorithm takes the form of Gath--Geva clustering with the functional $\J=\sum_i\sum_k\mik^m D^2_{ik}$. For $m=2$ the membership update $\mik=1/\sum_j(D_{ik}/D_{jk})^{2/(m-1)}$ is the E-step, $\mik=p(\eta_i\mid\mathbf{x}_k,y_k)$, and because the parameters are re-estimated with the weights $\mik$ rather than $\mik^m$, as in the M-step above, the alternating optimization is the EM algorithm: it increases the likelihood of the mixture and does not, strictly, minimize $\J$. The first factor of \eqref{eq:models:mggdist} measures how far the input is from the cluster center in units of the cluster widths, the second how well the local model predicts the output; a sample belongs to a cluster if its input lies in the cluster \emph{and} the local model fits its output. The rule weights of the resulting TS model are $w_i=\alpha_i\prod_j(2\pi\sigma^2_{ij})^{-1/2}$, and the firing strengths $\beta_i(\mathbf{x})=w_i\prod_jA_{ij}(x_j)$, once normalized, are the posteriors $p(\eta_i\mid\mathbf{x})$ given the input alone, which is what prediction needs. \code{fuzzyclust} evaluates all densities in the log domain.
+
+With the exponential distance, the algorithm converges fast to a nearby local optimum and can shrink a cluster onto a few samples (a tiny $\sigma_{ij}$ makes $1/D^2$ huge). \code{fuzzyclust} therefore offers the variance regularization $\sigma^2_{ij}\leftarrow(1-\gamma)\sigma^2_{ij}+\gamma\,\mathrm{var}(x_j)$, the diagonal analog of the covariance regularization of \cref{sec:part:gk}, a variance floor, and random restarts. Because $\J$ is not comparable between restarts of an exponential-distance algorithm, the restart is selected (\py{restart_criterion}) either by the mixture log-likelihood $\sum_k\log\sum_i 1/D^2_{ik}$, the EM criterion, or by the training error of the TS model. The two can disagree, because a rule with a small error variance on part of the data raises the likelihood without improving the global fit.
+
+\begin{algobox}{Modified Gath--Geva clustering for TS model identification}{mgg}\index{modified Gath--Geva algorithm}\index{Takagi--Sugeno model!identification by clustering}\index{ModifiedGG@\code{ModifiedGG}}\index{TakagiSugeno@\code{TakagiSugeno}}
+\begin{algorithm}[H]
+\KwIn{regressors $\X$, outputs $\mathbf{y}$, number of rules $c$, exponent $m$ (usually $2$), tolerance $\epsilon$}
+initialize the partition $\U^{(0)}$ (random, k-means++ or from an FCM/GK run)\;
+\Repeat{$\max_{ik}\abs{\mu^{(l)}_{ik}-\mu^{(l-1)}_{ik}}<\epsilon$}{
+  \For{every cluster $i$}{
+    centers and widths: $v_{ij}=\sum_k\mik x_{jk}/\sum_k\mik$,\quad $\sigma^2_{ij}=\sum_k\mik(x_{jk}-v_{ij})^2/\sum_k\mik$\;
+    local model: $\boldsymbol\theta_i=(\mathbf{X}_e\T\boldsymbol\Phi_i\mathbf{X}_e)^{-1}\mathbf{X}_e\T\boldsymbol\Phi_i\mathbf{y}$ with $\boldsymbol\Phi_i=\diag(\mu_{i1},\dots,\mu_{iN})$\;
+    error variance: $\sigma^2_i=\sum_k\mik(y_k-\mathbf{x}_{e,k}\T\boldsymbol\theta_i)^2/\sum_k\mik$\;
+    prior and rule weight: $\alpha_i=\frac1N\sum_k\mik$,\quad $w_i=\alpha_i\prod_j(2\pi\sigma^2_{ij})^{-1/2}$\;
+  }
+  distances: $D^2_{ik}$ by \eqref{eq:models:mggdist} for all $i,k$\;
+  partition: $\mik=1/\sum_{j=1}^{c}(D_{ik}/D_{jk})^{2/(m-1)}$\;
+}
+\KwOut{rules $R_i$: Gaussian sets $(v_{ij},\sigma_{ij})$, local models $\boldsymbol\theta_i$, weights $w_i$; TS output by \eqref{eq:models:tsout}}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Modified Gath--Geva clustering}
+\begin{itemize}
+  \item A cluster is a TS rule: axis-parallel Gaussian antecedent sets, a local linear model, its error variance and a prior; the distance is the inverse joint density of input and output.
+  \item For $m=2$ the alternating optimization is the EM algorithm for a mixture of local linear regressions; the memberships are posterior probabilities.
+  \item No projection, no decomposition error, rules on the original variables; the local models are local linearizations (weighted least squares), and a global re-estimation trades interpretability for accuracy.
+  \item Sensitive to initialization like all exponential-distance algorithms: use restarts, the variance regularization $\gamma$ and a sensible number of rules.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Multi-output dynamic systems}\label{sec:models:mimo}
+
+A nonlinear dynamic process is identified in the same framework by choosing lagged outputs and inputs as regressors. For a process with $n_y$ outputs and $n_u$ inputs, the regression vector of the nonlinear ARX (NARX) model is
+\begin{equation}
+  \boldsymbol\varphi(k)=\big[\mathbf{y}(k-1)\T,\dots,\mathbf{y}(k-n_a)\T,\ \mathbf{u}(k-n_k)\T,\dots,\mathbf{u}(k-n_k-n_b+1)\T\big]\T,
+  \label{eq:models:regressors}
+\end{equation}
+and the rule consequents are local linear \emph{MIMO ARX} models $\mathbf{y}^i(k)=\boldsymbol\theta_i\T\boldsymbol\varphi_e(k)$ with a parameter matrix $\boldsymbol\theta_i$ that has $n_y$ columns \cite{abonyi:2002:mimo,feil:2004:mimo}. The antecedent acts on a \emph{scheduling vector} $\mathbf{x}(k)$, a subset of $\boldsymbol\varphi(k)$ that determines the operating point (typically a few lagged outputs). Only the output density changes in \eqref{eq:models:mggdist}: the scalar error variance becomes the weighted error covariance matrix
+\begin{align}
+  \mathbf{F}^{yy}_i&=\frac{\sum_k\mik(\mathbf{y}_k-\boldsymbol\theta_i\T\boldsymbol\varphi_{e,k})(\mathbf{y}_k-\boldsymbol\theta_i\T\boldsymbol\varphi_{e,k})\T}{\sum_k\mik},
+  \label{eq:models:fyy}\\
+  p(\mathbf{y}\mid\boldsymbol\varphi,\eta_i)&=\frac{\exp\!\big(-\tfrac12(\mathbf{y}-\boldsymbol\theta_i\T\boldsymbol\varphi_e)\T(\mathbf{F}^{yy}_i)^{-1}(\mathbf{y}-\boldsymbol\theta_i\T\boldsymbol\varphi_e)\big)}{(2\pi)^{n_y/2}\sqrt{\det\mathbf{F}^{yy}_i}},
+  \label{eq:models:mimodensity}
+\end{align}
+and the local models are estimated column by column with the same weights \eqref{eq:models:wls}. With local estimation, the model is a linear parameter-varying (LPV) system: at the operating point $\mathbf{x}$ its matrices are the sums of the local matrices weighted by the normalized firing strengths, $\mathbf{A}_j(\mathbf{x})=\sum_i\beta_i(\mathbf{x})\mathbf{A}^i_j$, which is the interpretation model-based control needs \cite{johansen:2000:interpretation}. A single rule base replaces $n_y$ MISO models and shows the cross-couplings explicitly.
+
+Dynamic models must be validated in \emph{free run} (parallel simulation): the model is driven by the measured inputs only, and its own past outputs are fed back as regressors, $\hat{\mathbf{y}}(k)=f(\hat{\mathbf{y}}(k-1),\dots,\mathbf{u}(k-n_k),\dots)$. Errors can accumulate, so a model that predicts one step ahead well may still drift; the free-run error is the relevant measure when the model is used for simulation or control.
+
+\subsection{Fuzzy c-regression models}\label{sec:models:fcrm}
+
+In switching regression the data are generated by $c$ unknown linear laws $y=\mathbf{x}_e\T\boldsymbol\theta_i$ that share the input range and may cross each other. A point prototype with a fixed norm cannot separate such data, and an adaptive norm (Gustafson--Kessel) describes each law only indirectly, by an elongated ellipsoid, so Hathaway and Bezdek \cite{hathaway:1993:fcrm} let the prototype be the regression model itself and measure the distance of a sample by its squared residual,
+\begin{equation}
+  E_{ik}(\boldsymbol\theta_i)=\big(y_k-\mathbf{x}_{e,k}\T\boldsymbol\theta_i\big)^2,\qquad
+  \J=\sum_{i=1}^{c}\sum_{k=1}^{N}\mik^m E_{ik}(\boldsymbol\theta_i).
+  \label{eq:models:fcrmJ}
+\end{equation}
+Any error measure that keeps the minimizer property of the c-means functional may replace the squared residual. For models linear in the parameters, the minimizing $\boldsymbol\theta_i$ for fixed $\U$ is the weighted least-squares estimate \eqref{eq:models:wls} with $\boldsymbol\Phi_i=\diag(\mu^m_{i1},\dots,\mu^m_{iN})$, and the minimizing $\U$ for fixed models is the FCM update with $E_{ik}$ in place of $\Dsq$; the alternating optimization is a grouped coordinate descent and converges to a local minimum or saddle point, so random restarts are advisable. The memberships of a sample depend on the output, so they exist only for input--output \emph{pairs}; for a new input the model can return the outputs of all $c$ local models but cannot say which one applies. Prediction from the input alone needs an input-space partition, as in a TS model, or the hinging-hyperplane construction of \cref{sec:models:hinge}; both can be built on FCRM.
+
+\begin{algobox}{Fuzzy c-regression models (FCRM)}{fcrm}\index{fuzzy c-regression models (FCRM)}\index{switching regression}\index{FuzzyCRegression@\code{FuzzyCRegression}}
+\begin{algorithm}[H]
+\KwIn{regressors $\X$, outputs $\mathbf{y}$, number of models $c$, exponent $m>1$, tolerance $\epsilon$}
+initialize the partition $\U^{(0)}$ at random\;
+\Repeat{$\max_{ik}\abs{\mu^{(l)}_{ik}-\mu^{(l-1)}_{ik}}<\epsilon$}{
+  models: $\boldsymbol\theta_i=(\mathbf{X}_e\T\boldsymbol\Phi_i\mathbf{X}_e)^{-1}\mathbf{X}_e\T\boldsymbol\Phi_i\mathbf{y}$, $\boldsymbol\Phi_i=\diag(\mu^m_{i1},\dots,\mu^m_{iN})$, $i=1,\dots,c$\;
+  residuals: $E_{ik}=(y_k-\mathbf{x}_{e,k}\T\boldsymbol\theta_i)^2$\;
+  partition: $\mik=1/\sum_{j=1}^{c}(E_{ik}/E_{jk})^{1/(m-1)}$\;
+}
+\KwOut{$c$ regression models $\boldsymbol\theta_i$, partition $\U$ of the pairs $(\xk,y_k)$}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Fuzzy c-regression models}
+\begin{itemize}
+  \item Prototypes are regression models; the distance of a sample is its squared residual, so crossing linear laws are separated.
+  \item Alternating weighted least squares and FCM membership update; the functional has local minima, so use restarts.
+  \item Memberships are defined for input--output pairs only; a new input yields the $c$ candidate outputs, not a single prediction.
+  \item Building block of the hinging-hyperplane tree and a diagnostic tool for switching behavior in data.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Supervised fuzzy clustering for fuzzy classifiers}\label{sec:models:supervised}
+
+A fuzzy rule-based classifier with one rule per class and a crisp class as consequent can represent only classes that are single compact regions. Abonyi and Szeifert \cite{abonyi:2003:supervised} generalize the consequent to a vector of class probabilities,
+\begin{equation}
+  \begin{aligned}
+  r_i:\ &\text{If } x_1 \text{ is } A_{i1}(x_1) \text{ and } \dots \text{ and } x_n \text{ is } A_{in}(x_n)\\
+        &\text{then } \hat y=c_1 \text{ with } P(c_1\mid r_i),\ \dots,\ \hat y=c_C \text{ with } P(c_C\mid r_i)\quad [w_i],
+  \end{aligned}
+  \label{eq:models:classrule}
+\end{equation}
+so that $R$ rules, possibly more than the $C$ classes, describe the data, and a class may be covered by several rules. The rules are aggregated with the normalized firing strengths, and the class with the largest posterior is chosen,
+\begin{equation}
+  P(c_q\mid\mathbf{x})=\frac{\sum_{i=1}^{R}\beta_i(\mathbf{x})P(c_q\mid r_i)}{\sum_{i=1}^{R}\beta_i(\mathbf{x})},\qquad
+  \hat y=\argmax_q P(c_q\mid\mathbf{x}).
+  \label{eq:models:classposterior}
+\end{equation}
+With Gaussian antecedents and the weights $w_i=P(r_i)/\abs{2\pi\mathbf{F}_i}^{1/2}$ this is the Bayes decision rule of a classifier whose class-conditional densities are mixtures of (axis-parallel) Gaussians, an extension of the quadratic Bayes classifier, so the rule base inherits its probabilistic interpretation.
+
+Unsupervised clustering estimates the density of the inputs without looking at the labels and therefore places clusters that ignore the class boundaries. The \emph{supervised} algorithm includes the label in the sample, $\mathbf{z}_k=[\xk\T\ y_k]\T$, and in the distance: the inverse Gath--Geva distance of the input is multiplied by the probability that the rule describes the class of the sample,
+\begin{equation}
+  \frac{1}{D^2_{ik}}=P(r_i)\prod_{j=1}^{n}\frac{1}{\sqrt{2\pi\sigma^2_{ij}}}\exp\!\Big(-\frac12\frac{(x_{jk}-v_{ij})^2}{\sigma^2_{ij}}\Big)\;P(y_k\mid r_i).
+  \label{eq:models:supdist}
+\end{equation}
+(The paper writes this distance without the normalizing constants of the Gaussians; with them $1/D^2_{ik}$ is the joint probability $p(\xk,y_k,r_i)$, consistent with the weights $w_i$ of the classifier. \code{fuzzyclust} implements both forms, selected by \py{normalize_density}.) The updates follow from the Lagrangian of $\J=\sum_i\sum_k\mik^m D^2_{ik}$ as for Gath--Geva clustering: centers and variances are $\mu^m$-weighted means, the class probabilities are the membership mass of each class in the rule, $P(c_q\mid r_i)=\sum_{k:\,y_k=c_q}\mik^m/\sum_k\mik^m$, and $P(r_i)=\frac1N\sum_k\mik^m$. A sample is thus attracted by a rule when it lies in the rule's region \emph{and} the rule's consequent favors its class; the clustering pulls the rules apart along class boundaries that pass through a dense region of the input space.
+
+Feature selection follows the same probabilistic view. With the within-rule and between-rule scatter matrices
+\begin{equation}
+  \mathbf{F}_W=\sum_{i=1}^{R}P(r_i)\mathbf{F}_i,\quad
+  \mathbf{F}_B=\sum_{i=1}^{R}P(r_i)(\vi-\mathbf{v}_0)(\vi-\mathbf{v}_0)\T,\quad
+  \mathbf{v}_0=\sum_{i=1}^{R}P(r_i)\vi,
+  \label{eq:models:scatter}
+\end{equation}
+the Fisher interclass separability $J=\det\mathbf{F}_B/\det\mathbf{F}_W$ measures how well separated and how compact the rules are. The importance of a feature is the value of $J$ computed \emph{without} it; the feature whose removal lowers $J$ least is deleted, the classifier is re-identified on the reduced data, and the procedure stops when the accuracy starts to drop. (Since $\mathbf{F}_B$ has rank at most $R-1$, \code{fuzzyclust} uses the product of its $\min(R-1,n)$ largest eigenvalues in place of a vanishing determinant, which keeps the values comparable between feature subsets of equal size; the trace criterion $\tr(\mathbf{F}_W^{-1}\mathbf{F}_B)$ is available as well.)
+
+\begin{algobox}{Supervised fuzzy clustering}{supervised}\index{supervised fuzzy clustering}\index{fuzzy classifier}\index{SupervisedFuzzyClassifier@\code{SupervisedFuzzyClassifier}}
+\begin{algorithm}[H]
+\KwIn{inputs $\X$, class labels $y_k\in\{c_1,\dots,c_C\}$, number of rules $R$, exponent $m$, tolerance $\epsilon$}
+initialize the partition $\U^{(0)}$\;
+\Repeat{$\max_{ik}\abs{\mu^{(l)}_{ik}-\mu^{(l-1)}_{ik}}<\epsilon$}{
+  \For{every rule $i$}{
+    $v_{ij}=\sum_k\mik^m x_{jk}/\sum_k\mik^m$,\quad $\sigma^2_{ij}=\sum_k\mik^m(x_{jk}-v_{ij})^2/\sum_k\mik^m$\;
+    $P(c_q\mid r_i)=\sum_{k:\,y_k=c_q}\mik^m/\sum_k\mik^m$ for $q=1,\dots,C$\;
+    $P(r_i)=\frac1N\sum_k\mik^m$,\quad $w_i=P(r_i)\prod_j(2\pi\sigma^2_{ij})^{-1/2}$\;
+  }
+  distances $D^2_{ik}$ by \eqref{eq:models:supdist}; partition $\mik=1/\sum_j(D_{ik}/D_{jk})^{2/(m-1)}$\;
+}
+\KwOut{rules $r_i$ with Gaussian sets, class probabilities and weights; classification by \eqref{eq:models:classposterior}}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Supervised fuzzy clustering}
+\begin{itemize}
+  \item Rules carry a probability for every class, so the number of rules is free and classes made of several groups are handled; the classifier is a Gaussian-mixture Bayes classifier.
+  \item The class label enters the distance; the clustering is the supervised counterpart of Gath--Geva clustering and identifies the classifier in one pass.
+  \item Choose $R$ by cross-validation, regularize the variances for large $R$, and prune the features with the interclass separability criterion.
+  \item The projections of the rules onto the features provide the supervised fuzzy partitions of \cref{sec:models:partition}.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Supervised fuzzy partitions for decision-tree induction}\label{sec:models:partition}
+
+Decision-tree and rule-induction methods of the ID3 family \cite{quinlan:1986:id3} operate on discrete attributes, so continuous features are partitioned \emph{a priori} and the partition fixes what the tree can express. Fuzzy sets make the partition soft and the tree a fuzzy decision tree \cite{janikow:1998:fid}, but the common a priori partitions (equal-width bins, equal-frequency bins or a Ruspini partition of triangles \cite{ruspini:1969}) ignore the class labels; Dougherty, Kohavi and Sahami \cite{dougherty:1995:discretization} survey these unsupervised discretizations and their supervised counterparts. An unsupervised clustering of each feature ignores the labels as well: like equal-frequency binning, it adapts the sets to the density of the samples rather than to the class boundaries. Abonyi \cite{abonyi:2010:partition} derives the partition from the supervised clustering of \cref{sec:models:supervised} in four steps (\cref{fig:models:partition}):
+\begin{enumerate}
+  \item \emph{Supervised clustering} with $R$ rules; every rule projected onto feature $j$ gives a Gaussian set $(v_{ij},\sigma_{ij})$, so each feature starts with $R$ sets whose positions follow the class structure.
+  \item \emph{Trapezoids}: since the tree learner needs triangular or trapezoidal sets, every Gaussian is replaced by the trapezoid with the corner points
+  \begin{equation}
+    a_{ij}=v_{ij}-3\sigma_{ij},\quad b_{ij}=v_{ij}-\tfrac12\sigma_{ij},\quad c_{ij}=v_{ij}+\tfrac12\sigma_{ij},\quad d_{ij}=v_{ij}+3\sigma_{ij}.
+    \label{eq:models:trapezoid}
+  \end{equation}
+  \item \emph{Merging (pre-pruning)}: sets of the same feature that overlap strongly are merged on the basis of the similarity measure of Setnes et al.\ \cite{setnes:1998:similarity},
+  \begin{equation}
+    S(A_{ij},A_{lj})=\frac{\abs{A_{ij}\cap A_{lj}}}{\abs{A_{ij}\cup A_{lj}}},
+    \label{eq:models:similarity}
+  \end{equation}
+  the ratio of the cardinalities of the intersection ($\min$) and the union ($\max$) of the two membership functions; pairs with $S>\theta$ (the paper uses $\theta=0.8$) are merged, most similar first, into a set whose center and width are the prior-weighted combination of the two. A feature left with a single set carries no information about the classes and is a \emph{don't care} variable that can be dropped.
+  \item \emph{Tree induction and post-pruning}: the sets are the a priori partition of the tree learner (the fuzzy ID3 variant FID in the paper); the leaves of the resulting tree store the class frequencies and are read as rules of the form \eqref{eq:models:classrule}, and rules with a prior below a cut level $\alpha_c$ are removed.
+\end{enumerate}
+The cut points of the partition therefore sit where the classes change, and the tree is small because every attribute test is informative.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[scale=0.72]
+  % --- step 1: three Gaussians from three rules ---
+  \begin{scope}
+    \node[note, anchor=south, text width=3.4cm] at (2.3,1.75) {1. projected rules on feature $x_j$};
+    \draw[fcgray, thin, ->] (-0.2,0) -- (4.8,0) node[below left, note] {$x_j$};
+    \draw[fcblue, thick, domain=0:2.4, samples=50, smooth] plot (\x, {1.2*exp(-0.5*((\x-1.0)/0.4)^2)});
+    \draw[fcverm, thick, domain=0.4:3.0, samples=50, smooth] plot (\x, {1.2*exp(-0.5*((\x-1.5)/0.45)^2)});
+    \draw[fcgreen, thick, domain=2.2:4.8, samples=50, smooth] plot (\x, {1.2*exp(-0.5*((\x-3.6)/0.4)^2)});
+    \node[note, text width=3.4cm, anchor=north] at (2.3,-0.45) {$R=3$ Gaussians $(v_{ij},\sigma_{ij})$};
+  \end{scope}
+  \draw[arrow] (5.1,0.7) -- (5.7,0.7);
+  % --- step 2: trapezoids ---
+  \begin{scope}[shift={(6.0,0)}]
+    \node[note, anchor=south, text width=3.4cm] at (2.3,1.75) {2. Gaussians $\to$ trapezoids};
+    \draw[fcgray, thin, ->] (-0.2,0) -- (4.8,0) node[below left, note] {$x_j$};
+    % trapezoid of v=1.0 s=0.4: a=-0.2 b=0.8 c=1.2 d=2.2
+    \draw[fcblue, thick] (-0.2,0) -- (0.8,1.2) -- (1.2,1.2) -- (2.2,0);
+    % v=1.5 s=0.45: a=0.15 b=1.275 c=1.725 d=2.85
+    \draw[fcverm, thick] (0.15,0) -- (1.275,1.2) -- (1.725,1.2) -- (2.85,0);
+    % v=3.6 s=0.4: a=2.4 b=3.4 c=3.8 d=4.8
+    \draw[fcgreen, thick] (2.4,0) -- (3.4,1.2) -- (3.8,1.2) -- (4.8,0);
+    \draw[fcgray, dashed] (0.8,0) -- (0.8,1.2); \draw[fcgray, dashed] (1.2,0) -- (1.2,1.2);
+    \node[note, anchor=north] at (0.8,-0.02) {$b$}; \node[note, anchor=north] at (1.2,-0.02) {$c$};
+    \node[note, anchor=north] at (-0.2,-0.02) {$a$}; \node[note, anchor=north] at (2.2,-0.02) {$d$};
+    \node[note, text width=3.4cm, anchor=north] at (2.3,-0.45) {$v\mp3\sigma$, $v\mp\sigma/2$};
+  \end{scope}
+  \draw[arrow] (11.1,0.7) -- (11.7,0.7);
+  % --- step 3: merged ---
+  \begin{scope}[shift={(12.0,0)}]
+    \node[note, anchor=south, text width=3.4cm] at (2.3,1.75) {3. merge if $S>\theta$};
+    \draw[fcgray, thin, ->] (-0.2,0) -- (4.8,0) node[below left, note] {$x_j$};
+    % merged blue+orange: v~1.25 s~0.5: a=-0.25 b=1.0 c=1.5 d=2.75
+    \draw[fcblue, thick] (-0.25,0) -- (1.0,1.2) -- (1.5,1.2) -- (2.75,0);
+    \draw[fcgreen, thick] (2.4,0) -- (3.4,1.2) -- (3.8,1.2) -- (4.8,0);
+    \node[note, fcblue!70!black] at (1.25,1.45) {low};
+    \node[note, fcgreen!60!black] at (3.6,1.45) {high};
+    \node[note, text width=3.4cm, anchor=north] at (2.3,-0.45) {two sets; one set left $\Rightarrow$ don't care};
+  \end{scope}
+\end{tikzpicture}
+\caption[Supervised fuzzy partition of one feature.]{Supervised fuzzy partition of one feature. The Gaussian antecedent sets of the $R$ rules are projected onto the feature (left), converted into trapezoids with corner points $v\mp3\sigma$ and $v\mp\sigma/2$ (middle), and sets whose Jaccard similarity exceeds the threshold $\theta$ are merged (right). A feature whose sets all merge into one does not separate the classes and is dropped.}
+\label{fig:models:partition}
+\end{figure}
+
+\begin{algobox}{Supervised fuzzy partitioning of continuous features}{partition}\index{supervised fuzzy partition}\index{discretization!supervised}\index{FuzzyPartitionDiscretizer@\code{FuzzyPartitionDiscretizer}}
+\begin{algorithm}[H]
+\KwIn{inputs $\X$, labels $\mathbf{y}$, number of rules $R$, similarity threshold $\theta$}
+identify $R$ rules by supervised fuzzy clustering (\cref{alg:supervised})\;
+\For{every feature $j$}{
+  sets $A_{ij}$: trapezoids \eqref{eq:models:trapezoid} from $(v_{ij},\sigma_{ij})$, $i=1,\dots,R$\;
+  \While{the most similar pair $(A_{ij},A_{lj})$ has $S>\theta$ by \eqref{eq:models:similarity}}{
+    merge the pair into one set (prior-weighted center and width)\;
+  }
+  \lIf{one set is left}{mark feature $j$ as don't care}
+}
+encode every sample by the index of its most active set (or by its memberships) and induce the tree\;
+\KwOut{fuzzy partition of every feature, list of don't care features, decision tree / rule base}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Supervised fuzzy partitions}
+\begin{itemize}
+  \item A priori discretization whose cut points come from a supervised clustering and therefore sit where the classes change.
+  \item Gaussian sets become trapezoids; similar sets are merged; features with one set are discarded.
+  \item Gives small trees with linguistically meaningful tests; a tree that optimizes its own thresholds (CART) may still be more accurate on axis-parallel problems.
+  \item Parameters: initial number of sets $R$ (3--5) and the merging threshold $\theta\approx0.8$.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Hinging-hyperplane regression trees}\label{sec:models:hinge}
+
+A \emph{hinging hyperplane} \cite{breiman:1993:hinge} is the continuous piecewise-linear function of two hyperplanes joined along their intersection,
+\begin{equation}
+  \begin{aligned}
+  h(\mathbf{x})&=\max\big(\mathbf{x}_e\T\boldsymbol\theta_1,\ \mathbf{x}_e\T\boldsymbol\theta_2\big)\quad\text{or}\quad
+  \min\big(\mathbf{x}_e\T\boldsymbol\theta_1,\ \mathbf{x}_e\T\boldsymbol\theta_2\big),\\
+  \text{hinge: }&\{\mathbf{x}:\ \mathbf{x}_e\T(\boldsymbol\theta_1-\boldsymbol\theta_2)=0\},
+  \end{aligned}
+  \label{eq:models:hinge}
+\end{equation}
+and sums of hinge functions approximate smooth functions arbitrarily well. Finding one hinge is a nonsmooth least-squares problem with local minima, for which Breiman's iterative algorithm has convergence and range problems. Kenesei and Abonyi \cite{kenesei:2013:hinge} observed that fuzzy c-regression with $c=2$ (\cref{sec:models:fcrm}) identifies two linear models and their fuzzy operating regions at once, which is a hinge if the two planes cross inside the data (\cref{fig:models:hingetree}, top). With $\mathbf{v}_i=\sum_k\mik^m\xk/\sum_k\mik^m$ as the weighted center of the regressors of cluster $i$, the crossing is enforced by the \emph{relative constraint}
+\begin{equation}
+  \begin{aligned}
+  &\mathbf{v}_{e,1}\T(\boldsymbol\theta_1-\boldsymbol\theta_2)<0 \ \text{and}\ \mathbf{v}_{e,2}\T(\boldsymbol\theta_1-\boldsymbol\theta_2)>0\\
+  \text{or}\quad &\mathbf{v}_{e,1}\T(\boldsymbol\theta_1-\boldsymbol\theta_2)>0 \ \text{and}\ \mathbf{v}_{e,2}\T(\boldsymbol\theta_1-\boldsymbol\theta_2)<0,
+  \end{aligned}
+  \label{eq:models:crossing}
+\end{equation}
+that is, the two cluster centers lie on opposite sides of the hinge. When the unconstrained weighted least-squares solution violates it, the two models are re-estimated jointly by a quadratic program $\min_{\boldsymbol\theta}\tfrac12\boldsymbol\theta\T\mathbf{H}\boldsymbol\theta+\mathbf{c}\T\boldsymbol\theta$ with the linear constraints \eqref{eq:models:crossing} (\code{fuzzyclust} solves it with SLSQP for both sign patterns and keeps the better one); local or global constraints on the parameters can be added in the same way. The hinge type ($\max$ or $\min$) is the one with the smaller squared error on the node data.
+
+A single hinge is a coarse model, and a sum of hinges fitted to all data is hard to interpret. The paper therefore builds a \emph{binary tree}: the hinge of the root splits the data into the two operating regions (the samples where plane 1 is active go to the left child), each region is modeled by a hinge again, and so on, until a stopping rule holds: the depth limit is reached, a child would be too small for a two-plane fit, the error does not decrease ($E_1+E_2\ge E$ of the parent), or the node error is below a tolerance. The tree is grown either \emph{balanced} (every branch to the same depth) or \emph{greedy} (the leaf with the largest error is split next, until a budget of leaves is spent). Internal nodes split along oblique hinges, so no splitting variable has to be chosen, and the leaves are hinge functions (or single planes). The whole model is therefore piecewise linear, with a transparent structure that can be used directly for instantaneous linearization in predictive control. Each node reports its RMSE and the \emph{condition}
+\begin{equation}
+  \varrho=1-\frac{\abs{m_1-\sum_{k}\mu_{1k}}}{\sum_{i=1}^{2}\sum_k\mik},
+  \label{eq:models:condition}
+\end{equation}
+where $m_1$ is the number of samples the crisp hinge sends to the side of plane 1 and $\sum_k\mu_{1k}$ the membership mass of model 1. A value of $\varrho$ close to one means that the hinge does not override the fuzzy partition found by FCRM, that is, the hinge identification at that node is reliable.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[>={Latex[length=2mm]}]
+  % ---- top: hinge function in 1-D with memberships ----
+  \begin{scope}
+    \node[note, anchor=south] at (2.6,4.3) {one hinge from FCRM with $c=2$};
+    \draw[fcgray, thin, ->] (-0.2,1.3) -- (5.4,1.3) node[below left, note] {$x$};
+    \draw[fcgray, thin, ->] (0,1.1) -- (0,4.1) node[left, note] {$y$};
+    % two lines crossing at x=2.4 ; line1: y = 3.4 - 0.5 x ; line2: y = 0.5 + 0.7 x
+    \draw[fcblue, thick, dashed] (0.2,3.3) -- (5.2,0.8);
+    \draw[fcverm, thick, dashed] (0.2,0.64) -- (5.2,4.14);
+    \draw[black, very thick] (0.2,3.3) -- (2.4167,2.19) -- (5.2,4.14);
+    \fill[black] (2.4167,2.19) circle (1.6pt);
+    \node[note, anchor=south west] at (2.5,2.0) {hinge};
+    \node[note, fcblue!70!black] at (0.9,3.75) {$\mathbf{x}_e\T\boldsymbol\theta_1$};
+    \node[note, fcverm!70!black] at (4.3,4.3) {$\mathbf{x}_e\T\boldsymbol\theta_2$};
+    \node[note, anchor=south east] at (3.55,3.15) {$h=\max(\cdot,\cdot)$};
+    % centers on both sides
+    \fill[fcblue] (1.1,1.3) circle (1.5pt); \node[note, below, fcblue!70!black] at (1.1,1.25) {$\mathbf{v}_1$};
+    \fill[fcverm] (3.9,1.3) circle (1.5pt); \node[note, below, fcverm!70!black] at (3.9,1.25) {$\mathbf{v}_2$};
+    % memberships below
+    \draw[fcgray, thin, ->] (-0.2,0) -- (5.4,0);
+    \draw[fcgray, thin, ->] (0,-0.1) -- (0,1.0) node[left, note] {$\mu$};
+    \draw[fcblue, thick, domain=0.2:5.2, samples=60, smooth] plot (\x, {0.85/(1+exp(2.5*(\x-2.4167)))});
+    \draw[fcverm, thick, domain=0.2:5.2, samples=60, smooth] plot (\x, {0.85/(1+exp(-2.5*(\x-2.4167)))});
+    \draw[fcgray, dashed] (2.4167,0) -- (2.4167,2.19);
+    \node[note, anchor=north, text width=4.6cm] at (2.6,-0.2) {fuzzy operating regions; the crisp split is the sign of $\mathbf{x}_e\T(\boldsymbol\theta_1-\boldsymbol\theta_2)$};
+  \end{scope}
+  % ---- bottom: tree ----
+  \begin{scope}[shift={(-0.4,-6.9)}]
+    \node[note, anchor=south] at (3.0,4.3) {recursive hinges: a binary regression tree};
+    \node[block, minimum width=24mm] (root) at (3.0,3.5) {hinge $h_0$\\ all data};
+    \node[block, minimum width=22mm] (l) at (1.1,2.0) {hinge $h_1$\\ plane 1 active};
+    \node[block, minimum width=22mm] (r) at (4.9,2.0) {hinge $h_2$\\ plane 2 active};
+    \node[result, minimum width=16mm, font=\small] (ll) at (0.1,0.4) {leaf hinge};
+    \node[result, minimum width=16mm, font=\small] (lr) at (2.1,0.4) {leaf hinge};
+    \node[result, minimum width=16mm, font=\small] (rl) at (3.9,0.4) {leaf hinge};
+    \node[result, minimum width=16mm, font=\small] (rr) at (5.9,0.4) {leaf hinge};
+    \draw[arrow] (root) -- node[note, left=2pt, pos=0.45] {$\mathbf{x}_e\T(\boldsymbol\theta_1-\boldsymbol\theta_2)\ge0$} (l);
+    \draw[arrow] (root) -- node[note, right=2pt, pos=0.45] {$\mathbf{x}_e\T(\boldsymbol\theta_1-\boldsymbol\theta_2)<0$} (r);
+    \draw[arrow] (l) -- (ll); \draw[arrow] (l) -- (lr); \draw[arrow] (r) -- (rl); \draw[arrow] (r) -- (rr);
+    \node[note, anchor=north, text width=7.0cm] at (3.0,-0.2) {every node: FCRM with $c=2$ under the crossing constraint; RMSE and condition $\varrho$ per node; stop at depth, size, no error decrease or tolerance};
+  \end{scope}
+\end{tikzpicture}
+\caption[Hinging-hyperplane regression tree.]{Hinging-hyperplane regression tree. Top: fuzzy c-regression with two models yields two lines and their fuzzy operating regions; the lines cross between the cluster centers $\mathbf{v}_1$, $\mathbf{v}_2$ (the crossing constraint), and the hinge function is their maximum or minimum. Bottom: the sign of $\mathbf{x}_e\T(\boldsymbol\theta_1-\boldsymbol\theta_2)$ splits the data; each part is modeled by a new hinge, which gives a binary tree with oblique splits and piecewise-linear leaves.}
+\label{fig:models:hingetree}
+\end{figure}
+
+\begin{algobox}{Hinging-hyperplane regression tree}{hinge}\index{hinging hyperplane}\index{regression tree!hinging-hyperplane}\index{HingingHyperplaneTree@\code{HingingHyperplaneTree}}
+\begin{algorithm}[H]
+\KwIn{regressors $\X$, outputs $\mathbf{y}$, maximum depth, minimum leaf size, growth strategy (balanced or greedy), tolerance}
+\SetKwFunction{Hinge}{FitHinge}\SetKwFunction{Grow}{Grow}
+\SetKwProg{Fn}{Function}{:}{}
+\Fn{\Hinge{node data}}{
+  run FCRM with $c=2$ (\cref{alg:fcrm}, several restarts, keep the lowest $\J$)\;
+  \If{the centers $\mathbf{v}_1,\mathbf{v}_2$ are on the same side of the hinge}{re-estimate $\boldsymbol\theta_1,\boldsymbol\theta_2$ by the constrained quadratic program \eqref{eq:models:crossing} and update $\U$}
+  choose $\max$ or $\min$ by the smaller squared error; compute RMSE and $\varrho$ by \eqref{eq:models:condition}\;
+}
+\Fn{\Grow{node}}{
+  \If{depth limit, RMSE below tolerance or a child would be smaller than the minimum}{\Return}
+  split the node data by the sign of $\mathbf{x}_e\T(\boldsymbol\theta_1-\boldsymbol\theta_2)$; \Hinge on both parts\;
+  \lIf{$E_1+E_2\ge E$}{\Return (the split does not help)}
+  attach the children; \Grow both (balanced), or push them to the list of candidate leaves (greedy)\;
+}
+root $\leftarrow$ \Hinge{all data}; \Grow{root} (greedy: repeatedly split the leaf with the largest error until the leaf budget is spent)\;
+\KwOut{binary tree of hinge nodes; prediction by descending to a leaf and evaluating its hinge}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Hinging-hyperplane regression tree}
+\begin{itemize}
+  \item FCRM with two models identifies a hinge; the crossing constraint keeps the hinge inside the data.
+  \item Recursive hinge identification grows a binary tree with oblique splits (no splitting variable) and piecewise-linear leaves.
+  \item Complexity is controlled by the depth, the leaf size and the leaf budget of greedy growth; the node RMSE and the condition $\varrho$ guide the construction.
+  \item The local linear models of the leaves make the model directly usable for linearization-based predictive control.
+\end{itemize}
+\end{summarybox}
+
+\section{Using it in fuzzyclust}\label{sec:models:api}
+
+The estimators of this chapter are in \code{fuzzyclust.models}. All of them are supervised in the scikit-learn sense: \code{fit(X, y)} takes the regressors and the outputs (or the class labels), the clusterers inherit the alternating-optimization loop of \cref{ch:foundations}, and the regressors and the classifier follow the \code{RegressorMixin} / \code{ClassifierMixin} conventions (\code{score} is $R^2$ or the accuracy). Regression matrices of dynamic systems are built with \code{fuzzyclust.preprocessing.\allowbreak make\_regressors}.
+
+\begin{apibox}{fuzzyclust.models.TakagiSugeno}
+\code{n\_clusters=3}, \code{m=2.0}, \code{antecedent="gaussian\_axis\_parallel"|\allowbreak "gg\_projected"|\allowbreak "gk\_projected"}, \code{consequent="local"|\allowbreak "global"|\allowbreak "tls"}, \code{antecedent\_features=None}, \code{gamma=0.0}, \code{beta=1e15}, \code{tol}, \code{max\_iter}, \code{init="kmeans++"}, \code{n\_init=1}, \code{restart\_criterion="likelihood"|\allowbreak "error"}, \code{random\_state}, \code{verbose}.\\
+\code{fit(X,\allowbreak\ y)} with \code{y} of shape \code{(N,)} or \code{(N,\allowbreak\ n\_outputs)}; \code{predict(X)} is the TS output \eqref{eq:models:tsout}; \code{firing\_strengths(X)}, \code{antecedent\_membership(X)}, \code{local\_predict(X)}; \code{rule\_base()} (DataFrame) and \code{describe()} (text). Attributes \code{centers\_}, \code{sigmas\_}, \code{rule\_weights\_}, \code{local\_models\_} \code{(c,\allowbreak\ n+1,\allowbreak\ n\_outputs)}, \code{coef\_}, \code{intercept\_}, \code{membership\_}, \code{clusterer\_} (the engine). \code{antecedent\_features} selects the scheduling variables; the consequents always use all regressors.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.models.ModifiedGG}
+A \code{BaseFuzzyClusterer}, the clustering engine of the default \code{TakagiSugeno}, with \code{fit(X,\allowbreak\ y)}, the parameters of \code{TakagiSugeno} without \code{antecedent}, \code{consequent} and \code{beta}, plus \code{var\_floor=1e-6} (and \code{n\_init=3} by default), and the fitted rule parameters \code{cluster\_centers\_}, \code{input\_variances\_}, \code{local\_models\_}, \code{error\_covariances\_}, \code{priors\_}, \code{rule\_weights\_}, \code{log\_likelihood\_}, \code{restart\_scores\_}. \code{predict(X)} returns the TS output, \code{predict\_proba(X[,\allowbreak\ y])} the memberships (posteriors given the input, or given input and output), \code{transform(X[,\allowbreak\ y])} the distances, \code{describe\_rules()} the rule table.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.models.simulate\_free\_run(\allowbreak model,\allowbreak\ u,\allowbreak\ y\_init,\allowbreak\ n\_a,\allowbreak\ n\_b=0,\allowbreak\ n\_k=1)}
+Free-run simulation of any regressor trained on the regressors of \code{make\_regressors}: the predicted outputs are fed back while the measured inputs \code{u} (\code{None} for autonomous models) drive the model, and \code{y\_init} supplies the initial outputs up to the largest lag. Works for single- and multi-output models.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.models.FuzzyCRegression}
+\code{n\_clusters=2}, \code{m=2.0}, \code{fit\_intercept=True}, \code{tol}, \code{max\_iter}, \code{init="random"|\allowbreak "kmeans++"|\allowbreak array}, \code{n\_init=1}, \code{random\_state}, \code{verbose}.\\
+\code{fit(X,\allowbreak\ y)}; \code{coef\_}, \code{intercept\_}, \code{local\_models\_}, \code{membership\_}, \code{labels\_}. \code{predict(X)} returns the outputs of \emph{all} local models \code{(N,\allowbreak\ c)}; \code{predict\_proba(X,\allowbreak\ y)}, \code{predict\_labels(X,\allowbreak\ y)} and \code{transform(X,\allowbreak\ y)} (absolute residuals) need the pairs.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.models.SupervisedFuzzyClassifier}
+\code{n\_clusters=3}, \code{m=2.0}, \code{gamma=0.0}, \code{var\_floor=1e-6}, \code{normalize\_density=True}, \code{tol}, \code{max\_iter}, \code{init="kmeans++"}, \code{n\_init=3}, \code{random\_state}, \code{verbose}.\\
+A classifier: \code{predict\_proba(X)} are class posteriors \eqref{eq:models:classposterior}, \code{predict(X)} the labels, \code{cluster\_membership(X[,\allowbreak\ y])} the rule memberships; \code{classes\_}, \code{cluster\_centers\_}, \code{input\_variances\_}, \code{class\_probs\_} \code{(R,\allowbreak\ C)}, \code{priors\_}, \code{rule\_weights\_}; \code{rule\_base()}, \code{interclass\_separability(features,\allowbreak\ criterion)}, \code{feature\_importance()}. The function \code{select\_features\_by\_separability(X,\allowbreak\ y,\allowbreak\ n\_features\_to\_select,\allowbreak\ **params)} runs the backward elimination and returns the kept features, the elimination order and a history of separability and accuracy.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.models.FuzzyPartitionDiscretizer}
+\code{n\_sets=3}, \code{shape="trapezoid"|\allowbreak "gaussian"|\allowbreak "triangle"}, \code{merge\_threshold=0.8}, \code{encode="crisp"|\allowbreak "membership"}, \code{method="supervised"|\allowbreak "ruspini"}, \code{drop\_single=False}, \code{m}, \code{tol}, \code{max\_iter}, \code{init}, \code{random\_state}.\\
+A transformer: \code{fit(X,\allowbreak\ y)}, \code{transform(X)} returns one set index per feature (floats, like \code{KBinsDiscretizer}) or the memberships in all sets; \code{partitions\_} (centers, widths, merged rule groups per feature), \code{n\_sets\_}, \code{active\_features\_}, \code{classifier\_}; \code{membership(X)}, \code{evaluate(feature,\allowbreak\ grid)}, \code{get\_feature\_names\_out()}. The functions \code{supervised\_fuzzy\_partition}, \code{ruspini\_partition}, \code{membership\_1d} and \code{set\_similarity} expose the building blocks.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.models.HingingHyperplaneTree}
+\code{max\_depth=3}, \code{min\_samples\_leaf=10}, \code{growth="balanced"|\allowbreak "greedy"}, \code{max\_leaves=None}, \code{tol\_rmse=0.0}, \code{leaf\_model="hinge"|\allowbreak "linear"}, \code{constrain\_hinge=True}, \code{m=2.0}, \code{n\_init=3}, \code{fcrm\_max\_iter=100}, \code{fcrm\_tol=1e-4}, \code{random\_state}.\\
+A regressor: \code{predict(X)}, \code{apply(X)} (leaf index), \code{tree\_} (root \code{HingeNode} with \code{theta}, \code{kind}, \code{rmse}, \code{condition}, children), \code{leaves\_}, \code{n\_leaves\_}, \code{depth\_}; \code{node\_table()} and \code{describe()}.
+\end{apibox}
+
+\begin{apibox}{data generators and plot helpers}
+\code{make\_sinc}, \code{make\_second\_order\_plant} (the benchmark plant, random or sinusoidal excitation), \code{make\_mimo\_plant}, \code{make\_switching\_lines}, \code{make\_two\_class\_overlap}, \code{make\_banded\_classes}, \code{make\_piecewise\_linear}; \code{plot\_membership\_functions(model,\allowbreak\ X)}, \code{plot\_local\_models(model,\allowbreak\ X,\allowbreak\ y)}, \code{plot\_decision\_regions(clf,\allowbreak\ X,\allowbreak\ y,\allowbreak\ proba\_class)}, \code{plot\_fuzzy\_partition(disc,\allowbreak\ feature,\allowbreak\ X,\allowbreak\ y)}, \code{plot\_hinge\_tree\_surface(tree,\allowbreak\ X)}.
+\end{apibox}
+
+A TS model of a static function is identified and inspected in three lines:
+\pysnippet{examples/03_models/plot_01_ts_sinc.py}{fit}
+For a dynamic system, the regressors are built first and the model is validated in free run:
+\pysnippet{examples/03_models/plot_02_ts_dynamic_plant.py}{data}
+\pysnippet{examples/03_models/plot_02_ts_dynamic_plant.py}{fit}
+A MIMO model schedules on the lagged outputs and is simulated with \code{simulate\_free\_run}:
+\pysnippet{examples/03_models/plot_03_ts_mimo.py}{fit}
+Switching regression, the fuzzy classifier and the hinge tree follow the same pattern:
+\pysnippet{examples/03_models/plot_04_fcrm_switching.py}{fit}
+\pysnippet{examples/03_models/plot_05_supervised_classifier.py}{fit}
+\pysnippet{examples/03_models/plot_07_hinging_tree.py}{fit}
+and the supervised partition is a transformer in a scikit-learn pipeline:
+\pysnippet{examples/03_models/plot_06_fuzzy_partition_tree.py}{tree}
+
+\section{Examples}\label{sec:models:examples}
+
+\subsection{Takagi--Sugeno model of the sinc function}
+
+Three hundred noisy samples of $y=\sin x/x$ on $[-10,10]$ are modeled with four rules (\cref{fig:models:ex1a}). The local linear models (colored) are the linear laws of the clusters, drawn thick where the rule fires; the black curve is the TS output, a smooth interpolation whose weights are the shaded firing strengths, and the Gaussian sets below are the clusters themselves (nothing has been projected). \Cref{fig:models:ex1b} compares the three antecedent constructions with four rules each: the modified GG model is the most accurate ($R^2=0.96$ on noise-free test data), the projected GK model follows, and the projected GG model, whose clusters have free volumes and lean most strongly along the local slopes, loses the central peak ($R^2=0.86$), which makes the decomposition error visible. \Cref{fig:models:ex1c} shows two of them in the product space: GK clusters are oblique ellipses in the $(x,y)$ plane, modified GG clusters are Gaussians in $x$ with a line inside. The consequent estimators differ as predicted: global least squares reaches the smallest RMSE ($0.067$ against $0.074$), but its slopes no longer match the local slopes of the sinc. Finally, \cref{fig:models:ex1d} scans the number of rules. Both errors fall from $0.24$ with two rules to $0.04$ with six, though not monotonically: the five-rule model is worse than the four-rule one (training RMSE $0.096$ against $0.074$), because the clustering, not the prediction error, places the rules. From six rules on, the training error approaches the noise level of $0.02$, and the error on the noise-free test data keeps falling, to $0.016$ with twelve rules, so up to twelve rules the model does not yet fit the noise.
+
+\exfig{03_models/plot_01_ts_sinc_1}[Four rules identified by modified Gath--Geva clustering on the sinc function.]{Four rules identified by modified Gath--Geva clustering on the sinc function. Top: local linear models (thick where the rule fires), TS output (black) and normalized firing strengths (shaded). Bottom: the Gaussian antecedent sets, which are the clusters themselves.}{models:ex1a}
+\exfig{03_models/plot_01_ts_sinc_2}[The same data with four rules from the modified GG algorithm, from Gath--Geva clustering with projected antecedents and from Gustafson--Kessel clustering with projected antecedents (shaded bands: $\pm\sigma_i$ of the sets).]{The same data with four rules from the modified GG algorithm, from Gath--Geva clustering with projected antecedents and from Gustafson--Kessel clustering with projected antecedents (shaded bands: $\pm\sigma_i$ of the sets). The projection of the oblique Gath--Geva clusters cuts off the central peak.}{models:ex1b}
+\exfig{03_models/plot_01_ts_sinc_3}{The product space $(x,y)$: Gustafson--Kessel clusters are oblique ellipses whose width along $x$ is not the width of their operating region (left); modified Gath--Geva clusters are Gaussians in $x$ carrying a line (right).}{models:ex1c}
+\exfig[0.55\textwidth]{03_models/plot_01_ts_sinc_4}{RMSE on the noisy training data and on noise-free test data as a function of the number of rules; apart from the poorer five-rule solution, both errors fall, and the test error keeps falling up to twelve rules.}{models:ex1d}
+
+\subsection{Nonlinear dynamic plant with free-run validation}
+
+The second-order plant of \cite{abonyi:2002:mgg} is identified from 200 samples with a random input and validated on 200 samples with a sinusoid (\cref{fig:models:ex2a}). The TS model approximates the nonlinear component $f(y(k-1),y(k-2))$ with four rules; fed with its own outputs, it reproduces the validation output of an excitation it has never seen (\cref{fig:models:ex2b}, free-run MSE $1.3\cdot10^{-2}$ against $5\cdot10^{-3}$ for one-step prediction). The antecedent sets on the two lagged outputs (\cref{fig:models:ex2c}) and the identified surface (\cref{fig:models:ex2d}) show the operating regimes: the model matches $f$ where there are data and extrapolates linearly outside, and the input space is tiled by the four rules. The scan in \cref{fig:models:ex2e} repeats the paper's experiment over the number of rules and compares the two restart criteria: the training error decreases monotonically, the free-run error on the sinusoid no longer decreases systematically beyond three rules (it fluctuates between $5\cdot10^{-3}$ and $2\cdot10^{-2}$ up to eight rules) and grows tenfold for twelve rules (the sinusoid visits parts of the state space the random excitation has barely covered), and selecting the restart by the TS training error avoids the poor two-rule solution that the likelihood criterion picks.
+
+\exfig[0.8\textwidth]{03_models/plot_02_ts_dynamic_plant_1}{The second-order plant is identified on data with a random input (left part) and validated on data with a sinusoidal input (right part).}{models:ex2a}
+\exfig[0.9\textwidth]{03_models/plot_02_ts_dynamic_plant_2}{Validation on the sinusoidal input: one-step-ahead prediction and free-run simulation of the four-rule model follow the plant closely although the model was identified under random excitation.}{models:ex2b}
+\exfig[0.7\textwidth]{03_models/plot_02_ts_dynamic_plant_3}{The antecedent membership functions of the four rules tile the ranges of $y(k-1)$ and $y(k-2)$.}{models:ex2c}
+\exfig{03_models/plot_02_ts_dynamic_plant_4}[True nonlinearity $f(y_1,y_2)$ (left), TS model (middle) and operating regimes with the rule centers (right); dots are the identification samples.]{True nonlinearity $f(y_1,y_2)$ (left), TS model (middle) and operating regimes with the rule centers (right); dots are the identification samples. The model is accurate where there are data and extrapolates linearly.}{models:ex2d}
+\exfig[0.6\textwidth]{03_models/plot_02_ts_dynamic_plant_5}[Training and free-run error as a function of the number of rules for the two restart criteria.]{Training and free-run error as a function of the number of rules for the two restart criteria. The training error decreases monotonically, the free-run error on the different excitation saturates and grows again for twelve rules.}{models:ex2e}
+
+\subsection{MIMO model of a two-input two-output process}
+
+A process with two coupled states and operating-point-dependent input gains is identified with three rules whose antecedents act on the lagged outputs. \Cref{fig:models:ex3a} shows the free-run simulation of both outputs on a validation sequence of random steps (RMSE $0.10$ and $0.08$); because the two outputs are fed back jointly, the cross-couplings are represented inside every local MIMO model. The antecedent sets (\cref{fig:models:ex3b}) divide the operating range of the outputs into three regimes, and the local input gains, compared with the true gains at the rule centers, give the LPV interpretation. The rule at large outputs matches them closely ($0.42$ and $0.27$ against $0.41$ and $0.27$); the central rule has the largest $u_2\to y_2$ gain, as it should, but the membership-weighted fit over a wide region flattens the $u_1\to y_1$ gains of the two rules near the origin ($0.49$ and $0.47$ against $0.56$ and $0.60$). \Cref{fig:models:ex3c} scans the number of rules for three choices of the scheduling vector: one rule is the linear MIMO ARX model, and adding rules lowers the free-run error on the whole, though not at every step (with scheduling on the outputs, from $0.114$ for one rule to $0.063$ for six, with three and four rules equally good); scheduling on the outputs (or on all regressors) works, whereas scheduling on the inputs brings little because the inputs do not define the operating point of this process.
+
+\exfig[0.9\textwidth]{03_models/plot_03_ts_mimo_1}{Free-run simulation of the three-rule MIMO TS model on validation data with random step inputs; both outputs are simulated jointly.}{models:ex3a}
+\exfig[0.7\textwidth]{03_models/plot_03_ts_mimo_2}{The antecedent sets on the two scheduling variables $y_1(k-1)$ and $y_2(k-1)$ divide the operating range into three regimes.}{models:ex3b}
+\exfig[0.6\textwidth]{03_models/plot_03_ts_mimo_3}{Free-run RMSE versus the number of rules for scheduling on the outputs, on the inputs and on all regressors: scheduling on the inputs brings little.}{models:ex3c}
+
+\subsection{Switching regression with fuzzy c-regression models}
+
+Three hundred samples of two crossing lines are clustered in \cref{fig:models:ex4a}. FCM splits the plane into halves (ARI $0.28$). GK finds two elongated ellipsoids that follow the lines and labels the points as well as FCRM does (ARI $0.96$ for both, the same three points at the crossing being mislabeled), but it describes the laws only by ellipsoids. FCRM recovers the slopes and intercepts to within $0.02$ and assigns every point to the line with the smaller residual. The memberships (\cref{fig:models:ex4b}) are fuzzy only around the crossing, and the objective decreases monotonically over eleven iterations. With three lines, two of them parallel, the functional has several minima (\cref{fig:models:ex4c}): of twelve runs from random partitions, six reach $\J=3.9$ and the correct lines, and the other six end in solutions with $\J=14.7$ (four runs) or $46.3$ (two runs) in which one model averages the parallel lines. With \code{n\_init} restarts, the run with the lowest $\J$ is the right one. The exponent $m$ (\cref{fig:models:ex4d}) changes the crispness of the partition but hardly changes the lines: the weighted least-squares fits are insensitive to $m$ as long as the residual ratios are sharp.
+
+\exfig{03_models/plot_04_fcrm_switching_1}{Two crossing lines: FCM cuts the points into two halves, GK follows the lines with two elongated ellipsoids, and FCRM clusters the pairs with regression prototypes and recovers the lines themselves.}{models:ex4a}
+\exfig{03_models/plot_04_fcrm_switching_2}[Left: membership in the first model along $x$, fuzzy only where the lines cross.]{Left: membership in the first model along $x$, fuzzy only where the lines cross. Right: monotone decrease of the FCRM objective.}{models:ex4b}
+\exfig{03_models/plot_04_fcrm_switching_3}{Three lines, two of them parallel: the worst of twelve random starts averages the parallel lines (left); the best restart recovers all three (right).}{models:ex4c}
+\exfig[0.55\textwidth]{03_models/plot_04_fcrm_switching_4}{Effect of the exponent $m$: the partition becomes fuzzier, the agreement with the generating lines stays.}{models:ex4d}
+
+\subsection{Fuzzy classifier from supervised clustering}
+
+Each of two classes consists of two Gaussian blobs in an XOR layout. With two rules, the clustering can only place one rule on a blob and one broad rule in the middle whose consequent mixes the classes, and the accuracy is $0.70$; with four rules, every blob gets a nearly pure rule, and the decision regions show the XOR pattern (\cref{fig:models:ex5a}, accuracy $0.94$). The posterior of class 1 (\cref{fig:models:ex5b}) is smooth between the rules, and the antecedent sets come in pairs on each feature (\cref{fig:models:ex5c}). Cross-validation over the number of rules (\cref{fig:models:ex5d}) confirms that four rules are needed and that the variance regularization $\gamma=0.1$ keeps the accuracy at $0.94$ for twelve rules, where the unregularized rules start to shrink onto subsets. On the wine data (\cref{fig:models:ex5e}), three rules on all thirteen attributes classify $98.9\,\%$ of the wines; the backward elimination by interclass separability removes magnesium, alcalinity of ash, malic acid and color intensity first and keeps $95$--$98\,\%$ accuracy down to four attributes (alcohol, flavanoids, nonflavanoid phenols and hue, $96.1\,\%$); with three attributes the accuracy drops to $89\,\%$.
+
+\exfig{03_models/plot_05_supervised_classifier_1}{Decision regions of the fuzzy classifier with two rules (left) and four rules (right) on two classes made of two blobs each; dashed ellipses are the $\pm\sigma$ extents of the rules.}{models:ex5a}
+\exfig[0.55\textwidth]{03_models/plot_05_supervised_classifier_2}{Posterior probability of class 1 and the 0.5 boundary of the four-rule classifier: the posterior changes smoothly between the rules.}{models:ex5b}
+\exfig[0.7\textwidth]{03_models/plot_05_supervised_classifier_3}{The antecedent sets of the four rules come in pairs on each of the two features.}{models:ex5c}
+\exfig[0.55\textwidth]{03_models/plot_05_supervised_classifier_4}{Cross-validated accuracy versus the number of rules without and with variance regularization: four rules are needed, and the regularized classifier keeps its accuracy for many rules.}{models:ex5d}
+\exfig[0.6\textwidth]{03_models/plot_05_supervised_classifier_5}{Backward elimination of the wine attributes by interclass separability: the training accuracy of the three-rule classifier drops only when fewer than four attributes remain.}{models:ex5e}
+
+\subsection{Supervised fuzzy partitions and decision trees}
+
+Three classes are separated by thresholds on two features; a third feature is noise. The supervised partition (\cref{fig:models:ex6a}, top) merges two of the three sets on $x_1$ (the rules of classes 1 and 2 coincide there), keeps three sets on $x_2$ with the transitions between the classes, and merges all sets of the noise feature into one, which marks it as a don't care variable; the Ruspini partition (bottom) places its sets at equal distances regardless of the classes. A decision tree of depth two on the crisp codes reads as three rules on linguistic terms. In cross-validation, unrestricted trees on the supervised codes reach $0.96$ accuracy with five leaves, whereas equal-width, equal-frequency and Ruspini partitions need about fifteen leaves for $0.93$, $0.91$ and $0.79$; the membership encoding reaches $0.996$, and a tree on the raw features is perfect because the boundaries are axis-parallel thresholds that CART finds exactly. On iris (\cref{fig:models:ex6b}) the supervised sets of the petal length switch between the species, and trees of depth three on the a priori partitions reach $0.91$--$0.98$ accuracy against $0.93$ for the raw tree: equal-width bins ($0.98$) and the supervised codes ($0.94$) do slightly better, equal-frequency bins, the Ruspini sets and the membership encoding ($0.91$--$0.92$) slightly worse, so on these well-separated species the benefit of the supervised sets is their meaning rather than accuracy. The scan in \cref{fig:models:ex6c} shows that three to five initial sets suffice, that two are too few, and that merging at $\theta\le0.8$ removes a fifth to a third of the sets in this range (six instead of nine for three initial sets) without loss of accuracy, whereas $\theta=1$ keeps every set and grows larger trees (nine leaves instead of five for three initial sets).
+
+\exfig{03_models/plot_06_fuzzy_partition_tree_1}[Supervised fuzzy partition (top) and Ruspini partition (bottom) of three features, with the class-conditional samples as rugs.]{Supervised fuzzy partition (top) and Ruspini partition (bottom) of three features, with the class-conditional samples as rugs. The supervised sets switch where the classes change and collapse to one set on the noise feature.}{models:ex6a}
+\exfig[0.9\textwidth]{03_models/plot_06_fuzzy_partition_tree_2}{Supervised and Ruspini sets of the petal length of the iris data: the supervised sets switch between the species.}{models:ex6b}
+\exfig{03_models/plot_06_fuzzy_partition_tree_3}{Cross-validated accuracy of the tree and total number of sets as functions of the initial number of sets, for three merging thresholds: three to five initial sets suffice.}{models:ex6c}
+
+\subsection{Hinging-hyperplane tree on a piecewise-linear surface}
+
+\Cref{fig:models:ex7a} shows the elementary step on one input: FCRM with two models fits the two lines of $y=\max(0.8x,\,-1.2x+1)$, their crossing at $x=0.49$ (true $0.5$) is the hinge, and the memberships are the fuzzy version of the split; the condition of the node is $0.999$. On the two-input surface with two crossing creases (\cref{fig:models:ex7b}) the root hinge of a depth-two tree splits the plane close to the main crease, the child hinges model the remaining kinks, and one child is split again; the root reports $\varrho=1.00$ and the deepest node $\varrho=0.66$, where the remaining error sits. The parameter study (\cref{fig:models:ex7c}) shows the test RMSE falling from $0.30$ (one hinge) to $0.06$ with seven leaves, steeply for the first splits and slowly afterwards, because every hinge is fitted to data that are only approximately piecewise planar. On this surface greedy growth gives practically the same error as balanced growth for every number of leaves, a large \code{min\_samples\_leaf} stops the growth at four leaves, and linear leaves need more splits than hinge leaves (a depth-two tree with three planes has an RMSE of $0.26$).
+
+\exfig[0.7\textwidth]{03_models/plot_07_hinging_tree_1}{One hinge from FCRM with two models on one input: the two lines (dashed), the hinge function (black) and the memberships of the two models, which are the fuzzy operating regions.}{models:ex7a}
+\exfig{03_models/plot_07_hinging_tree_2}{True piecewise-linear surface with the samples (left) and the prediction of a depth-two hinge tree with its hinges (right): the hinges of the internal nodes in black, those of the leaves dashed white.}{models:ex7b}
+\exfig[0.6\textwidth]{03_models/plot_07_hinging_tree_3}[Test RMSE versus the number of leaves for balanced and greedy growth.]{Test RMSE versus the number of leaves for balanced growth with two leaf sizes and for greedy growth. The greedy and balanced curves practically coincide; the large leaf size stops the growth at four leaves.}{models:ex7c}
+
+\section{Further reading}\label{sec:models:reading}
+
+The Takagi--Sugeno model was introduced in \cite{takagi:1985}; Babu\v{s}ka's book \cite{babuska:1998:book} and the chapter \cite{babuska:1997:productspace} are the standard references for product-space clustering, projection of clusters and the local versus global estimation of consequents, whose interpretation is analyzed in \cite{abonyi:2000:localglobal,johansen:2000:interpretation}. The probabilistic interpretation of Gath--Geva clustering \cite{gath:1989} as a Gaussian mixture of regressors connects it to cluster-weighted modeling \cite{gershenfeld:1999:cwm}; the transformed input-domain approach \cite{kim:1998:transformed} is the exact but opaque alternative to projection, and the modified Gath--Geva algorithm \cite{abonyi:2002:mgg} the transparent one, extended to MIMO systems in \cite{abonyi:2002:mimo,feil:2004:mimo}. Gustafson--Kessel clustering was introduced in \cite{gustafson:1979} and fuzzy c-regression models in \cite{hathaway:1993:fcrm}; the c-means functional with its convergence theory is Bezdek's \cite{bezdek:1981}. The supervised fuzzy classifier and its feature selection are in \cite{abonyi:2003:supervised}, and the supervised partitions for decision trees in \cite{abonyi:2010:partition}, which builds on the similarity-based rule-base simplification of \cite{setnes:1998:similarity}, the fuzzy decision trees of Janikow \cite{janikow:1998:fid}, ID3 \cite{quinlan:1986:id3}, CART \cite{breiman:1984:cart} and the comparison of discretization methods in \cite{dougherty:1995:discretization}. Hinging hyperplanes are Breiman's \cite{breiman:1993:hinge}; their identification by constrained fuzzy c-regression, the tree construction and its use in predictive control are described in \cite{kenesei:2013:hinge}.

@@ -1,0 +1,150 @@
+r"""
+Image segmentation under noise: six spatially constrained FCM variants
+=======================================================================
+
+Segmenting a gray-level image with fuzzy c-means means clustering the
+pixel values. Pixel-wise FCM labels every pixel on its own, so noise
+that pushes a pixel's value across the midpoint between two gray levels
+produces a wrong label, however clear the surrounding region is. The
+spatially constrained variants add the neighborhood of every pixel to
+the functional: FCM_S (Ahmed et al. 2002) adds the distances of the
+neighbors to the prototype, FCM_S1 and FCM_S2 (Chen and Zhang 2004)
+replace them by a mean- or median-filtered image computed once, EnFCM
+(Szilágyi et al. 2003) clusters the gray-level histogram of a linearly
+smoothed image, FGFCM (Cai, Chen and Zhang 2007) does the same with
+locally adaptive weights, and FLICM (Krinidis and Chatzis 2010) adds a
+parameter-free fuzzy local factor. The test image has four regions with
+equally spaced gray levels and one disc of every class inside another
+region; it is corrupted by Gaussian noise (every pixel slightly) and by
+salt-and-pepper noise (a few pixels set to black or white), which call
+for different remedies.
+"""
+
+# %%
+import matplotlib.pyplot as plt
+
+from fuzzyclust.image import (
+    METHODS,
+    SpatialFCM,
+    add_image_noise,
+    make_synthetic_image,
+    match_labels,
+    plot_image,
+    plot_label_image,
+    segmentation_accuracy,
+)
+from fuzzyclust.plotting import PALETTE
+
+base = make_synthetic_image(shape=(128, 128), n_classes=4, noise="none", random_state=0)
+NAMES = {"fcm": "FCM", "fcm_s": "FCM_S", "fcm_s1": "FCM_S1", "fcm_s2": "FCM_S2", "enfcm": "EnFCM",
+         "fgfcm": "FGFCM", "flicm": "FLICM"}
+
+
+def segment(image, method):
+    """All variants with the same settings: alpha=4, 3x3 window, k-means++ seeding."""
+    return SpatialFCM(n_clusters=4, method=method, alpha=4.0, init="kmeans++", random_state=0).fit(image)
+
+
+def panel_figure(noisy, title):
+    fig, axes = plt.subplots(3, 3, figsize=(9.5, 10))
+    axes = axes.ravel()
+    plot_image(base.clean, ax=axes[0], title="clean image", vmin=0, vmax=1)
+    plot_image(noisy, ax=axes[1], title=title, vmin=0, vmax=1)
+    for ax, method in zip(axes[2:], METHODS, strict=True):
+        model = segment(noisy, method)
+        acc = segmentation_accuracy(base.truth, model.labels_)
+        plot_label_image(model.labels_, ax=ax, n_clusters=4, order=match_labels(base.truth, model.labels_),
+                         title=f"{NAMES[method]}: accuracy {acc:.3f}")
+    for ax in axes:
+        ax.title.set_fontsize(11)
+    plt.tight_layout()
+
+
+# %%
+# Gaussian noise
+# ---------------
+# With a noise standard deviation of 0.2, more than half the gap of 0.33
+# between neighboring gray levels, pixel-wise FCM produces a speckled
+# segmentation. Every spatial variant removes most of the speckle. FCM_S
+# leaves clumps and the filtered-image variants FCM_S1 and FCM_S2 leave
+# isolated specks; EnFCM, FGFCM and FLICM give clean regions. All
+# smoothing variants share one artifact: where the black and the white
+# region meet, the smoothed values are intermediate, and a one-pixel band
+# is assigned to a gray class.
+
+# [snippet:segment]
+noisy = add_image_noise(base.clean, noise="gaussian", noise_level=0.2, random_state=0)
+model = SpatialFCM(n_clusters=4, method="flicm", init="kmeans++", random_state=0).fit(noisy)
+accuracy = segmentation_accuracy(base.truth, model.labels_)
+# [/snippet:segment]
+print(f"FLICM on Gaussian noise 0.2: accuracy {accuracy:.3f}, {model.n_iter_} iterations")
+panel_figure(noisy, "Gaussian noise, $\\sigma=0.2$")
+
+# %%
+# Salt-and-pepper noise
+# ----------------------
+# Now 20 % of the pixels are set to 0 or 1. These values coincide with
+# the darkest and the brightest class, so pixel-wise FCM is not confused
+# about the prototypes, only about the hit pixels. Averaging methods
+# spread an impulse over its neighbors and *add* errors (FCM_S, EnFCM);
+# the median filter of FCM_S2 removes impulses outright and the adaptive
+# weights of FGFCM ignore neighbors that differ from the local level.
+# FLICM moves many impulses only halfway: a white pixel inside the black
+# region lands in the dark-gray class, because its distance to the black
+# prototype plus the small fuzzy factor of that class balance against the
+# intermediate prototype, whose fuzzy factor is moderate.
+noisy_sp = add_image_noise(base.clean, noise="salt_pepper", noise_level=0.2, random_state=0,
+                           value_range=(0.0, 1.0))
+panel_figure(noisy_sp, "salt-and-pepper noise, 20 % of pixels")
+
+# %%
+# Parameter study: accuracy against the noise level
+# --------------------------------------------------
+# The plots show the share of correctly labeled pixels for increasing
+# noise of both kinds. Under Gaussian noise, all spatial variants beat FCM
+# by a wide margin, and the adaptive ones (FGFCM, FLICM) keep their
+# accuracy longest. Under impulse noise, only the median-based FCM_S2 and
+# FGFCM improve on FCM consistently. The right spatial model depends on
+# the noise.
+
+# [snippet:scan]
+levels = {"gaussian": (0.05, 0.1, 0.15, 0.2, 0.25, 0.3), "salt_pepper": (0.05, 0.1, 0.2, 0.3)}
+scores = {}
+for noise, values in levels.items():
+    for method in METHODS:
+        scores[noise, method] = [
+            segmentation_accuracy(base.truth, segment(
+                add_image_noise(base.clean, noise, level, random_state=0, value_range=(0.0, 1.0)), method
+            ).labels_)
+            for level in values
+        ]
+# [/snippet:scan]
+
+fig, axes = plt.subplots(1, 2, figsize=(12, 4.4), sharey=True)
+markers = ["o", "s", "^", "v", "D", "P", "X"]
+for ax, (noise, values) in zip(axes, levels.items(), strict=True):
+    for j, method in enumerate(METHODS):
+        color = "0.2" if method == "fcm" else PALETTE[(j - 1) % len(PALETTE)]
+        ax.plot(values, scores[noise, method], marker=markers[j], ms=5, color=color,
+                ls="--" if method == "fcm" else "-", label=NAMES[method])
+    ax.set_xlabel("noise standard deviation" if noise == "gaussian" else "share of hit pixels")
+    ax.set_title("Gaussian noise" if noise == "gaussian" else "Salt-and-pepper noise")
+    ax.grid(True, color="0.9")
+axes[0].set_ylabel("segmentation accuracy")
+axes[1].legend(frameon=False, fontsize=8, ncol=2, loc="lower left")
+plt.tight_layout()
+
+for noise in levels:
+    print(noise, {NAMES[m]: round(scores[noise, m][-1], 3) for m in METHODS})
+
+# %%
+# **Take-away.** Spatial constraints turn a speckled pixel classification
+# into a segmentation: every variant beats pixel-wise FCM on Gaussian
+# noise, and the locally adaptive ones, FGFCM and FLICM, degrade most
+# slowly as the noise grows. Impulse noise is different: averaging the
+# neighborhood spreads an impulse instead of removing it, and only the
+# median filter of FCM_S2 and the gray-level similarity weights of FGFCM
+# deal with it reliably. The histogram methods (EnFCM, FGFCM) are also
+# the cheapest, because they iterate over at most 256 gray levels instead
+# of all pixels. When the noise type is unknown, FGFCM is the safest
+# choice in this comparison.

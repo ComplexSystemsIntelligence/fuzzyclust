@@ -1,0 +1,38 @@
+% ---------------------------------------------------------------------------
+% fuzzyclust visual identity: colors, display font and the logo mark.
+% Shared by the book (preamble.tex), the cover, the banner and the software
+% documentation. Colors: Pannon blue for structure, the Okabe--Ito triple
+% (blue, vermilion, bluish green) of the logo and of every data figure.
+% ---------------------------------------------------------------------------
+\definecolor{fcnavy}{HTML}{14304A}   % cover and dark backgrounds
+\definecolor{fcbrand}{HTML}{285780}  % headings, rules, links
+\definecolor{fcink}{HTML}{1F2A36}    % running text in headings
+\definecolor{fcblue}{HTML}{0072B2}
+\definecolor{fcverm}{HTML}{D55E00}
+\definecolor{fcgreen}{HTML}{009E73}
+\definecolor{fcpurple}{HTML}{CC79A7}
+\definecolor{fcorange}{HTML}{E69F00}
+\definecolor{fcsky}{HTML}{56B4E9}
+\definecolor{fcgray}{HTML}{6B7785}
+\definecolor{fcpaper}{HTML}{F4F6F8}
+\definecolor{fclight}{HTML}{9CC3E6}  % light accent on dark backgrounds
+
+% display face: Raleway (Type 1 via the raleway package)
+\providecommand{\fcdisplay}{\fontfamily{Raleway-TLF}\selectfont}
+\providecommand{\fcblack}{\fontfamily{Raleway-TLF}\fontseries{k}\selectfont}
+\providecommand{\fcbold}{\fontfamily{Raleway-TLF}\fontseries{b}\selectfont}
+\providecommand{\fcsemi}{\fontfamily{Raleway-TLF}\fontseries{sb}\selectfont}
+\providecommand{\fcmedium}{\fontfamily{Raleway-TLF}\fontseries{mb}\selectfont}
+\providecommand{\fclightface}{\fontfamily{Raleway-TLF}\fontseries{l}\selectfont}
+
+% logo mark: three membership clouds; \fclogo[<scale>]{<opacity factor>}
+% drawn with its center at the origin, unit = 1cm at scale 1
+\newcommand{\fclogocloud}[3]{% x, y, color
+  \foreach \r/\o in {1.25/0.18,1.0/0.32,0.68/0.55,0.36/0.9}{%
+    \fill[#3, fill opacity=\o] (#1,#2) circle (\r);}}
+\newcommand{\fclogo}[1][1]{%
+  \begin{tikzpicture}[scale=#1, every node/.style={transform shape}]
+    \fclogocloud{-0.9}{-0.52}{fcblue}
+    \fclogocloud{0.9}{-0.52}{fcverm}
+    \fclogocloud{0}{1.04}{fcgreen}
+  \end{tikzpicture}}

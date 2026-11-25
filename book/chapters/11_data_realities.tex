@@ -1,0 +1,547 @@
+\chapter{Incomplete, very large, and image data}\label{ch:data_realities}
+\begin{roadmap}
+The algorithms of the previous chapters assume a complete data matrix of moderate size whose rows are unrelated samples. Real data often violate all three assumptions. Values are \emph{missing} because sensors fail or records are merged from sources that measure different things; data sets are \emph{very large} or arrive as an endless stream; and the samples may be the pixels of an \emph{image}, where neighbors almost always belong to the same region. This chapter keeps the fuzzy c-means functional and adapts it to each situation: partial distances and optimal completion for incomplete data (Hathaway and Bezdek); weighted fuzzy c-means with sampling, single-pass, and online schemes for very large data and streams (Havens, Bezdek, and co-workers); and six ways of bringing the pixel neighborhood into the functional for image segmentation. The three sub-packages \code{fuzzyclust.incomplete}, \code{fuzzyclust.large}, and \code{fuzzyclust.image} share the notation and the membership formula of fuzzy c-means, and the image methods reuse weighted fuzzy c-means to cluster gray-level histograms.
+\end{roadmap}
+
+\section{Problem and idea}\label{sec:data:problem}
+
+\paragraph{Missing values.} Fuzzy c-means measures the distance of a sample to a prototype as a sum over all features, so a single missing value makes the distance undefined. The common remedies outside clustering---dropping incomplete samples, or filling the holes with the column mean before clustering---either waste data or invent values that ignore the cluster structure: a column mean lies \emph{between} the clusters and drags the filled samples there. Hathaway and Bezdek \cite{hathaway:2001:incomplete} compared four strategies for running fuzzy c-means on incomplete data (\cref{fig:data:partial}). The \emph{whole-data strategy} (WDS) drops the incomplete samples, which is defensible only when they are few. The \emph{partial-distance strategy} (PDS) measures the distance over the observed features only and rescales it to the full dimension, following Dixon \cite{dixon:1979:missing}; a sample is then judged by what is known about it. The \emph{optimal-completion strategy} (OCS) treats every missing value as an additional variable of the c-means functional and optimizes it together with the partition and the prototypes, so that the data are imputed while they are clustered; the optimal value is a membership-weighted mean of the prototype coordinates. The \emph{nearest-prototype strategy} (NPS) is its crisp version and copies the coordinate of the nearest prototype. All four assume that the values are missing completely at random, so that the hole pattern itself carries no information about the clusters \cite{little:2002:missing}.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[scale=0.95, >={Latex[length=2mm]}]
+  % axes
+  \draw[->, fcgray] (0,0) -- (6.3,0) node[below left, font=\small, text=black] {$x_1$};
+  \draw[->, fcgray] (0,0) -- (0,4.6) node[left, font=\small, text=black] {$x_2$};
+  % the observed coordinate: every point of the dashed line is compatible with x_k
+  \draw[black, thick, dashed] (2.0,0.1) -- (2.0,4.4);
+  \node[font=\small, anchor=west] at (2.1,4.25) {$x_{k2}$ missing};
+  \draw[black] (2.0,0.08) -- (2.0,-0.08) node[below, font=\small] {$x_{k1}$ observed};
+  % prototypes
+  \fill[fcblue] (1.2,3.6) circle (3pt) node[left=2pt, font=\small] {$\mathbf{v}_1$};
+  \fill[fcverm] (2.6,1.0) circle (3pt) node[right=2pt, font=\small] {$\mathbf{v}_2$};
+  \fill[fcgreen] (5.0,2.8) circle (3pt) node[right=2pt, font=\small] {$\mathbf{v}_3$};
+  % partial distances: only the x1 differences count
+  \draw[<->, fcblue, thick] (1.25,3.25) -- (1.95,3.25);
+  \draw[<->, fcverm, thick] (2.05,0.65) -- (2.55,0.65);
+  \draw[<->, fcgreen, thick] (2.05,2.45) -- (4.95,2.45);
+  \draw[fcgray, densely dotted] (1.2,3.6) -- (1.2,3.25);
+  \draw[fcgray, densely dotted] (2.6,1.0) -- (2.6,0.65);
+  \draw[fcgray, densely dotted] (5.0,2.8) -- (5.0,2.45);
+  % imputations
+  \draw[black, thick, fill=white] (2.0,1.63) circle (3.2pt);
+  \node[font=\small, anchor=west] at (2.12,1.75) {OCS};
+  \draw[black, thick] (1.88,0.88) rectangle (2.12,1.12);
+  \node[font=\small, anchor=east] at (1.85,1.0) {NPS};
+  % explanations
+  \node[anchor=north west, text width=5.4cm, font=\small, align=left] at (6.5,4.5) {%
+    \textbf{PDS:} distances over the observed features, rescaled by $n/I_k$:\\[2pt]
+    $D^2_{ik}=\frac{2}{1}(x_{k1}-v_{i1})^2$ (arrows)\\[2pt]
+    $\mu_{k}=(0.35,\ 0.62,\ 0.03)$ for $m=2$\\[6pt]
+    \textbf{OCS:} the missing value is the membership-weighted mean of the prototype coordinates,\\[2pt]
+    $x_{k2}=\frac{\sum_i\mu_{ik}^2v_{i2}}{\sum_i\mu_{ik}^2}=1.63$ (circle)\\[6pt]
+    \textbf{NPS:} the coordinate of the nearest prototype, $x_{k2}=v_{22}=1.0$ (square)};
+\end{tikzpicture}
+\caption[Partial distances and the completion of a missing value.]{Partial distances and the completion of a missing value. A sample with $x_{k1}=2$ observed and $x_{k2}$ missing can lie anywhere on the dashed line. The partial distance compares it with the prototypes along the observed axis only (arrows) and rescales the result to the full dimension; the memberships follow from these distances as in fuzzy c-means. Optimal completion places the missing value at the membership-weighted mean of the prototype coordinates (circle), the nearest-prototype strategy at the coordinate of the nearest prototype (square).}
+\label{fig:data:partial}
+\end{figure}
+
+\paragraph{Very large data.} Fuzzy c-means touches every sample in every iteration and stores the $N\times c$ partition. With $N$ in the millions, or with data that arrive as a stream, both become a problem. Since the efficient implementation of Cannon, Dave, and Bezdek \cite{cannon:1986:efficient}, many schemes have been proposed that either make each iteration cheaper \cite{kolen:2002:complexity} or cluster only samples or chunks of the data; Havens, Bezdek, Leckie, Hall, and Palaniswami \cite{havens:2012:large} compared the latter systematically. This chapter covers three of them (\cref{fig:data:chunks}). \emph{Random sample and extend} (rseFCM) clusters a random sample and computes the memberships of all samples in one pass from the fixed prototypes. The other two rest on \emph{weighted} fuzzy c-means, in which a sample with weight $w$ counts as $w$ identical samples, so that a prototype standing for a thousand observations can be clustered together with raw samples. \emph{Single-pass} FCM (spFCM) of Hore, Hall, and Goldgof \cite{hore:2007:spfcm} processes the data in chunks and carries the $c$ prototypes of a chunk, weighted by the membership mass they collected, into the next chunk. \emph{Online} FCM (oFCM) \cite{hore:2009:scalable} clusters every chunk separately and then clusters the weighted chunk prototypes. In both chunked schemes every chunk is seen once and only one chunk is held in memory, so they can also process a stream.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[>={Latex[length=2mm]},
+    chunk/.style={data, minimum width=13mm, minimum height=7mm},
+    proc/.style={block, minimum width=13mm, minimum height=7mm},
+    lab/.style={font=\footnotesize, inner sep=1pt}]
+  % ---------------- spFCM ----------------
+  \node[font=\small\bfseries, anchor=west] at (-0.65,1.75) {single-pass FCM (spFCM)};
+  \foreach \l/\x in {1/0, 2/2.7, 3/5.4} {
+    \node[chunk] (c\l) at (\x,1) {$\X_{\l}$};
+    \node[proc] (w\l) at (\x,-0.3) {wFCM};
+    \draw[arrow] (c\l) -- (w\l);
+  }
+  \node[chunk] (cs) at (8.3,1) {$\X_s$};
+  \node[proc] (ws) at (8.3,-0.3) {wFCM};
+  \draw[arrow] (cs) -- (ws);
+  \node at (6.85,1) {$\cdots$};
+  \draw[arrow] (w1) -- node[lab, below] {$\mathbf{V}_1,\lambda\mathbf{w}'_1$} (w2);
+  \draw[arrow] (w2) -- node[lab, below] {$\mathbf{V}_2,\lambda\mathbf{w}'_2$} (w3);
+  \draw[arrow] (w3) -- (6.45,-0.3);
+  \node at (6.85,-0.3) {$\cdots$};
+  \draw[arrow] (7.25,-0.3) -- (ws);
+  \node[result, minimum height=7mm] (ext1) at (10.75,-0.3) {extend $\to\U$};
+  \draw[arrow] (ws) -- node[lab, above] {$\mathbf{V}_s$} (ext1);
+  \node[note, anchor=north, text width=11cm] at (5.05,-1.0) {the carried prototypes enter the next chunk as $c$ weighted samples and are its initialization; $\lambda{=}1$ in the published algorithm, $\lambda{<}1$ forgets old chunks};
+  % ---------------- oFCM ----------------
+  \begin{scope}[yshift=-4.3cm]
+  \node[font=\small\bfseries, anchor=west] at (-0.65,1.75) {online FCM (oFCM)};
+  \foreach \l/\x in {1/0, 2/2.7, 3/5.4} {
+    \node[chunk] (d\l) at (\x,1) {$\X_{\l}$};
+    \node[proc] (f\l) at (\x,-0.3) {FCM};
+    \draw[arrow] (d\l) -- (f\l);
+  }
+  \node[chunk] (ds) at (8.3,1) {$\X_s$};
+  \node[proc] (fs) at (8.3,-0.3) {FCM};
+  \draw[arrow] (ds) -- (fs);
+  \node at (6.85,1) {$\cdots$};
+  \node at (6.85,-0.3) {$\cdots$};
+  \node[proc, minimum width=40mm] (merge) at (4.15,-1.9) {wFCM of the $s\cdot c$ prototypes};
+  \foreach \l in {1,2,3,s} {
+    \draw[arrow] (f\l.south) -- node[lab, fill=white, pos=0.45] {$\mathbf{V}_{\l},\mathbf{w}_{\l}$} (merge.north);
+  }
+  \node[result, minimum height=7mm] (ext2) at (10.75,-1.9) {extend $\to\U$};
+  \draw[arrow] (merge) -- node[lab, above] {$\mathbf{V}$} (ext2);
+  \node[note, anchor=north, text width=11cm] at (5.05,-2.5) {the chunk clusterings are independent (parallel, any order); the merge sees only weighted prototypes};
+  \end{scope}
+\end{tikzpicture}
+\caption[The chunk pipelines of single-pass and online FCM.]{The chunk pipelines of single-pass and online FCM. Top: spFCM clusters each chunk together with the weighted prototypes of the previous one, so the prototypes accumulate the whole history. Bottom: oFCM clusters the chunks independently and merges their weighted prototypes with weighted FCM. Both obtain the memberships of all samples by one extension step from the final prototypes; rseFCM is the special case of a single sampled chunk.}
+\label{fig:data:chunks}
+\end{figure}
+
+\paragraph{Images.} A gray-level image is a data set of $N=H\cdot W$ one-dimensional samples, and fuzzy c-means on the pixel values is the simplest segmentation algorithm. It ignores what distinguishes an image from an arbitrary data set: a pixel and its neighbors almost always belong to the same region. Noise that pushes a pixel value across the midpoint between two prototypes therefore produces a wrong label, however clear the surrounding region is. The spatially constrained variants bring the neighborhood $N_k$ of every pixel into the functional (\cref{fig:data:pixels}). FCM\_S of Ahmed et al.\ \cite{ahmed:2002:fcms} adds the distances of the neighbors to the prototype; FCM\_S1 and FCM\_S2 of Chen and Zhang \cite{chen:2004:fcms12} replace them with the distance of a mean- or median-filtered pixel computed once in advance; EnFCM of Szil\'agyi et al.\ \cite{szilagyi:2003:enfcm} forms a smoothed image once and clusters its gray-level \emph{histogram}, with iterations whose cost does not depend on the image size; FGFCM of Cai, Chen, and Zhang \cite{cai:2007:fgfcm} does the same with locally adaptive weights that respect edges and ignore outliers; and FLICM of Krinidis and Chatzis \cite{krinidis:2010:flicm} adds a parameter-free fuzzy factor that weighs each neighbor by its spatial distance and its lack of membership in the cluster.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[>={Latex[length=2mm]}]
+  % ---------- left: the 3x3 neighborhood with the FLICM weights ----------
+  \begin{scope}[scale=0.85]
+    \node[font=\small, anchor=south] at (1.5,3.1) {window $N_k$ of pixel $k$};
+    \foreach \i/\j/\g in {0/0/20,1/0/20,2/0/70,0/1/20,1/1/55,2/1/70,0/2/20,1/2/20,2/2/70} {
+      \fill[black!\g] (\i,\j) rectangle ++(1,1);
+    }
+    \draw[step=1, white, thick] (0,0) grid (3,3);
+    \draw[fcverm, very thick] (0,0) rectangle (3,3);
+    \foreach \i/\j/\w in {0/0/0.41,1/0/0.50,2/0/0.41,0/1/0.50,2/1/0.50,0/2/0.41,1/2/0.50,2/2/0.41} {
+      \node[font=\small, fill=white, inner sep=1pt, rounded corners=1pt] at (\i+0.5,\j+0.5) {\w};
+    }
+    \node[font=\small, fill=white, inner sep=1pt, rounded corners=1pt] at (1.5,1.5) {$k$};
+    \node[note, anchor=north, text width=3.4cm] at (1.5,-0.15) {numbers: FLICM weights $1/(d_{kr}{+}1)$; a noisy pixel $k$ at the edge of a light region};
+  \end{scope}
+  % ---------- right: effective distances ----------
+  \node[anchor=north west, font=\small, align=left] at (3.25,3.3) {%
+    effective squared distance $\tilde D^2_{ik}$ of pixel $k$ to $\vi$:\\[3pt]
+    \begin{tabular}{@{}l@{\hspace{0.8em}}l@{}}
+      FCM & $(x_k-v_i)^2$\\[2pt]
+      FCM\_S & $(x_k-v_i)^2+\frac{\alpha}{N_R}\sum_{r\in N_k}(x_r-v_i)^2$\\[2pt]
+      FCM\_S1, S2 & $(x_k-v_i)^2+\alpha(\bar x_k-v_i)^2$\\[2pt]
+      EnFCM, FGFCM & $(\xi_l-v_i)^2$, $l$ the bin of $\xi_k$\\[2pt]
+      FLICM & $(x_k-v_i)^2+G_{ki}$
+    \end{tabular}\\[5pt]
+    $\bar x_k$: mean (S1) or median (S2) of the window\\
+    $\xi_k$: smoothed pixel, clustered via its histogram\\
+    $G_{ki}=\sum_{r\in N_k}\frac{1}{d_{kr}+1}(1-\mu_{ir})^m(x_r-v_i)^2$};
+  % ---------- bottom: the histogram route ----------
+  \begin{scope}[yshift=-3.5cm]
+    \node[data, minimum width=16mm] (img) at (0,0) {image $x$};
+    \node[block, minimum width=22mm] (xi) at (2.7,0) {smoothed $\xi$\\ (EnFCM: linear,\\ FGFCM: adaptive)};
+    \node[data, minimum width=16mm, minimum height=13mm] (hist) at (5.5,0) {};
+    \foreach \x/\h in {-0.55/0.15,-0.4/0.45,-0.25/0.3,-0.1/0.1,0.05/0.05,0.2/0.25,0.35/0.5,0.5/0.2} {
+      \fill[fcgreen!70!black] (5.5+\x-0.06,-0.45) rectangle ++(0.12,\h+0.05);
+    }
+    \node[font=\small, anchor=south] at (5.5,0.7) {histogram $\gamma_l$};
+    \node[block, minimum width=22mm] (wf) at (8.3,0) {wFCM on $q$\\ gray levels};
+    \node[result, minimum width=14mm] (lut) at (10.5,0) {pixel\\ labels};
+    \draw[arrow] (img) -- (xi); \draw[arrow] (xi) -- (hist); \draw[arrow] (hist) -- (wf); \draw[arrow] (wf) -- (lut);
+    \node[note, anchor=north, text width=10.5cm] at (5.0,-0.85) {one pass over the pixels, then iterations over $q{\le}256$ levels instead of $N$ pixels; a pixel inherits the membership of its gray level};
+  \end{scope}
+\end{tikzpicture}
+\caption[Spatial constraints for image segmentation.]{Spatial constraints for image segmentation. Top left: the $3\times3$ neighborhood of a pixel with the spatial weights of FLICM. Top right: the effective squared distance that every method substitutes into the FCM membership formula. Bottom: EnFCM and FGFCM smooth the image once and cluster the gray-level histogram with weighted FCM.}
+\label{fig:data:pixels}
+\end{figure}
+
+\section{Theory}\label{sec:data:theory}
+
+We use the notation of \cref{sec:found:notation}: rows $\xk$ of $\X\in\R^{N\times n}$, prototypes $\vi$, and memberships $\mik$ in $\U\in\R^{c\times N}$ (stored transposed, $N\times c$, in the code), with $i$ (or $j$) indexing clusters and $k$ samples. All algorithms of the chapter use the membership formula of fuzzy c-means \cite{bezdek:1981},
+\begin{equation}
+  \mik=\frac{1}{\sum_{j=1}^{c}\big(D^2_{ik}/D^2_{jk}\big)^{1/(m-1)}},
+  \label{eq:data:mu}
+\end{equation}
+each with its own squared distance $D^2_{ik}$. We treat incomplete data first (\cref{sec:data:incomplete}), then weighted fuzzy c-means and the three schemes for very large data (\cref{sec:data:wfcm,sec:data:rse,sec:data:sp,sec:data:o}), and finally the six image segmentation methods (\cref{sec:data:image}).
+
+\subsection{Fuzzy c-means with missing values}\label{sec:data:incomplete}
+
+Let $I_{kj}=1$ when $x_{kj}$ is observed and $0$ when it is missing, $I_k=\sum_jI_{kj}$ the number of observed features of sample $k$, $X_P$ the set of observed and $X_M$ the set of missing values. Every sample must have at least one observed feature, and every feature must be observed in at least one sample.
+
+\paragraph{Whole-data strategy (WDS).} Fuzzy c-means runs on the complete samples only; the incomplete ones are classified afterwards with partial distances. With $n$ features and values missing independently with probability $p$, a sample is complete with probability $(1-p)^n$; with four features and $30\,\%$ of the values missing, three quarters of the samples are lost.
+
+\paragraph{Partial-distance strategy (PDS).} The squared distance is computed over the observed features and rescaled to the full dimension,
+\begin{equation}
+  D^2_{ik}=\frac{n}{I_k}\sum_{j=1}^{n}I_{kj}\,(x_{kj}-v_{ij})^2 ,
+  \label{eq:data:pds}
+\end{equation}
+which is the ordinary squared Euclidean distance for a complete sample and an unbiased estimate of it for an incomplete one when the coordinates contribute equally on average \cite{dixon:1979:missing}. The memberships follow from \eqref{eq:data:mu}, and every prototype coordinate is the membership-weighted mean of the samples that observe it,
+\begin{equation}
+  v_{ij}=\frac{\sum_{k=1}^{N}\mik^m I_{kj}\,x_{kj}}{\sum_{k=1}^{N}\mik^m I_{kj}} .
+  \label{eq:data:pdsv}
+\end{equation}
+
+\paragraph{Optimal-completion strategy (OCS).} The c-means functional on the completed data is minimized over the partition, the prototypes, \emph{and} the missing values,
+\begin{equation}
+  \min_{\U,\V,X_M}\;\J=\sum_{i=1}^{c}\sum_{k=1}^{N}\mik^m\norm{\xk-\vi}^2 .
+  \label{eq:data:ocsJ}
+\end{equation}
+For fixed $\U$ and $\V$ the functional is a sum of independent quadratics in the missing values, and setting the derivative to zero gives
+\begin{equation}
+  x_{kj}=\frac{\sum_{i=1}^{c}\mik^m v_{ij}}{\sum_{i=1}^{c}\mik^m},\qquad x_{kj}\in X_M ,
+  \label{eq:data:ocs}
+\end{equation}
+the membership-weighted mean of the prototype coordinates (\cref{fig:data:partial}). For fixed $X_M$ the conditions are those of fuzzy c-means on the completed data. Alternating the three blocks decreases $\J$ monotonically, and the clustering yields an imputation of the data as a by-product. The price is a functional with more local optima. The imputed values take part in the distances, so an imputed value that leans toward one prototype makes the sample look closer to it, which raises its membership and pulls the value further toward that prototype in the next step. From a poor start, samples can be captured by the wrong cluster in this way, which is why OCS is best started from the prototypes of a PDS fit (\py{init=pds.cluster_centers_}).
+
+\paragraph{Nearest-prototype strategy (NPS).} NPS is the crisp version of \eqref{eq:data:ocs}: the missing value is the coordinate of the prototype nearest to the sample, $x_{kj}=v_{i^*j}$ with $i^*=\argmin_iD^2_{ik}$, the nearest prototype being judged by the partial distance \eqref{eq:data:pds}. It is cheaper than OCS and a little coarser.
+
+For every strategy \code{fuzzyclust} returns a completed data matrix: the optimized values for OCS and NPS, and a post hoc estimate by \eqref{eq:data:ocs} from the final partition for PDS and WDS. New samples, complete or not, are classified by their partial distances. The initial prototypes are seeded on the data with the holes provisionally filled by column means, but the initial partition is computed from partial distances, and OCS and NPS start from the imputation of that partition rather than from the column means.
+
+\begin{algobox}{Fuzzy c-means for incomplete data (WDS, PDS, OCS, NPS)}{incfcm}\index{fuzzy c-means (FCM)!incomplete data}\index{partial distance}\index{optimal completion strategy}\index{OCS|see{optimal completion strategy}}\index{PDS|see{partial distance}}\index{IncompleteFCM@\code{IncompleteFCM}}
+\begin{algorithm}[H]
+\KwIn{data $\X$ with missing values, number of clusters $c$, exponent $m$, strategy, tolerance $\epsilon$}
+\lIf{WDS}{run fuzzy c-means on the complete samples, classify the others by \eqref{eq:data:pds}, stop}
+initial prototypes $\V$; initial memberships from the partial distances \eqref{eq:data:pds}\;
+\lIf{OCS or NPS}{fill $X_M$ by \eqref{eq:data:ocs} or by the nearest prototype}
+\Repeat{$\max_{ik}\abs{\mu^{(l)}_{ik}-\mu^{(l-1)}_{ik}}<\epsilon$}{
+  \uIf{PDS}{prototypes by \eqref{eq:data:pdsv}; distances by \eqref{eq:data:pds}}
+  \Else{prototypes by the FCM update on the completed data; missing values by \eqref{eq:data:ocs} (OCS) or by the nearest prototype (NPS); Euclidean distances on the completed data}
+  memberships by \eqref{eq:data:mu}\;
+}
+\KwOut{partition $\U$ of all samples, prototypes $\V$, completed data}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Fuzzy c-means for incomplete data}
+\begin{itemize}
+  \item Four strategies for data with values missing completely at random: drop incomplete samples (WDS), partial distances (PDS), missing values as optimization variables (OCS), and nearest-prototype completion (NPS).
+  \item PDS keeps every observed value at no extra cost and is the most reliable; it is the default. OCS and NPS impute while they cluster; OCS has more local optima and should be started from the PDS prototypes.
+  \item Every fit comes with a completed data matrix, which is a good imputation when the data have cluster structure.
+  \item Parameters: \py{strategy}; $c$, $m$, \py{init}, and \py{n_init} as for FCM.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Weighted fuzzy c-means and the extension step}\label{sec:data:wfcm}
+
+Let every sample carry a non-negative weight $w_k$, the number of observations it stands for. Weighted fuzzy c-means (wFCM) minimizes
+\begin{equation}
+  \J_w=\sum_{i=1}^{c}\sum_{k=1}^{N}w_k\,\mik^m\norm{\xk-\vi}^2 .
+  \label{eq:data:wJ}
+\end{equation}
+The weight multiplies all terms of sample $k$ and cancels in its membership condition, so the memberships follow \eqref{eq:data:mu} with the Euclidean distance unchanged; the prototypes become weighted means,
+\begin{equation}
+  \vi=\frac{\sum_{k=1}^{N}w_k\,\mik^m\,\xk}{\sum_{k=1}^{N}w_k\,\mik^m} .
+  \label{eq:data:wv}
+\end{equation}
+With integer weights, wFCM is fuzzy c-means on the data set in which sample $k$ is repeated $w_k$ times; with all weights equal to one, it is fuzzy c-means. The weight of a prototype after a weighted clustering is the membership mass it collected, $w'_i=\sum_kw_k\mik$. These weights add up to the total weight of the data, so a set of weighted prototypes is a lossy but mass-preserving summary. The second building block is the \emph{extension}: for fixed prototypes, one evaluation of \eqref{eq:data:mu} gives the memberships of any number of samples, chunk by chunk with $O(\text{chunk}\cdot c)$ memory. The histogram-based image methods of \cref{sec:data:image} use wFCM with the gray-level counts as weights.
+
+\begin{algobox}{Weighted fuzzy c-means (wFCM)}{wfcm}\index{weighted fuzzy c-means (wFCM)}\index{wFCM|see{weighted fuzzy c-means (wFCM)}}\index{WeightedFCM@\code{WeightedFCM}}
+\begin{enumerate}[leftmargin=*]
+  \item Initialize $\V$ (random or weighted k-means++ seeding); memberships by \eqref{eq:data:mu}.
+  \item Repeat: prototypes by \eqref{eq:data:wv}; Euclidean distances; memberships by \eqref{eq:data:mu}; until $\max_{ik}\abs{\Delta\mik}<\epsilon$.
+  \item Output $\U$, $\V$, $\J_w$, and the prototype weights $w'_i=\sum_kw_k\mik$.
+\end{enumerate}
+\end{algobox}
+\begin{summarybox}{Weighted fuzzy c-means}
+\begin{itemize}
+  \item Fuzzy c-means in which sample $k$ counts $w_k$ times; the membership formula is unchanged and the prototypes are weighted means.
+  \item Lets weighted summaries (prototypes, histogram bins) be clustered together with raw data; the building block of spFCM, oFCM, EnFCM, and FGFCM.
+  \item Parameters: those of FCM; the weights are passed to \code{fit} as \py{sample_weight}.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Random sample and extend (rseFCM)}\label{sec:data:rse}
+
+The simplest scheme draws $n_s\ll N$ samples at random, runs fuzzy c-means on them, and extends the result to all samples. Its cost is one FCM run on $n_s$ samples plus one pass over the data, $O(n_s\,c\,l+N\,c)$ for $l$ iterations, and Havens et al.\ \cite{havens:2012:large}, who measure every scheme against literal fuzzy c-means (LFCM), recommend it for very large image data in more than one dimension. The scheme has no approximation guarantee. If FCM on the sample finds a different local optimum than FCM on the whole data, for instance because a small cluster is underrepresented in the sample, the extension carries the error to all samples.
+
+\begin{algobox}{Random sample and extend FCM (rseFCM)}{rsefcm}\index{random sample and extend FCM}\index{rseFCM|see{random sample and extend FCM}}\index{RandomSampleFCM@\code{RandomSampleFCM}}
+\begin{enumerate}[leftmargin=*]
+  \item Draw $n_s$ samples without replacement.
+  \item Run fuzzy c-means on the sample (with restarts if requested): prototypes $\V$.
+  \item Extend: memberships of all $N$ samples by \eqref{eq:data:mu} with $\V$ fixed, chunk by chunk.
+\end{enumerate}
+\end{algobox}
+\begin{summarybox}{Random sample and extend FCM}
+\begin{itemize}
+  \item FCM on a random sample, one membership step for the rest; the fastest scheme.
+  \item Adequate when the sample is large enough for FCM to find the right solution on it; small clusters are at risk.
+  \item Parameters: \py{sample_size} (count or fraction), \py{chunk_size} of the extension, and those of FCM.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Single-pass FCM (spFCM)}\label{sec:data:sp}
+
+The data are split into chunks $\X_1,\dots,\X_s$ of $n_l$ samples each. The first chunk is clustered with fuzzy c-means; its prototypes $\V_1$ with the weights $w'_{1i}=\sum_k\mu_{ik}$ are appended to the second chunk as $c$ weighted samples, and the augmented chunk is clustered with wFCM, initialized at $\V_1$:
+\begin{equation}
+  (\U_l,\V_l)=\text{wFCM}\big([\X_l;\V_{l-1}],\,[\mathbf{1};\lambda\,\mathbf{w}'_{l-1}]\big),\qquad
+  w'_{li}=\sum_k w_k\,\mu_{ik},
+  \label{eq:data:sp}
+\end{equation}
+for $l=2,\dots,s$, where the sum runs over the augmented chunk. The prototypes of the last chunk summarize the data set, and the memberships of all samples follow by extension. Because a carried prototype weighs as much as the observations it represents, the final prototypes approximate those of fuzzy c-means on the whole data; the approximation is good when every chunk contains all clusters. The weights also explain the weakness of the scheme: after a few chunks the carried prototypes outweigh any new chunk, so the result is anchored at the solution of the first chunk, and a poor local optimum there, such as two merged clusters, is never left. Restarts on the first chunk (\py{n_init}) are a cheap safeguard.
+
+The published algorithm uses $\lambda=1$; \code{fuzzyclust} adds a \emph{forgetting factor} $\lambda\in[0,1]$ that multiplies the carried weights before every chunk. The weight of chunk $l$ in the summary after chunk $L$ is then $\lambda^{L-l}$, an effective memory of about $1/(1-\lambda)$ chunks, which lets the prototypes follow clusters that drift in a stream; $\lambda=0$ clusters every chunk on its own, started from the previous prototypes.
+
+\begin{algobox}{Single-pass FCM (spFCM)}{spfcm}\index{single-pass fuzzy c-means}\index{spFCM|see{single-pass fuzzy c-means}}\index{forgetting factor}\index{SinglePassFCM@\code{SinglePassFCM}}
+\begin{algorithm}[H]
+\KwIn{data $\X$ (or a stream of chunks), $c$, $m$, chunk size $n_l$, forgetting factor $\lambda$}
+split $\X$ into chunks $\X_1,\dots,\X_s$ (random order unless streaming)\;
+$(\U_1,\V_1)\leftarrow$ fuzzy c-means on $\X_1$; $\mathbf{w}'_1\leftarrow$ row sums of $\U_1$\;
+\For{$l=2,\dots,s$}{
+  $(\U_l,\V_l)\leftarrow$ wFCM on $[\X_l;\V_{l-1}]$ with weights $[\mathbf{1};\lambda\mathbf{w}'_{l-1}]$, initialized at $\V_{l-1}$\;
+  $w'_{li}\leftarrow\sum_kw_k\mu_{ik}$ over the augmented chunk\;
+}
+extend: memberships of all samples from $\V_s$ by \eqref{eq:data:mu}\;
+\KwOut{prototypes $\V_s$ and weights, chunk history, partition $\U$}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Single-pass FCM}
+\begin{itemize}
+  \item Each chunk is clustered together with the weighted prototypes of the previous one; one pass over the data, memory of one chunk, \code{partial\_fit} for streams.
+  \item Close to FCM when every chunk contains all clusters; inherits the solution of the first chunk, so give that chunk restarts.
+  \item The forgetting factor $\lambda<1$ (an extension of the published algorithm) lets the prototypes follow drifting clusters.
+  \item Parameters: \py{chunk_size}, \py{forgetting_factor}, \py{shuffle}, and those of FCM.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Online FCM (oFCM)}\label{sec:data:o}
+
+Online FCM clusters the chunks independently and merges the results:
+\begin{equation}
+  \begin{aligned}
+  (\U_l,\V_l)&=\text{FCM}(\X_l),\qquad w_{li}=\sum_k\mu_{ik},\qquad l=1,\dots,s,\\
+  \V&=\text{wFCM}\big([\V_1;\dots;\V_s],\,[\mathbf{w}_1;\dots;\mathbf{w}_s]\big),
+  \end{aligned}
+  \label{eq:data:o}
+\end{equation}
+followed by the extension $\U=\text{extend}(\X,\V)$. In the original formulation the chunk clusterings do not influence each other, so they can run in parallel, on different machines, or in any order as the chunks arrive; the final weighted clustering of $s\cdot c$ prototypes is cheap and can be repeated after every chunk, which is what \code{partial\_fit} does. A poor local optimum on one chunk contributes only $c$ of the $s\cdot c$ merged points and is outvoted. The price is the storage of all chunk prototypes and a full FCM run to convergence on every chunk, which makes oFCM the slowest of the three schemes. By default, \code{fuzzyclust} starts each chunk run from the prototypes of the previous chunk, which saves iterations and keeps the cluster order aligned; \py{chunk_init="independent"} restores fully independent starts. Like spFCM with $\lambda=1$, oFCM summarizes the whole past and lags behind drifting clusters; its chunk prototypes $\V_l$, on the other hand, are memoryless estimates of the current clusters.
+
+\begin{algobox}{Online FCM (oFCM)}{ofcm}\index{online fuzzy c-means}\index{oFCM|see{online fuzzy c-means}}\index{OnlineFCM@\code{OnlineFCM}}
+\begin{enumerate}[leftmargin=*]
+  \item For every chunk $\X_l$: fuzzy c-means (started from the previous chunk's prototypes or afresh), prototypes $\V_l$ and weights $w_{li}=\sum_k\mu_{ik}$.
+  \item Cluster the $s\cdot c$ weighted prototypes into $c$ clusters with wFCM, initialized at the prototypes of the last chunk: $\V$.
+  \item Extend: memberships of all samples from $\V$ by \eqref{eq:data:mu}.
+\end{enumerate}
+\end{algobox}
+\begin{summarybox}{Online FCM}
+\begin{itemize}
+  \item Independent FCM runs on the chunks, a weighted FCM of their prototypes at the end; chunks can be processed in parallel or in any order.
+  \item The least sensitive of the three schemes to poor chunk solutions, and the slowest.
+  \item Parameters: \py{chunk_size}, \py{chunk_init} (\py{"previous"} or \py{"independent"}), \py{shuffle}, and those of FCM.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Spatially constrained fuzzy c-means for images}\label{sec:data:image}
+
+Let $x_k$ be the value of pixel $k$ (a gray level, or a vector of channels for the pixel-based methods), $\mathbf{p}_k$ its position (row and column index), $N_k$ the set of its neighbors in a square window of side $a$ with the center excluded, $N_R=a^2-1$ their number, $d_{kr}=\norm{\mathbf{p}_k-\mathbf{p}_r}$ the Euclidean distance between the positions of $k$ and $r$, and $\vi$ the prototype of region $i$. All methods iterate the membership formula \eqref{eq:data:mu} with an \emph{effective} squared distance $\tilde D^2_{ik}$ (\cref{fig:data:pixels}) and an adapted prototype update. Windows that extend beyond the image border are filled by reflection.
+
+\paragraph{FCM\_S.} Ahmed et al.\ \cite{ahmed:2002:fcms} add a term to the functional that penalizes neighbors of a pixel that lie far from the prototype of the pixel's cluster,
+\begin{equation}
+  \J_{S}=\sum_{i=1}^{c}\sum_{k=1}^{N}\mik^m\norm{\xk-\vi}^2+\frac{\alpha}{N_R}\sum_{i=1}^{c}\sum_{k=1}^{N}\mik^m\sum_{r\in N_k}\norm{\mathbf{x}_r-\vi}^2 ,
+  \label{eq:data:fcms}
+\end{equation}
+which gives the effective distance and the prototype update
+\begin{equation}
+  \begin{aligned}
+  \tilde D^2_{ik}&=\norm{\xk-\vi}^2+\frac{\alpha}{N_R}\sum_{r\in N_k}\norm{\mathbf{x}_r-\vi}^2,\\
+  \vi&=\frac{\sum_k\mik^m\big(\xk+\frac{\alpha}{N_R}\sum_{r\in N_k}\mathbf{x}_r\big)}{(1+\alpha)\sum_k\mik^m} .
+  \end{aligned}
+  \label{eq:data:fcmsupd}
+\end{equation}
+A pixel whose value is corrupted but whose neighbors are clean is pulled into the neighbors' cluster; the weight $\alpha$ sets how strongly. The paper's second component, the estimation of the intensity bias field of MR images, is not implemented. The neighborhood sums of the distances to every prototype must be recomputed in every iteration.
+
+\begin{algobox}{FCM\_S}{fcms}\index{FCM\_S}\index{spatially constrained fuzzy c-means}\index{SpatialFCM@\code{SpatialFCM}}
+\begin{enumerate}[leftmargin=*]
+  \item Precompute the neighborhood sums $\sum_{r\in N_k}\mathbf{x}_r$; initialize the partition.
+  \item Repeat: prototypes by \eqref{eq:data:fcmsupd}; squared distances of all pixels; their neighborhood sums; effective distances by \eqref{eq:data:fcmsupd}; memberships by \eqref{eq:data:mu}; until $\max_{ik}\abs{\Delta\mik}<\epsilon$.
+\end{enumerate}
+\end{algobox}
+\begin{summarybox}{FCM\_S}
+\begin{itemize}
+  \item Adds the distances of the neighbors to the prototype; suppresses Gaussian noise but smooths with fixed weights.
+  \item Cost $O(N\,c\,N_R)$ per iteration; mean-type smoothing spreads impulse noise instead of removing it.
+  \item Parameters: \py{alpha} ($\alpha$), \py{window_size}.
+\end{itemize}
+\end{summarybox}
+
+\paragraph{FCM\_S1 and FCM\_S2.} Chen and Zhang \cite{chen:2004:fcms12} replace the neighbors with a single filtered value $\bar{\mathbf{x}}_k$, the mean (S1) or the median (S2) of the window, computed once in advance:
+\begin{equation}
+  \J_{S1,2}=\sum_{i=1}^{c}\sum_{k=1}^{N}\mik^m\big(\norm{\xk-\vi}^2+\alpha\norm{\bar{\mathbf{x}}_k-\vi}^2\big),\qquad
+  \vi=\frac{\sum_k\mik^m(\xk+\alpha\bar{\mathbf{x}}_k)}{(1+\alpha)\sum_k\mik^m} .
+  \label{eq:data:fcms12}
+\end{equation}
+The cost per iteration is that of fuzzy c-means. The median makes FCM\_S2 robust to impulse noise, but only when the median outweighs the pixel: for a white impulse in a gray region the pixel term favors the white cluster and the median term the gray one, and with $\alpha=1$ the two balance exactly, so $\alpha>1$ is needed. The paper's main contribution, a kernel-induced distance, is not implemented.
+
+\begin{algobox}{FCM\_S1 and FCM\_S2}{fcms12}\index{FCM\_S1, FCM\_S2}
+\begin{enumerate}[leftmargin=*]
+  \item Filter the image once: mean (S1) or median (S2) of every window, $\bar{\mathbf{x}}_k$.
+  \item Repeat: prototypes by \eqref{eq:data:fcms12}; effective distances $\norm{\xk-\vi}^2+\alpha\norm{\bar{\mathbf{x}}_k-\vi}^2$; memberships by \eqref{eq:data:mu}; until convergence.
+\end{enumerate}
+\end{algobox}
+\begin{summarybox}{FCM\_S1 and FCM\_S2}
+\begin{itemize}
+  \item The filtered pixel is a second observation weighted by $\alpha$; the cost per iteration is that of FCM.
+  \item S1 (mean) suits Gaussian noise; S2 (median) removes impulses and keeps edges, but needs $\alpha>1$ against salt-and-pepper noise.
+  \item Parameters: \py{alpha}, \py{window_size}.
+\end{itemize}
+\end{summarybox}
+
+\paragraph{EnFCM.} Szil\'agyi et al.\ \cite{szilagyi:2003:enfcm} form the linearly weighted sum image once,
+\begin{equation}
+  \xi_k=\frac{1}{1+\alpha}\Big(x_k+\frac{\alpha}{N_R}\sum_{r\in N_k}x_r\Big),
+  \label{eq:data:xi}
+\end{equation}
+quantize it into $q$ gray levels $\xi_l$ with pixel counts $\gamma_l$, and cluster the levels with the counts as weights,
+\begin{equation}
+  \J_{En}=\sum_{i=1}^{c}\sum_{l=1}^{q}\gamma_l\,\mu_{il}^m(\xi_l-v_i)^2,\qquad
+  v_i=\frac{\sum_l\gamma_l\mu_{il}^m\xi_l}{\sum_l\gamma_l\mu_{il}^m} ,
+  \label{eq:data:enfcm}
+\end{equation}
+which is wFCM \eqref{eq:data:wJ} on the $q$ levels. A pixel inherits the memberships of its level. After one pass over the image, the iterations cost $O(q\,c)$ instead of $O(N\,c)$, about a thousand times less for a $512\times512$ image and $q=256$. The method needs a single-channel image.
+
+\begin{algobox}{EnFCM}{enfcm}\index{EnFCM}\index{histogram-based fuzzy c-means}
+\begin{enumerate}[leftmargin=*]
+  \item Sum image $\xi$ by \eqref{eq:data:xi}; histogram: levels $\xi_l$ and counts $\gamma_l$, $l=1,\dots,q$.
+  \item wFCM on the levels with weights $\gamma_l$ \eqref{eq:data:enfcm}.
+  \item Every pixel takes the memberships of its level.
+\end{enumerate}
+\end{algobox}
+\begin{summarybox}{EnFCM}
+\begin{itemize}
+  \item Linear smoothing once, then fuzzy c-means on the gray-level histogram; the fastest method, with iterations independent of the image size.
+  \item Same noise behavior as FCM\_S1 (good for Gaussian, poor for impulse noise); gray-level images only.
+  \item Parameters: \py{alpha}, \py{window_size}, \py{n_levels} ($q$).
+\end{itemize}
+\end{summarybox}
+
+\paragraph{FGFCM.} Cai, Chen, and Zhang \cite{cai:2007:fgfcm} keep the histogram route but form the summed image with locally adaptive weights,
+\begin{equation}
+  \begin{aligned}
+  \xi_k&=\frac{\sum_{r\in N_k}S_{kr}\,x_r}{\sum_{r\in N_k}S_{kr}},\\
+  S_{kr}&=\exp\Big(-\frac{\norm{\mathbf{p}_k-\mathbf{p}_r}_\infty}{\lambda_s}\Big)\exp\Big(-\frac{(x_k-x_r)^2}{\lambda_g\,\sigma_k^2}\Big),
+  \end{aligned}
+  \label{eq:data:fgfcm}
+\end{equation}
+where $\norm{\cdot}_\infty$ is the maximum norm, so that the spatial factor depends on the larger of the row and column offsets, and $\sigma_k^2=\frac{1}{N_R}\sum_{r\in N_k}(x_r-x_k)^2$ is the local mean squared difference. The gray-level factor compares a neighbor's difference with the typical difference in the window: in a flat region all neighbors count, whereas an outlier among them or a neighbor on the far side of an edge hardly counts at all. Noise is smoothed without blurring edges, and an impulse does not leak into its neighbors. The clustering is then \eqref{eq:data:enfcm} on the histogram of $\xi$.
+
+\begin{algobox}{FGFCM}{fgfcm}\index{FGFCM}
+\begin{enumerate}[leftmargin=*]
+  \item Local similarities $S_{kr}$ and adaptive image $\xi$ by \eqref{eq:data:fgfcm}.
+  \item Histogram of $\xi$, wFCM on the levels \eqref{eq:data:enfcm}, memberships of the pixels from their levels.
+\end{enumerate}
+\end{algobox}
+\begin{summarybox}{FGFCM}
+\begin{itemize}
+  \item EnFCM with edge-preserving, outlier-rejecting weights; as fast as EnFCM.
+  \item Handled both Gaussian and impulse noise well in our experiments; gray-level images only.
+  \item Parameters: \py{lambda_s}, \py{lambda_g} (scales of the spatial and gray-level factors), \py{window_size}, \py{n_levels}.
+\end{itemize}
+\end{summarybox}
+
+\paragraph{FLICM.} Krinidis and Chatzis \cite{krinidis:2010:flicm} add a \emph{fuzzy factor} to the distance,
+\begin{equation}
+  G_{ki}=\sum_{r\in N_k}\frac{1}{d_{kr}+1}\,(1-\mu_{ir})^m\,\norm{\mathbf{x}_r-\vi}^2,\qquad
+  \tilde D^2_{ik}=\norm{\xk-\vi}^2+G_{ki},
+  \label{eq:data:flicm}
+\end{equation}
+with the prototypes updated as in fuzzy c-means, $\vi=\sum_k\mik^m\xk/\sum_k\mik^m$. A neighbor that belongs firmly to cluster $i$ ($\mu_{ir}\approx1$) adds nothing to the distance of pixel $k$ to $\vi$; a neighbor that does not belong to it adds its own distance, damped by the spatial distance. A pixel surrounded by members of cluster $i$ is thus drawn into it even when its own value is far from $\vi$, and the factor needs no weight parameter. Because $G_{ki}$ depends on the memberships, it is evaluated with the memberships of the previous iteration. The iteration is therefore a fixed-point scheme rather than an exact minimization of the functional $\sum_{i,k}(\mik^m\norm{\xk-\vi}^2+G_{ki})$, and in our experiments its result depended more on the initialization than that of the other methods; the examples use k-means++ seeding.
+
+\begin{algobox}{FLICM}{flicm}\index{FLICM}\index{fuzzy local information c-means}
+\begin{enumerate}[leftmargin=*]
+  \item Initialize the partition.
+  \item Repeat: prototypes as in FCM; squared distances of all pixels; fuzzy factors $G_{ki}$ by \eqref{eq:data:flicm} with the current memberships; memberships by \eqref{eq:data:mu} with $\tilde D^2_{ik}$; until convergence.
+\end{enumerate}
+\end{algobox}
+\begin{summarybox}{FLICM}
+\begin{itemize}
+  \item A fuzzy factor built from the neighbors' distances and their lack of membership; no smoothing weight to tune.
+  \item Among the best under Gaussian noise; moves strong impulses only halfway when the extreme gray levels are classes of their own.
+  \item Cost $O(N\,c\,N_R)$ per iteration; sensitive to the initialization. Parameters: \py{window_size}, \py{m}.
+\end{itemize}
+\end{summarybox}
+
+\section{Using it in fuzzyclust}\label{sec:data:api}
+
+The incomplete-data estimator and the very-large-data schemes derive from \code{BaseFuzzyClusterer} and have the usual methods \code{fit}, \code{predict}, \code{predict\_proba}, \code{transform}, and \code{score}; the chunked schemes add \code{partial\_fit}. \code{SpatialFCM} takes an image of shape $(H,W)$ or $(H,W,C)$ instead of a data matrix and produces label and membership images.
+
+\begin{apibox}{fuzzyclust.incomplete.IncompleteFCM}
+\code{n\_clusters=3}, \code{m=2.0}, \code{strategy="pds"|\allowbreak "wds"|\allowbreak "ocs"|\allowbreak "nps"}, \code{tol}, \code{max\_iter}, \code{init} (string or prototypes, e.g.\ those of a PDS fit), \code{n\_init}, \code{random\_state}, \code{verbose}. Missing values are \code{NaN}.\\
+Attributes \code{cluster\_centers\_}, \code{membership\_}, \code{labels\_} (all samples), \code{distances\_}, \code{missing\_mask\_}, \code{n\_missing\_}, \code{X\_completed\_} (optimized for OCS/NPS, post hoc for PDS/WDS), \code{covariances\_}, \code{objective\_}, \code{n\_iter\_}. \code{predict\_proba} and \code{transform} accept incomplete samples (partial distances).
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.large.WeightedFCM}
+Parameters of FCM; \code{fit(X,\allowbreak\ sample\_weight=None)}. Attributes as for FCM, plus \code{sample\_weight\_}. The function \code{extend\_partition(X,\allowbreak\ V,\allowbreak\ m=2.0,\allowbreak\ chunk\_size=None)} returns memberships and squared distances for fixed prototypes.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.large.RandomSampleFCM}
+\code{n\_clusters=3}, \code{sample\_size=0.1} (count or fraction), \code{m}, \code{tol}, \code{max\_iter}, \code{init}, \code{n\_init}, \code{chunk\_size=None} (extension), \code{random\_state}, \code{verbose}.\\
+Attributes \code{sample\_indices\_}, \code{fcm\_} (the FCM fitted on the sample), \code{cluster\_centers\_}, \code{membership\_}, \code{labels\_}, \code{objective\_} (on all data).
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.large.SinglePassFCM, fuzzyclust.large.OnlineFCM}
+\code{n\_clusters=3}, \code{chunk\_size=10000}, \code{m}, \code{tol}, \code{max\_iter}, \code{init}, \code{n\_init} (first chunk; every chunk of \code{OnlineFCM} with \code{chunk\_init="independent"}), \code{shuffle=True}, \code{random\_state}, \code{verbose}; \code{SinglePassFCM} also \code{forgetting\_factor=1.0}, \code{OnlineFCM} also \code{chunk\_init="previous"|\allowbreak "independent"}.\\
+Methods \code{fit(X)} and \code{partial\_fit(chunk)}. Attributes \code{cluster\_centers\_}, \code{center\_weights\_}, \code{chunk\_centers\_}, \code{chunk\_weights\_}, \code{chunk\_objective\_}, \code{chunk\_n\_iter\_}, \code{n\_chunks\_}, \code{membership\_}, \code{labels\_} (of the data passed last); \code{OnlineFCM.centers\_model\_} is the final weighted clusterer.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.image.SpatialFCM}
+\code{n\_clusters=3}, \code{method="flicm"|\allowbreak "fcm"|\allowbreak "fcm\_s"|\allowbreak "fcm\_s1"|\allowbreak "fcm\_s2"|\allowbreak "enfcm"|\allowbreak "fgfcm"}, \code{m=2.0}, \code{alpha=1.0}, \code{window\_size=3}, \code{lambda\_s=3.0}, \code{lambda\_g=6.0}, \code{n\_levels=256}, \code{tol}, \code{max\_iter=100}, \code{init}, \code{n\_init}, \code{random\_state}, \code{verbose}.\\
+Attributes \code{cluster\_centers\_}, \code{membership\_} $(H,W,c)$, \code{labels\_} $(H,W)$, \code{filtered\_image\_}, \code{histogram\_}, \code{level\_values\_}, \code{level\_membership\_} (histogram methods), \code{objective\_}, \code{n\_iter\_}. \code{predict(image)} segments a new image with the fitted prototypes.
+\end{apibox}
+
+\begin{apibox}{helpers,\allowbreak\ data generators,\allowbreak\ and plots}
+\code{partial\_distances(X,\allowbreak\ V)}; \code{make\_mcar(X,\allowbreak\ missing\_rate)}, \code{make\_incomplete\_blobs}; \code{plot\_incomplete\_clusters}, \code{plot\_imputation}. \code{make\_large\_blobs}, \code{make\_drifting\_stream} (a generator of chunks); \code{plot\_chunk\_timeline}, \code{plot\_center\_trajectories}. \code{neighborhood\_sum}, \code{weighted\_sum\_image}, \code{local\_similarity\_image}; \code{make\_synthetic\_image}, \code{add\_image\_noise}; \code{segmentation\_accuracy}, \code{match\_labels}; \code{plot\_image}, \code{plot\_label\_image}, \code{plot\_membership\_maps}, \code{plot\_segmentation}.
+\end{apibox}
+
+All four strategies run on the same incomplete matrix, and OCS is best started from the PDS prototypes:
+\pysnippet{examples/08_data_realities/plot_01_missing_strategies.py}{fit}
+\pysnippet{examples/08_data_realities/plot_02_ocs_imputation.py}{impute}
+The very-large-data schemes are drop-in replacements for FCM, and the chunked ones consume a stream with \code{partial\_fit}:
+\pysnippet{examples/08_data_realities/plot_03_large_data.py}{fit}
+\pysnippet{examples/08_data_realities/plot_04_stream_drift.py}{stream}
+An image is segmented with a single call:
+\pysnippet{examples/08_data_realities/plot_05_image_noise.py}{segment}
+\pysnippet{examples/08_data_realities/plot_06_spatial_alpha_window.py}{enfcm}
+
+\section{Examples}\label{sec:data:examples}
+
+\subsection{Four strategies for missing values}
+
+Three well-separated Gaussian clusters of 150 points each in the plane lose $25\,\%$ of their values (\cref{fig:data:ex1a}). WDS, PDS, and NPS recover the groups (ARI $0.99$), with prototype errors against complete-data FCM of $0.11$, $0.05$, and $0.04$. The completed coordinates show the character of each strategy: NPS snaps the imputed coordinates onto the prototypes, whereas PDS and WDS impute only afterwards. OCS from a random start ends in a poor solution (ARI $0.82$, prototype error $0.47$): samples of the lower-left cluster that lost their first coordinate were imputed with the first coordinate of the right cluster early on and remain captured there, forming the vertical streak of hollow markers in the figure. The memberships of incomplete samples (\cref{fig:data:ex1b}) are lower when the observed coordinate is ambiguous. The parameter study in four dimensions (\cref{fig:data:ex1c}) follows the experiment of Hathaway and Bezdek: WDS loses samples quickly, since only $(1-p)^4$ of them remain complete, and its prototypes wander off beyond $40\,\%$; PDS degrades most gracefully (prototype error $0.13$ at $40\,\%$), NPS is close to it ($0.14$), and the randomly started OCS falls behind ($0.28$).
+
+\exfig{08_data_realities/plot_01_missing_strategies_1}[The four strategies on data with 25\,\% missing values.]{The four strategies on data with 25\,\% missing values; hollow markers are incomplete samples at their completed coordinates, crosses are the prototypes of each strategy, and plus signs those of FCM on the complete data. The randomly started OCS captures samples in the wrong cluster.}{data:ex1a}
+\exfig[0.85\textwidth]{08_data_realities/plot_01_missing_strategies_2}{The PDS partition at the true coordinates (left) and the maximal membership of the incomplete samples (right): an ambiguous observed coordinate gives a low membership.}{data:ex1b}
+\exfig{08_data_realities/plot_01_missing_strategies_3}{Prototype error against complete-data FCM and agreement with the true groups for missing rates up to 60\,\% (four-dimensional blobs), and the share of complete samples.}{data:ex1c}
+
+\subsection{Imputation by clustering}
+
+The second data set has four clusters in four dimensions with $20\,\%$ of the values missing (\cref{fig:data:ex2a}). Imputation by the column mean has an RMSE of $2.56$; an oracle that knows every sample's cluster mean reaches $0.64$. The clustering-based imputations lie close to the oracle: PDS post hoc $0.81$, NPS $0.83$, and OCS started from the PDS prototypes $0.90$, while OCS from a random start reaches only $1.29$; the horizontal bands in its panel are samples imputed with the coordinates of a wrong prototype. \Cref{fig:data:ex2b} shows why: the randomly started OCS is far more confident about the incomplete samples than PDS, which computes the memberships from the observed features only, and its large errors sit on samples that PDS considers ambiguous. The scans (\cref{fig:data:ex2c}) show that the ranking holds at every missing rate (at $30\,\%$: PDS $0.94$, NPS and OCS from the PDS start $1.03$, OCS from a random start $1.54$) and that the exponent matters little for PDS, with a shallow optimum near $m=2$; the randomly started OCS improves with $m$ because softer memberships weaken the self-reinforcement of the imputed values.
+
+\exfig[0.8\textwidth]{08_data_realities/plot_02_ocs_imputation_1}{Imputed against true values with 20\,\% of the values missing, for PDS (post hoc), NPS, and OCS from a random and from the PDS start.}{data:ex2a}
+\exfig[0.85\textwidth]{08_data_realities/plot_02_ocs_imputation_2}{Memberships of the incomplete samples under OCS and PDS (left), and the largest imputation error of a sample against its PDS membership (right).}{data:ex2b}
+\exfig{08_data_realities/plot_02_ocs_imputation_3}{Imputation error against the missing rate (left) and against the exponent $m$ at 30\,\% missing (right), with the column mean and the oracle as references.}{data:ex2c}
+
+\subsection{200\,000 samples}
+
+The third data set has 200\,000 points in five clusters of very different sizes, from $35\,\%$ down to $5\,\%$ of the data (\cref{fig:data:ex3a}). Literal fuzzy c-means needs 32 iterations over all samples. With 1\,\% of the data at a time, rseFCM is more than ten times, spFCM about six times, and oFCM about twice as fast as literal FCM, and all three agree with the literal partition with an ARI of $0.998$ or better; the measured speedups vary from run to run with the machine and its load. The chunk timeline of spFCM (\cref{fig:data:ex3b}, left) is flat after the first chunks: the carried prototypes soon outweigh any new chunk. The chunk prototypes of oFCM scatter around the merged ones by the sampling error of a chunk, most for the small cluster, of which a chunk holds only about a hundred members. The chunk-size study (\cref{fig:data:ex3c}) exposes the weakness of the first two schemes: with 600 samples or fewer, FCM on the sample (or on the first chunk) merges two clusters and splits the largest (ARI $0.87$ with the literal partition), and spFCM carries this solution through all later chunks. oFCM outvotes the poor chunk solutions and stays above $0.99$ at every size, and five restarts on the first chunk repair spFCM at a small cost.
+
+\exfig{08_data_realities/plot_03_large_data_1}[Literal FCM and the three schemes on 200\,000 samples.]{Literal FCM and the three schemes with 1\,\% chunks on 200\,000 samples (5000 of them plotted); the white crosses are the prototypes of each scheme and cover the plus signs of the literal FCM prototypes, and the panel titles give speedup and agreement.}{data:ex3a}
+\exfig{08_data_realities/plot_03_large_data_2}{The spFCM prototypes after every chunk, marker area proportional to the carried weight (left), and the oFCM chunk prototypes relative to the merged ones (right).}{data:ex3b}
+\exfig{08_data_realities/plot_03_large_data_3}{Speedup over literal FCM (left) and agreement with its partition (right) against the sample or chunk size.}{data:ex3c}
+
+\subsection{A drifting stream}
+
+Three clusters move along straight lines while 40 chunks of 500 samples are fed to \code{partial\_fit} (\cref{fig:data:ex4a}). The published spFCM and oFCM summarize the whole past, so their prototypes sit near the time average of the centers, halfway along the path; with $\lambda=0.5$ spFCM follows the clusters. The tracking error (\cref{fig:data:ex4b}) grows linearly for the two published schemes and settles at a small constant for $\lambda=0.5$, close to that of a memoryless FCM on the last chunk. The parameter study with chunks of 200 samples (\cref{fig:data:ex4c}) shows the trade-off between lag and noise: without drift, a long memory is best ($\lambda=0.95$, error $0.014$ against $0.097$ for $\lambda=0$); with a drift of $0.02$ per chunk, the best factor is $0.5$; and with $0.05$ or more, it is $0.25$.
+
+\exfig{08_data_realities/plot_04_stream_drift_1}{The first and the last chunk of a drifting stream with the true center paths (dotted), the prototype paths of spFCM with $\lambda=1$ and $\lambda=0.5$, and the final prototypes of the three models.}{data:ex4a}
+\exfig[0.7\textwidth]{08_data_realities/plot_04_stream_drift_2}{Distance of the prototypes from the current true centers along the stream.}{data:ex4b}
+\exfig[0.7\textwidth]{08_data_realities/plot_04_stream_drift_3}{Mean tracking error over the second half of the stream against the forgetting factor for four drift speeds; circles mark the best factor.}{data:ex4c}
+
+\subsection{Segmentation under noise}
+
+A $128\times128$ image with four regions at gray levels $0$, $1/3$, $2/3$, and $1$, and one disc of every class inside another region, is segmented by all seven methods with $\alpha=4$, a $3\times3$ window, and k-means++ seeding. Under Gaussian noise with $\sigma=0.2$ (\cref{fig:data:ex5a}), pixel-wise FCM labels $62\,\%$ of the pixels correctly; FCM\_S leaves clumps ($0.91$), FCM\_S1 and FCM\_S2 leave isolated specks ($0.95$, $0.94$), and EnFCM, FGFCM, and FLICM give clean regions ($0.96$--$0.97$). All smoothing methods share one artifact: where the black and the white regions meet, the smoothed values are intermediate and a one-pixel band is assigned to a gray class. Salt-and-pepper noise on $20\,\%$ of the pixels (\cref{fig:data:ex5b}) reverses the picture. The impulses coincide with the darkest and the brightest class, so FCM still labels $85\,\%$ of the pixels correctly. The mean-based methods spread the impulses and \emph{lose} accuracy (FCM\_S $0.68$, EnFCM $0.80$), whereas the median of FCM\_S2 removes them ($0.93$) and the adaptive weights of FGFCM ignore them ($0.92$). FLICM ($0.72$) moves many impulses only halfway: a white pixel in the black region ends up in the dark-gray class, because its distance to the black prototype plus the small fuzzy factor of the black class exceeds its smaller distance to the dark-gray prototype plus the moderate fuzzy factor of that class. Across the noise levels (\cref{fig:data:ex5c}), the adaptive methods keep their accuracy longest under Gaussian noise (at $\sigma=0.3$: FLICM $0.90$, FGFCM $0.88$, FCM $0.51$), and only FCM\_S2 and FGFCM beat FCM consistently under impulse noise.
+
+\exfig[0.75\textwidth]{08_data_realities/plot_05_image_noise_1}[Seven segmentations of an image with Gaussian noise.]{Seven segmentations of an image with Gaussian noise ($\sigma=0.2$); the titles give the share of correctly labeled pixels.}{data:ex5a}
+\exfig[0.75\textwidth]{08_data_realities/plot_05_image_noise_2}{The same image with 20\,\% salt-and-pepper noise: averaging spreads the impulses, whereas the median and the adaptive weights remove them.}{data:ex5b}
+\exfig{08_data_realities/plot_05_image_noise_3}{Segmentation accuracy against the level of Gaussian (left) and salt-and-pepper noise (right).}{data:ex5c}
+
+\subsection{How much neighborhood?}
+
+Two thin bars, one and two pixels wide, are added to the test image, and the accuracy is measured separately on the interior of the regions and on the $11\,\%$ of the pixels next to a region boundary, labeled ``detail'' in the figures (\cref{fig:data:ex6a}). For EnFCM under Gaussian noise, increasing $\alpha$ from $0$ to $4$ raises the interior accuracy from $0.63$ to $0.99$ but lowers the boundary accuracy from $0.65$ to $0.54$, and the one-pixel bar breaks up; larger windows round the corners, shrink the discs, and dissolve both bars. The $\alpha$ scan (\cref{fig:data:ex6b}) shows the same trade-off for all three methods under Gaussian noise: the boundary accuracy peaks at $\alpha\approx0.25$--$1$ for FCM\_S and EnFCM and at $\alpha\approx2$ for the edge-preserving median of FCM\_S2. Under salt-and-pepper noise, FCM\_S and EnFCM gain at most a few points on the interior over pixel-wise FCM ($0.89$; at best $0.92$ for FCM\_S at $\alpha=16$) and lose half of the boundary accuracy (from $0.90$ to below $0.50$), and FCM\_S2 helps only for $\alpha>1$ ($0.92$ at $\alpha=2$, $0.95$ at $4$, and $0.999$ at $8$), as predicted by the balance of the pixel and median terms. Enlarging the window with $\alpha=4$ (\cref{fig:data:ex6c}) costs boundary accuracy for all methods and, for FCM\_S, interior accuracy as well ($0.97$ at $5\times5$, $0.84$ at $11\times11$), while the median keeps the interior of FCM\_S2 at $0.995$.
+
+\exfig{08_data_realities/plot_06_spatial_alpha_window_1}[EnFCM with increasing weight and window size.]{EnFCM with increasing weight $\alpha$ in a $3\times3$ window (top row and bottom left) and with increasing window size at $\alpha=4$ (rest of the bottom row); the titles give the accuracy on the interior and on the boundary (detail) pixels.}{data:ex6a}
+\exfig{08_data_realities/plot_06_spatial_alpha_window_2}{Interior (solid) and boundary (dashed) accuracy against $\alpha$ for FCM\_S, EnFCM, and FCM\_S2 under Gaussian (left) and salt-and-pepper noise (right).}{data:ex6b}
+\exfig[0.7\textwidth]{08_data_realities/plot_06_spatial_alpha_window_3}{Interior and boundary accuracy against the window size with $\alpha=4$ under Gaussian noise.}{data:ex6c}
+
+\section{Further reading}\label{sec:data:reading}
+
+The four strategies for incomplete data are compared in \cite{hathaway:2001:incomplete}; the partial distance goes back to Dixon \cite{dixon:1979:missing}, and the statistical framework of missing data, including the distinction between values missing completely at random and other mechanisms, is given in \cite{little:2002:missing}. Havens et al.\ \cite{havens:2012:large} compare fuzzy c-means algorithms for very large data, covering rseFCM, spFCM, oFCM, and their kernel versions. Single-pass FCM is introduced in \cite{hore:2007:spfcm}, and online FCM and its use for large magnetic resonance volumes in \cite{hore:2009:scalable}; earlier work on making each FCM iteration cheaper includes \cite{cannon:1986:efficient,kolen:2002:complexity}. The spatially constrained segmentation methods are FCM\_S \cite{ahmed:2002:fcms}, FCM\_S1 and FCM\_S2 with their kernel versions \cite{chen:2004:fcms12}, EnFCM \cite{szilagyi:2003:enfcm}, FGFCM \cite{cai:2007:fgfcm}, and FLICM \cite{krinidis:2010:flicm}. A related approach for MR images, which estimates the bias field together with the partition and adds a smoothness penalty on that field, is the adaptive fuzzy c-means of Pham and Prince \cite{pham:1999:afcm}. All rest on the c-means functional of Bezdek \cite{bezdek:1981}.

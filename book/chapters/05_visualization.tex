@@ -1,0 +1,392 @@
+\chapter[Visualization]{Visualization of fuzzy clustering results}\label{ch:visualization}
+\begin{roadmap}
+The previous chapter judged a fuzzy partition by validity indices, that is, by single numbers. This chapter projects the data \emph{and} the cluster prototypes to the plane, so that the analyst can see whether the clusters are compact, whether two of them overlap, or whether a prototype of the wrong shape was fitted. We start with the two classical projections, PCA and Sammon mapping, explain why neither shows a fuzzy clustering faithfully, and derive the fuzzy Sammon mapping (FUZZSAM), which preserves the $N\times c$ sample--prototype distances the clustering algorithm worked with rather than the distances between samples; measures of the quality of a projection follow. The fuzzy self-organizing map takes the opposite route: it arranges the prototypes on a grid during clustering, so that the result is a map by construction. All methods are in \code{fuzzyclust.viz}.
+\end{roadmap}
+
+\section{Problem and idea}\label{sec:viz:problem}
+
+Clustering algorithms always fit their prototypes to the data, whether or not the assumed cluster structure is adequate. In two dimensions the analyst sees at once whether a spherical prototype was forced onto an elongated group or two groups were merged. In a typical data mining problem the data have tens of attributes, the clusters are high-dimensional geometric objects, and this inspection is impossible. Validity indices (\cref{ch:validity}) compress the partition into a scalar; they are indispensable for ranking candidate partitions, but the compression loses the information on \emph{where} and \emph{why} a partition is poor.
+
+A low-dimensional picture of the clustering is therefore a tool in its own right \cite{kovacs:2002:fuzzsam,abonyi:2004:fuzzsam,feil:2007:fuzzsam}. Two classical projection methods are at hand. Principal component analysis (PCA) is a linear projection onto the plane of largest variance; Sammon's nonlinear mapping \cite{sammon:1969} places $N$ points in the plane so that their mutual Euclidean distances reproduce the $N(N-1)/2$ distances of the original samples. Both methods project the \emph{data}. A fuzzy clustering, however, is not defined by the distances between samples: it is defined by the $N\times c$ distances $D_{ik}=d(\xk,\vi)$ between the samples and the prototypes, measured with the norm of the algorithm (Euclidean for FCM, the adaptive norm $\Ai$ of Gustafson--Kessel, the exponential distance of Gath--Geva, the distance to a line or a shell for the variants of \cref{ch:robust_shape}), and by the memberships derived from them. Two consequences follow:
+\begin{itemize}
+  \item a projection of the data cannot represent a clustering that uses a non-Euclidean distance; a Gustafson--Kessel ellipsoid appears as an ellipsoid in the PCA plane, although the algorithm ``sees'' it as a sphere in its own norm, and the prototype of a line or shell cluster has no natural position in the picture at all;
+  \item the $N(N-1)/2$ pairwise distances of Sammon mapping make every iteration quadratic in $N$, while the clustering itself needs only $Nc$ distances per iteration.
+\end{itemize}
+
+The fuzzy Sammon mapping resolves both problems with one idea (\cref{fig:viz:concept}): it looks for $N$ projected samples $\mathbf{y}_k\in\R^q$ ($q=2$) and $c$ projected centers $\mathbf{z}_i\in\R^q$ such that the Euclidean distances $d^*_{ik}=\norm{\mathbf{y}_k-\mathbf{z}_i}$ in the plane reproduce the distances $D_{ik}$ of the clustering algorithm, each pair weighted by $\mik^m$. Every cluster becomes a single point in the plane regardless of the shape of its prototype, the memberships can be recomputed from the picture with the FCM formula, and the agreement between recomputed and fitted memberships tells how faithful the picture is. The fuzzy self-organizing map, finally, does not project an existing partition but constrains the prototypes to a grid while clustering; the grid \emph{is} the picture.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[scale=0.86, >={Latex[length=2mm]}, lbl/.style={note, fill=white, fill opacity=0.85, text opacity=1, inner sep=0.8pt, rounded corners=1pt}]
+  % ---------------- original space ----------------
+  \begin{scope}
+    \node[note, anchor=south] at (2.0,4.1) {original space $\R^n$ ($n$ large)};
+    \draw[fcgray, thin, ->] (-0.3,-0.3) -- (4.6,-0.3) node[below left, note] {$x_1$};
+    \draw[fcgray, thin, ->] (-0.3,-0.3) -- (-0.3,3.7) node[left, note] {$x_2$};
+    \draw[fcgray, thin, ->] (-0.3,-0.3) -- (-1.0,-0.9) node[below, note] {$x_n$};
+    \begin{scope}[rotate around={30:(1.1,2.6)}]
+      \draw[fcblue, thick, fill=fcblue!10] (1.1,2.6) ellipse (1.05 and 0.38);
+    \end{scope}
+    \begin{scope}[rotate around={-55:(3.4,2.3)}]
+      \draw[fcverm, thick, fill=fcverm!10] (3.4,2.3) ellipse (0.95 and 0.42);
+    \end{scope}
+    \begin{scope}[rotate around={5:(2.1,0.6)}]
+      \draw[fcgreen, thick, fill=fcgreen!10] (2.1,0.6) ellipse (1.2 and 0.35);
+    \end{scope}
+    \foreach \p in {(0.4,2.2),(0.7,2.5),(1.0,2.4),(1.3,2.8),(1.6,2.9),(1.9,3.1),(1.2,2.5),(0.9,2.9)}
+      \fill[fcblue] \p circle (1.2pt);
+    \foreach \p in {(3.1,2.9),(3.2,2.5),(3.4,2.1),(3.6,1.8),(3.7,2.6),(3.3,2.3),(3.9,1.6),(3.5,2.4)}
+      \fill[fcverm] \p circle (1.2pt);
+    \foreach \p in {(1.1,0.55),(1.5,0.7),(1.9,0.5),(2.3,0.75),(2.7,0.55),(3.1,0.7),(2.0,0.4),(2.5,0.5)}
+      \fill[fcgreen] \p circle (1.2pt);
+    \node[fcblue!50!black] at (1.1,2.6) {$\times$};  \node[lbl] at (0.25,3.0) {$\mathbf{v}_1$};
+    \node[fcverm!50!black] at (3.4,2.3) {$\times$};  \node[lbl, right=2pt] at (4.05,2.3) {$\mathbf{v}_2$};
+    \node[fcgreen!50!black] at (2.1,0.6) {$\times$}; \node[lbl, below=2pt] at (2.1,0.25) {$\mathbf{v}_3$};
+    \coordinate (xk) at (2.45,1.95);
+    \fill[black] (xk) circle (1.8pt); \node[lbl, below left=1pt] at (xk) {$\xk$};
+    \draw[dashed, thick, fcblue!70!black] (xk) -- (1.1,2.6) node[midway, above=1pt, lbl] {$D_{1k}$};
+    \draw[dashed, thick, fcverm!70!black] (xk) -- (3.4,2.3) node[midway, below=2pt, lbl] {$D_{2k}$};
+    \draw[dashed, thick, fcgreen!70!black] (xk) -- (2.1,0.6) node[midway, right=1pt, lbl] {$D_{3k}$};
+    \node[note, text width=4.2cm, anchor=north] at (2.0,-1.0) {$D_{ik}=d(\xk,\vi)$ in the norm of the clustering algorithm (here: GK ellipsoids)};
+  \end{scope}
+  % ---------------- arrow ----------------
+  \draw[arrow, very thick] (4.95,1.5) -- (6.65,1.5);
+  \node[block, text width=1.75cm, align=center, font=\footnotesize, inner sep=2pt] at (5.8,2.6) {FUZZSAM:\\ minimize\\ $\sum_{i,k}\mik^m\,\times$\\ $(D_{ik}-d^*_{ik})^2$};
+  \node[note, text width=1.9cm, anchor=north] at (5.8,1.25) {$Nc$ distances,\\ not $N(N{-}1)/2$};
+  % ---------------- projected plane ----------------
+  \begin{scope}[shift={(7.6,0)}]
+    \node[note, anchor=south] at (2.2,4.1) {projection plane $\R^2$};
+    \draw[fcgray, thin, ->] (-0.3,-0.3) -- (4.6,-0.3) node[below left, note] {$y_1$};
+    \draw[fcgray, thin, ->] (-0.3,-0.3) -- (-0.3,3.7) node[left, note] {$y_2$};
+    \foreach \r in {0.35,0.7} { \draw[fcblue!60, thin] (1.0,2.6) circle (\r); }
+    \foreach \r in {0.35,0.7} { \draw[fcverm!60, thin] (3.5,2.4) circle (\r); }
+    \foreach \r in {0.35,0.7} { \draw[fcgreen!60, thin] (2.2,0.7) circle (\r); }
+    \foreach \p in {(0.6,2.4),(0.8,2.9),(1.2,2.3),(1.3,2.8),(0.7,2.7),(1.0,2.2),(1.4,2.5),(0.9,3.0)}
+      \fill[fcblue] \p circle (1.2pt);
+    \foreach \p in {(3.2,2.6),(3.4,2.1),(3.7,2.7),(3.8,2.2),(3.3,2.3),(3.6,2.5),(3.9,2.5),(3.5,2.0)}
+      \fill[fcverm] \p circle (1.2pt);
+    \foreach \p in {(1.8,0.6),(2.0,0.9),(2.3,0.5),(2.5,0.8),(2.1,0.5),(2.4,1.0),(1.9,0.85),(2.6,0.6)}
+      \fill[fcgreen] \p circle (1.2pt);
+    \node[fcblue!50!black] at (1.0,2.6) {$\times$};  \node[lbl] at (0.15,3.2) {$\mathbf{z}_1$};
+    \node[fcverm!50!black] at (3.5,2.4) {$\times$};  \node[lbl, right=2pt] at (4.2,2.4) {$\mathbf{z}_2$};
+    \node[fcgreen!50!black] at (2.2,0.7) {$\times$}; \node[lbl, left=2pt] at (1.5,0.7) {$\mathbf{z}_3$};
+    \coordinate (yk) at (2.5,1.9);
+    \fill[black] (yk) circle (1.8pt); \node[lbl, below left=1pt] at (yk) {$\mathbf{y}_k$};
+    \draw[dashed, thick, fcblue!70!black] (yk) -- (1.0,2.6) node[midway, above=1pt, lbl] {$d^*_{1k}$};
+    \draw[dashed, thick, fcverm!70!black] (yk) -- (3.5,2.4) node[midway, below=2pt, lbl] {$d^*_{2k}$};
+    \draw[dashed, thick, fcgreen!70!black] (yk) -- (2.2,0.7) node[midway, right=1pt, lbl] {$d^*_{3k}$};
+    \node[note, text width=4.2cm, anchor=north] at (2.2,-1.0) {$d^*_{ik}=\norm{\mathbf{y}_k-\mathbf{z}_i}$ Euclidean; every prototype is a point, iso-membership curves are near-circles};
+  \end{scope}
+\end{tikzpicture}
+\caption[The idea of the fuzzy Sammon mapping.]{The idea of the fuzzy Sammon mapping. Left: in the original space the clustering algorithm measures the distance of every sample $\xk$ to every prototype $\vi$ in its own norm (dashed lines; for Gustafson--Kessel the clusters are ellipsoids). Right: the projected samples $\mathbf{y}_k$ and centers $\mathbf{z}_i$ are placed so that the Euclidean distances $d^*_{ik}$ in the plane reproduce the $D_{ik}$, weighted by the memberships. Only $N\times c$ distances are involved, and in the plane every cluster is a point surrounded by nearly circular membership contours (exact circles for two clusters).}
+\label{fig:viz:concept}
+\end{figure}
+
+\section{Theory}\label{sec:viz:theory}
+
+Throughout the chapter $\X=[\mathbf{x}_1,\dots,\mathbf{x}_N]\T\in\R^{N\times n}$ is the data matrix, $\V=[\mathbf{v}_1,\dots,\mathbf{v}_c]\T$ the prototypes, $\U=[\mik]\in\R^{c\times N}$ the fuzzy partition, and $D_{ik}=d(\xk,\vi)$ the (not squared) distance of the clustering algorithm; in the code $\U$ is stored transposed as \code{membership\_} of shape \code{(n\_samples, n\_clusters)} and $D_{ik}$ is returned by \code{transform}. The projection has dimension $q$ (two in all pictures); $\mathbf{y}_k\in\R^q$ denotes the projected sample and $\mathbf{z}_i\in\R^q$ the projected prototype. We first review the two classical data projections (\cref{sec:viz:pca,sec:viz:sammon}), then derive FUZZSAM (\cref{sec:viz:fuzzsam}) and the measures of projection quality (\cref{sec:viz:quality}), and finally present the fuzzy self-organizing map (\cref{sec:viz:fsom}).
+
+\subsection{Principal component projection}\label{sec:viz:pca}
+
+PCA \cite{jolliffe:2002} projects the centered data onto the $q$ eigenvectors $\mathbf{w}_1,\dots,\mathbf{w}_q$ of the covariance matrix
+\begin{equation}
+  \mathbf{F} = \frac{1}{N}\sum_{k=1}^{N}(\xk-\bar{\mathbf{x}})(\xk-\bar{\mathbf{x}})\T,\qquad
+  \mathbf{y}_k = \mathbf{W}\T(\xk-\bar{\mathbf{x}}),\quad \mathbf{W}=[\mathbf{w}_1,\dots,\mathbf{w}_q],
+  \label{eq:viz:pca}
+\end{equation}
+belonging to the $q$ largest eigenvalues. The plane captures the largest possible share of the total variance, and the ratio of the retained eigenvalues to their sum tells how large this share is. Because the map is affine, the prototypes are projected with the same formula, $\mathbf{z}_i=\mathbf{W}\T(\vi-\bar{\mathbf{x}})$; for Euclidean prototypes (FCM) the $\mathbf{z}_i$ coincide with the membership-weighted means of the projected data. PCA is fast, deterministic, and applicable to new samples, but it preserves variance, not distances: clusters that differ in low-variance directions fall on top of each other, and nothing in the picture refers to the norm of the clustering algorithm.
+
+\begin{algobox}{Principal component projection of data and prototypes}{pca}\index{principal component analysis (PCA)}\index{pca\_projection@\code{pca\_projection}}
+\begin{algorithm}[H]
+\KwIn{data $\X$, prototypes $\V$, dimension $q$}
+center the data: $\bar{\mathbf{x}}=\frac1N\sum_k\xk$, $\tilde{\mathbf{x}}_k=\xk-\bar{\mathbf{x}}$\;
+compute the covariance $\mathbf{F}$ of \eqref{eq:viz:pca} and its eigen-decomposition $\mathbf{F}=\sum_j\lambda_j\mathbf{w}_j\mathbf{w}_j\T$, $\lambda_1\ge\lambda_2\ge\dots$\;
+$\mathbf{W}\leftarrow[\mathbf{w}_1,\dots,\mathbf{w}_q]$\;
+$\mathbf{y}_k\leftarrow\mathbf{W}\T\tilde{\mathbf{x}}_k$ for $k=1,\dots,N$; \quad $\mathbf{z}_i\leftarrow\mathbf{W}\T(\vi-\bar{\mathbf{x}})$ for $i=1,\dots,c$\;
+\KwOut{$\mathbf{Y}$, $\mathbf{Z}$, explained variance $\sum_{j\le q}\lambda_j/\sum_j\lambda_j$}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{PCA projection}
+\begin{itemize}
+  \item Linear, variance-preserving projection onto the plane of the first two principal components.
+  \item Prototypes are mapped with the same affine transform, so data and centers stay consistent.
+  \item Deterministic, cheap, extendable to new data; the natural starting point of the nonlinear methods.
+  \item Ignores distances and the algorithm's norm; compact high-dimensional clusters may overlap in the plane.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Sammon mapping}\label{sec:viz:sammon}
+
+Sammon's mapping \cite{sammon:1969} is a multidimensional scaling method. It looks for $N$ points $\mathbf{y}_k\in\R^q$ whose pairwise distances $d^*_{kl}=\norm{\mathbf{y}_k-\mathbf{y}_l}$ approximate the pairwise distances $d_{kl}=\norm{\xk-\mathbf{x}_l}$ of the original data by minimizing the \emph{stress}
+\begin{equation}
+  E = \frac{1}{\lambda}\sum_{k<l}\frac{(d_{kl}-d^*_{kl})^2}{d_{kl}},\qquad \lambda=\sum_{k<l}d_{kl}.
+  \label{eq:viz:stress}
+\end{equation}
+The division by $d_{kl}$ gives small distances a larger weight than a plain least-squares fit would, so that the local structure is preserved; the constant $\lambda$ only normalizes $E$ and does not change the optimum. $E=0$ means that every distance is reproduced exactly. The minimization in the $Nq$ coordinates $y_{kl}$ is carried out by Sammon's diagonal Newton step with step size (``magic factor'') $\alpha$,
+\begin{equation}
+  y_{kl}(t+1) = y_{kl}(t) - \alpha\,\frac{\partial E/\partial y_{kl}}{\abs{\partial^2E/\partial y_{kl}^2}},
+  \label{eq:viz:newton}
+\end{equation}
+with
+\begin{align}
+  \frac{\partial E}{\partial y_{kl}} &= -\frac{2}{\lambda}\sum_{j\ne k}\frac{d_{kj}-d^*_{kj}}{d_{kj}d^*_{kj}}\,(y_{kl}-y_{jl}),\label{eq:viz:grad}\\
+  \frac{\partial^2E}{\partial y_{kl}^2} &= -\frac{2}{\lambda}\sum_{j\ne k}\frac{1}{d_{kj}d^*_{kj}}\left[(d_{kj}-d^*_{kj})-\frac{(y_{kl}-y_{jl})^2}{d^*_{kj}}\left(1+\frac{d_{kj}-d^*_{kj}}{d^*_{kj}}\right)\right].\label{eq:viz:hess}
+\end{align}
+Sammon recommended $\alpha\approx0.3$--$0.4$. The denominator in \eqref{eq:viz:newton} is a curvature along one coordinate and can be arbitrarily small for single points, in which case the step throws them far away; \code{fuzzyclust} therefore clips outlying displacements and halves the step when the stress would increase, which in practice keeps the stress history monotone (the raw update is available with \code{backtracking=False}). The stress surface has local minima, so the initial configuration matters: random starts give different maps, whereas the principal component scores give a deterministic and usually good start \cite{mao:1995}. Two properties limit the method for clustering: every iteration needs all $N(N-1)/2$ distances, which becomes impractical for large $N$ \cite{deridder:1997}, and there is no out-of-sample extension---a new point requires a new optimization \cite{pal:1998}. Prototypes are not part of the mapping; for Euclidean clusterings they can be placed at the weighted means of the projected data afterward.
+
+\begin{algobox}{Sammon mapping}{sammon}\index{Sammon mapping}\index{stress (Sammon)}\index{Sammon@\code{Sammon}}
+\begin{algorithm}[H]
+\KwIn{data $\X$, dimension $q$, step size $\alpha$, maximum number of iterations, tolerance $\epsilon$}
+compute the pairwise distances $d_{kl}$ and $\lambda$\;
+initialize $\mathbf{Y}$ (PCA scores or random), center it\;
+\Repeat{the relative change of $E$ is below $\epsilon$}{
+  compute $d^*_{kl}$ for the current $\mathbf{Y}$\;
+  \For{every point $k$ and coordinate $l$}{
+    evaluate the derivatives \eqref{eq:viz:grad}--\eqref{eq:viz:hess} and the step $\Delta y_{kl}=-\alpha\,(\partial E/\partial y_{kl})/\abs{\partial^2E/\partial y_{kl}^2}$\;
+  }
+  move all points simultaneously, $\mathbf{Y}\leftarrow\mathbf{Y}+\Delta\mathbf{Y}$ (halving $\Delta\mathbf{Y}$ while $E$ would increase), re-center\;
+  compute the stress \eqref{eq:viz:stress}\;
+}
+\KwOut{embedding $\mathbf{Y}$, stress $E$}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Sammon mapping}
+\begin{itemize}
+  \item Nonlinear projection that preserves the $N(N-1)/2$ pairwise Euclidean distances of the samples; small distances weigh more.
+  \item Iterative diagonal Newton descent of the stress $E$; step size $\alpha\approx0.3$--$0.4$, initialize from PCA.
+  \item Cost quadratic in $N$ per iteration; local minima; no mapping of new samples.
+  \item Shows the geometry of the \emph{data}; knows nothing about the prototypes or the norm of the clustering algorithm.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Fuzzy Sammon mapping (FUZZSAM)}\label{sec:viz:fuzzsam}
+
+A fuzzy clustering algorithm minimizes $\J=\sum_i\sum_k\mik^m D^2_{ik}$: only the distances between samples and prototypes matter, and each of them matters in proportion to the membership. The fuzzy Sammon mapping \cite{kovacs:2002:fuzzsam,abonyi:2004:fuzzsam,feil:2007:fuzzsam} carries this structure over to the projection. It looks for projected samples $\mathbf{y}_k$ and projected centers $\mathbf{z}_i$ such that
+\begin{equation}
+  E_\text{fuzz} = \sum_{i=1}^{c}\sum_{k=1}^{N}\mik^m\bigl(D_{ik}-d^*_{ik}\bigr)^2,\qquad d^*_{ik}=\norm{\mathbf{y}_k-\mathbf{z}_i},
+  \label{eq:viz:efuzz}
+\end{equation}
+is minimal, where $D_{ik}=d(\xk,\vi)$ is the distance \emph{of the clustering algorithm}. Three things change with respect to \eqref{eq:viz:stress}. First, only $Nc$ distances enter, so an iteration costs $\mathcal{O}(Nc)$ instead of $\mathcal{O}(N^2)$. Second, the norm of the algorithm is built in: a Gustafson--Kessel cluster, whose points are all at a small Mahalanobis-type distance from the prototype, is mapped to a compact round group around $\mathbf{z}_i$, whatever its orientation and elongation in $\R^n$; a line or shell prototype becomes an ordinary point. Third, the weights $\mik^m$ make the map accurate where it matters: the distance of a sample to a cluster it hardly belongs to need not be reproduced. The derivatives of \eqref{eq:viz:efuzz} with respect to the coordinates of $\mathbf{y}_k$, with the $\mathbf{z}_i$ held fixed, are the analogs of \eqref{eq:viz:grad}--\eqref{eq:viz:hess}:
+\begin{align}
+  \frac{\partial E_\text{fuzz}}{\partial y_{kl}} &= -2\sum_{i=1}^{c}\mik^m\frac{D_{ik}-d^*_{ik}}{d^*_{ik}}\,(y_{kl}-z_{il}),\label{eq:viz:fgrad}\\
+  \frac{\partial^2E_\text{fuzz}}{\partial y_{kl}^2} &= -2\sum_{i=1}^{c}\frac{\mik^m}{d^*_{ik}}\left[(D_{ik}-d^*_{ik})-\frac{(y_{kl}-z_{il})^2}{d^*_{ik}}\left(1+\frac{D_{ik}-d^*_{ik}}{d^*_{ik}}\right)\right],\label{eq:viz:fhess}
+\end{align}
+and the points are moved by the same diagonal Newton step \eqref{eq:viz:newton}. After every sweep the projected centers are recomputed as the weighted means of the projected data, in analogy with the prototype update of the clustering algorithms,
+\begin{equation}
+  \mathbf{z}_i = \frac{\sum_{k=1}^{N}\mik^m\,\mathbf{y}_k}{\sum_{k=1}^{N}\mik^m}.
+  \label{eq:viz:zi}
+\end{equation}
+The first version of the method \cite{kovacs:2002:fuzzsam} weighted with $\mik$ instead of $\mik^m$ in \eqref{eq:viz:efuzz} and \eqref{eq:viz:zi}; the later papers and \code{fuzzyclust} use $\mik^m$ (parameter \code{weight\_exponent} selects either). The initial configuration is the PCA projection of the data, or, as in the original case studies, a classical Sammon map; from it the $\mathbf{z}_i$ follow by \eqref{eq:viz:zi}.
+
+In the plane every cluster is represented by a point and the distances are Euclidean, so the picture can be read with the FCM membership formula: the memberships implied by the picture are
+\begin{equation}
+  \mu^*_{ik} = \frac{1}{\sum_{j=1}^{c}\left(d^*_{ik}/d^*_{jk}\right)^{2/(m-1)}},
+  \label{eq:viz:mustar}
+\end{equation}
+and their level curves $\max_i\mu^*_i(\mathbf{y})$, drawn over the plane, are the contours of \cref{fig:viz:concept}. For two clusters they are exact circles (each level set of $d^*_{1k}/d^*_{2k}$ is an Apollonius circle); for more clusters they are close to circles near a projected center and deform where the regions of neighboring clusters meet. If the prototype suits the data, the projected cluster is a compact group inside its contours; a cluster that spills across the contours, or two clusters whose contours interpenetrate, point to an inadequate prototype or a wrong number of clusters. A smaller fuzziness exponent $m$ is visible too: the partition is crisper and the contours of high membership enclose more points.
+
+\begin{algobox}{Fuzzy Sammon mapping (FUZZSAM)}{fuzzsam}\index{fuzzy Sammon mapping (FUZZSAM)}\index{FUZZSAM|see{fuzzy Sammon mapping}}\index{FuzzySammon@\code{FuzzySammon}}
+\begin{algorithm}[H]
+\KwIn{fitted clustering: partition $\U$, distances $D_{ik}=d(\xk,\vi)$ in the norm of the algorithm, exponent $m$; dimension $q$, step size $\alpha$, maximum number of iterations, tolerance $\epsilon$}
+initialize $\mathbf{Y}$ by the PCA scores of $\X$ (or a Sammon map, or at random), center it\;
+$\mathbf{z}_i\leftarrow\sum_k\mik^m\mathbf{y}_k/\sum_k\mik^m$ for $i=1,\dots,c$\;
+\Repeat{the relative change of $E_\text{fuzz}$ is below $\epsilon$}{
+  $d^*_{ik}\leftarrow\norm{\mathbf{y}_k-\mathbf{z}_i}$ for all $i,k$\;
+  \For{every sample $k$ and coordinate $l$}{
+    evaluate \eqref{eq:viz:fgrad}--\eqref{eq:viz:fhess} and the step $\Delta y_{kl}=-\alpha\,(\partial E_\text{fuzz}/\partial y_{kl})/\abs{\partial^2E_\text{fuzz}/\partial y_{kl}^2}$\;
+  }
+  $\mathbf{Y}\leftarrow\mathbf{Y}+\Delta\mathbf{Y}$ (halving $\Delta\mathbf{Y}$ while $E_\text{fuzz}$ would increase), re-center\;
+  recompute the projected centers $\mathbf{z}_i$ by \eqref{eq:viz:zi}\;
+  compute $E_\text{fuzz}$ by \eqref{eq:viz:efuzz}\;
+}
+\KwOut{embedding $\mathbf{Y}$, projected centers $\mathbf{Z}$, $E_\text{fuzz}$; recomputed memberships $\U^*$ by \eqref{eq:viz:mustar}}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Fuzzy Sammon mapping}
+\begin{itemize}
+  \item Projects a \emph{fitted fuzzy clustering}: preserves the $N\times c$ sample--prototype distances of the algorithm, weighted by $\mik^m$.
+  \item Works with any prototype and norm (FCM, GK, GG, lines, shells); every cluster becomes a point with nearly circular membership contours.
+  \item $\mathcal{O}(Nc)$ per iteration; same Newton step as Sammon ($\alpha\approx0.4$); centers recomputed as weighted means after every sweep.
+  \item Distorted or overlapping groups in the plane indicate a wrong prototype or a wrong number of clusters; the recomputed memberships $\U^*$ quantify the fidelity.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Quality of a projection}\label{sec:viz:quality}\index{projection quality}
+
+Any two-dimensional picture is an approximation. For a projection of a fuzzy clustering the natural question is whether the memberships a viewer reads off the picture agree with the fitted ones. With the recomputed partition $\U^*=[\mu^*_{ik}]$ of \eqref{eq:viz:mustar}, evaluated for the projected data and centers of whatever method produced them, the FUZZSAM papers use three numbers:
+\begin{align}
+  P &= \frac{1}{Nc}\sum_{i=1}^{c}\sum_{k=1}^{N}\abs{\mik-\mu^*_{ik}}, \label{eq:viz:P}\\
+  F &= \frac{1}{N}\sum_{i=1}^{c}\sum_{k=1}^{N}\mik^2,\qquad F^* = \frac{1}{N}\sum_{i=1}^{c}\sum_{k=1}^{N}(\mu^*_{ik})^2, \label{eq:viz:F}
+\end{align}
+the mean absolute membership error and the partition coefficients \cite{bezdek:1981} of the fitted and of the recomputed partition. $P=0$ means that the picture shows exactly the fitted partition; $F^*\gg F$ means that the picture looks much crisper than the clustering really is (the typical failure of PCA, which pushes the samples apart from the wrong centers). The Sammon stress $E$ of \eqref{eq:viz:stress}, evaluated for the embedding against the Euclidean distances of the data, completes the set; it measures how well the geometry of the \emph{data} is kept, which is a different goal. In the published case studies FUZZSAM has by far the smallest $P$ and an $F^*$ closest to $F$, while classical Sammon mapping has the smallest $E$---each method is best at what it optimizes. Other validity indices computed from $\U$ and $\U^*$ can be compared in the same way.
+
+\subsection{Fuzzy self-organizing map}\label{sec:viz:fsom}
+
+The methods so far project a finished clustering. Kohonen's self-organizing map \cite{kohonen:1990} takes the opposite route: the prototypes (code vectors) sit on the nodes of a regular low-dimensional grid and are trained so that neighboring nodes hold similar prototypes; the grid thus becomes a topology-preserving map of the data. The classical SOM is a heuristic competitive-learning rule with a shrinking neighborhood and no objective function; several authors have therefore reformulated it as a modification of fuzzy c-means \cite{tsao:1994:fkcn,pascualmarqui:2001}. Abonyi, Migály, and Szeifert \cite{migaly:2003:fsom} add a smoothness penalty to the FCM functional:
+\begin{align}
+  \J(\X;\U,\V) &= \sum_{i=1}^{c}\sum_{k=1}^{N}\mik^m\norm{\xk-\vi}^2 + \vartheta\sum_{i=1}^{c}\norm{\frac{\partial^2\vi}{\partial\mathbf{r}^2}}^2\notag\\
+  &\approx \sum_{i=1}^{c}\sum_{k=1}^{N}\mik^m\norm{\xk-\vi}^2 + \vartheta\,\tr\bigl(\V\T\mathbf{L}\V\bigr),
+  \label{eq:viz:fsomJ}
+\end{align}
+with $\vartheta\ge0$, where $\mathbf{r}\in\R^s$ is the position of a node on the $s$-dimensional grid ($s=1$: a chain, $s=2$: a sheet) and $\mathbf{L}=\mathbf{G}\T\mathbf{G}$ with $\mathbf{G}=[\mathbf{G}_1;\dots;\mathbf{G}_s]$ stacks the second-order finite difference operators along the grid axes: for every interior node $i$ of axis $a$ the row of $\mathbf{G}_a$ reads $\mathbf{v}_{i-1}-2\mathbf{v}_i+\mathbf{v}_{i+1}$ (\cref{fig:viz:grid}). The penalty is thus the sum of the squared discrete curvatures of the map; an affine (planar, regularly spaced) grid is not penalized at all, so the penalty orders the prototypes without pulling them together. Replacing the second-order by first-order differences gives the ``smoothly distributed FCM'' of \cite{pascualmarqui:2001}, which penalizes the edge lengths and therefore contracts the map toward the data center; the fuzzy curve-tracing algorithm of \cite{yan:2001:curvetrace} is the special case of a chain with second-order differences. For $\vartheta=0$ plain FCM with $c$ unordered prototypes is recovered.
+
+The membership update is that of FCM, since the penalty does not involve $\U$. For fixed $\U$ the prototypes are coupled through $\mathbf{L}$; setting the gradient of \eqref{eq:viz:fsomJ} to zero gives the linear system
+\begin{align}
+  \vi\sum_{k=1}^{N}\mik^m + \vartheta\sum_{j=1}^{c}L_{ij}\mathbf{v}_j &= \sum_{k=1}^{N}\mik^m\xk,\qquad i=1,\dots,c,\notag\\
+  \text{i.e.}\qquad \Bigl(\diag\bigl(\textstyle\sum_k\mik^m\bigr)+\vartheta\mathbf{L}\Bigr)\V &= (\U^m)\X,
+  \label{eq:viz:fsomV}
+\end{align}
+where $\U^m$ denotes the element-wise power of the $c\times N$ partition matrix. The system has a unique solution because the left matrix is the sum of a positive diagonal and a positive semidefinite matrix. \code{fuzzyclust} solves it exactly in every iteration; the original paper iterates its row-wise form $\vi=\bigl(\sum_k\mik^m\xk-\vartheta\sum_{j\ne i}L_{ij}\mathbf{v}_j\bigr)/\bigl(\sum_k\mik^m+\vartheta L_{ii}\bigr)$, whose fixed point is the same. The alternating optimization of the base class (\cref{ch:foundations}) therefore applies unchanged with a modified prototype step. The prototypes are initialized on a regular grid in the subspace of the first $s$ principal components, which already gives an ordered start; the regularization then keeps the order while the map folds into the data.
+
+Once fitted, the map is read like a SOM. The \emph{U-matrix}\index{U-matrix} shows for every node the mean distance of its prototype to the prototypes of its grid neighbors: ridges of large distance separate groups of similar prototypes, i.e.\ clusters of the data. A \emph{component plane} shows one coordinate of the prototypes over the grid and reveals which variables drive the organization. The \emph{fuzzy hit histogram} $h_i=\sum_k\mik$ shows where the data (or a subset, e.g.\ one class) fall on the map. A smaller exponent $m$ sharpens these views when many prototypes are fitted in high dimension, where the FCM memberships for $m=2$ tend to become uniform.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[scale=1.3]
+  % grid of prototypes
+  \foreach \i in {0,1,2,3} \foreach \j in {0,1,2} {
+    \coordinate (n\i\j) at (\i,\j);
+  }
+  \foreach \i in {0,1,2,3} \foreach \j in {0,1,2} {
+    \ifnum\i<3 \draw[fcgray!70] (n\i\j) -- ($(n\i\j)+(1,0)$); \fi
+    \ifnum\j<2 \draw[fcgray!70] (n\i\j) -- ($(n\i\j)+(0,1)$); \fi
+  }
+  \foreach \i in {0,1,2,3} \foreach \j in {0,1,2} { \fill[fcblue] (n\i\j) circle (2.2pt); }
+  % highlighted stencil
+  \draw[fcverm, very thick] (n01) -- (n21);
+  \draw[fcverm, very thick] (n10) -- (n12);
+  \fill[fcverm] (n11) circle (3pt);
+  \node[note, below left=1pt] at (n11) {$\vi$};
+  \node[note, above=2pt] at (n01) {$\mathbf{v}_{i-1}$};
+  \node[note, above=2pt] at (n21) {$\mathbf{v}_{i+1}$};
+  \node[note, right=2pt] at (n12) {$\mathbf{v}_{i+w}$};
+  \node[note, right=2pt] at (n10) {$\mathbf{v}_{i-w}$};
+  \node[note, anchor=north, text width=5.2cm] at (1.5,-0.3) {grid of $c=w\times h$ nodes in $\R^s$ ($s=2$); every node carries a prototype $\vi\in\R^n$};
+  % stencil box
+  \node[result, anchor=west, text width=5.4cm, align=left, font=\small] at (4.0,1.0) {%
+    rows of $\mathbf{G}$ at node $i$:\\[2pt]
+    $\mathbf{G}_1$: $\;\mathbf{v}_{i-1}-2\vi+\mathbf{v}_{i+1}$\\
+    $\mathbf{G}_2$: $\;\mathbf{v}_{i-w}-2\vi+\mathbf{v}_{i+w}$\\[3pt]
+    penalty $\vartheta\,\tr(\V\T\mathbf{G}\T\mathbf{G}\V)$\\
+    $\;=\vartheta\sum\norm{\text{rows}}^2$, zero for a\\ regular planar grid};
+\end{tikzpicture}
+\caption[The regularization of the fuzzy self-organizing map.]{The regularization of the fuzzy self-organizing map. The prototypes are indexed by the nodes of a grid; at every interior node the second-order differences along the two grid axes (red stencil) form the rows of $\mathbf{G}$, and $\vartheta\,\tr(\V\T\mathbf{L}\V)$ with $\mathbf{L}=\mathbf{G}\T\mathbf{G}$ penalizes the curvature of the map. The membership update of FCM is unchanged; the prototype update becomes the linear system \eqref{eq:viz:fsomV}.}
+\label{fig:viz:grid}
+\end{figure}
+
+\begin{algobox}{Fuzzy self-organizing map (regularized FCM)}{fsom}\index{fuzzy self-organizing map}\index{self-organizing map!fuzzy}\index{FuzzySOM@\code{FuzzySOM}}
+\begin{algorithm}[H]
+\KwIn{data $\X$, grid shape ($c$ nodes in $s$ dimensions), exponent $m$, regularization weight $\vartheta$, tolerance $\epsilon$}
+build the difference operator $\mathbf{G}$ of the grid and $\mathbf{L}=\mathbf{G}\T\mathbf{G}$\;
+initialize the prototypes on a regular grid spanning the first $s$ principal components; derive $\U^{(0)}$ from the Euclidean distances\;
+\Repeat{$\max_{ik}\abs{\mu^{(l)}_{ik}-\mu^{(l-1)}_{ik}}<\epsilon$}{
+  prototypes: solve the linear system \eqref{eq:viz:fsomV} for $\V$\;
+  distances: $\Dsq=\norm{\xk-\vi}^2$\;
+  memberships: $\mik=1/\sum_j(\Dik/D_{jk})^{2/(m-1)}$\;
+}
+\KwOut{ordered prototypes $\V$, partition $\U$, grid positions; U-matrix, component planes, hit histogram}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Fuzzy self-organizing map}
+\begin{itemize}
+  \item FCM whose prototypes live on a grid and are coupled by a curvature penalty $\vartheta\,\tr(\V\T\mathbf{L}\V)$; an exact objective is minimized by alternating optimization.
+  \item $\vartheta=0$: plain FCM, unordered; moderate $\vartheta$: ordered, topology-preserving map; very large $\vartheta$: flat grid that ignores the curvature of the data.
+  \item Second-order differences (default) order without contracting; first-order differences shrink the map toward the data center.
+  \item Read the result like a SOM: U-matrix, component planes, hit histograms; use a smaller $m$ for many nodes in high dimension.
+\end{itemize}
+\end{summarybox}
+
+\section{Using it in fuzzyclust}\label{sec:viz:api}
+
+All methods live in \code{fuzzyclust.viz}. FUZZSAM accepts any fitted \code{fuzzyclust} clusterer and obtains the distances in the norm of the algorithm from the \code{transform} method of the clusterer.
+
+\begin{apibox}{fuzzyclust.viz.pca\_projection(\allowbreak X,\allowbreak\ n\_components=2,\allowbreak\ centers=None)}
+Returns \code{(Y,\allowbreak\ Z,\allowbreak\ pca)}: the projected data, the projected prototypes (or \code{None}) and the fitted \code{sklearn.decomposition.PCA} object (\code{explained\_variance\_ratio\_}, \code{transform} for further data).
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.viz.Sammon}
+\code{n\_components=2}, \code{max\_iter=100}, \code{alpha=0.3}, \code{init="pca"}, \code{tol=1e-6}, \code{backtracking=True}, \code{max\_backtracks=10}, \code{random\_state=None}. \\
+\code{fit(X)}, \code{fit\_transform(X)}; attributes \code{embedding\_}, \code{stress\_}, \code{stress\_history\_}, \code{n\_iter\_}. \code{init} may also be an array (e.g.\ a previous embedding). \code{transform} raises \code{NotImplementedError}: Sammon mapping has no out-of-sample extension. The function \code{sammon\_stress(X,\allowbreak\ Y)} evaluates \eqref{eq:viz:stress} for any embedding.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.viz.FuzzySammon}
+\code{n\_components=2}, \code{max\_iter=100}, \code{alpha=0.4}, \code{init="pca"}, \code{tol=1e-6}, \code{backtracking=True}, \code{max\_backtracks=10}, \code{m=None}, \code{weight\_exponent=None}, \code{random\_state=None}. \\
+\code{fit(estimator,\allowbreak\ X)} takes a fitted clusterer and the data (memberships and distances are re-evaluated on \code{X}, so any data the estimator can score may be mapped); alternatively \code{fit(membership=U,\allowbreak\ distances=D)} with explicit arrays. Attributes \code{embedding\_}, \code{embedded\_centers\_}, \code{stress\_}, \code{stress\_history\_}, \code{n\_iter\_}, \code{membership\_}, \code{distances\_}, \code{m\_} (the exponent used); methods \code{recomputed\_membership()} and \code{quality(X=None)} returning $P$, $F$, $F^*$ (and $E$). \code{m=None} takes the exponent of the estimator (2.0 if it has none); \code{weight\_exponent=1.0} selects the $\mik$-weighted first variant.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.viz.recomputed\_membership(\allowbreak Y,\allowbreak\ Z,\allowbreak\ m=2.0) /\allowbreak\ projection\_quality(\allowbreak U,\allowbreak\ Y,\allowbreak\ Z,\allowbreak\ m=2.0,\allowbreak\ X=None)}
+\eqref{eq:viz:mustar} and the dictionary \code{\{"P"}, \code{"F"}, \code{"F\_star"}, \code{"E"\}} of \eqref{eq:viz:P}--\eqref{eq:viz:F}; \code{E} is included when \code{X} is given. Works for any projection, so PCA, Sammon, and FUZZSAM maps are compared on the same footing.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.viz.FuzzySOM}
+\code{grid\_shape=(5,\allowbreak\ 5),\allowbreak\ m=2.0,\allowbreak\ regularization=1.0,\allowbreak\ difference\_order=2,\allowbreak\ tol=1e-4,\allowbreak\ max\_iter=300,\allowbreak\ init="pca",\allowbreak\ n\_init=1,\allowbreak\ random\_state=None,\allowbreak\ verbose=0}. \\
+A \code{BaseFuzzyClusterer}: \code{fit}, \code{predict}, \code{predict\_proba}, \code{transform}, \code{cluster\_centers\_}, \code{membership\_}, \code{labels\_}, \code{objective\_history\textunderscore}; the number of nodes is \code{n\_clusters\_ = prod(grid\_shape)}. Map views: \code{grid\_positions\_}, \code{regularization\_matrix\_}, \code{u\_matrix()}, \code{component\_planes()}, \code{hits(X=None)}, \code{neighbor\_distance()}. \code{grid\_laplacian(grid\_shape,\allowbreak\ order=2)} returns $\mathbf{L}$ and the node positions without fitting a map.
+\end{apibox}
+
+\begin{apibox}{plot helpers: plot\_projection,\allowbreak\ plot\_stress,\allowbreak\ plot\_map,\allowbreak\ plot\_som\_lattice}
+\code{plot\_projection(Y,\allowbreak\ Z,\allowbreak\ labels,\allowbreak\ U,\allowbreak\ contours=True,\allowbreak\ m,\allowbreak\ levels,\allowbreak\ misclassified,\allowbreak\ label\_prefix)} draws the embedding with the projected centers and the level curves of $\max_i\mu^*_i$; \code{plot\_stress} the stress histories; \code{plot\_map(som,\allowbreak\ kind="umatrix"|\allowbreak "component"|\allowbreak "hits",\allowbreak\ feature,\allowbreak\ X)} a fuzzy SOM as a colored grid; \code{plot\_som\_lattice(som,\allowbreak\ X,\allowbreak\ dims)} the prototypes in the data space with grid neighbors connected. All four take \code{ax=None} and return the \code{Axes}.
+\end{apibox}
+
+A typical session projects a Gustafson--Kessel result with PCA and FUZZSAM and compares the two pictures by their quality measures:
+\pysnippet{examples/02_visualization/plot_02_fuzzy_sammon.py}{fuzzsam_gk}
+and reproduces the three-way comparison of the papers on the wine data:
+\pysnippet{examples/02_visualization/plot_02_fuzzy_sammon.py}{wine_table}
+A fuzzy self-organizing map is fitted like any other clusterer:
+\pysnippet{examples/02_visualization/plot_03_fuzzy_som.py}{hemisphere}
+
+\section{Examples}\label{sec:viz:examples}
+
+\subsection{PCA versus Sammon mapping}
+
+Five Gaussian clusters in five dimensions are projected by PCA and by Sammon mapping started from the PCA scores (\cref{fig:viz:ex1a}). The PCA plane keeps 76\,\% of the variance but its stress is twice that of the Sammon map; the groups that overlap in the PCA picture are separated once the distances rather than the variance are preserved. \Cref{fig:viz:ex1b} shows the convergence of the stress for several step sizes and for random initial configurations: a larger $\alpha$ converges in fewer iterations, and random starts need many more iterations than the PCA start and end in different local minima of comparable stress.
+
+\exfig{02_visualization/plot_01_pca_vs_sammon_1}{PCA keeps the directions of largest spread and lets clusters that differ in the discarded directions overlap; the Sammon mapping started from the same configuration bends the picture until the inter-point distances match, which separates the five groups and halves the stress.}{viz:ex1a}
+\exfig{02_visualization/plot_01_pca_vs_sammon_2}[Convergence of Sammon's stress.]{Convergence of Sammon's stress. Left: a larger step size $\alpha$ lowers the stress faster; with the safeguarded step none of the runs diverges. Right: the PCA start is already close to a minimum; random starts take longer and reach different, slightly worse minima.}{viz:ex1b}
+
+\subsection{Fuzzy Sammon mapping}
+
+\Cref{fig:viz:ex2a} illustrates the central property of FUZZSAM on three elongated Gaussian clusters in four dimensions. In the PCA picture of the Gustafson--Kessel result the memberships recomputed in the plane disagree with the fitted ones ($P=0.078$). FUZZSAM of the FCM result reproduces its memberships closely ($P=0.013$), but the groups spill into each other's contours, because the spherical prototype does not fit these data. FUZZSAM of the GK result shows three separated groups with round contours, since the GK norm already sees the ellipsoids as spheres and the picture inherits this view; the tails of the groups reach into the neighboring contours, so its $P=0.027$ is higher than that of FCM. The distortion of a FUZZSAM picture is thus a diagnostic of the prototype.
+
+\exfig{02_visualization/plot_02_fuzzy_sammon_1}[Three elongated clusters in four dimensions.]{Three elongated clusters in four dimensions. Left: the GK partition projected by PCA, with the contours of the recomputed memberships. Middle: FUZZSAM of the FCM partition, whose spherical prototypes overlap. Right: FUZZSAM of the GK partition; the groups are separated and their contours are round, with tails reaching into the neighboring contours.}{viz:ex2a}
+
+\Cref{fig:viz:ex2b} repeats the comparison of the papers on the wine data (178 wines, 13 range-scaled attributes, FCM with $c=3$). \Cref{tab:viz:wine} lists the quality measures: $P$ drops from $0.13$ (PCA) through $0.09$ (Sammon) to $0.04$ (FUZZSAM), and the partition coefficient read off the FUZZSAM picture ($F^*=0.52$) is close to the fitted one ($F=0.50$), whereas PCA suggests a far crisper partition ($F^*=0.74$). The Sammon stress ranks the methods differently: classical Sammon mapping is best at preserving the data geometry, FUZZSAM at preserving the clustering. The circled samples are wines whose cluster does not match their cultivar (5\,\% of the data); they lie in the fuzzy region between the centers in every picture, but only the FUZZSAM picture places them where their memberships say.
+
+\begin{table}[htbp]\centering\small
+\caption{Quality of three projections of the FCM partition ($c=3$, $m=2$) of the range-scaled wine data: mean membership error $P$, partition coefficient of the fitted ($F$) and of the recomputed ($F^*$) partition, Sammon stress $E$.}
+\label{tab:viz:wine}
+\begin{tabular}{lcccc}\toprule
+ & $P$ & $F$ & $F^*$ & $E$ \\\midrule
+PCA     & 0.130 & 0.503 & 0.742 & 0.130 \\
+Sammon  & 0.087 & 0.503 & 0.656 & 0.057 \\
+FUZZSAM & 0.036 & 0.503 & 0.522 & 0.096 \\\bottomrule
+\end{tabular}
+\end{table}
+
+\exfig{02_visualization/plot_02_fuzzy_sammon_2}[The FCM partition of the wine data projected by PCA, Sammon mapping, and FUZZSAM; colors are the cultivars, contours the recomputed membership levels, circles the wines whose cluster disagrees with their cultivar.]{The FCM partition of the wine data projected by PCA, Sammon mapping, and FUZZSAM; colors are the cultivars, contours the recomputed membership levels, circles the wines whose cluster disagrees with their cultivar. Only in the FUZZSAM picture do the contours agree with the point clouds.}{viz:ex2b}
+
+The fuzziness of a partition is visible as well. \Cref{fig:viz:ex2c} shows the GK clustering of the iris data for $m=2$ and $m=1.4$, drawn with the same membership levels: with the smaller exponent the partition is crisper ($F=0.94$ against $0.73$), and the curves of high membership expand and enclose almost all points of each cluster.
+
+\exfig{02_visualization/plot_02_fuzzy_sammon_3}[FUZZSAM pictures of the GK clustering of the iris data with $m=2$ (left) and $m=1.4$ (right), drawn with the same membership levels.]{FUZZSAM pictures of the GK clustering of the iris data with $m=2$ (left) and $m=1.4$ (right), drawn with the same membership levels. The crisper partition shows up as wide contours of high membership around compact groups.}{viz:ex2c}
+
+\subsection{Fuzzy self-organizing map}
+
+The two geometric case studies of \cite{migaly:2003:fsom} are reproduced. In \cref{fig:viz:ex3a} seven prototypes on a one-dimensional grid are fitted to 300 noisy points on one turn of a helix. Plain FCM ($\vartheta=0$) finds seven groups along the curve, but the chain connecting consecutive nodes is tangled; with $\vartheta=2$ the chain follows the curve. \Cref{fig:viz:ex3b} fits a $6\times6$ grid to 900 points on a hemisphere: without regularization the lattice is a tangle of crossing edges; with $\vartheta=0.5$ it is a regular net folded onto the surface, as the component plane of the third coordinate in \cref{fig:viz:ex3c} confirms; and with $\vartheta=5$ the net is nearly planar and no longer follows the curvature. The Spearman correlation between grid distances and prototype distances, printed in the panel titles, rises from $0.93$ for $\vartheta=0$ to $0.98$ for $\vartheta=0.5$ and $0.99$ for $\vartheta=5$, while the objective grows from $6.76$ to $7.43$ and $8.36$. \Cref{fig:viz:ex3d} compares the two difference operators: with first-order differences the extent of the map shrinks with $\vartheta$ and collapses to a point for $\vartheta=2$; with second-order differences it stays constant, which is the argument for the curvature penalty.
+
+\exfig{02_visualization/plot_03_fuzzy_som_1}[A chain of seven prototypes on a noisy helix.]{A chain of seven prototypes on a noisy helix. Left: fuzzy c-means places the prototypes along the curve but connects consecutive nodes in a tangled order. Right: with the curvature penalty ($\vartheta=2$) the chain follows the curve.}{viz:ex3a}
+\exfig{02_visualization/plot_03_fuzzy_som_2}[A $6\times6$ fuzzy SOM of points on a hemisphere, lattice drawn in the $(x_1,x_2)$ plane.]{A $6\times6$ fuzzy SOM of points on a hemisphere, lattice drawn in the $(x_1,x_2)$ plane. $\vartheta=0$ is plain FCM and gives a tangled lattice; $\vartheta=0.5$ gives an ordered net that follows the surface; $\vartheta=5$ flattens the net.}{viz:ex3b}
+\exfig[0.95\textwidth]{02_visualization/plot_03_fuzzy_som_3}{Component planes of the ordered map ($\vartheta=0.5$): the first two coordinates change monotonically across the grid, each in its own direction; the third (height on the hemisphere) peaks in the middle of the grid, so the map has folded onto the surface.}{viz:ex3c}
+\exfig[0.5\textwidth]{02_visualization/plot_03_fuzzy_som_4}[Largest extent of the prototypes as a function of $\vartheta$.]{Largest extent of the prototypes as a function of $\vartheta$. The first-order penalty of the smoothly distributed FCM contracts the map toward the data center and collapses it for $\vartheta=2$; the second-order (curvature) penalty leaves a regular grid unpenalized and keeps the extent of the map.}{viz:ex3d}
+
+\Cref{fig:viz:ex3e,fig:viz:ex3f} show a $6\times6$ map of the standardized wine data ($m=1.3$, $\vartheta=0.5$). The U-matrix has dark ridges that divide the grid into three regions, the hit histograms of the three cultivars fall into exactly these regions, and the component planes of the flavanoid content and the color intensity show the chemistry behind the split.
+
+\exfig{02_visualization/plot_03_fuzzy_som_5}{A $6\times6$ fuzzy SOM of the wine data: U-matrix (dark ridges separate groups of similar prototypes), fuzzy hit histogram, and the component planes of two attributes.}{viz:ex3e}
+\exfig[0.95\textwidth]{02_visualization/plot_03_fuzzy_som_6}{Hit histograms of the three cultivars on the same map: each occupies its own region, separated by the ridges of the U-matrix.}{viz:ex3f}
+
+\subsection{Visual validation of the number of clusters}
+
+\Cref{fig:viz:ex4a} applies FUZZSAM to the FCM partitions of the Wisconsin breast cancer data (569 samples, ten standardized features) for $c=2,3,4$. With two clusters the groups are compact and the diagnosis coincides with the clusters up to a band of ambiguous cases between the centers; with three clusters the extra prototype splits the large benign group, and with four the malignant group is split as well; the new clusters overlap in the plane, and the recomputed memberships fit worse ($P$ grows from $0.004$ to $0.02$). The validity indices PC, CE, and XB also favor two clusters (SC, which decreases with $c$ by design, does not), but only the picture shows \emph{which} clusters were split and where the ambiguous samples lie. \Cref{fig:viz:ex4b} shows the convergence of $E_\text{fuzz}$ for several step sizes; because only $Nc$ distances enter, sixty iterations on 569 samples take a fraction of a second.
+
+\exfig{02_visualization/plot_04_cluster_number_validation_1}[FUZZSAM pictures of FCM partitions of the breast cancer data with two, three, and four clusters (colors: diagnosis).]{FUZZSAM pictures of FCM partitions of the breast cancer data with two, three, and four clusters (colors: diagnosis; diagnosis~1 is malignant, diagnosis~2 benign). Two compact groups for $c=2$; for $c=3$ the additional prototype splits the benign group, for $c=4$ each diagnosis is split in two, and the clusters overlap.}{viz:ex4a}
+\exfig[0.55\textwidth]{02_visualization/plot_04_cluster_number_validation_2}{Convergence of the fuzzy Sammon stress for different step sizes; a larger $\alpha$ speeds up the decrease, and the safeguarded step keeps every run monotone.}{viz:ex4b}
+
+\section{Further reading}\label{sec:viz:reading}
+
+Sammon's original paper \cite{sammon:1969} remains the clearest account of the stress and of the diagonal Newton step; Mao and Jain \cite{mao:1995} and de Ridder and Duin \cite{deridder:1997} discuss initialization, neural-network implementations, and the computational burden, Pal and Eluri \cite{pal:1998} the missing out-of-sample extension. The fuzzy Sammon mapping was introduced by Kov\'acs and Abonyi \cite{kovacs:2002:fuzzsam}, presented with the Gustafson--Kessel examples and the quality measures by Abonyi and Babu\v{s}ka \cite{abonyi:2004:fuzzsam}, and applied to the visualization of reconstructed phase-space trajectories of chaotic systems by Feil, Balask\'o, and Abonyi \cite{feil:2007:fuzzsam}, where the prototypes are local linear models and no classical projection would apply. For PCA see Jolliffe \cite{jolliffe:2002}; the partition coefficient used in $F$ and $F^*$ is Bezdek's \cite{bezdek:1981}. The self-organizing map is Kohonen's \cite{kohonen:1990}; its fuzzy reformulations include the fuzzy Kohonen clustering network \cite{tsao:1994:fkcn}, the smoothly distributed fuzzy c-means \cite{pascualmarqui:2001} and the fuzzy curve-tracing algorithm \cite{yan:2001:curvetrace}; the last two are special cases of the regularized FCM of Abonyi, Mig\'aly, and Szeifert \cite{migaly:2003:fsom}, obtained by the choice of $\mathbf{L}$. The SOM Toolbox \cite{vesanto:2000:somtoolbox} is the reference implementation of the U-matrix and component-plane views.

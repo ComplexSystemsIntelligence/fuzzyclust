@@ -1,0 +1,38 @@
+{
+  "title": "fuzzyclust: fuzzy clustering and data analysis toolbox for Python",
+  "upload_type": "software",
+  "description": "<p>fuzzyclust is a scikit-learn compatible Python toolbox for fuzzy clustering and the data-analysis methods built on it. It succeeds the Fuzzy Clustering and Data Analysis Toolbox for MATLAB (Balaskó, Abonyi, Feil, 2005) and contains fuzzy c-means, Gustafson–Kessel and Gath–Geva clustering, cluster validity indices, fuzzy Sammon mapping, possibilistic, noise, kernel and shape-prototype variants, graph-based clustering, Takagi–Sugeno model identification, time-series segmentation, and methods for relational, incomplete, very large and image data, partial supervision, co-clustering, collaborative clustering and ensembles.</p><p>The archive contains the source code, the tests, the 61 gallery examples, the Sphinx documentation and the LaTeX source of the companion book <em>Fuzzy Clustering and Data Analysis in Python: The fuzzyclust toolbox</em>.</p>",
+  "notes": "Code: MIT License. Book (book/ directory): CC BY 4.0. Documentation: https://complexsystemsintelligence.github.io/fuzzyclust. Supported by NKFIH (OTKA 143482).",
+  "creators": [
+    {
+      "name": "Abonyi, János",
+      "affiliation": "University of Pannonia, Veszprém, Hungary",
+      "orcid": "0000-0001-8593-1493"
+    }
+  ],
+  "language": "eng",
+  "license": "mit",
+  "access_right": "open",
+  "keywords": [
+    "fuzzy clustering",
+    "fuzzy c-means",
+    "Gustafson-Kessel",
+    "Gath-Geva",
+    "cluster validity",
+    "Sammon mapping",
+    "Takagi-Sugeno",
+    "time-series segmentation",
+    "scikit-learn",
+    "Python"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://complexsystemsintelligence.github.io/fuzzyclust",
+      "relation": "isDocumentedBy"
+    },
+    {
+      "identifier": "https://github.com/ComplexSystemsIntelligence/fuzzyclust",
+      "relation": "isSupplementTo"
+    }
+  ]
+}

@@ -1,0 +1,147 @@
+\chapter{The example gallery}\label{app:examples}
+\begin{roadmap}
+Every algorithm of the toolbox has at least one runnable example script. The scripts generate their own data, explain the method in their comments, and end with a study of the main parameters. The same scripts produce the gallery of the online documentation, the Jupyter notebooks, and every computed figure and code listing of this book. The tables below list them by folder of \code{examples/}, with the first figure of the book that each script produced.
+\end{roadmap}
+
+\section[Core partitioning algorithms]{Core partitioning algorithms and validity}
+Folder \code{examples/01\_clustering/}. The methods are described in \cref{ch:partitioning}.
+
+{\small\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.40\textwidth}>{\raggedright\arraybackslash}p{0.44\textwidth}>{\raggedleft\arraybackslash}p{0.09\textwidth}@{}}
+\toprule Script & Topic & Figure \\\midrule\endfirsthead
+\toprule Script & Topic & Figure \\\midrule\endhead
+\bottomrule\endfoot
+\code{plot\_01\_fcm\_basics.py} & Fuzzy c-means: memberships and the fuzziness exponent & \ref{fig:intro:first} \\[2pt]
+\code{plot\_02\_hard\_vs\_fuzzy.py} & Hard versus fuzzy partitions: k-means, k-medoids, and FCM & \ref{fig:part:ex:hard} \\[2pt]
+\code{plot\_03\_gk\_ellipses.py} & Gustafson--Kessel: clusters with their own shape & \ref{fig:part:ex:gk} \\[2pt]
+\code{plot\_04\_gg\_densities.py} & Gath--Geva: clusters of different size and density & \ref{fig:part:ex:gg} \\[2pt]
+\code{plot\_05\_validity\_scan.py} & Choosing the number of clusters with validity indices & \ref{fig:val:ex:scan} \\[2pt]
+\code{plot\_06\_predict\_new\_data.py} & Applying a fitted model to new data & \ref{fig:part:ex:predict} \\[2pt]
+\code{plot\_07\_motorcycle\_scaling.py} & Feature scaling on real data: the motorcycle data set & \ref{fig:found:ex:scaling} \\[2pt]
+\code{plot\_08\_sklearn\_pandas\_workflow.py} & Working with pandas and scikit-learn: pipelines, DataFrames, and model selection & \ref{fig:found:ex:sklearn} \\[2pt]
+\code{plot\_09\_fuzziness\_exponent.py} & The fuzziness exponent m: from crisp cells to uniform memberships & \ref{fig:part:ex:m1d} \\[2pt]
+\code{plot\_10\_initialisation\_restarts.py} & Local optima and restarts: initializing Gustafson--Kessel on crossing lines & \ref{fig:found:ex:restarts} \\[2pt]
+\code{plot\_11\_distance\_norms.py} & Distance norms: Euclidean, diagonal, and Mahalanobis fuzzy c-means & \ref{fig:found:ex:norms} \\[2pt]
+\code{plot\_12\_fuzzifiers\_annealing.py} & What makes a partition fuzzy: fuzzifiers, regularization, and annealing & \ref{fig:part:ex:fuzz-line} \\[2pt]
+\code{plot\_13\_subtractive\_clustering.py} & Subtractive clustering: the number and location of clusters from density & \ref{fig:part:ex:subtractive} \\[2pt]
+\code{plot\_14\_merging\_stability.py} & Three routes to the number of clusters: merging, validity scan, and stability & \ref{fig:val:ex:merging} \\[2pt]
+\end{longtable}}
+
+\section[Visualization of fuzzy clusters]{Visualization of fuzzy clusters}
+Folder \code{examples/02\_visualization/}. The methods are described in \cref{ch:visualization}.
+
+{\small\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.40\textwidth}>{\raggedright\arraybackslash}p{0.44\textwidth}>{\raggedleft\arraybackslash}p{0.09\textwidth}@{}}
+\toprule Script & Topic & Figure \\\midrule\endfirsthead
+\toprule Script & Topic & Figure \\\midrule\endhead
+\bottomrule\endfoot
+\code{plot\_01\_pca\_vs\_sammon.py} & PCA versus Sammon mapping: preserving variance or distances & \ref{fig:viz:ex1a} \\[2pt]
+\code{plot\_02\_fuzzy\_sammon.py} & Fuzzy Sammon mapping: projecting clusters, not just data & \ref{fig:viz:ex2a} \\[2pt]
+\code{plot\_03\_fuzzy\_som.py} & Fuzzy self-organizing map: ordered prototypes by regularized FCM & \ref{fig:viz:ex3a} \\[2pt]
+\code{plot\_04\_cluster\_number\_validation.py} & Visual validation of the number of clusters with FUZZSAM & \ref{fig:viz:ex4a} \\[2pt]
+\end{longtable}}
+
+\section[Model identification]{Model identification}
+Folder \code{examples/03\_models/}. The methods are described in \cref{ch:models}.
+
+{\small\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.40\textwidth}>{\raggedright\arraybackslash}p{0.44\textwidth}>{\raggedleft\arraybackslash}p{0.09\textwidth}@{}}
+\toprule Script & Topic & Figure \\\midrule\endfirsthead
+\toprule Script & Topic & Figure \\\midrule\endhead
+\bottomrule\endfoot
+\code{plot\_01\_ts\_sinc.py} & Takagi--Sugeno model of a static nonlinearity: clusters become rules & \ref{fig:models:ex1a} \\[2pt]
+\code{plot\_02\_ts\_dynamic\_plant.py} & Identification of a nonlinear dynamic system with free-run validation & \ref{fig:models:ex2a} \\[2pt]
+\code{plot\_03\_ts\_mimo.py} & MIMO Takagi--Sugeno model with local MIMO ARX consequents & \ref{fig:models:ex3a} \\[2pt]
+\code{plot\_04\_fcrm\_switching.py} & Fuzzy c-regression models: switching regression with crossing lines & \ref{fig:models:ex4a} \\[2pt]
+\code{plot\_05\_supervised\_classifier.py} & Supervised fuzzy clustering: classifier rules that carry class probabilities & \ref{fig:models:ex5a} \\[2pt]
+\code{plot\_06\_fuzzy\_partition\_tree.py} & Supervised fuzzy partitions as a priori discretization for decision trees & \ref{fig:models:ex6a} \\[2pt]
+\code{plot\_07\_hinging\_tree.py} & Hinging-hyperplane regression tree identified by fuzzy c-regression & \ref{fig:models:ex7a} \\[2pt]
+\end{longtable}}
+
+\section[Time-series analysis]{Time-series analysis}
+Folder \code{examples/04\_timeseries/}. The methods are described in \cref{ch:timeseries}.
+
+{\small\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.40\textwidth}>{\raggedright\arraybackslash}p{0.44\textwidth}>{\raggedleft\arraybackslash}p{0.09\textwidth}@{}}
+\toprule Script & Topic & Figure \\\midrule\endfirsthead
+\toprule Script & Topic & Figure \\\midrule\endhead
+\bottomrule\endfoot
+\code{plot\_01\_fuzzy\_segmentation.py} & Fuzzy segmentation of a multivariate time series & \ref{fig:ts:ex1a} \\[2pt]
+\code{plot\_02\_bottom\_up\_vs\_fuzzy.py} & Bottom-up segmentation with PCA models versus fuzzy segmentation & \ref{fig:ts:ex2a} \\[2pt]
+\code{plot\_03\_fnn\_model\_order.py} & Model-order selection by false nearest neighbors with a cluster-based threshold & \ref{fig:ts:ex3a} \\[2pt]
+\code{plot\_04\_chaotic\_reconstruction.py} & State-space reconstruction and prediction of a chaotic time series & \ref{fig:ts:ex4a} \\[2pt]
+\code{plot\_05\_mixed\_input\_structure.py} & Model-free structure selection with mixed discrete and continuous inputs & \ref{fig:ts:ex5a} \\[2pt]
+\end{longtable}}
+
+\section[Graph-based clustering]{Graph-based clustering}
+Folder \code{examples/05\_graph/}. The methods are described in \cref{ch:graph}.
+
+{\small\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.40\textwidth}>{\raggedright\arraybackslash}p{0.44\textwidth}>{\raggedleft\arraybackslash}p{0.09\textwidth}@{}}
+\toprule Script & Topic & Figure \\\midrule\endfirsthead
+\toprule Script & Topic & Figure \\\midrule\endhead
+\bottomrule\endfoot
+\code{plot\_01\_mst\_clustering.py} & Minimal spanning tree clustering: cutting, splitting, and Gath--Geva refinement & \ref{fig:graph:ex1a} \\[2pt]
+\code{plot\_02\_mst\_cut\_criteria.py} & Inconsistent edges: Zahn's criteria and the neighborhood depth & \ref{fig:graph:ex2a} \\[2pt]
+\code{plot\_03\_mst\_validation.py} & Number of clusters: volume-based validity and fuzzy cluster similarity & \ref{fig:graph:ex3a} \\[2pt]
+\code{plot\_04\_geodesic\_fcm.py} & Geodesic-distance-based fuzzy clustering versus fuzzy c-means & \ref{fig:graph:ex4a} \\[2pt]
+\code{plot\_05\_geodesic\_path\_isomap.py} & Geodesic paths, the S-curve, and clustering of the Isomap projection & \ref{fig:graph:ex5a} \\[2pt]
+\end{longtable}}
+
+\section[Possibilistic]{Possibilistic, noise, kernel, and shape-prototype extensions}
+Folder \code{examples/06\_extensions/}. The methods are described in \cref{ch:robust_shape}.
+
+{\small\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.40\textwidth}>{\raggedright\arraybackslash}p{0.44\textwidth}>{\raggedleft\arraybackslash}p{0.09\textwidth}@{}}
+\toprule Script & Topic & Figure \\\midrule\endfirsthead
+\toprule Script & Topic & Figure \\\midrule\endhead
+\bottomrule\endfoot
+\code{plot\_01\_pcm\_typicality.py} & Possibilistic c-means: typicalities, scales and coincident clusters & \ref{fig:robust:ex:pcm1} \\[2pt]
+\code{plot\_02\_pfcm\_trade\_off.py} & Possibilistic fuzzy c-means: memberships and typicalities together & \ref{fig:robust:ex:pfcm1} \\[2pt]
+\code{plot\_03\_noise\_clustering.py} & Noise clustering: a virtual cluster at constant distance $\delta$ & \ref{fig:robust:ex:nc1} \\[2pt]
+\code{plot\_04\_kernel\_fcm.py} & Kernel fuzzy c-means: rings and moons through the kernel trick & \ref{fig:robust:ex:kfcm1} \\[2pt]
+\code{plot\_05\_fuzzy\_c\_varieties.py} & Fuzzy c-varieties: lines as prototypes, and the elliptotype compromise & \ref{fig:robust:ex:fcv} \\[2pt]
+\code{plot\_06\_fuzzy\_c\_shells.py} & Fuzzy c-shells: circles as prototypes & \ref{fig:robust:ex:shells1} \\[2pt]
+\code{plot\_07\_feature\_weighting.py} & Learning which features matter: SCAD and the weighted FCM & \ref{fig:robust:ex:weights1} \\[2pt]
+\code{plot\_08\_volume\_prototypes.py} & Volume prototypes and adaptive cluster merging & \ref{fig:robust:ex:volume1} \\[2pt]
+\end{longtable}}
+
+\section[Relational, categorical, and mixed data]{Relational, categorical, and mixed data}
+Folder \code{examples/07\_relational/}. The methods are described in \cref{ch:relational}.
+
+{\small\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.40\textwidth}>{\raggedright\arraybackslash}p{0.44\textwidth}>{\raggedleft\arraybackslash}p{0.09\textwidth}@{}}
+\toprule Script & Topic & Figure \\\midrule\endfirsthead
+\toprule Script & Topic & Figure \\\midrule\endhead
+\bottomrule\endfoot
+\code{plot\_01\_rfcm\_fcm\_duality.py} & Relational fuzzy c-means and NERF for non-Euclidean data & \ref{fig:rel:ex1a} \\[2pt]
+\code{plot\_02\_fcmdd\_dtw\_series.py} & Fuzzy c-medoids on dynamic-time-warping dissimilarities of time series & \ref{fig:rel:ex2a} \\[2pt]
+\code{plot\_03\_kmodes\_survey.py} & Fuzzy k-modes on categorical survey data & \ref{fig:rel:ex3a} \\[2pt]
+\code{plot\_04\_kprototypes\_mixed.py} & Fuzzy k-prototypes on mixed numeric and categorical data & \ref{fig:rel:ex4a} \\[2pt]
+\code{plot\_05\_gower\_fcmdd\_vs\_onehot.py} & Gower's dissimilarity versus one-hot encoding for mixed data & \ref{fig:rel:ex5a} \\[2pt]
+\code{plot\_06\_autocorrelation\_series.py} & Autocorrelation-based fuzzy clustering of time series & \ref{fig:rel:ex6a} \\[2pt]
+\end{longtable}}
+
+\section[Incomplete, very large, and image data]{Incomplete, very large, and image data}
+Folder \code{examples/08\_data\_realities/}. The methods are described in \cref{ch:data_realities}.
+
+{\small\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.40\textwidth}>{\raggedright\arraybackslash}p{0.44\textwidth}>{\raggedleft\arraybackslash}p{0.09\textwidth}@{}}
+\toprule Script & Topic & Figure \\\midrule\endfirsthead
+\toprule Script & Topic & Figure \\\midrule\endhead
+\bottomrule\endfoot
+\code{plot\_01\_missing\_strategies.py} & Clustering incomplete data: the four strategies of Hathaway and Bezdek & \ref{fig:data:ex1a} \\[2pt]
+\code{plot\_02\_ocs\_imputation.py} & Imputation by clustering: accuracy of the completed values & \ref{fig:data:ex2a} \\[2pt]
+\code{plot\_03\_large\_data.py} & Fuzzy c-means for very large data: rseFCM, spFCM and oFCM & \ref{fig:data:ex3a} \\[2pt]
+\code{plot\_04\_stream\_drift.py} & Clustering a drifting stream chunk by chunk with \code{partial\_fit} & \ref{fig:data:ex4a} \\[2pt]
+\code{plot\_05\_image\_noise.py} & Image segmentation under noise: six spatially constrained FCM variants & \ref{fig:data:ex5a} \\[2pt]
+\code{plot\_06\_spatial\_alpha\_window.py} & Spatial FCM: the neighborhood weight and the window size & \ref{fig:data:ex6a} \\[2pt]
+\end{longtable}}
+
+\section[Partial supervision]{Partial supervision, co-clustering, collaboration, and ensembles}
+Folder \code{examples/09\_beyond\_unsupervised/}. The methods are described in \cref{ch:beyond}.
+
+{\small\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.40\textwidth}>{\raggedright\arraybackslash}p{0.44\textwidth}>{\raggedleft\arraybackslash}p{0.09\textwidth}@{}}
+\toprule Script & Topic & Figure \\\midrule\endfirsthead
+\toprule Script & Topic & Figure \\\midrule\endhead
+\bottomrule\endfoot
+\code{plot\_01\_ssfcm\_partial\_labels.py} & Fuzzy c-means with partial supervision: label fraction and weight & \ref{fig:beyond:ex1a} \\[2pt]
+\code{plot\_02\_pcca\_pairwise\_constraints.py} & Pairwise constraints: must-link, cannot-link and competitive agglomeration & \ref{fig:beyond:ex2a} \\[2pt]
+\code{plot\_03\_fccm\_document\_term.py} & Fuzzy co-clustering of a document--term matrix & \ref{fig:beyond:ex3a} \\[2pt]
+\code{plot\_04\_collaborative\_sites.py} & Collaborative fuzzy clustering across three data sites & \ref{fig:beyond:ex4a} \\[2pt]
+\code{plot\_05\_ensemble\_consensus.py} & Consensus of soft clusterings: a library beats a single run & \ref{fig:beyond:ex5a} \\[2pt]
+\code{plot\_06\_ensemble\_lifetime.py} & The lifetime criterion of evidence accumulation & \ref{fig:beyond:ex6a} \\[2pt]
+\end{longtable}}
+

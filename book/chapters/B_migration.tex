@@ -1,0 +1,130 @@
+\chapter{Migrating from the MATLAB toolbox}\label{app:migration}
+\begin{roadmap}
+This appendix is for readers who know the \emph{Fuzzy Clustering and Data Analysis Toolbox for MATLAB} \cite{balasko:2005:toolbox}. It maps every MATLAB function, parameter, and result field to its counterpart in \code{fuzzyclust} and lists the places where the Python toolbox deliberately behaves differently. The chapter column of the first table points to the full treatment of each method.
+\end{roadmap}
+
+\section{Functions}
+
+The MATLAB toolbox passed a \code{data} structure and a \code{param} structure to every function and returned a nested \code{result} structure. In \code{fuzzyclust} every algorithm is a scikit-learn estimator: the parameters are constructor arguments, the data matrix is the argument of \code{fit}, and the results are attributes of the fitted object. \Cref{tab:migration:functions} maps the functions.
+
+\begin{table}[tbp]\centering\footnotesize
+\caption{MATLAB toolbox functions and their \code{fuzzyclust} counterparts.}\label{tab:migration:functions}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{0.12\textwidth}@{}}
+\toprule
+MATLAB & \code{fuzzyclust} & Chapter \\
+\midrule
+\code{Kmeans(data,param)} & \code{cluster.KMeans(n\_clusters).fit(X)} & \ref{ch:partitioning} \\
+\code{Kmedoid(data,param)} & \code{cluster.KMedoids(n\_clusters).fit(X)} & \ref{ch:partitioning} \\
+\code{FCMclust(data,param)} & \code{cluster.FCM(n\_clusters, m).fit(X)} & \ref{ch:partitioning} \\
+\code{GKclust(data,param)} & \code{cluster.GK(n\_clusters,\allowbreak\ m,\allowbreak\ rho,\allowbreak\ gamma,\allowbreak\ beta).fit(X)} & \ref{ch:partitioning} \\
+\code{GGclust(data,param)} & \code{cluster.GG(n\_clusters, m).fit(X)} & \ref{ch:partitioning} \\
+\code{clusteval(new,\allowbreak result,\allowbreak param)} & \code{est.predict\_proba(X\_new)}, \code{est.transform(X\_new)}, \code{plotting.\allowbreak plot\_membership\_contours} & \ref{ch:partitioning} \\
+\code{validity(result,\allowbreak data,\allowbreak param)} & \code{validity.validity\_indices(X, U, V, m)} & \ref{ch:validity} \\
+\code{optnumber} (demo) & \code{validity.scan\_n\_clusters}, \code{suggest\_n\_clusters} & \ref{ch:validity} \\
+\code{clust\_normalize(data,\allowbreak 'range'|'var')} & \code{preprocessing.normalize(X,\allowbreak\ 'range'|'var')} or scikit-learn scalers & \ref{ch:foundations} \\
+\code{clust\_denormalize(data)} & \code{scaler.\allowbreak inverse\_transform(Z)} & \ref{ch:foundations} \\
+\code{PCA(data,param,result)} & \code{viz.pca\_projection(X, n\_components, centers)} & \ref{ch:visualization} \\
+\code{Sammon(proj,\allowbreak data,\allowbreak result,\allowbreak param)} & \code{viz.Sammon(n\_components).\allowbreak fit\_transform(X)} & \ref{ch:visualization} \\
+\code{FuzSam(proj,\allowbreak result,\allowbreak param)} & \code{viz.FuzzySammon().fit(est, X)} & \ref{ch:visualization} \\
+\code{projeval(result,param)} & \code{viz.projection\_quality(U, Y, Z, m)} & \ref{ch:visualization} \\
+\code{samstr(data,\allowbreak result)} (stress) & \code{viz.sammon\_stress(X, Y)} & \ref{ch:visualization} \\
+\code{nDexample(cx,N,n,seed)} & \code{datasets.make\_fuzzy\_blobs(...)} & \ref{ch:foundations} \\
+\code{MotorCycle.txt} & \code{datasets.load\_motorcycle()} & \ref{ch:partitioning} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Parameters}
+
+\Cref{tab:migration:params} maps the fields of the MATLAB \code{param} structure to the constructor arguments of the estimators.
+
+\begin{table}[tbp]\centering\footnotesize
+\caption{Fields of the MATLAB \code{param} structure and the corresponding constructor arguments.}\label{tab:migration:params}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.27\textwidth}>{\raggedright\arraybackslash}X@{}}
+\toprule
+\code{param.*} & constructor argument & remark \\
+\midrule
+\code{param.c} (scalar) & \code{n\_clusters} & number of clusters \\
+\code{param.c} (matrix $N\times c$) & \code{init=U0} & initial partition matrix \\
+\code{param.c} (matrix $c\times n$, k-means) & \code{init=V0} & initial centers \\
+\code{param.m} & \code{m} & fuzziness exponent (default 2) \\
+\code{param.e} & \code{tol} & termination tolerance on $\max|\Delta\mik|$ (default $10^{-4}$) \\
+\code{param.ro} & \code{rho} & GK cluster volumes (default all 1); MATLAB's $(\det\mathbf{F}_i/\rho_i)^{1/n}\mathbf{F}_i^{-1}$ gave $\det\mathbf{A}_i=1/\rho_i$, \code{fuzzyclust} follows $\det\mathbf{A}_i=\rho_i$ \\
+\code{param.gamma} & \code{gamma} & covariance regularization weight of GK, here also of GG (default 0) \\
+\code{param.beta} & \code{beta} & condition-number bound of GK, here also of GG (default $10^{15}$) \\
+\code{param.val} (1/2/3) & \code{indices=[...]} of \code{validity\_indices} & 1: PC, CE; 2: SC, S, XB; 3: DI, ADI \\
+\code{param.vis} & \code{plotting.*} after fitting & plotting is separated from fitting \\
+\code{param.q} & \code{n\_components} & projection dimension (PCA; Sammon and FuzSam took it from \code{proj.P}) \\
+\code{param.max} & \code{max\_iter} & iteration count of Sammon and FuzSam (default 100) \\
+\code{param.alpha} & \code{alpha} & gradient step size of Sammon and FuzSam \\
+--- & \code{init}, \code{n\_init}, \code{max\_iter}, \code{random\_state} & new in the clustering estimators: initialization strategy, restarts, iteration cap, seed \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Results}
+
+\Cref{tab:migration:results} maps the fields of the MATLAB \code{result} structure to the attributes of a fitted estimator.
+
+\begin{table}[tbp]\centering\footnotesize
+\caption{Fields of the MATLAB \code{result} structure and the fitted attributes.}\label{tab:migration:results}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.27\textwidth}>{\raggedright\arraybackslash}X@{}}
+\toprule
+\code{result.*} & attribute & shape \\
+\midrule
+\code{result.data.f} & \code{membership\_} & $(N, c)$ --- same orientation as MATLAB \\
+\code{result.data.d} & \code{distances\_} & $(N, c)$, $D_{ik}$ (not squared) \\
+\code{result.cluster.v} & \code{cluster\_centers\_} & $(c, n)$ \\
+\code{result.cluster.P} & \code{covariances\_} & $(c, n, n)$ (MATLAB: $n\times n\times c$) \\
+\code{result.cluster.M} & \code{norm\_matrices\_} & $(c, n, n)$, GK only \\
+\code{result.cluster.V} & \code{eigenvectors\_} & $(c, n, n)$, all eigenvectors as columns, in ascending order of the eigenvalues (MATLAB kept only that of the smallest eigenvalue) \\
+\code{result.cluster.D} & \code{eigenvalues\_} & $(c, n)$, ascending \\
+\code{result.cluster.Pi} (GG) & \code{priors\_} & $(c,)$ \\
+\code{result.iter} & \code{n\_iter\_} & \\
+\code{result.cost} & \code{objective\_history\_}, \code{objective\_} & $J$ per iteration, final $J$; MATLAB's \code{cost} summed $\mik D^2_{ik}$ without the exponent $m$ (\code{GGclust}: after the distances were transformed), so its values differ \\
+\code{result.validity.PC} \ldots & \code{validity\_indices(...)\allowbreak ['PC']} & dictionary \\
+\code{eval.f}, \code{eval.d} (\code{clusteval}) & \code{predict\_proba(X)}, \code{transform(X)} & $(N_{\mathrm{new}}, c)$ \\
+\code{result.proj.P} & \code{embedding\_}; first output \code{Y} of \code{pca\_projection} & $(N, q)$ \\
+\code{result.proj.vp} & \code{embedded\_centers\_} (FuzzySammon); second output \code{Z} of \code{pca\_projection} & $(c, q)$ \\
+\code{result.proj.e} & \code{stress\_} (Sammon) or \code{sammon\_stress(X,\allowbreak\ Y)} & float; the function scores any projection \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Behavioral differences}
+
+\begin{description}[style=nextline]
+\item[Initialization.] The fuzzy algorithms of the MATLAB toolbox drew random prototypes uniformly from the box centered at the data mean whose half-widths are the largest absolute deviations from it, with a fixed seed (\code{rand('state',0)}); \code{Kmeans} and \code{Kmedoid} started from randomly chosen samples. \code{fuzzyclust} offers the same start (\code{init="random"}, the default) and k-means++ seeding for every estimator, controls the seed through \code{random\_state}, and can run several restarts (\code{n\_init}), keeping the partition with the lowest $J$ (\cref{sec:found:init}).
+\item[Termination.] MATLAB iterated while the largest membership \emph{increase}, $\max_{ik}(\mu^{(l)}_{ik}-\mu^{(l-1)}_{ik})$ without the absolute value, exceeded $\epsilon$, and had no iteration cap; \code{fuzzyclust} tests $\max_{ik}|\Delta\mik|<\epsilon$ and adds \code{max\_iter}.
+\item[Optional parameters.] \code{FCMclust}, \code{GKclust}, and \code{GGclust} tested their optional fields with \code{exist('param.m')==1}. \code{exist} looks for a variable or a file of that name, never for a structure field, so the test was always false: \code{m} and \code{e} (and, in \code{GKclust}, \code{ro}, \code{gamma}, and \code{beta}) always took their default values, and \code{clusteval} and \code{validity} always used $m=2$ for the same reason. The tolerance line also read \code{param.m} where \code{param.e} was meant. Results computed in MATLAB with other settings therefore correspond to the defaults; \code{fuzzyclust} honors every constructor argument.
+\item[GK covariance regularization.] The MATLAB code shrank the covariance toward \code{A0.\^{}(1/n)}, and since \code{A0} already contained $\det(\mathbf F_0)^{1/n}$, it computed $\Fi\leftarrow(1-\gamma)\Fi+\gamma\det(\mathbf{F}_0)^{1/n^2}\mathbf{I}$; the Python implementation follows the published formula $\Fi\leftarrow(1-\gamma)\Fi+\gamma\det(\mathbf{F}_0)^{1/n}\mathbf{I}$ of Babu\v{s}ka et al.\ \cite{babuska:2002:covariance} exactly (\cref{sec:part:gk}). Since \code{gamma} was always zero in MATLAB (see above), the difference never showed in MATLAB results.
+\item[Gath--Geva.] The exponential distance is evaluated in the logarithmic domain, so far-away samples no longer overflow. The covariance weighting exponent equals $m$, as in MATLAB, but the priors are computed from the memberships themselves, $\alpha_i=\frac1N\sum_k\mik$, where MATLAB used $\mik^m$. The regularization of GK (\code{gamma}, \code{beta}) is also available.
+\item[Validity.] All indices are computed at once from the data, the partition, the centers, and $m$, with Euclidean distances whatever the clustering algorithm (for SC, S, XB, and ADI, MATLAB used the algorithm's distance matrix \code{result.data.d}). The Fukuyama--Sugeno, PBM-F, Kwon, and PCAES indices, the volume and density indices of Gath and Geva (FHV, PD, APD), MPC, and the silhouette were added. The \code{param.val} groups are reproduced by passing the index names.
+\item[Plotting.] \code{param.vis} and the contour map of \code{clusteval} are replaced by explicit plotting helpers that draw on a matplotlib \code{Axes}; fitting never opens a figure.
+\item[Data.] The data matrix is a NumPy array or a pandas \code{DataFrame}; no wrapper structure is needed. Feature names are kept in \code{feature\_names\_in\_}.
+\item[Normalization.] \code{clust\_normalize} stored the scaling inside the data structure; here the scaler is a separate object (or a step in a scikit-learn \code{Pipeline}) whose \code{inverse\_transform} plays the role of \code{clust\_denormalize}. The MATLAB \code{Kmeans} range-normalized its input internally; \code{KMeans} does not scale the data.
+\end{description}
+
+A minimal translation of a typical MATLAB session,
+\begin{verbatim}
+data = clust_normalize(data,'range');
+param.c = 3; param.m = 2; param.e = 1e-4;
+result = GKclust(data,param);
+param.val = 2;
+result = validity(result,data,param);
+new.X = (new.X - repmat(data.min,size(new.X,1),1)) ./ ...
+        repmat(data.max - data.min,size(new.X,1),1);
+eval = clusteval(new,result,param);
+\end{verbatim}
+reads in Python as
+\begin{lstlisting}
+from fuzzyclust.cluster import GK
+from fuzzyclust.preprocessing import normalize
+from fuzzyclust.validity import validity_indices
+
+Xs, scaler = normalize(X, "range")
+gk = GK(n_clusters=3, m=2.0, tol=1e-4, random_state=0).fit(Xs)
+indices = validity_indices(Xs, gk.membership_, gk.cluster_centers_, m=gk.m,
+                           indices=["SC", "S", "XB"])
+U_new = gk.predict_proba(scaler.transform(X_new))
+\end{lstlisting}

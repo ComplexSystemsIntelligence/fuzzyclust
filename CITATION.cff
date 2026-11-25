@@ -1,0 +1,35 @@
+cff-version: 1.2.0
+message: "If you use fuzzyclust, please cite it as below, together with the original publications of the methods you use."
+type: software
+title: "fuzzyclust: fuzzy clustering and data analysis toolbox for Python"
+version: "1.0"
+date-released: 2026-11-25
+license: MIT
+repository-code: "https://github.com/ComplexSystemsIntelligence/fuzzyclust"
+url: "https://complexsystemsintelligence.github.io/fuzzyclust"
+authors:
+  - family-names: Abonyi
+    given-names: János
+    affiliation: "University of Pannonia, Veszprém, Hungary"
+    orcid: "https://orcid.org/0000-0001-8593-1493"
+keywords:
+  - fuzzy clustering
+  - fuzzy c-means
+  - Gustafson-Kessel
+  - Gath-Geva
+  - Takagi-Sugeno
+  - time-series segmentation
+  - Sammon mapping
+references:
+  - type: report
+    title: "Fuzzy Clustering and Data Analysis Toolbox for Use with MATLAB"
+    authors:
+      - family-names: Balaskó
+        given-names: Balázs
+      - family-names: Abonyi
+        given-names: János
+      - family-names: Feil
+        given-names: Balázs
+    institution:
+      name: "University of Veszprém, Department of Process Engineering"
+    year: 2005

@@ -1,0 +1,387 @@
+\chapter[Foundations]{Foundations of prototype-based clustering}\label{ch:foundations}
+\begin{roadmap}
+The previous chapter motivated fuzzy partitions; this one lays the common ground on which every algorithm of the toolbox stands. We fix the data matrix and the notation, define the distance norms that decide what a cluster can look like, introduce the hard, fuzzy, and possibilistic partition spaces, and describe the kinds of prototypes that the later chapters fit. We then present the objective-function view of clustering, with alternating optimization as the template that all algorithms share, discuss initialization, termination, and scaling, and collect the notation in a table. The chapter closes with the scikit-learn interface shared by the clustering estimators of \code{fuzzyclust}; the individual algorithms follow in \cref{ch:partitioning}.
+\end{roadmap}
+
+\section{Problem and idea}\label{sec:found:problem}
+
+Prototype-based clustering fits a small number of geometric objects, the \emph{prototypes}, to a large number of samples and describes every sample by its distances to the prototypes. Three ingredients are involved: the \emph{data}, a set of $N$ samples in $\R^n$; the \emph{prototypes}, $c$ objects of a chosen kind; and the \emph{partition}, which says to what degree each sample belongs to each prototype. An objective function scores how well the prototypes fit the data given the partition, and an iterative algorithm improves the partition and the prototypes in turn. The algorithms of this book (hard or fuzzy, with points, ellipsoids, lines, or shells as prototypes) are instances of this one scheme, and almost all of their differences come down to two choices: \emph{which prototype} and \emph{which distance}.
+
+\Cref{fig:found:prototypes} shows the four kinds of prototypes that appear in the book. A point prototype with a fixed norm detects spherical clusters (or, with a diagonal or Mahalanobis norm, ellipsoidal clusters that all have the same shape); this is fuzzy c-means. A point prototype with a norm adapted to each cluster detects ellipsoids of different shape and orientation (and, in the Gath--Geva algorithm, of different size); these are the Gustafson--Kessel and Gath--Geva algorithms, whose prototype is in fact the pair (center, covariance). A linear-variety prototype measures the distance of a sample to a line, plane, or hyperplane and detects flat clusters, which is what local linear models in identification need. A shell prototype measures the distance to a circle or ellipse and detects hollow clusters. The rest of this chapter is about what all of them have in common.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[scale=0.88]
+  \def\sph{2.02/1.30,1.33/1.16,1.78/0.76,2.06/1.26,1.60/1.42,1.97/0.84,1.40/1.38,1.86/1.15,1.44/1.22,1.51/1.69,1.15/1.87,1.79/1.66,1.79/1.28,1.46/1.20,1.41/1.67,1.28/1.37,1.28/1.23,1.29/1.50}
+  \def\ell{0.60/1.05,2.70/2.41,1.46/1.22,0.71/1.53,1.62/1.38,1.39/2.04,1.52/1.69,1.78/1.56,0.65/0.91,1.26/1.53,2.04/2.08,1.61/1.82,0.76/1.43,1.94/1.67,1.89/1.70,2.19/2.34,2.90/2.18,0.44/0.74}
+  \def\lin{2.55/1.89,1.69/1.46,0.21/0.65,1.80/1.53,1.05/1.13,1.57/1.48,2.50/1.95,1.13/1.18,2.56/1.85,1.82/1.46,0.24/0.75,2.62/1.91,2.00/1.57,2.79/2.00,0.65/0.87,0.56/0.93,2.62/1.88,2.01/1.70}
+  \def\shl{2.15/0.75,1.48/0.58,0.51/1.13,2.17/2.27,2.43/1.87,2.20/2.16,2.52/1.79,2.36/2.19,1.64/2.40,1.26/0.47,0.49/1.10,2.51/1.58,2.35/1.91,2.52/1.29,0.60/1.09,1.78/2.43,1.49/2.44,1.46/0.47,1.85/2.48,0.66/1.03}
+  % ---- panel 1: point prototype, fixed norm
+  \begin{scope}
+    \draw[fcgray!50, thin] (0,0) rectangle (3,3);
+    \foreach \r in {0.45,0.9} \draw[fcblue!60, thin] (1.62,1.35) circle (\r);
+    \foreach \x/\y in \sph { \fill[fcblue!80!black] (\x,\y) circle (1.6pt); }
+    \node[black] at (1.62,1.35) {$\boldsymbol\times$};
+    \node[note, right=2pt] at (1.7,1.35) {$\vi$};
+    \node[note, anchor=north, text width=2.8cm] at (1.5,-0.1) {point, fixed norm $\A$:\\ spheres (FCM)};
+  \end{scope}
+  % ---- panel 2: point prototype + covariance
+  \begin{scope}[shift={(3.6,0)}]
+    \draw[fcgray!50, thin] (0,0) rectangle (3,3);
+    \begin{scope}[rotate around={30:(1.5,1.55)}]
+      \draw[fcverm!60, thin] (1.5,1.55) ellipse (0.6 and 0.17);
+      \draw[fcverm!60, thin] (1.5,1.55) ellipse (1.2 and 0.34);
+    \end{scope}
+    \foreach \x/\y in \ell { \fill[fcverm!80!black] (\x,\y) circle (1.6pt); }
+    \node[black] at (1.5,1.55) {$\boldsymbol\times$};
+    \draw[arrow, fcverm!70!black] (1.5,1.55) -- ++(30:1.2) node[note, below right=-3pt and -2pt] {$\sqrt{\lambda_2}\,\boldsymbol\phi_2$};
+    \draw[arrow, fcverm!70!black] (1.5,1.55) -- ++(120:0.34) node[note, above left=-2pt and -4pt] {$\sqrt{\lambda_1}\,\boldsymbol\phi_1$};
+    \node[note, anchor=north, text width=2.8cm] at (1.5,-0.1) {point $+$ covariance $\Fi$:\\ ellipsoids (GK, GG)};
+  \end{scope}
+  % ---- panel 3: linear variety
+  \begin{scope}[shift={(7.2,0)}]
+    \draw[fcgray!50, thin] (0,0) rectangle (3,3);
+    \draw[fcgreen!70!black, thick] (0.1,0.65) -- (2.9,2.05);
+    \foreach \x/\y in \lin { \fill[fcgreen!80!black] (\x,\y) circle (1.6pt); }
+    \coordinate (q) at (1.05,1.13);
+    \draw[dashed, fcgray] (1.3,2.2) -- (1.72,1.46) ;
+    \fill[black] (1.3,2.2) circle (1.5pt) node[note, left=1pt] {$\xk$};
+    \node[note, anchor=north, text width=2.8cm] at (1.5,-0.1) {line / hyperplane:\\ flat clusters (c-varieties)};
+  \end{scope}
+  % ---- panel 4: shell
+  \begin{scope}[shift={(10.8,0)}]
+    \draw[fcgray!50, thin] (0,0) rectangle (3,3);
+    \draw[fcpurple!80!black, thick] (1.5,1.5) circle (1.0);
+    \foreach \x/\y in \shl { \fill[fcpurple!80!black] (\x,\y) circle (1.6pt); }
+    \node[black] at (1.5,1.5) {$\boldsymbol\times$};
+    \draw[arrow, fcpurple!70!black] (1.5,1.5) -- ++(50:1.0) node[note, midway, below right=-2pt] {$r_i$};
+    \node[note, anchor=north, text width=2.8cm] at (1.5,-0.1) {circle / shell:\\ hollow clusters (c-shells)};
+  \end{scope}
+\end{tikzpicture}
+\caption[The prototypes of this book and the cluster shapes they detect.]{The prototypes of this book and the cluster shapes they detect. A point prototype with one fixed norm detects spheres (\cref{ch:partitioning}, FCM); a point with its own covariance matrix detects ellipsoids whose axes are the eigenvectors $\boldsymbol\phi_j$ of $\Fi$ scaled by $\sqrt{\lambda_j}$ (GK, GG); a linear variety measures the orthogonal distance of a sample to a line or hyperplane and detects flat clusters; a shell prototype measures the distance to a circle of radius $r_i$ and detects hollow clusters (both in \cref{ch:robust_shape}). Whatever the prototype, the algorithm needs only the distances $\Dik$ of every sample to every prototype.}
+\label{fig:found:prototypes}
+\end{figure}
+
+\section{Theory}\label{sec:found:theory}
+
+This section follows the order of the ingredients: data (\cref{sec:found:data}), distances (\cref{sec:found:norms}), partitions (\cref{sec:found:partitions}), and prototypes (\cref{sec:found:prototypes}); then the objective function and the alternating optimization that ties them together (\cref{sec:found:ao}); the practical matters of initialization, termination, and scaling (\cref{sec:found:init,sec:found:stop,sec:found:scaling}); and finally the notation table (\cref{sec:found:notation}). The notation is that of Babu\v{s}ka \cite{babuska:1998:book}, which the MATLAB toolbox \cite{balasko:2005:toolbox} also used.
+
+\subsection{The data}\label{sec:found:data}
+
+Clustering is applied here to quantitative data. Each observation consists of $n$ measured variables, grouped into a row vector $\xk=[x_{k1},x_{k2},\dots,x_{kn}]\in\R^n$, and the $N$ observations form the data matrix
+\begin{equation}
+  \X=\begin{bmatrix} x_{11} & x_{12} & \cdots & x_{1n}\\ x_{21} & x_{22} & \cdots & x_{2n}\\ \vdots & \vdots & \ddots & \vdots\\ x_{N1} & x_{N2} & \cdots & x_{Nn}\end{bmatrix}\in\R^{N\times n},
+  \qquad \X=[\mathbf{x}_1,\dots,\mathbf{x}_N]\T .
+  \label{eq:found:X}
+\end{equation}
+In pattern recognition the rows are called patterns or objects, and the columns features or attributes. The meaning of the rows depends on the application (\cref{sec:intro:purpose}): independent observations in data analysis, consecutive samples or delay vectors of signals in time-series analysis, and regression vectors built from lagged inputs and outputs in system identification, where $\X$ spans the product space of regressors and regressands and the clusters are regions in which one local model is valid. In the last two cases, past values of the variables usually enter $\X$ as extra columns; \code{make\_regressors} and \code{lagged\_matrix} of \code{fuzzyclust.preprocessing} build them. Throughout the book $k=1,\dots,N$ indexes samples and $i,j=1,\dots,c$ index clusters; in code the data are stored row-wise, exactly as in \eqref{eq:found:X}.
+
+\subsection{Distance norms}\label{sec:found:norms}
+
+A cluster is a group of objects that are more similar to one another than to the members of other clusters, and in a metric space similarity is measured by a \emph{distance norm}. Except for Gath--Geva, the algorithms of \cref{ch:partitioning} measure the distance of a sample to a prototype with the squared inner-product norm
+\begin{equation}
+  D^2_{ik\A}=\norm{\xk-\vi}^2_{\A}=(\xk-\vi)\T\A\,(\xk-\vi),
+  \label{eq:found:norm}
+\end{equation}
+where the symmetric positive definite matrix $\A\in\R^{n\times n}$ is the \emph{norm-inducing matrix}\index{norm-inducing matrix}. Its unit sphere $\{\mathbf{x}: \mathbf{x}\T\A\mathbf{x}=1\}$, the boundary of the unit ball, holds the points at unit distance from the origin; centered on a prototype, it gives the shape of the iso-membership contours near that prototype (\cref{fig:found:norms}). Three global choices are classical:
+\begin{itemize}
+  \item $\A=\mathbf{I}$, the Euclidean norm: the unit ball is a sphere, and all features are weighted equally in their given units.
+  \item $\A=\A_D=\diag(1/\sigma_1^2,\dots,1/\sigma_n^2)$ with the standard deviations $\sigma_j$ of the features: the unit ball is an axis-parallel ellipsoid, and every feature is measured in units of its own spread. Clustering with $\A_D$ is identical to Euclidean clustering of the standardized data.
+  \item $\A=\mathbf{F}^{-1}$ with the covariance matrix of the whole data set,
+  \begin{equation}
+    \mathbf{F}=\frac1N\sum_{k=1}^{N}(\xk-\bar{\mathbf{x}})(\xk-\bar{\mathbf{x}})\T,\qquad \bar{\mathbf{x}}=\frac1N\sum_{k=1}^N\xk,
+    \label{eq:found:cov}
+  \end{equation}
+  the Mahalanobis norm: the unit ball is an ellipsoid with the orientation of the data cloud, so a correlation that all clusters share is removed.
+\end{itemize}
+Any positive definite $\A$ can be factored as $\A=\mathbf{L}\T\mathbf{L}$, and then $D^2_{ik\A}=\norm{\mathbf{L}\xk-\mathbf{L}\vi}^2$: clustering with the norm $\A$ is Euclidean clustering of the linearly transformed data $\mathbf{L}\xk$. A global norm therefore cannot give clusters different shapes; it fixes one shape for all of them. The Gustafson--Kessel algorithm (\cref{sec:part:gk}) gives every cluster its own matrix $\Ai$, derived from the covariance of its members, and the Gath--Geva algorithm (\cref{sec:part:gg}) replaces the inner-product norm with an exponential distance. Both are treated in the next chapter; \cref{fig:found:norms} already shows what the adaptive norm adds.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[scale=0.88]
+  \begin{scope}
+    \draw[fcgray!50, thin, ->] (-1.4,0) -- (1.4,0); \draw[fcgray!50, thin, ->] (0,-1.4) -- (0,1.4);
+    \draw[fcblue, thick] (0,0) circle (1.0);
+    \node[note, anchor=north, text width=2.8cm] at (0,-1.5) {Euclidean\\ $\A=\mathbf{I}$};
+  \end{scope}
+  \begin{scope}[shift={(3.3,0)}]
+    \draw[fcgray!50, thin, ->] (-1.4,0) -- (1.4,0); \draw[fcgray!50, thin, ->] (0,-1.4) -- (0,1.4);
+    \draw[fcblue, thick] (0,0) ellipse (1.25 and 0.55);
+    \node[note, anchor=north, text width=2.8cm] at (0,-1.5) {diagonal\\ $\A=\diag(1/\sigma_j^2)$};
+  \end{scope}
+  \begin{scope}[shift={(6.6,0)}]
+    \draw[fcgray!50, thin, ->] (-1.4,0) -- (1.4,0); \draw[fcgray!50, thin, ->] (0,-1.4) -- (0,1.4);
+    \begin{scope}[rotate=35] \draw[fcblue, thick] (0,0) ellipse (1.25 and 0.5); \end{scope}
+    \node[note, anchor=north, text width=2.8cm] at (0,-1.5) {Mahalanobis\\ $\A=\mathbf{F}^{-1}$};
+  \end{scope}
+  \begin{scope}[shift={(10.3,0)}]
+    \draw[fcgray!50, thin, ->] (-1.7,0) -- (1.7,0); \draw[fcgray!50, thin, ->] (0,-1.4) -- (0,1.4);
+    \begin{scope}[rotate around={60:(-0.7,0.3)}] \draw[fcverm, thick] (-0.7,0.3) ellipse (0.8 and 0.3); \end{scope}
+    \begin{scope}[rotate around={-20:(0.8,-0.3)}] \draw[fcgreen!70!black, thick] (0.8,-0.3) ellipse (0.7 and 0.45); \end{scope}
+    \node[black] at (-0.7,0.3) {$\boldsymbol\times$}; \node[black] at (0.8,-0.3) {$\boldsymbol\times$};
+    \node[note, anchor=north, text width=3.2cm] at (0,-1.5) {adaptive, per cluster\\ $\Ai\propto\Fi^{-1}$ (GK)};
+  \end{scope}
+\end{tikzpicture}
+\caption[Unit spheres $\{\mathbf{x}:\mathbf{x}\T\A\mathbf{x}=1\}$ of the inner-product norms.]{Unit spheres $\{\mathbf{x}:\mathbf{x}\T\A\mathbf{x}=1\}$ of the inner-product norms. The Euclidean norm gives spheres, the diagonal norm axis-parallel ellipsoids (equivalent to standardizing the features), and the Mahalanobis norm ellipsoids oriented like the whole data cloud. All three are global, so every cluster has the same shape; the Gustafson--Kessel algorithm (right) gives each cluster its own norm-inducing matrix and thus its own ellipsoid.}
+\label{fig:found:norms}
+\end{figure}
+
+\subsection{Partition spaces}\label{sec:found:partitions}
+
+The clusters are subsets of the data, and the partition says which sample belongs to which subset. A \emph{hard partition} of $\X$ into $c$ clusters is a family of subsets $A_1,\dots,A_c$ with
+\begin{equation}
+  \bigcup_{i=1}^{c}A_i=\X,\qquad A_i\cap A_j=\emptyset\ (i\ne j),\qquad \emptyset\subset A_i\subset\X,
+  \label{eq:found:hardsets}
+\end{equation}
+that is, the subsets cover the data, they are disjoint, and none is empty or equal to the whole data set. In terms of the characteristic functions $\mu_i(\xk)=\mik\in\{0,1\}$ of the subsets, these conditions read
+\begin{equation}
+  \mik\in\{0,1\},\qquad \sum_{i=1}^{c}\mik=1\ \ \forall k,\qquad 0<\sum_{k=1}^{N}\mik<N\ \ \forall i,
+  \label{eq:found:hardmu}
+\end{equation}
+and the memberships are collected in the partition matrix $\U=[\mik]\in\R^{c\times N}$, whose $i$-th row is the membership function of cluster $i$ and whose $k$-th column holds the memberships of sample $k$.
+\begin{definition}[Hard partitioning space]\label{def:found:mhc}\index{partition!hard}\index{partitioning space}
+Let $\X=\{\mathbf{x}_1,\dots,\mathbf{x}_N\}$ be a finite set and $2\le c<N$ an integer. The hard partitioning space of $\X$ is
+\begin{equation}
+  M_{hc}=\Bigl\{\U\in\R^{c\times N}\ \Big|\ \mik\in\{0,1\}\ \forall i,k;\ \sum_{i=1}^{c}\mik=1\ \forall k;\ 0<\sum_{k=1}^{N}\mik<N\ \forall i\Bigr\}.
+  \label{eq:found:mhc}
+\end{equation}
+\end{definition}
+A \emph{fuzzy partition} \cite{ruspini:1969} relaxes the first condition and lets the memberships take any value in $[0,1]$. The sum of each column is still one, so the total membership of each sample is distributed over the clusters; how it is distributed is not constrained.
+\begin{definition}[Fuzzy partitioning space]\label{def:found:mfc}\index{partition!fuzzy}
+With $\X$ and $c$ as above, the fuzzy partitioning space is
+\begin{equation}
+  M_{fc}=\Bigl\{\U\in\R^{c\times N}\ \Big|\ \mik\in[0,1]\ \forall i,k;\ \sum_{i=1}^{c}\mik=1\ \forall k;\ 0<\sum_{k=1}^{N}\mik<N\ \forall i\Bigr\}.
+  \label{eq:found:mfc}
+\end{equation}
+\end{definition}
+The column constraint $\sum_i\mik=1$ makes the memberships \emph{relative}: a sample far from all prototypes still has memberships that sum to one, and a sample equidistant from all prototypes has $\mik=1/c$ in every cluster, however far away it is (\cref{fig:intro:hardfuzzy}, bottom). This is sometimes called the probabilistic constraint. The \emph{possibilistic partition} \cite{krishnapuram:1993:pcm} drops it and only requires every sample to belong to at least one cluster to some degree:
+\begin{definition}[Possibilistic partitioning space]\label{def:found:mpc}\index{partition!possibilistic}
+\begin{equation}
+  M_{pc}=\Bigl\{\U\in\R^{c\times N}\ \Big|\ \mik\in[0,1]\ \forall i,k;\ \forall k\ \exists\, i:\ \mik>0;\ 0<\sum_{k=1}^{N}\mik<N\ \forall i\Bigr\}.
+  \label{eq:found:mpc}
+\end{equation}
+\end{definition}
+Possibilistic memberships are \emph{absolute} degrees of typicality: a sample far from everything has small memberships in all clusters, so an outlier is recognized as such. The price is that the clusters are no longer coupled through the column sum, and the clustering problem splits into $c$ independent problems that may all converge to the same cluster unless additional terms hold them apart; this is the subject of \cref{ch:robust_shape}. \Cref{fig:found:partitions} shows a partition matrix in each of the three spaces. The nesting $M_{hc}\subset M_{fc}\subset M_{pc}$ is immediate, and so is the fact that $M_{fc}$ is a convex set, whereas $M_{hc}$ is a finite one; the former is why fuzzy clustering can be treated with calculus, and the latter why hard clustering is a combinatorial problem.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}
+  \tikzset{pm/.style={matrix of math nodes, left delimiter={[}, right delimiter={]}, nodes={font=\small, minimum width=5.6mm, minimum height=5mm, inner sep=1pt}}}
+  \matrix (H) [pm] at (0,0) {
+    1 & 0 & 0 & 0 & 0 \\
+    0 & 1 & 1 & 0 & 0 \\
+    0 & 0 & 0 & 1 & 1 \\
+  };
+  \node[note, anchor=south, font=\small] at (H.north) {hard $\U\in M_{hc}$};
+  \node[note, anchor=north, text width=3.6cm] at (H.south) {entries $0$ or $1$,\\ one $1$ per column};
+  \matrix (F) [pm] at (4.3,0) {
+    .9 & .1 & .2 & .0 & .3 \\
+    .1 & .8 & .7 & .1 & .2 \\
+    .0 & .1 & .1 & .9 & .5 \\
+  };
+  \node[note, anchor=south, font=\small] at (F.north) {fuzzy $\U\in M_{fc}$};
+  \node[note, anchor=north, text width=3.6cm] at (F.south) {entries in $[0,1]$,\\ every column sums to $1$};
+  \matrix (P) [pm] at (8.6,0) {
+    .9 & .1 & .3 & .0 & .1 \\
+    .2 & .9 & .8 & .1 & .1 \\
+    .0 & .1 & .1 & .9 & .0 \\
+  };
+  \node[note, anchor=south, font=\small] at (P.north) {possibilistic $\U\in M_{pc}$};
+  \node[note, anchor=north, text width=3.6cm] at (P.south) {entries in $[0,1]$, columns free; the last column is an outlier};
+  \foreach \M in {H,F,P} { \draw[fcverm, thick, rounded corners=2pt] ($(\M-1-5.north west)+(-1pt,1pt)$) rectangle ($(\M-3-5.south east)+(1pt,-1pt)$); }
+  \node[note, anchor=north, text width=11.5cm] at (4.3,-2.25) {rows are clusters $i$ ($c=3$), columns are samples $k$ ($N=5$); the highlighted column is the same sample in the three spaces. In all three spaces every row must have a positive sum smaller than $N$, so no cluster is empty and none contains everything. The code stores $\U\T$ of shape \code{(n\_samples, n\_clusters)}.};
+\end{tikzpicture}
+\caption[One partition matrix of three clusters and five samples in each of the three partitioning spaces.]{One partition matrix of three clusters and five samples in each of the three partitioning spaces. In the hard space every column is a unit vector; in the fuzzy space the columns are points of the probability simplex, so memberships are relative; in the possibilistic space the columns are free, so memberships are absolute degrees of typicality and an outlier (highlighted column) has small memberships everywhere.}
+\label{fig:found:partitions}
+\end{figure}
+
+\subsection{Prototypes}\label{sec:found:prototypes}
+
+The prototype of cluster $i$ is the object the distances are measured to. In the simplest case it is a point $\vi\in\R^n$ of the data space, the \emph{cluster center}, and the matrix $\V=[\mathbf{v}_1,\dots,\mathbf{v}_c]\T\in\R^{c\times n}$ collects the centers. The algorithms of \cref{ch:partitioning} all have point prototypes. The Gustafson--Kessel and Gath--Geva algorithms add to each center a covariance matrix $\Fi$ that shapes the norm around it, so their prototype is in effect the ellipsoid $(\vi,\Fi)$; Gath--Geva also adds a prior probability $\alpha_i$ that scales the size of the cluster. A \emph{medoid} (\cref{sec:part:kmedoids}) is a point prototype constrained to be one of the samples, which is useful when the mean of a group has no meaning. Prototypes of higher order are linear varieties (points, lines, and planes) and shells (circles and ellipses), treated in \cref{ch:robust_shape}. In the identification setting of \cref{ch:models} the prototype of a cluster is a local linear model, whose parameters are read off the eigenstructure of $\Fi$ or fitted by weighted least squares. Whatever the prototype, the clustering algorithm needs only the distances $\Dik$ of every sample to every prototype, and this is the interface that the base class of the toolbox asks an algorithm to provide.
+
+\subsection{Objective functions and alternating optimization}\label{sec:found:ao}
+
+Most of the algorithms in this book minimize a sum of weighted squared distances, the \emph{c-means functional}\index{c-means functional} of Dunn \cite{dunn:1973:fcm} and Bezdek \cite{bezdek:1981},
+\begin{equation}
+  \J(\X;\U,\V)=\sum_{i=1}^{c}\sum_{k=1}^{N}\mik^m\,\Dsq,\qquad \U\in M_{fc},\ m>1,
+  \label{eq:found:J}
+\end{equation}
+where $\Dsq$ is the squared distance of $\xk$ to the prototype of cluster $i$ in the norm of the algorithm and $m$ is the \emph{fuzziness}\index{fuzziness exponent} or weighting exponent. Statistically, $\J$ measures the total variance of the samples about the prototypes, with each sample counted in cluster $i$ with weight $\mik^m$. For $m\to1$ and $\U\in M_{hc}$ it is the within-cluster sum of squares of k-means. Most algorithms of \cref{ch:partitioning} and of the later chapters are defined by \eqref{eq:found:J} together with a choice of distance and prototype; the Gath--Geva algorithm, the possibilistic variants, and the fuzzy self-organizing map modify the functional but keep its structure.
+
+Minimizing $\J$ over $\U$ and $\V$ jointly is a nonconvex problem. It is, however, convex in $\U$ for fixed prototypes and easy in $\V$ for fixed $\U$. With the column constraint adjoined by Lagrange multipliers, setting the gradient with respect to $\U$ to zero yields a closed-form expression for the memberships in terms of the distances (derived in \cref{sec:part:fcm}), and setting the gradient with respect to the prototypes to zero yields the prototypes as membership-weighted means (or an analogous update for ellipsoids, lines, and shells). The classical way to exploit this is \emph{alternating optimization}, also called Picard iteration or grouped coordinate descent: fix $\U$ and update the prototypes, fix the prototypes and update $\U$, and repeat. Neither half-step can increase $\J$, so the sequence $\J^{(1)}\ge\J^{(2)}\ge\dots$ is monotone and bounded below. Bezdek's original theorem \cite{bezdek:1980:convergence} claimed convergence to a local minimum; the corrected theorem of Bezdek, Hathaway, Sabin, and Tucker \cite{bezdek:1987:convergence} states that every convergent subsequence of the iterates tends to a local minimum or a saddle point of $\J$, and saddle points are rarely met in practice. \Cref{fig:found:ao} shows the loop as it is implemented once in \code{BaseFuzzyClusterer}. An algorithm provides the prototype update and the distance computation; the base class provides everything else.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[>={Latex[length=2mm]}]
+  \node[data, text width=3.3cm] (init) at (0,1.9) {initialize $\U^{(0)}$\\ \code{\_init\_state}};
+  \node[block, text width=3.3cm] (proto) at (0,0) {prototypes $\V^{(l)}$ from $(\U^{(l-1)})^m$\\ \code{\_update\_prototypes}};
+  \node[block, text width=3.3cm] (dist) at (4.2,0) {distances $\Dsq$ to the prototypes\\ \code{\_distances}};
+  \node[data, text width=3.3cm] (memb) at (8.4,0) {memberships $\U^{(l)}$ from $\Dsq$\\ \code{\_memberships}};
+  \node[result, diamond, aspect=2.0, inner sep=1pt, text width=2.6cm] (stop) at (8.4,-2.4) {$\max_{ik}\abs{\Delta\mik}<\epsilon$\\ or $l=l_{\max}$?};
+  \node[result, text width=3.6cm] (out) at (8.4,-4.7) {\code{cluster\_centers\_},\\ \code{membership\_}, \code{labels\_},\\ \code{distances\_},\\ \code{objective\_history\_},\\ \code{n\_iter\_}};
+  \draw[arrow] (init) -- (proto);
+  \draw[arrow] (proto) -- (dist);
+  \draw[arrow] (dist) -- (memb);
+  \draw[arrow] (memb) -- (stop);
+  \draw[arrow] (stop) -- node[note, right] {yes} (out);
+  \draw[arrow] (stop.west) -- node[note, above] {no: $l\leftarrow l+1$} (0,-2.4) -- (proto.south);
+  \node[note, anchor=north west, text width=5.6cm, align=left] at (-1.6,-3.2) {$\Delta\mik=\mu^{(l)}_{ik}-\mu^{(l-1)}_{ik}$. $\J^{(l)}=\sum_{ik}(\mu^{(l-1)}_{ik})^m\Dsq$ is recorded in every pass. With \code{n\_init}$>1$ the whole loop is repeated from new random starts and the run with the smallest final $\J$ is kept.};
+  \node[note, anchor=south west, text width=4.2cm, align=left] at (2.6,1.3) {blue: the two hooks an algorithm implements; green: base-class defaults it may override};
+\end{tikzpicture}
+\caption[Alternating optimization as implemented once in \code{BaseFuzzyClusterer}.]{Alternating optimization as implemented once in \code{BaseFuzzyClusterer}. An algorithm defines only how prototypes are computed from the weighted partition and how distances to its prototypes are measured (blue blocks); the base class provides the initialization and the membership update (green blocks, which an algorithm may override), the termination test, the objective history, and the restarts.}
+\label{fig:found:ao}
+\end{figure}
+
+\begin{algobox}{Alternating optimization of a prototype-based clustering functional}{ao}\index{alternating optimization}\index{Picard iteration|see{alternating optimization}}\index{BaseFuzzyClusterer@\code{BaseFuzzyClusterer}}
+\begin{algorithm}[H]
+\KwIn{data $\X$, number of clusters $1<c<N$, fuzziness exponent $m$, tolerance $\epsilon>0$, maximum number of iterations $l_{\max}$, number of restarts $r$}
+\For{$\text{run}=1,\dots,r$}{
+  initialize $\U^{(0)}\in M_{fc}$ (random prototypes, k-means++ seeds, or a user-supplied matrix)\;
+  \For{$l=1,2,\dots,l_{\max}$}{
+    prototypes: compute $\V^{(l)}$ (and any shape parameters $\Fi,\Ai,\alpha_i$) from $\X$ and $(\U^{(l-1)})^m$\;
+    distances: compute $\Dsq$ of every sample to every prototype\;
+    objective: $\J^{(l)}\leftarrow\sum_{i,k}(\mu^{(l-1)}_{ik})^m\Dsq$\;
+    memberships: compute $\U^{(l)}$ from the distances (fuzzy or crisp rule)\;
+    \lIf{$\max_{i,k}\abs{\mu^{(l)}_{ik}-\mu^{(l-1)}_{ik}}<\epsilon$}{\textbf{break}}
+  }
+  keep the run if $\J^{(l)}$ is the smallest so far\;
+}
+\KwOut{$\V$, $\U$, hard labels $\argmax_i\mik$, distances $\Dik$, history $\J^{(1)},\dots,\J^{(l)}$}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{The common template}
+\begin{itemize}
+  \item Every algorithm minimizes a sum of membership-weighted squared distances $\J=\sum_{ik}\mik^m\Dsq$ over a partition $\U$ and prototypes $\V$.
+  \item Two choices define an algorithm: the prototype (point, ellipsoid, medoid, line, shell) and the distance (fixed norm, adaptive norm, exponential).
+  \item Alternating optimization updates prototypes and memberships in turn; $\J$ decreases monotonically, and the iteration converges to a local minimum (in rare cases to a saddle point).
+  \item Which optimum is reached depends on the start: restarts (\code{n\_init}) and good seeds are the remedy; a converged run with a poor $\J$ is a poor optimum, not an unfinished one.
+  \item Parameters shared by the estimators: \code{n\_clusters}, \code{tol}, \code{max\_iter}, \code{init}, \code{n\_init}, \code{random\_state}, and, in the fuzzy ones, \code{m}.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Initialization and local optima}\label{sec:found:init}\index{initialization}\index{restarts}
+
+The alternating optimization is a local method, so the initial partition decides which stationary point is reached. The toolbox offers three ways to start. The default, \code{init="random"}, reproduces the MATLAB toolbox: $c$ prototypes are drawn uniformly from a box that is centered on the data mean and encloses all samples, $\mathbf{v}_i^{(0)}=\bar{\mathbf{x}}+(2\mathbf{u}_i-\mathbf{1})\odot\mathbf{h}$ with $\mathbf{u}_i\sim\mathcal{U}[0,1]^n$ and $h_j=\max_k\abs{x_{kj}-\bar{x}_j}$, and the initial memberships follow from the Euclidean distances to these prototypes through the fuzzy membership formula. Starting from random prototypes rather than from a random membership matrix avoids the near-uniform partitions that a random $\U^{(0)}$ produces for large $N$. The second option, \code{init="kmeans++"}, is the seeding of Arthur and Vassilvitskii \cite{arthur:2007:kmeanspp}: the first seed is a random sample, and every further seed is a sample drawn with probability proportional to its squared distance from the seeds chosen so far, so that the seeds spread over the data. The toolbox calls the scikit-learn implementation, a greedy variant that draws $2+\lfloor\ln c\rfloor$ candidates in this way for every further seed and keeps the one that most reduces the sum of squared distances to the nearest seed. The seeding is designed for compact groups; on elongated or crossing clusters its preference for far-apart seeds can be a disadvantage (\cref{sec:found:ex:init}). The third option is an explicit array, either initial centers of shape $(c,n)$ or an initial partition of shape $(N,c)$. This is how the Gath--Geva algorithm is started from a converged FCM or GK result, and how a clustering can be continued or reproduced.
+
+Restarts complement the seeding. With \code{n\_init}$=r>1$ the loop of \cref{alg:ao} is run $r$ times from fresh starts, and the run with the smallest final $\J$ is kept; the final objective is the only criterion, because it is the only one the algorithm itself can evaluate. On well-separated compact clusters nearly every start reaches the same optimum, and $r=1$ suffices. On data with elongated, crossing, or differently sized clusters, the spread of the final objectives over seeds (\cref{fig:found:ex:restarts}) is the quickest diagnostic of a multimodal objective, and $r$ between $5$ and $20$ is cheap insurance. When \code{init} is an array, \code{n\_init} is ignored.
+
+\subsection{Termination}\label{sec:found:stop}
+
+The iteration stops when the partition no longer changes,
+\begin{equation}
+  \max_{i,k}\abs{\mu^{(l)}_{ik}-\mu^{(l-1)}_{ik}}<\epsilon,
+  \label{eq:found:stop}
+\end{equation}
+with the tolerance \code{tol}$=\epsilon$ (default $10^{-4}$, the value in the code of the MATLAB toolbox, although its manual states $10^{-3}$), or after \code{max\_iter} iterations (default 300). The maximum change of a membership is a scale-free criterion: it depends neither on the units of the data nor on the size of $\J$. It is the termination test of Bezdek's FCM algorithm \cite{bezdek:1981,bezdek:1984:fcm}. For hard partitions it reduces to ``no sample changed cluster.'' The number of iterations actually run is stored in \code{n\_iter\_}, and the objective after every iteration in \code{objective\_history\_}; a history that is still falling steeply at \code{max\_iter} indicates that the limit, not convergence, stopped the run. A smaller $\epsilon$ locates the prototypes more precisely but costs iterations; because the memberships change slowly when $m$ is large (\cref{sec:part:m}), partitions with $m$ above about two need more iterations for the same $\epsilon$. Two numerical safeguards protect the membership update: squared distances are clipped at zero, and a constant $10^{-10}$ is added to them before negative powers are taken (as in the MATLAB toolbox), so that a sample that coincides with a prototype receives a membership of almost one instead of causing a division by zero.
+
+\subsection{Scaling the data}\label{sec:found:scaling}\index{scaling}
+
+Distances compare features, and features have units. If one feature ranges over hundreds and another over fractions, the Euclidean distance is in effect the first feature alone, and so is the clustering (\cref{sec:found:ex:norms}). Scaling the data is therefore part of the clustering method, not a preliminary detail. Two linear scalings are standard; \code{fuzzyclust.preprocessing.normalize} reproduces the MATLAB function \code{clust\_normalize}, and the scaler it returns reproduces \code{clust\_denormalize}:
+\begin{equation}
+  \text{range:}\quad \tilde{x}_{kj}=\frac{x_{kj}-\min_k x_{kj}}{\max_k x_{kj}-\min_k x_{kj}}\in[0,1],\qquad
+  \text{variance:}\quad \tilde{x}_{kj}=\frac{x_{kj}-\bar{x}_j}{\sigma_j}.
+  \label{eq:found:scaling}
+\end{equation}
+Range scaling is bounded and easy to interpret but sensitive to outliers; variance scaling (standardization) depends less on single extreme values but is still affected by heavy tails. Both correspond to a diagonal norm in the original units ($\A_D$ for variance scaling), and both must be inverted to report prototypes in physical units, which the returned scaler does with \code{inverse\_transform}. The recommended pattern is a scikit-learn \code{Pipeline}: the scaler is fitted on the training data and applied automatically to every new sample passed to \code{predict\_proba}.
+
+For the adaptive norm of Gustafson--Kessel the situation is subtler. In exact arithmetic the GK distance $D^2_{ik\Ai}$ with $\Ai=[\rho_i\det\Fi]^{1/n}\Fi^{-1}$ is invariant up to a common factor under any invertible linear map $\xk\mapsto\mathbf{S}\xk$: the covariance becomes $\mathbf{S}\Fi\mathbf{S}\T$, its determinant is multiplied by $(\det\mathbf{S})^2$, and all squared distances are multiplied by the same constant $(\det\mathbf{S})^{2/n}$, which the membership formula cancels. GK is therefore affine-invariant in principle, and so is Gath--Geva. In practice the invariance is only partial. The random initialization in an axis-parallel box is not invariant. The regularization of the covariance matrices (\cref{sec:part:gk}) shrinks every $\Fi$ toward a multiple of the \emph{identity} and bounds its condition number, and neither operation is invariant under anisotropic scaling, so with $\gamma>0$, or when the bound $\beta$ is active, the result depends on the units. Finally, the validity indices of \cref{ch:validity} are computed with Euclidean distances. Scaling the data is therefore good practice for every algorithm of the toolbox, and indispensable for k-means and for FCM with the Euclidean norm.
+
+\subsection{Notation}\label{sec:found:notation}
+
+\Cref{tab:found:notation} collects the symbols of the book together with their names in code. The convention that index $i$ (and $j$) runs over clusters and $k$ over samples is used without exception; the partition matrix is $c\times N$ in formulas, as in Bezdek and Babu\v{s}ka, and is stored transposed in code so that it aligns with the $(N,c)$ layout of \code{predict\_proba}.
+
+\begin{table}[htbp]\centering\small
+\caption{Notation of the book and the corresponding names in \code{fuzzyclust}.}
+\label{tab:found:notation}
+\begin{tabularx}{\textwidth}{@{}l >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}\toprule
+Symbol & Meaning & Code \\\midrule
+$N$ & number of samples & \code{n\_samples} \\
+$n$ & number of features & \code{n\_features} \\
+$c$ & number of clusters & \code{n\_clusters} \\
+$\X\in\R^{N\times n}$ & data matrix $[\mathbf{x}_1,\dots,\mathbf{x}_N]\T$, rows are samples & \code{X} \\
+$\xk$, $k=1,\dots,N$ & $k$-th sample (row) & \code{X[k]} \\
+$\vi$, $i=1,\dots,c$ & prototype (center) of cluster $i$ & \code{cluster\_centers\_[i]} \\
+$\V\in\R^{c\times n}$ & matrix of prototypes $[\mathbf{v}_1,\dots,\mathbf{v}_c]\T$ & \code{cluster\_centers\_} \\
+$\mik\in[0,1]$ & membership of sample $k$ in cluster $i$ & \code{membership\_[k, i]} \\
+$\U=[\mik]\in\R^{c\times N}$ & fuzzy partition matrix & \code{membership\_} is $\U\T$, shape \code{(N,~c)} \\
+$m>1$ & fuzziness exponent & \code{m} \\
+$D^2_{ik\Ai}$, eq.~\eqref{eq:found:norm} & squared inner-product distance of $\xk$ to $\vi$ & \code{transform(X)} returns $\Dik$, shape \code{(N, c)} \\
+$\Ai$ & norm-inducing matrix of cluster $i$ & \code{norm\_matrices\_[i]} (\code{norm\_matrix\_} if shared) \\
+$\Fi$ & fuzzy covariance matrix $\sum_k\mik^m(\xk-\vi)(\xk-\vi)\T/\sum_k\mik^m$ & \code{covariances\_[i]} \\
+$\alpha_i=\frac1N\sum_k\mik$ & prior probability of cluster $i$ (GG) & \code{priors\_[i]} \\
+$\J(\X;\U,\V)$ & objective, $\sum_i\sum_k\mik^m\Dsq$ & \code{objective\_}, \code{objective\_history\_} \\
+$\epsilon$ & termination tolerance on $\max_{ik}\abs{\mu^{(l)}_{ik}-\mu^{(l-1)}_{ik}}$ & \code{tol} \\
+$l$, $l_{\max}$ & iteration counter, maximum & \code{n\_iter\_}, \code{max\_iter} \\
+$\rho_i$ & cluster volume (GK) & \code{rho} \\
+$\gamma$ & covariance regularization weight (GK, GG) & \code{gamma} \\
+$\beta$ & condition-number bound (GK, GG) & \code{beta} \\
+$\mathbf{y}_k\in\R^q$ & low-dimensional projection of $\xk$ & \code{embedding\_} \\
+$\mathbf{z}_i$ & projected cluster center & \code{embedded\_centers\_} \\
+$M_{hc}, M_{fc}, M_{pc}$ & hard, fuzzy, possibilistic partitioning spaces & -- \\\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Using it in fuzzyclust}\label{sec:found:api}
+
+The clustering estimators derive from the base class \code{BaseFuzzyClusterer} of \code{fuzzyclust.base}, which mixes in the scikit-learn classes \code{BaseEstimator}, \code{ClusterMixin}, and \code{TransformerMixin} and implements the alternating optimization of \cref{alg:ao}. The contract below therefore holds for FCM, GK, GG, the hard methods, and most estimators of the later chapters.
+
+\begin{apibox}{fuzzyclust.base.BaseFuzzyClusterer -- constructor parameters shared by every estimator}
+\code{n\_clusters=3} ($c$); \code{m=2.0} ($m$; not a parameter of the hard methods, which fix $m=1$); \code{tol=1e-4} ($\epsilon$); \code{max\_iter=300} ($l_{\max}$); \code{init="random"} (\code{"random"}: random prototypes in a box around the data, as in MATLAB; \code{"kmeans++"}; or an array of initial centers $(c,n)$ or an initial partition $(N,c)$); \code{n\_init=1} (restarts; the run with the lowest final $\J$ is kept; ignored for an array \code{init}); \code{random\_state=None}; \code{verbose=0} (a positive value prints $\J$ at every iteration). Algorithm-specific parameters, e.g.\ \code{norm} for FCM or \code{rho}, \code{gamma}, and \code{beta} for GK, follow \code{n\_clusters} (and \code{m}, where present) in the signatures, so pass them by keyword. Nothing is validated or computed in the constructor (a scikit-learn rule); all work happens in \code{fit}.
+\end{apibox}
+
+\begin{apibox}{fitted attributes (\allowbreak trailing underscore)}
+\code{cluster\_centers\_} $(c,n)$: $\V$. \code{membership\_} $(N,c)$: $\U\T$, rows sum to one. \code{labels\_} $(N,)$: $\argmax_i\mik$. \code{distances\_} $(N,c)$: $\Dik$ of the training data at convergence, in the norm of the algorithm. \code{objective\_}: final $\J$; \code{objective\_history\_} $(l,)$: $\J$ per iteration; \code{n\_iter\_}. Where defined: \code{covariances\_} $(c,n,n)$ for $\Fi$, \code{norm\_matrices\_} $(c,n,n)$ for $\Ai$, \code{norm\_matrix\_} $(n,n)$ for the shared $\A$ of FCM, \code{priors\_} $(c,)$ for $\alpha_i$, \code{eigenvalues\_}, and \code{eigenvectors\_}. Set by scikit-learn's validation: \code{n\_features\_in\_}, and \code{feature\_names\_in\_} when a \code{DataFrame} was fitted.
+\end{apibox}
+
+\begin{apibox}{methods}
+\code{fit(X,\allowbreak\ y=None)} runs the alternating optimization of \cref{alg:ao} and returns \code{self}. \code{predict\_proba(X)} returns the memberships $(N',c)$ of new samples, computed from their distances to the fitted prototypes with the algorithm's own membership rule (the MATLAB \code{clusteval}); \code{predict(X)} returns their arg-max; \code{transform(X)} returns the distances $\Dik$ $(N',c)$, so a clusterer is a transformer that maps $n$ features to $c$ distance features (\code{get\_feature\_names\_out} gives \code{dist\_cluster\_0}, \dots, and \code{set\_output(transform="pandas")} is honored). \code{fit\_predict} and \code{fit\_transform} are available, and \code{score(X)} returns $-\J(X)$ (higher is better, so grid search maximizes it). Inputs may be \code{numpy} arrays, \code{pandas} data frames, or anything scikit-learn accepts; they are never modified and never scaled inside the estimator.
+\end{apibox}
+
+\begin{apibox}{implementing a new algorithm}
+A subclass defines \code{\_update\_prototypes(X,\allowbreak\ Um)}, which sets \code{cluster\_centers\_} (and shape attributes) from $\X$ and the matrix $\U^m$ of shape $(N,c)$, and \code{\_distances(X)}, which returns the squared distances $(N,c)$ to the current prototypes. Optionally it overrides \code{\_memberships(d2)} (the hard methods return one-hot rows, Gath--Geva a log-domain softmax), \code{\_check\_params(X)} for parameter validation, \code{\_init\_state(X,\allowbreak\ rng)} for a special initialization, and \code{\_finalize(X,\allowbreak\ Um)} for attributes computed once after convergence. Everything else (restarts, history, the scikit-learn API, and pandas support) is inherited.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.preprocessing.normalize(\allowbreak X,\allowbreak\ method="var")}
+Returns \code{(X\_scaled,\allowbreak\ scaler)}: the data standardized to zero mean and unit variance (\code{"var"}) or scaled to the range $[0,1]$ (\code{"range"}), and the fitted \code{StandardScaler} or \code{MinMaxScaler}, whose \code{inverse\_transform} is the MATLAB \code{clust\_denormalize}. A \code{DataFrame} comes back as a \code{DataFrame}. For new data, put the scaler into a \code{Pipeline}.
+\end{apibox}
+
+The three built-in norms of FCM are selected by name, and an explicit matrix is accepted as well:
+\pysnippet{examples/01_clustering/plot_11_distance_norms.py}{norms}
+Restarts take one keyword, and the spread of the final objective over seeds diagnoses local optima:
+\pysnippet{examples/01_clustering/plot_10_initialisation_restarts.py}{restarts}
+Scaling composes with any estimator through a pipeline, which then scales new data automatically:
+\begin{lstlisting}
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+pipe = make_pipeline(StandardScaler(), GK(n_clusters=4, random_state=0)).fit(X)
+pipe.predict_proba(new_points)          # scaled, then evaluated with the GK norms
+pipe[-1].cluster_centers_               # prototypes in the scaled space
+pipe[0].inverse_transform(pipe[-1].cluster_centers_)   # ... and in physical units
+\end{lstlisting}
+
+\section{Examples}\label{sec:found:examples}
+
+\subsection{Distance norms}\label{sec:found:ex:norms}
+
+The script \code{plot\_11\_distance\_norms.py} generates three clusters with the same elongated, rotated covariance and clusters them with the three built-in norms and with the explicit inverse of the generating covariance (\cref{fig:found:ex:norms}). The Euclidean norm cuts the elongated groups with circles and mixes neighboring clusters (adjusted Rand index, ARI, $0.47$); the diagonal norm helps only insofar as the variances differ along the axes ($0.61$). The Mahalanobis norm, whose unit ball has the orientation of the pooled data, does better ($0.78$) but not perfectly, because the covariance of the pooled data also contains the spread of the cluster centers and is rounder than the clusters themselves (its eigenvalue ratio is $5.4$, against $39.5$ for the true within-cluster covariance). The explicit within-cluster norm recovers the groups exactly. The second figure of the script (not shown) stretches one feature by a factor of twenty. The Euclidean norm then produces horizontal bands, whereas the diagonal norm and standardization followed by the Euclidean norm give identical partitions, the same as without the stretch, because the two are the same operation.
+
+\exfig{01_clustering/plot_11_distance_norms_1}[Fuzzy c-means with four norms on three clusters of identical elongated shape.]{Fuzzy c-means with four norms on three clusters of identical elongated shape. The level curves of the maximal membership follow the shape of the unit ball of the norm; the colored ellipses are the $2\sigma$ ellipses of the fuzzy covariance matrices of the clusters found. From left to right the norm fits the clusters better, and the ARI with the generating labels rises from $0.47$ to $1.00$.}{found:ex:norms}
+
+\subsection{Scaling: the motorcycle data}\label{sec:found:ex:scaling}
+
+The motorcycle data set (time after impact in milliseconds against head acceleration in $g$) is the real data set that the MATLAB toolbox used throughout. The two variables have ranges of about $55$ and $210$, so the raw Euclidean distance is dominated by the acceleration, and a Euclidean method such as k-means or FCM sees mainly that variable. \Cref{fig:found:ex:scaling} (script \code{plot\_07\_motorcycle\_scaling.py}) clusters the raw, the range-scaled, and the variance-scaled data with Gustafson--Kessel and maps the prototypes back to physical units. All three partitions are identical, with the same prototypes in physical units: the clusters follow the course of the signal in time, which is the physically meaningful segmentation. This is the affine invariance of GK (\cref{sec:found:scaling}) at work: on these data the units do not change the optimum that the iteration reaches. With regularization switched on, or on data where the box initialization leads to different local optima, the scaled and raw results can differ, so scaling remains the safe default.
+
+\exfig{01_clustering/plot_07_motorcycle_scaling_1}[Gustafson--Kessel clustering of the motorcycle data without scaling (left), after range scaling (middle), and after variance scaling (right), with the prototypes shown in the original units.]{Gustafson--Kessel clustering of the motorcycle data without scaling (left), after range scaling (middle), and after variance scaling (right), with the prototypes shown in the original units. The three partitions coincide: the adaptive norm of GK makes the result independent of the units of the features, and every cluster is a segment of the signal in time.}{found:ex:scaling}
+
+\subsection{Initialization and restarts}\label{sec:found:ex:init}
+
+The script \code{plot\_10\_initialisation\_restarts.py} fits GK with three clusters to three noisy line segments from twenty random starts. The final objectives take two distinct values, $\J=142.1$ in six runs and $\J=229.4$ in fourteen, with adjusted Rand indices of $0.94$ and $0.47$; the objective histories of all runs decrease monotonically, so the poor runs are converged runs. \Cref{fig:found:ex:restarts} compares four strategies over twenty outer seeds: a single random start reaches the good optimum in $30\,\%$ of the cases, five restarts in $70\,\%$, and ten restarts in $80\,\%$. Seeding with k-means++, which places the seeds far apart, reaches it in none: on line-shaped clusters the far-apart seeds are the \emph{ends} of different lines, the configuration from which GK slides into the poor optimum. Seeding heuristics are tuned to compact groups and are no substitute for restarts.
+
+\exfig[0.75\textwidth]{01_clustering/plot_10_initialisation_restarts_4}[Final objective of Gustafson--Kessel on three line segments for twenty outer seeds and four initialization strategies.]{Final objective of Gustafson--Kessel on three line segments for twenty outer seeds and four initialization strategies. Restarts (\code{n\_init}) move most runs to the good optimum (dashed line); k-means++ seeding, designed for compact groups, fails on these data in every run.}{found:ex:restarts}
+
+\subsection{The scikit-learn interface}\label{sec:found:ex:sklearn}
+
+The script \code{plot\_08\_sklearn\_pandas\_workflow.py} exercises the interface on the iris data, given as a \code{pandas} data frame. A pipeline of a \code{StandardScaler} and GK with \code{set\_output(transform="pandas")} returns the distance matrix as a data frame with columns \code{dist\_cluster\_0}, \dots, and keeps the feature names in \code{feature\_names\_in\_}. Aggregated per species, the memberships recover setosa with a mean membership of $0.95$, whereas versicolor and virginica overlap ($0.72$ and $0.70$). \code{GridSearchCV} selects $c$ and $m$ of FCM with the Xie--Beni index on held-out folds as the scoring function (\cref{fig:found:ex:sklearn}), and the fitted pipeline survives a pickle round trip. The grid search prefers two clusters, a well-known property of the iris data: validity indices measure geometric separation, not agreement with external labels, and two of the three species are not geometrically separated.
+
+\exfig[0.6\textwidth]{01_clustering/plot_08_sklearn_pandas_workflow_1}[Xie--Beni index of FCM on held-out folds of the standardized iris data for several $c$ and $m$, computed inside \code{GridSearchCV} with \code{predict\_proba}.]{Xie--Beni index of FCM on held-out folds of the standardized iris data for several $c$ and $m$, computed inside \code{GridSearchCV} with \code{predict\_proba}. The index is lowest for two clusters because versicolor and virginica overlap.}{found:ex:sklearn}
+
+\section{Further reading}\label{sec:found:reading}
+
+The data--clusters--partition exposition follows Babu\v{s}ka \cite{babuska:1998:book} and the MATLAB toolbox manual \cite{balasko:2005:toolbox}. The partitioning spaces are Bezdek's \cite{bezdek:1981}; Ruspini \cite{ruspini:1969} introduced fuzzy partitions, and Krishnapuram and Keller \cite{krishnapuram:1993:pcm} the possibilistic ones. The c-means functional goes back to Dunn \cite{dunn:1973:fcm}, its alternating optimization and the convergence theorem to Bezdek \cite{bezdek:1980:convergence,bezdek:1984:fcm}, with the corrected theorem by Bezdek, Hathaway, Sabin, and Tucker \cite{bezdek:1987:convergence}; H\"oppner et al.\ \cite{hoppner:1999:book} give a unified treatment of the objective-function family, including linear varieties and shells. The k-means++ seeding is due to Arthur and Vassilvitskii \cite{arthur:2007:kmeanspp}. The estimator interface follows scikit-learn \cite{pedregosa:2011:sklearn}.

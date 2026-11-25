@@ -1,0 +1,57 @@
+# Build the documentation (executing every gallery example) and publish it on
+# GitHub Pages from the gh-pages branch. The book PDF already on gh-pages
+# (fuzzyclust-book.pdf, updated by the "book" workflow) is kept.
+name: docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "docs/**"
+      - "examples/**"
+      - "pyproject.toml"
+      - "CHANGELOG.md"
+      - ".github/workflows/docs.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gh-pages
+  cancel-in-progress: false
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e ".[docs]"
+      - run: python docs/build_api_pages.py
+      - run: sphinx-build -b html docs docs/_build/html -j auto
+        env:
+          MPLBACKEND: Agg
+      - name: Keep the published book PDF
+        run: |
+          if git rev-parse -q --verify origin/gh-pages >/dev/null; then
+            git show origin/gh-pages:fuzzyclust-book.pdf > docs/_build/html/fuzzyclust-book.pdf \
+              || rm -f docs/_build/html/fuzzyclust-book.pdf
+          fi
+      - name: Publish on the gh-pages branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd docs/_build/html
+          touch .nojekyll
+          git init -q -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Documentation for ${GITHUB_SHA::7}"
+          git push -q --force "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" gh-pages

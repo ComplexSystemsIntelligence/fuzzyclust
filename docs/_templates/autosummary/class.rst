@@ -1,0 +1,14 @@
+{{ fullname | escape | underline}}
+
+.. currentmodule:: {{ module }}
+
+.. autoclass:: {{ objname }}
+   :members:
+   :inherited-members:
+   :exclude-members: set_fit_request, set_predict_request, set_score_request, set_transform_request, set_partial_fit_request, set_output
+
+.. include:: {{ fullname }}.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

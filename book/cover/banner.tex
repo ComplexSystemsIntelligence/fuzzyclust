@@ -1,0 +1,25 @@
+% README / social-preview banner, 2:1 (rendered at 1280 x 640 px).
+% Build: python make_cover_art.py 13.0 13.6 banner_art.tex && latexmk -pdf banner.tex
+\documentclass[tikz,border=0pt]{standalone}
+\usepackage[T1]{fontenc}
+\usepackage{libertinus}
+\usepackage[type1,lining]{raleway}
+\usepackage[scale=0.9]{plex-mono}
+\usetikzlibrary{fadings}
+\input{brand}
+\tikzfading[name=leftfade, left color=transparent!0, right color=transparent!100]
+\begin{document}
+\begin{tikzpicture}[x=1cm,y=1cm]
+  \fill[fcnavy] (0,0) rectangle (24,12);
+  \begin{scope}[shift={(10.6,-0.8)}]
+    \clip (0,0.8) rectangle (13.4,12.8);
+    \input{banner_art}
+  \end{scope}
+  \fill[fcnavy, path fading=leftfade] (10.4,0) rectangle (13.6,12);
+  \node[anchor=south west, inner sep=0] at (1.6,7.35) {\fclogo[0.62]};
+  \node[anchor=north west, inner sep=0, text=white, font=\fcblack\fontsize{58}{62}\selectfont] at (1.45,6.55) {fuzzyclust};
+  \node[anchor=north west, inner sep=0, text=fclight, align=left, font=\fcmedium\fontsize{19}{25}\selectfont] at (1.55,4.1)
+    {Fuzzy clustering and data analysis\\in Python, scikit-learn compatible};
+  \node[anchor=south west, inner sep=0, text=white, font=\ttfamily\fontsize{15}{18}\selectfont] at (1.6,1.5) {pip install fuzzyclust};
+\end{tikzpicture}
+\end{document}

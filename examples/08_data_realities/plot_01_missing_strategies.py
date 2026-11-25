@@ -1,0 +1,160 @@
+r"""
+Clustering incomplete data: the four strategies of Hathaway and Bezdek
+=======================================================================
+
+Fuzzy c-means needs a complete data matrix: a distance between a sample
+and a prototype is a sum over all features. When values are missing
+(``NaN``), Hathaway and Bezdek (2001) distinguish four strategies. The
+*whole-data strategy* (WDS) drops every incomplete sample. The
+*partial-distance strategy* (PDS) keeps all samples and measures the
+distance over the observed features only, rescaled to the full dimension,
+:math:`D^2_{ik}=\frac{n}{I_k}\sum_j I_{kj}(x_{kj}-v_{ij})^2`. The *optimal
+completion strategy* (OCS) treats the missing values as additional
+variables of the c-means functional and updates them to the
+membership-weighted mean of the prototype coordinates, so that the data
+are imputed while they are clustered. The *nearest-prototype strategy*
+(NPS) is its hard version: a missing value is copied from the nearest
+prototype. This example plants values missing completely at random into
+well-separated Gaussian clusters and asks how far each strategy's
+prototypes drift from those of FCM on the complete data as the missing
+rate grows.
+"""
+
+# %%
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.optimize import linear_sum_assignment
+from scipy.spatial.distance import cdist
+from sklearn.metrics import adjusted_rand_score
+
+from fuzzyclust import FCM
+from fuzzyclust.datasets import make_fuzzy_blobs
+from fuzzyclust.incomplete import STRATEGIES, IncompleteFCM, make_mcar, plot_incomplete_clusters
+from fuzzyclust.plotting import PALETTE, plot_clusters
+
+
+def center_error(V, V_ref):
+    """Largest distance between matched prototypes."""
+    D = cdist(V, V_ref)
+    r, c = linear_sum_assignment(D)
+    return D[r, c].max()
+
+
+X, y = make_fuzzy_blobs(n_clusters=3, n_samples_per_cluster=150, n_features=2, random_state=0)
+reference = FCM(n_clusters=3, random_state=0).fit(X)
+
+# %%
+# One data set, 25 % of the values missing
+# -----------------------------------------
+# Every strategy sees the same incomplete matrix. The completed
+# coordinates (``X_completed_``) show how each strategy treats a missing
+# value: PDS and WDS impute only afterward (membership-weighted prototype
+# coordinates from the final partition), OCS has moved the imputed values
+# during the iterations, and NPS snaps them onto the nearest prototype, so
+# its hollow markers line up on the prototype coordinates.
+
+# [snippet:fit]
+Xm = make_mcar(X, missing_rate=0.25, random_state=0)
+fits = {s: IncompleteFCM(n_clusters=3, strategy=s, random_state=0).fit(Xm) for s in STRATEGIES}
+for s, model in fits.items():
+    print(f"{s.upper()}: {model.n_iter_:3d} iterations, ARI = {adjusted_rand_score(y, model.labels_):.3f}, "
+          f"prototype error = {center_error(model.cluster_centers_, reference.cluster_centers_):.3f}")
+# [/snippet:fit]
+
+fig, axes = plt.subplots(1, 4, figsize=(15, 3.9), sharex=True, sharey=True)
+for ax, (s, model) in zip(axes, fits.items(), strict=True):
+    plot_incomplete_clusters(model.X_completed_, model.labels_, model.missing_mask_,
+                             centers=model.cluster_centers_, ax=ax, legend=False)
+    ax.scatter(*reference.cluster_centers_.T, marker="+", s=160, color="black", zorder=6)
+    ax.set_title(f"{s.upper()}: ARI {adjusted_rand_score(y, model.labels_):.2f}, "
+                 f"$\\Delta V$ = {center_error(model.cluster_centers_, reference.cluster_centers_):.2f}")
+axes[0].set_ylabel("hollow: incomplete samples at completed coordinates")
+plt.tight_layout()
+
+# %%
+# Memberships of incomplete samples
+# ----------------------------------
+# A sample with only one observed feature is classified by that feature
+# alone: along the missing axis its membership is spread according to
+# the projections of the prototypes. The partial distance makes this
+# explicit (left: the complete data colored by the PDS partition; right:
+# the maximal membership of the incomplete samples, which is lower when
+# the observed coordinate is ambiguous).
+pds = fits["pds"]
+incomplete = pds.missing_mask_.any(axis=1)
+fig, axes = plt.subplots(1, 2, figsize=(11, 4.2), sharex=True, sharey=True)
+plot_clusters(X, pds.labels_, pds.cluster_centers_, ax=axes[0], legend=False)
+axes[0].set_title("True coordinates, colored by the PDS partition")
+sc = axes[1].scatter(X[incomplete, 0], X[incomplete, 1], c=pds.membership_[incomplete].max(axis=1),
+                     cmap="viridis", vmin=0.34, vmax=1.0, s=22)
+axes[1].scatter(*pds.cluster_centers_.T, marker="X", s=140, color="black", edgecolor="white", zorder=5)
+axes[1].set_title("Incomplete samples: maximal membership")
+plt.colorbar(sc, ax=axes[1], label=r"$\max_i \mu_{ik}$")
+plt.tight_layout()
+
+# %%
+# Parameter study: the missing rate
+# ----------------------------------
+# We repeat the experiment of the paper: the prototype error against
+# complete-data FCM and the agreement with the true groups for missing
+# rates from 0 to 60 %, averaged over several random patterns of missing
+# values. WDS loses samples fast (a sample with :math:`n` features is
+# complete with probability :math:`(1-p)^n`) and finally has too few to
+# cluster. PDS keeps every observed value and degrades most gracefully.
+# OCS and NPS are close to it at low rates but move the data they cluster,
+# which costs accuracy when many values are missing.
+
+# [snippet:scan]
+rates = (0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6)
+seeds = range(5)
+X4, y4 = make_fuzzy_blobs(n_clusters=3, n_samples_per_cluster=150, n_features=4, random_state=0)
+ref4 = FCM(n_clusters=3, random_state=0).fit(X4)
+errors = {s: np.full((len(rates), len(seeds)), np.nan) for s in STRATEGIES}
+aris = {s: np.full((len(rates), len(seeds)), np.nan) for s in STRATEGIES}
+for a, rate in enumerate(rates):
+    for b, seed in enumerate(seeds):
+        Xr = make_mcar(X4, missing_rate=rate, random_state=seed)
+        for s in STRATEGIES:
+            try:
+                model = IncompleteFCM(n_clusters=3, strategy=s, random_state=0).fit(Xr)
+            except ValueError:  # WDS: fewer complete samples than clusters
+                continue
+            errors[s][a, b] = center_error(model.cluster_centers_, ref4.cluster_centers_)
+            aris[s][a, b] = adjusted_rand_score(y4, model.labels_)
+# [/snippet:scan]
+
+fig, axes = plt.subplots(1, 3, figsize=(14, 3.9))
+for j, s in enumerate(STRATEGIES):
+    axes[0].plot(rates, np.nanmean(errors[s], axis=1), "o-", color=PALETTE[j], label=s.upper())
+    axes[1].plot(rates, np.nanmean(aris[s], axis=1), "o-", color=PALETTE[j], label=s.upper())
+axes[0].set_title("Prototype error against complete-data FCM (4-D blobs)")
+axes[0].set_ylabel(r"$\max_i \|\mathbf{v}_i - \mathbf{v}_i^{\mathrm{FCM}}\|$")
+axes[1].set_title("Agreement with the true groups")
+axes[1].set_ylabel("ARI")
+for ax in axes[:2]:
+    ax.set_xlabel("missing rate")
+    ax.legend(frameon=False, fontsize=8)
+    ax.grid(True, color="0.9")
+share = [(1 - r) ** X4.shape[1] for r in rates]
+axes[2].plot(rates, share, "o-", color="0.3")
+axes[2].set_title("Share of complete samples $(1-p)^n$, $n=4$")
+axes[2].set_xlabel("missing rate $p$")
+axes[2].set_ylabel("complete samples")
+axes[2].grid(True, color="0.9")
+plt.tight_layout()
+
+print("prototype error at 40 % missing (mean over seeds):",
+      {s: round(float(np.nanmean(errors[s][rates.index(0.4)])), 3) for s in STRATEGIES})
+
+# %%
+# **Take-away.** Dropping incomplete samples is defensible only while few
+# samples are affected: with four features and 30 % of the values
+# missing, three quarters of the samples are gone and the prototypes
+# wander. The partial distance keeps every observed value in play at no
+# extra cost and tracks the complete-data prototypes best; it is the
+# default of ``IncompleteFCM``. Optimal completion and the nearest
+# prototype rule cluster and impute at once and are close to PDS at
+# moderate rates, but because they alter the data they optimize, they have
+# more local optima and lose accuracy when the rate is high. When the
+# imputation is what you are after, start them from the PDS prototypes or
+# use ``n_init``.

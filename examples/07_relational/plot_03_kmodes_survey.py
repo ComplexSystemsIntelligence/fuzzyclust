@@ -1,0 +1,157 @@
+r"""
+Fuzzy k-modes on categorical survey data
+========================================
+
+Categorical records such as survey answers, product attributes or
+diagnoses have no mean, and coding the categories as numbers imposes an
+order that does not exist. Huang's k-modes replaces the mean by the *mode*
+(the most frequent category per attribute) and the Euclidean distance by
+the *simple matching* dissimilarity, the number of attributes in which two
+records differ. Fuzzy k-modes (Huang and Ng) keeps the FCM membership
+formula with this dissimilarity; its authors proved that the mode of a
+fuzzy cluster is, per attribute, the category that carries the largest
+membership mass
+:math:`\sum_k\mu_{ik}^m`. The dissimilarity is integer-valued, so many
+records are equally far from several modes; the partition is therefore
+fuzzier than in FCM and the exponent :math:`m` has to be chosen with care.
+"""
+
+# %%
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from sklearn.metrics import adjusted_rand_score
+
+from fuzzyclust.plotting import PALETTE
+from fuzzyclust.relational import FuzzyKModes, make_categorical_blobs, matching_dissimilarity, plot_modes
+
+survey = make_categorical_blobs(n_samples=300, n_features=6, n_categories=4, n_clusters=3, noise=0.25,
+                                random_state=0)
+X, y = survey.data, survey.target
+print(X.head())
+print("planted modes:")
+print(survey.modes)
+
+# %%
+# Fitting and reading the modes
+# -----------------------------
+# Three groups of respondents each have a typical answer pattern (the
+# planted mode); every answer is replaced by a uniformly random one (which
+# may coincide with the planted answer) with probability 0.25.
+# Fuzzy k-modes with :math:`m=1.5` and a few restarts recovers the three
+# modes exactly, and the ``modes_`` table is directly interpretable: each
+# row *is* a typical respondent of its group. The shade of a cell shows how
+# unanimous the group is on that question.
+
+# [snippet:fit]
+km = FuzzyKModes(n_clusters=3, m=1.5, n_init=5, random_state=0).fit(X)
+print(km.modes_)                       # DataFrame with the original categories
+print(f"ARI = {adjusted_rand_score(y, km.labels_):.2f}, {km.n_iter_} iterations, J = {km.objective_:.1f}")
+# [/snippet:fit]
+
+fig, axes = plt.subplots(1, 2, figsize=(12, 3.2), gridspec_kw={"width_ratios": [1.2, 1]})
+plot_modes(km, X, ax=axes[0])
+axes[0].set_title("Fitted modes and their share of the membership mass")
+D = km.transform(X) ** 2  # matching dissimilarity to every mode
+for i in range(3):
+    axes[1].hist(D[y == i, km.predict(survey.modes.iloc[[i]])[0]], bins=np.arange(-0.5, 7.5), alpha=0.6,
+                 color=PALETTE[i], label=f"group {i + 1}")
+axes[1].set_xlabel("mismatches with the group's own mode")
+axes[1].set_ylabel("respondents")
+axes[1].set_title("Matching dissimilarity to the group's own mode")
+axes[1].legend(frameon=False, fontsize=8)
+plt.tight_layout()
+
+# %%
+# The theorem behind the mode update
+# ----------------------------------
+# For one cluster and one question, the membership mass of every answer
+# is :math:`\sum_{k:\,x_{kj}=a}\mu_{ik}^m`; the mode takes the answer with
+# the largest mass. This is the fuzzy counterpart of "most frequent
+# category" and is what makes the update optimal for fixed memberships.
+Um = km.membership_**km.m
+fig, axes = plt.subplots(1, 3, figsize=(12, 3.2), sharey=True)
+cats = sorted(X["q1"].unique())
+for i, ax in enumerate(axes):
+    mass = [Um[(X["q1"] == a).to_numpy(), i].sum() for a in cats]
+    bars = ax.bar(cats, mass, color="0.75")
+    bars[int(np.argmax(mass))].set_color(PALETTE[i])
+    ax.set_title(f"cluster {i + 1}, question q1: mode = {km.modes_.iloc[i, 0]}")
+    ax.set_xlabel("answer")
+axes[0].set_ylabel(r"membership mass $\sum_k \mu_{ik}^m$")
+plt.tight_layout()
+
+# %%
+# Parameter study I: the fuzziness exponent
+# -----------------------------------------
+# With the integer-valued matching dissimilarity, a record that differs
+# in one attribute from mode A and in two from mode B has a membership
+# ratio of :math:`2^{1/(m-1)}` between the two (4 at :math:`m=1.5`, 2 at
+# :math:`m=2` and 1.4 at :math:`m=3`). A large :math:`m` therefore flattens
+# the partition quickly; from :math:`m=3` on, the modes lose their grip on
+# the data and drift away from the planted patterns. A small :math:`m`
+# approaches hard k-modes. Huang and Ng work with values around
+# :math:`1.1`--:math:`2`.
+
+# [snippet:m_scan]
+ms = (1.1, 1.25, 1.5, 2.0, 2.5, 3.0, 4.0)
+rows = []
+for m in ms:
+    model = FuzzyKModes(n_clusters=3, m=m, n_init=5, random_state=0).fit(X)
+    found = {tuple(r) for r in model.modes_.to_numpy()} == {tuple(r) for r in survey.modes.to_numpy()}
+    rows.append((m, adjusted_rand_score(y, model.labels_), model.membership_.max(axis=1).mean(),
+                 len({tuple(r) for r in model.modes_.to_numpy()}), found))
+    print(f"m = {m:.2f}: ARI = {rows[-1][1]:.2f}, mean max membership = {rows[-1][2]:.2f}, "
+          f"{rows[-1][3]} distinct modes, planted modes recovered: {found}")
+# [/snippet:m_scan]
+rows = pd.DataFrame(rows, columns=["m", "ARI", "max_membership", "distinct_modes", "recovered"])
+fig, ax = plt.subplots(figsize=(6.5, 3.6))
+ax.plot(rows["m"], rows["ARI"], "o-", color=PALETTE[0], label="ARI")
+ax.plot(rows["m"], rows["max_membership"], "s--", color=PALETTE[1], label="mean max. membership")
+ax.set_xlabel("fuzziness exponent $m$")
+ax.set_ylim(0, 1.05)
+ax.set_title("Effect of $m$ in fuzzy k-modes")
+ax.legend(frameon=False)
+ax.grid(True, color="0.9")
+plt.tight_layout()
+
+# %%
+# Parameter study II: answer noise and the number of clusters
+# -----------------------------------------------------------
+# The more answers are replaced at random, the weaker the structure. At a
+# replacement probability of 0.5, half of the answers are random, yet the
+# modes are still found exactly; even at 0.65
+# the modes survive, while the assignment of individual respondents
+# becomes unreliable. The objective :math:`J` against :math:`c` shows the
+# usual knee at the true number of groups.
+print("replacement probability:")
+for noise in (0.1, 0.25, 0.4, 0.5, 0.65):
+    d = make_categorical_blobs(n_samples=300, n_features=6, noise=noise, random_state=0)
+    model = FuzzyKModes(n_clusters=3, m=1.5, n_init=5, random_state=0).fit(d.data)
+    found = {tuple(r) for r in model.modes_.to_numpy()} == {tuple(r) for r in d.modes.to_numpy()}
+    print(f"  noise = {noise:.2f}: ARI = {adjusted_rand_score(d.target, model.labels_):.2f}, modes recovered: {found}")
+cs = range(1, 7)
+J = [FuzzyKModes(n_clusters=c, m=1.5, n_init=5, random_state=0).fit(X).objective_ for c in cs]
+fig, ax = plt.subplots(figsize=(5.5, 3.4))
+ax.plot(list(cs), J, "o-", color=PALETTE[2])
+ax.set_xlabel("number of clusters $c$")
+ax.set_ylabel("$J$")
+ax.set_title("Objective against the number of clusters ($m=1.5$)")
+ax.grid(True, color="0.9")
+plt.tight_layout()
+
+# %%
+# A record identical to a mode has membership one in that cluster, and
+# the matching dissimilarity between two different planted modes equals
+# the number of questions, as the generator guarantees.
+print(matching_dissimilarity(survey.modes.to_numpy(), km.modes_.to_numpy()))
+
+# %%
+# **Take-away.** Fuzzy k-modes treats categories as categories: the
+# prototype is a typical record, the dissimilarity counts disagreements,
+# and the fitted modes can be read like a table of group profiles. The
+# integer dissimilarity makes the partition inherently fuzzier than with
+# continuous distances, so the exponent should stay near 1.5; larger
+# values flatten the memberships and let the modes drift. The method is
+# robust to a substantial share of random answers, and the objective
+# against :math:`c` still shows where the groups are.

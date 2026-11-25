@@ -1,0 +1,687 @@
+\chapter[Partitioning algorithms]{Hard and fuzzy partitioning algorithms}\label{ch:partitioning}
+\begin{roadmap}
+The previous chapter set up the template: a prototype, a distance, the c-means functional, and its alternating optimization. This chapter fills it with the core algorithms of the toolbox, all of which the MATLAB predecessor already offered: the hard reference methods k-means and k-medoids; fuzzy c-means (FCM), derived in full together with the role of the fuzziness exponent; the Gustafson--Kessel algorithm (GK), which gives every cluster its own norm and is presented with the eigenstructure of its covariance matrices and the regularization of Babu\v{s}ka, van der Veen, and Kaymak; and the Gath--Geva algorithm (GG), which replaces the norm by an exponential distance that adapts volume and density and must be started from a good partition. A comparison of the four is followed by two extensions: the mechanisms that make a partition fuzzy (the exponent $m$, entropy regularization and its interpretation as deterministic annealing, quadratic regularization, and the polynomial fuzzifier of Klawonn and H\"oppner, which allows exact zero memberships), and the density-based estimation of the number and location of clusters by the mountain method and subtractive clustering, which also initializes the iterative algorithms. Everything that follows builds on this chapter: validity indices judge the partitions these algorithms produce, and the identification, time-series, and graph methods of later chapters use GK and GG as building blocks.
+\end{roadmap}
+
+\section{Problem and idea}\label{sec:part:problem}
+
+Every algorithm of this chapter minimizes the c-means functional $\J=\sum_i\sum_k\mik^m\Dsq$ of \cref{sec:found:ao} by alternating optimization, and all of them have point prototypes. They differ in the distance and in the partition space. \Cref{fig:part:concept} shows what this means for one set of three prototypes: the level curves of the maximal membership $\max_i\mu_i(\mathbf{x})$ over the plane, the picture that the MATLAB function \code{clusteval} drew and \code{plot\_membership\_contours} draws, change shape from algorithm to algorithm. k-means tiles the plane into Voronoi cells with crisp boundaries. FCM, with a fixed Euclidean norm, draws nearly circular contours around every prototype; it can only see spherical clusters of about the same size. GK derives a norm-inducing matrix from the fuzzy covariance of each cluster, so its contours are ellipses with the orientation and elongation of the cluster, but the determinant constraint fixes the volume of every cluster. GG measures distance by the reciprocal of a Gaussian density weighted by a prior probability; its contours are ellipses of different size and density, and the memberships fall off exponentially, so the partition is almost crisp between the clusters. Each step up this ladder buys flexibility at a price: more parameters per cluster, more computation, and greater sensitivity to the initial partition, which is why GG is usually started from FCM or GK.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[scale=0.82]
+  \tikzset{proto/.style={black, font=\small}}
+  % panel 1: k-means Voronoi
+  \begin{scope}
+    \draw[fcgray!50, thin] (0,0) rectangle (3,3);
+    \draw[fcgray, thick] (1.62,1.36) -- (0.21,3.0);
+    \draw[fcgray, thick] (1.62,1.36) -- (3.0,1.45);
+    \draw[fcgray, thick] (1.62,1.36) -- (1.44,0.0);
+    \fill[fcblue!10, opacity=0.6] (0,0) -- (1.44,0) -- (1.62,1.36) -- (0.21,3.0) -- (0,3) -- cycle;
+    \fill[fcverm!10, opacity=0.6] (0.21,3.0) -- (1.62,1.36) -- (3.0,1.45) -- (3,3) -- cycle;
+    \fill[fcgreen!10, opacity=0.6] (1.44,0) -- (1.62,1.36) -- (3.0,1.45) -- (3,0) -- cycle;
+    \node[proto] at (0.8,0.9) {$\boldsymbol\times$}; \node[proto] at (2.2,2.1) {$\boldsymbol\times$}; \node[proto] at (2.3,0.7) {$\boldsymbol\times$};
+    \node[note, anchor=north, text width=2.8cm] at (1.5,-0.1) {k-means: Voronoi cells, $\mik\in\{0,1\}$};
+  \end{scope}
+  % panel 2: FCM circles
+  \begin{scope}[shift={(3.6,0)}]
+    \draw[fcgray!50, thin] (0,0) rectangle (3,3);
+    \clip (0,0) rectangle (3,3);
+    \foreach \r in {0.25,0.5,0.75} { \draw[fcblue!70, thin] (0.8,0.9) circle (\r); \draw[fcverm!70, thin] (2.2,2.1) circle (\r); \draw[fcgreen!70!black, thin] (2.3,0.7) circle (\r); }
+    \node[proto] at (0.8,0.9) {$\boldsymbol\times$}; \node[proto] at (2.2,2.1) {$\boldsymbol\times$}; \node[proto] at (2.3,0.7) {$\boldsymbol\times$};
+  \end{scope}
+  \node[note, anchor=north, text width=2.8cm] at (5.1,-0.1) {FCM: circles, one norm $\A$ for all clusters};
+  % panel 3: GK ellipses
+  \begin{scope}[shift={(7.2,0)}]
+    \draw[fcgray!50, thin] (0,0) rectangle (3,3);
+    \clip (0,0) rectangle (3,3);
+    \foreach \r in {0.33,0.66,1.0} {
+      \begin{scope}[rotate around={40:(0.8,0.9)}] \draw[fcblue!70, thin] (0.8,0.9) ellipse ({0.9*\r} and {0.3*\r}); \end{scope}
+      \begin{scope}[rotate around={-20:(2.2,2.1)}] \draw[fcverm!70, thin] (2.2,2.1) ellipse ({0.75*\r} and {0.36*\r}); \end{scope}
+      \begin{scope}[rotate around={80:(2.3,0.7)}] \draw[fcgreen!70!black, thin] (2.3,0.7) ellipse ({0.7*\r} and {0.38*\r}); \end{scope}
+    }
+    \node[proto] at (0.8,0.9) {$\boldsymbol\times$}; \node[proto] at (2.2,2.1) {$\boldsymbol\times$}; \node[proto] at (2.3,0.7) {$\boldsymbol\times$};
+  \end{scope}
+  \node[note, anchor=north, text width=2.8cm] at (8.7,-0.1) {GK: ellipses, own $\Ai$, equal volumes $\rho_i$};
+  % panel 4: GG densities
+  \begin{scope}[shift={(10.8,0)}]
+    \draw[fcgray!50, thin] (0,0) rectangle (3,3);
+    \clip (0,0) rectangle (3,3);
+    \foreach \r in {0.4,0.7,1.0} {
+      \begin{scope}[rotate around={40:(0.8,0.9)}] \draw[fcblue!70, thin] (0.8,0.9) ellipse ({1.3*\r} and {0.6*\r}); \end{scope}
+      \begin{scope}[rotate around={-20:(2.2,2.1)}] \draw[fcverm!70, thin] (2.2,2.1) ellipse ({0.45*\r} and {0.25*\r}); \end{scope}
+      \begin{scope}[rotate around={80:(2.3,0.7)}] \draw[fcgreen!70!black, thin] (2.3,0.7) ellipse ({0.5*\r} and {0.3*\r}); \end{scope}
+    }
+    \draw[fcgray, thick, dashed] (1.75,3.0) .. controls (1.6,1.8) and (1.7,1.4) .. (1.55,0.0);
+    \draw[fcgray, thick, dashed] (1.62,1.45) .. controls (2.2,1.45) and (2.6,1.3) .. (3.0,1.25);
+    \node[proto] at (0.8,0.9) {$\boldsymbol\times$}; \node[proto] at (2.2,2.1) {$\boldsymbol\times$}; \node[proto] at (2.3,0.7) {$\boldsymbol\times$};
+  \end{scope}
+  \node[note, anchor=north, text width=2.8cm] at (12.3,-0.1) {GG: densities of different size, sharp borders};
+\end{tikzpicture}
+\caption[Level curves of the maximal membership for one set of prototypes under four algorithms.]{Level curves of the maximal membership $\max_i\mu_i(\mathbf{x})$ for one set of prototypes under four algorithms. They are the Voronoi cells of k-means (crisp), circles for fuzzy c-means (one global norm), ellipses of equal volume but individual orientation for Gustafson--Kessel (adaptive norm with determinant constraint), and ellipses of individual size and density with nearly crisp borders for Gath--Geva (exponential distance with priors).}
+\label{fig:part:concept}
+\end{figure}
+
+\section{Theory}\label{sec:part:theory}
+
+We treat the algorithms in the order of \cref{fig:part:concept}: the hard methods (\cref{sec:part:kmeans,sec:part:kmedoids}), fuzzy c-means with its derivation and the role of $m$ (\cref{sec:part:fcm,sec:part:m}), Gustafson--Kessel (\cref{sec:part:gk}), and Gath--Geva (\cref{sec:part:gg});\cref{sec:part:comparison} compares them. \Cref{sec:part:fuzzifiers} then examines the mechanism that makes these partitions fuzzy and its alternatives, and \cref{sec:part:density} the estimation of the number and location of clusters before any iteration. The notation is that of \cref{tab:found:notation}; in formulas $\U$ is $c\times N$, in code it is stored transposed.
+
+\subsection{Hard c-means (k-means)}\label{sec:part:kmeans}
+
+The hard c-means or k-means algorithm \cite{macqueen:1967:kmeans} partitions the data into $c$ disjoint subsets $A_1,\dots,A_c$ and minimizes the within-cluster sum of squares,
+\begin{equation}
+  \J(\X;\U,\V)=\sum_{i=1}^{c}\sum_{\xk\in A_i}\norm{\xk-\vi}^2=\sum_{i=1}^{c}\sum_{k=1}^{N}\mik\norm{\xk-\vi}^2,\qquad \U\in M_{hc},
+  \label{eq:part:Jkm}
+\end{equation}
+which is the c-means functional \eqref{eq:found:J} for $m=1$ and a hard partition. For fixed subsets the minimizing prototype is the mean of the members,
+\begin{equation}
+  \vi=\frac{1}{N_i}\sum_{\xk\in A_i}\xk,\qquad N_i=\abs{A_i}=\sum_{k=1}^{N}\mik,
+  \label{eq:part:vkm}
+\end{equation}
+and for fixed prototypes the minimizing partition assigns every sample to its nearest prototype, $\mik=1$ if $i=\argmin_j\norm{\xk-\mathbf{v}_j}^2$ and $0$ otherwise. Alternating the two steps decreases $\J$ and terminates after finitely many iterations, because there are finitely many partitions and none is visited twice. The result depends more strongly on the start than that of FCM, because a prototype that loses all its members cannot recover. \code{fuzzyclust} keeps the previous prototype of an emptied cluster instead of letting it collapse, and restarts (\code{n\_init}) are the standard remedy. The MATLAB toolbox manual illustrates the problem with two runs on the same data, one of which splits a cluster and merges two others.
+
+\begin{algobox}{Hard c-means (k-means)}{kmeans}\index{k-means}\index{hard c-means|see{k-means}}\index{KMeans@\code{KMeans}}
+\begin{algorithm}[H]
+\KwIn{data $\X$, number of clusters $1<c<N$, tolerance $\epsilon$}
+initialize the prototypes $\mathbf{v}_i^{(0)}$ (random, k-means++, or given); $l\leftarrow0$\;
+\Repeat{no sample changed cluster, i.e.\ $\max_{ik}\abs{\mu^{(l)}_{ik}-\mu^{(l-1)}_{ik}}<\epsilon$}{
+  $l\leftarrow l+1$\;
+  distances: $\Dsq=\norm{\xk-\mathbf{v}_i^{(l-1)}}^2$ for all $i,k$\;
+  partition: $\mu^{(l)}_{ik}=1$ if $i=\argmin_j D^2_{jk}$, else $0$\;
+  prototypes: $\mathbf{v}_i^{(l)}=\sum_k\mu^{(l)}_{ik}\xk/\sum_k\mu^{(l)}_{ik}$ (previous prototype if the cluster is empty)\;
+}
+\KwOut{$\V$, crisp $\U\in M_{hc}$, within-cluster sum of squares $\J$}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{k-means}
+\begin{itemize}
+  \item Minimizes the within-cluster sum of squares; prototypes are cluster means, the partition is crisp (Voronoi cells).
+  \item Assumes compact, roughly spherical clusters of similar size in the Euclidean norm; needs scaled data.
+  \item Fast ($\mathcal{O}(Ncn)$ per iteration) and converges in finitely many steps, but depends strongly on the start: use \code{n\_init} or k-means++ seeding.
+  \item Parameters: \code{n\_clusters}, \code{init}, \code{n\_init}; it is the $m\to1$ limit of FCM and the hard reference for all fuzzy results.
+\end{itemize}
+\end{summarybox}
+
+\subsection{k-medoids}\label{sec:part:kmedoids}
+
+The mean of a cluster need not be a meaningful object: if the rows of $\X$ are discrete states of a system, categorical codes mapped to numbers, or positions on a network, the average of two states is no state. The k-medoids algorithm \cite{kaufman:1990:groups} keeps the nearest-prototype assignment of k-means but requires every prototype to be one of the samples, $\vi\in\{\mathbf{x}_1,\dots,\mathbf{x}_N\}$. Two rules choose the prototype of a cluster among its members. The exact rule takes the \emph{medoid}, the member with the smallest total distance to the other members; it minimizes the sum of distances rather than of squared distances, which is the criterion of the PAM algorithm of Kaufman and Rousseeuw. The MATLAB toolbox took the member closest to the cluster mean, which is cheaper and is the exact minimizer of the within-cluster sum of squares \eqref{eq:part:Jkm} among the members, because the total squared distance of a member to all members equals $N_i$ times its squared distance to the mean plus a constant. \code{fuzzyclust} offers both (\code{medoid="exact"} or \code{"nearest\_mean"}). Because prototypes are data points, k-medoids is less sensitive to outliers than k-means (an outlier can pull a mean but cannot become a medoid unless it forms a cluster of its own), and the medoids can be reported as representative samples. The row indices of the medoids are kept in \code{medoid\_indices\_}; the geodesic fuzzy c-medoids of \cref{ch:graph} build on the same idea with a different distance.
+
+\begin{algobox}{k-medoids}{kmedoids}\index{k-medoids}\index{medoid}\index{KMedoids@\code{KMedoids}}
+\begin{algorithm}[H]
+\KwIn{data $\X$, number of clusters $c$, tolerance $\epsilon$, medoid rule (exact or nearest to the mean)}
+initialize the prototypes $\mathbf{v}_i^{(0)}$; $l\leftarrow0$\;
+\Repeat{no sample changed cluster}{
+  $l\leftarrow l+1$\;
+  distances and crisp partition as in \cref{alg:kmeans}\;
+  \For{$i=1,\dots,c$}{
+    exact: $\vi\leftarrow\argmin_{\mathbf{x}\in A_i}\sum_{\mathbf{y}\in A_i}\norm{\mathbf{x}-\mathbf{y}}$;\quad nearest mean: $\vi\leftarrow\argmin_{\mathbf{x}\in A_i}\norm{\mathbf{x}-\bar{\mathbf{x}}_{A_i}}$\;
+  }
+}
+\KwOut{medoids $\V\subset\X$ with their indices, crisp $\U$, $\J$}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{k-medoids}
+\begin{itemize}
+  \item k-means with prototypes restricted to data points; the exact medoid minimizes the total distance to the other members (the PAM criterion), the cheaper nearest-to-mean rule the total squared distance.
+  \item Use when the mean is not a valid object (discrete states, codes) or when representative samples are wanted; more robust to outliers than k-means.
+  \item Exact medoids cost $\mathcal{O}(\sum_i N_i^2 n)$ per iteration; same start dependence as k-means.
+  \item Parameters: \code{n\_clusters}, \code{medoid}, \code{init}, \code{n\_init}; attribute \code{medoid\_indices\_}.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Fuzzy c-means}\label{sec:part:fcm}
+
+Fuzzy c-means \cite{dunn:1973:fcm,bezdek:1981} minimizes the c-means functional over the fuzzy partitioning space,
+\begin{equation}
+  \J(\X;\U,\V)=\sum_{i=1}^{c}\sum_{k=1}^{N}\mik^m\,D^2_{ik\A},\qquad D^2_{ik\A}=(\xk-\vi)\T\A(\xk-\vi),
+  \label{eq:part:Jfcm}
+\end{equation}
+where $\U\in M_{fc}$, $m>1$, and $\A$ is a fixed norm-inducing matrix (identity, diagonal, or Mahalanobis, \cref{sec:found:norms}). The stationary points are found by adjoining the column constraint $\sum_i\mik=1$ with Lagrange multipliers $\lambda_k$,
+\begin{equation}
+  \bar{\J}(\X;\U,\V,\boldsymbol\lambda)=\sum_{i=1}^{c}\sum_{k=1}^{N}\mik^m D^2_{ik\A}+\sum_{k=1}^{N}\lambda_k\Bigl(\sum_{i=1}^{c}\mik-1\Bigr),
+  \label{eq:part:lagrange}
+\end{equation}
+and setting the partial derivatives to zero. The derivative with respect to a single membership gives
+\begin{equation}
+  m\,\mik^{m-1}D^2_{ik\A}+\lambda_k=0\quad\Longrightarrow\quad \mik=\Bigl(\frac{-\lambda_k}{m}\Bigr)^{\frac{1}{m-1}}\bigl(D^2_{ik\A}\bigr)^{-\frac{1}{m-1}},
+  \label{eq:part:mulambda}
+\end{equation}
+and summing \eqref{eq:part:mulambda} over $i$ under the column constraint gives
+\[
+  \sum_{j=1}^{c}\Bigl(\frac{-\lambda_k}{m}\Bigr)^{\frac{1}{m-1}}\bigl(D^2_{jk\A}\bigr)^{-\frac{1}{m-1}}=1,
+\]
+so that dividing \eqref{eq:part:mulambda} by this sum eliminates the multiplier:
+\begin{equation}
+  \mik=\frac{1}{\sum_{j=1}^{c}\bigl(D_{ik\A}/D_{jk\A}\bigr)^{2/(m-1)}},\qquad 1\le i\le c,\ 1\le k\le N.
+  \label{eq:part:mufcm}
+\end{equation}
+The derivative with respect to $\vi$ gives $-2\A\sum_k\mik^m(\xk-\vi)=0$, hence
+\begin{equation}
+  \vi=\frac{\sum_{k=1}^{N}\mik^m\,\xk}{\sum_{k=1}^{N}\mik^m},\qquad 1\le i\le c,
+  \label{eq:part:vfcm}
+\end{equation}
+independently of $\A$. If $D^2_{ik\A}>0$ for all $i,k$ and $m>1$, then $(\U,\V)$ can minimize \eqref{eq:part:Jfcm} only if \eqref{eq:part:mufcm} and \eqref{eq:part:vfcm} hold \cite{bezdek:1981}; the solution automatically satisfies the remaining constraints of $M_{fc}$. Equation \eqref{eq:part:vfcm} is the mean of the data weighted by the memberships raised to $m$, which is why the algorithm is called c-\emph{means}; \eqref{eq:part:mufcm} makes the membership of a sample in a cluster a decreasing function of its distance to that prototype \emph{relative} to its distances to all prototypes. The FCM algorithm is the Picard iteration through the two equations, that is, the template of \cref{alg:ao} with the Euclidean (or $\A$-) norm. If some $D_{ik\A}=0$, the membership formula is undefined; \code{fuzzyclust}, like the MATLAB toolbox, adds $10^{-10}$ to the squared distances, which gives the sample a membership of practically one in the coinciding prototype.
+
+\subsubsection{The role of the fuzziness exponent}\label{sec:part:m}\index{fuzziness exponent!role of}
+
+The exponent $m$ determines how fast the membership decays with the relative distance. Writing \eqref{eq:part:mufcm} for two prototypes along the line through them (\cref{fig:part:ex:m1d}) makes this visible. As $m\to1^+$ the exponent $2/(m-1)$ grows without bound, each ratio $(D_{ik}/D_{jk})^{2/(m-1)}$ tends to $0$ or $\infty$, and the partition becomes crisp: FCM turns into k-means. As $m\to\infty$ the exponent tends to zero, every ratio tends to one, and $\mik\to1/c$ for every sample; the prototypes \eqref{eq:part:vfcm} then all coincide with the grand mean of the data. In between, $m$ trades the sharpness of the partition against its robustness: with a small $m$ every sample pulls mainly its own prototype, with a large $m$ every prototype averages over all samples. Two further properties of \eqref{eq:part:mufcm} matter in practice. First, the membership is one only \emph{at} the prototype, and a sample far from all prototypes receives nearly uniform memberships $1/c$; this is the price of the column constraint, which the possibilistic variants of \cref{ch:robust_shape} remove. Second, the memberships change more slowly for larger $m$, so above $m\approx2$ the number of iterations needed to reach a given tolerance grows with $m$; close to $m=1$ it rises again, because the nearly crisp partition takes several iterations to settle (\cref{sec:part:ex:m}). The usual default is $m=2$, for which \eqref{eq:part:mufcm} reduces to $\mik=D^{-2}_{ik}/\sum_j D^{-2}_{jk}$, and values in $[1.5,2.5]$ are the range to explore; the validity indices of \cref{ch:validity} can be scanned over $m$ as well as over $c$.
+
+\begin{algobox}{Fuzzy c-means (FCM)}{fcm}\index{fuzzy c-means (FCM)}\index{FCM|see{fuzzy c-means}}\index{FCM@\code{FCM}}
+\begin{algorithm}[H]
+\KwIn{data $\X$, number of clusters $1<c<N$, exponent $m>1$, tolerance $\epsilon>0$, norm-inducing matrix $\A$}
+initialize $\U^{(0)}\in M_{fc}$; $l\leftarrow0$\;
+\Repeat{$\max_{ik}\abs{\mu^{(l)}_{ik}-\mu^{(l-1)}_{ik}}<\epsilon$}{
+  $l\leftarrow l+1$\;
+  prototypes: $\mathbf{v}_i^{(l)}=\sum_k(\mu^{(l-1)}_{ik})^m\xk\big/\sum_k(\mu^{(l-1)}_{ik})^m$, $1\le i\le c$\;
+  distances: $D^2_{ik\A}=(\xk-\mathbf{v}_i^{(l)})\T\A(\xk-\mathbf{v}_i^{(l)})$, $1\le i\le c$, $1\le k\le N$\;
+  partition: $\mu^{(l)}_{ik}=1\big/\sum_j(D_{ik\A}/D_{jk\A})^{2/(m-1)}$\;
+}
+\KwOut{$\V$, $\U\in M_{fc}$, $\J$}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Fuzzy c-means}
+\begin{itemize}
+  \item Minimizes $\sum_{ik}\mik^m D^2_{ik\A}$ over fuzzy partitions; prototypes are $\mik^m$-weighted means, memberships are inverse relative distances raised to $2/(m-1)$.
+  \item One global norm $\A$: spherical clusters (Euclidean), axis-parallel or commonly oriented ellipsoids (diagonal, Mahalanobis); clusters of similar size.
+  \item $m\to1$: k-means; $m\to\infty$: all memberships $1/c$, prototypes collapse; default $m=2$, explore $[1.5,2.5]$.
+  \item $\mathcal{O}(Ncn)$ per iteration, insensitive to the initialization on compact data, the standard initializer for GK and GG.
+  \item Parameters: \code{n\_clusters}, \code{m}, \code{norm}; attributes \code{norm\_matrix\_}, \code{covariances\_} (for inspection).
+\end{itemize}
+\end{summarybox}
+
+\subsection{Gustafson--Kessel}\label{sec:part:gk}
+
+Gustafson and Kessel \cite{gustafson:1979} extended FCM with an \emph{adaptive} norm: each cluster has its own norm-inducing matrix $\Ai$, which becomes an optimization variable,
+\begin{equation}
+  \J(\X;\U,\V,\{\Ai\})=\sum_{i=1}^{c}\sum_{k=1}^{N}\mik^m\,D^2_{ik\Ai},\qquad D^2_{ik\Ai}=(\xk-\vi)\T\Ai(\xk-\vi).
+  \label{eq:part:Jgk}
+\end{equation}
+For fixed $\Ai$ the memberships and prototypes are those of FCM, \eqref{eq:part:mufcm} and \eqref{eq:part:vfcm}. The functional cannot be minimized over $\Ai$ directly, because it is linear in $\Ai$ and can be made arbitrarily small by making $\Ai$ less positive definite. The matrices must therefore be constrained, and the natural constraint fixes their determinants,
+\begin{equation}
+  \det\Ai=\rho_i,\qquad \rho_i>0,
+  \label{eq:part:volume}
+\end{equation}
+which lets every cluster adapt its \emph{shape} while its \emph{volume} stays constant. Adjoining \eqref{eq:part:volume} with multipliers $\lambda_i$ and differentiating with respect to $\Ai$ gives $\sum_k\mik^m(\xk-\vi)(\xk-\vi)\T=\lambda_i\det(\Ai)\Ai^{-1}$, so $\Ai$ is proportional to the inverse of the \emph{fuzzy covariance matrix} of the cluster, and the constraint fixes the factor:
+\begin{equation}
+  \Ai=\bigl[\rho_i\det(\Fi)\bigr]^{1/n}\Fi^{-1},\qquad
+  \Fi=\frac{\sum_{k=1}^{N}\mik^m(\xk-\vi)(\xk-\vi)\T}{\sum_{k=1}^{N}\mik^m}.
+  \label{eq:part:Agk}
+\end{equation}
+Substituting \eqref{eq:part:Agk} into \eqref{eq:part:Jgk} shows that the GK distance is a Mahalanobis distance with the cluster's own membership-weighted covariance, multiplied by the volume normalizer $[\rho_i\det\Fi]^{1/n}$. Without prior knowledge all $\rho_i$ are set to one, so GK can only find clusters of approximately equal volume; a cluster known to be larger can be given a larger $\rho_i$ (\cref{sec:part:ex:gk}). In exact arithmetic, any invertible affine transformation of the data multiplies the GK distances of all samples by a common factor, so the partition is affine-invariant (\cref{sec:found:scaling}).
+
+\paragraph{Eigenstructure.}\index{eigenstructure of a cluster} The covariance matrix $\Fi=\boldsymbol\Phi_i\boldsymbol\Lambda_i\boldsymbol\Phi_i\T$ describes the shape and orientation of the cluster: the eigenvectors $\boldsymbol\phi_{ij}$ are the axes of the ellipsoid and the square roots of the eigenvalues $\lambda_{ij}$ its semi-axis lengths (\cref{fig:found:prototypes}). The ratio of the largest to the smallest eigenvalue measures the elongation, and the eigenvector of the smallest eigenvalue is the \emph{normal} of the cluster: if the data of cluster $i$ lie close to a hyperplane, that hyperplane is $\boldsymbol\phi_{i1}\T(\mathbf{x}-\vi)=0$. This is the bridge from GK to local linear models: in the product space of regressors and output, the normal of a GK cluster gives the parameter vector of a local linear model, which \cref{ch:models} exploits. \code{fuzzyclust} stores the eigenvalues in ascending order in \code{eigenvalues\_} and the eigenvectors as columns of \code{eigenvectors\_}.
+
+\paragraph{Regularization.} The adaptive norm has a numerical weak spot \cite{babuska:2002:covariance}. When a cluster has few members or its members lie almost on a linear subspace, $\Fi$ is nearly singular: its smallest eigenvalue approaches zero, the condition number explodes, $\Fi^{-1}$ is unreliable, and the volume normalization fails as $\det\Fi\to0$. GK can even converge to a degenerate solution in which one cluster collapses onto a line of points, whose zero volume makes its distance to those points zero. Babu\v{s}ka, van der Veen, and Kaymak proposed two independent safeguards, both applied to $\Fi$ before inversion:
+\begin{align}
+  \Fi &\leftarrow (1-\gamma)\Fi+\gamma\,\det(\mathbf{F}_0)^{1/n}\,\mathbf{I},\qquad 0\le\gamma\le1, \label{eq:part:gamma}\\
+  \lambda_{ij} &\leftarrow \lambda_{i,\max}/\beta\quad\text{for all } j \text{ with } \lambda_{i,\max}/\lambda_{ij}>\beta,\notag\\
+  \Fi &\leftarrow\boldsymbol\Phi_i\,\diag(\lambda_{i1},\dots,\lambda_{in})\,\boldsymbol\Phi_i\T. \label{eq:part:beta}
+\end{align}
+The first shrinks every cluster covariance toward a scaled identity; $\mathbf{F}_0$ is the covariance of the whole data set, so the scale is that of the data. It is recommended for small or nearly collinear clusters and for identification, where it keeps the local models from overfitting. The second bounds the condition number of $\Fi$ by $\beta$ by raising the small eigenvalues; the MATLAB default $\beta=10^{15}$ is effectively off, and a bound between $10^{2}$ and $10^{4}$ is a practical choice when degenerate clusters appear; it acts only on clusters whose condition number exceeds it (\cref{sec:part:ex:gk}). \code{fuzzyclust} implements both as published, with the defaults $\gamma=0$ and $\beta=10^{15}$, and stores the regularized $\Fi$ in \code{covariances\_}. Both devices break the affine invariance of GK, because the identity matrix and the eigenvalues of $\Fi$ depend on the units of the data.
+
+\begin{algobox}{Gustafson--Kessel (GK) with covariance regularization}{gk}\index{Gustafson--Kessel algorithm (GK)}\index{GK|see{Gustafson--Kessel algorithm}}\index{covariance regularization}\index{GK@\code{GK}}
+\begin{algorithm}[H]
+\KwIn{data $\X$, number of clusters $1<c<N$, exponent $m>1$, tolerance $\epsilon$, volumes $\rho_i$ (default 1), regularization $\gamma\in[0,1]$, condition bound $\beta$}
+compute the data covariance $\mathbf{F}_0$; initialize $\U^{(0)}\in M_{fc}$; $l\leftarrow0$\;
+\Repeat{$\max_{ik}\abs{\mu^{(l)}_{ik}-\mu^{(l-1)}_{ik}}<\epsilon$}{
+  $l\leftarrow l+1$\;
+  prototypes: $\mathbf{v}_i^{(l)}=\sum_k(\mu^{(l-1)}_{ik})^m\xk\big/\sum_k(\mu^{(l-1)}_{ik})^m$\;
+  covariances: $\Fi=\sum_k(\mu^{(l-1)}_{ik})^m(\xk-\mathbf{v}_i^{(l)})(\xk-\mathbf{v}_i^{(l)})\T\big/\sum_k(\mu^{(l-1)}_{ik})^m$\;
+  regularize: $\Fi\leftarrow(1-\gamma)\Fi+\gamma\det(\mathbf{F}_0)^{1/n}\mathbf{I}$; eigen-decompose $\Fi$ and raise eigenvalues below $\lambda_{i,\max}/\beta$ to that value \eqref{eq:part:beta}\;
+  norms: $\Ai=[\rho_i\det\Fi]^{1/n}\Fi^{-1}$\;
+  distances: $D^2_{ik\Ai}=(\xk-\mathbf{v}_i^{(l)})\T\Ai(\xk-\mathbf{v}_i^{(l)})$\;
+  partition: $\mu^{(l)}_{ik}=1\big/\sum_j(D_{ik\Ai}/D_{jk\mathbf{A}_j})^{2/(m-1)}$\;
+}
+\KwOut{$\V$, $\U$, $\{\Fi\}$, $\{\Ai\}$, eigenvalues and eigenvectors of $\Fi$, $\J$}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Gustafson--Kessel}
+\begin{itemize}
+  \item FCM with a norm-inducing matrix per cluster, $\Ai=[\rho_i\det\Fi]^{1/n}\Fi^{-1}$; the determinant constraint $\det\Ai=\rho_i$ fixes the volume and lets the shape adapt.
+  \item Detects ellipsoidal clusters of different orientation and elongation but (for $\rho_i=1$) of similar volume; affine-invariant in exact arithmetic.
+  \item The eigenstructure of $\Fi$ gives axes, elongation, and the normal direction of a cluster---the basis of local linear models.
+  \item Nearly singular $\Fi$ (few points, collinear data) is handled by shrinkage $\gamma$ toward $\det(\mathbf{F}_0)^{1/n}\mathbf{I}$ and by the condition bound $\beta$.
+  \item $\mathcal{O}(Ncn^2+cn^3)$ per iteration; more start-dependent than FCM on crossing or elongated clusters, so use \code{n\_init}.
+  \item Parameters: \code{n\_clusters}, \code{m}, \code{rho}, \code{gamma}, \code{beta}; attributes \code{covariances\_}, \code{norm\_matrices\_}, \code{eigenvalues\_}, \code{eigenvectors\_}.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Gath--Geva}\label{sec:part:gg}
+
+The fuzzy maximum likelihood estimation (FMLE) algorithm of Bezdek and Dunn \cite{bezdek:1975:fmle}, developed into a clustering method by Gath and Geva \cite{gath:1989}, interprets cluster $i$ as a Gaussian component with mean $\vi$, covariance $\Fi$, and prior probability $\alpha_i$, and uses the reciprocal of the prior-weighted density as distance,
+\begin{equation}
+  \Dsq=\frac{\sqrt{\det\mathbf{F}_{wi}}}{\alpha_i}\exp\Bigl(\tfrac12(\xk-\vi)\T\mathbf{F}_{wi}^{-1}(\xk-\vi)\Bigr),
+  \label{eq:part:Dgg}
+\end{equation}
+with
+\begin{equation}
+  \mathbf{F}_{wi}=\frac{\sum_{k=1}^{N}\mik^{w}(\xk-\vi)(\xk-\vi)\T}{\sum_{k=1}^{N}\mik^{w}},\qquad
+  \alpha_i=\frac1N\sum_{k=1}^{N}\mik .
+  \label{eq:part:Fgg}
+\end{equation}
+The covariance weighting exponent is $w=1$ in the original FMLE algorithm; the MATLAB toolbox and \code{fuzzyclust} use $w=m$ (so $w=2$ by default), which makes the partition fuzzier to compensate for the exponential term. The two weightings generalize the classical covariance from different starting points, and the exponent $w$ covers both. Memberships and prototypes are updated with the FCM formulas \eqref{eq:part:mufcm} and \eqref{eq:part:vfcm}. Three consequences follow from \eqref{eq:part:Dgg}. First, $1/\Dsq$ is proportional to $\alpha_i\,\mathcal{N}(\xk;\vi,\mathbf{F}_{wi})$, so for $m=2$ the membership $\mik=D^{-2}_{ik}/\sum_j D^{-2}_{jk}$ is exactly Bayes' rule for the posterior probability of component $i$ given $\xk$: GG is a fuzzy relative of the EM algorithm for Gaussian mixtures and differs from it in the weights $\mik^m$ of the center and covariance updates. Second, volume \emph{and} density adapt: neither $\det\Fi$ nor $\alpha_i$ is constrained, so a large diffuse cluster next to a small dense one is described correctly, whereas GK's volume constraint forces the dense cluster to steal points (\cref{sec:part:ex:gg}). Third, the distance grows exponentially with the Mahalanobis distance instead of quadratically, so the memberships fall off fast, the partition is nearly crisp between the clusters, and the algorithm converges quickly, but to the \emph{nearest} local optimum. GG is therefore more sensitive to the start than FCM or GK and needs a good initialization; the recommended practice, in the MATLAB toolbox and here, is to pass the partition of a converged FCM or GK run as \code{init}.
+
+\paragraph{Evaluation in the log domain.} The exponential in \eqref{eq:part:Dgg} overflows a double for squared Mahalanobis distances above about $1400$, which happens routinely for far samples and small clusters; the MATLAB manual warns that GG ``can overflow at large $c$ values.'' \code{fuzzyclust} therefore works with the logarithm $\log\Dsq=\tfrac12\log\det\mathbf{F}_{wi}-\log\alpha_i+\tfrac12(\xk-\vi)\T\mathbf{F}_{wi}^{-1}(\xk-\vi)$, computes it with a stable log-determinant, caps it at $700$ (so that $\Dsq$ stays below the largest finite double), and evaluates the membership formula as a softmax over clusters,
+\begin{equation}
+  \mik=\frac{\exp\bigl(-\tfrac{1}{m-1}\log\Dsq\bigr)}{\sum_{j}\exp\bigl(-\tfrac{1}{m-1}\log D^2_{jk}\bigr)},
+  \label{eq:part:mugg}
+\end{equation}
+after subtracting the largest logit per sample. Below the cap this is algebraically identical to \eqref{eq:part:mufcm}, and it cannot overflow. The distances reported by \code{transform} and \code{distances\_} are the square roots of the capped values, $D_{ik}\le e^{350}$. The covariances can be regularized exactly as in GK (\code{gamma}, \code{beta}), which is advisable when the clusters have few samples.
+
+\begin{algobox}{Gath--Geva (GG, fuzzy maximum likelihood estimation)}{gg}\index{Gath--Geva algorithm (GG)}\index{GG|see{Gath--Geva algorithm}}\index{fuzzy maximum likelihood estimation}\index{GG@\code{GG}}
+\begin{algorithm}[H]
+\KwIn{data $\X$, number of clusters $c$, exponent $m$ (1: original FMLE, 2: recommended), tolerance $\epsilon$, regularization $\gamma,\beta$}
+initialize $\U^{(0)}$ with a less start-dependent method (the partition of FCM or GK); $l\leftarrow0$\;
+\Repeat{$\max_{ik}\abs{\mu^{(l)}_{ik}-\mu^{(l-1)}_{ik}}<\epsilon$}{
+  $l\leftarrow l+1$\;
+  prototypes: $\mathbf{v}_i^{(l)}=\sum_k(\mu^{(l-1)}_{ik})^m\xk\big/\sum_k(\mu^{(l-1)}_{ik})^m$\;
+  covariances $\mathbf{F}_{wi}$ with $w=m$ by \eqref{eq:part:Fgg}, regularized as in \cref{alg:gk}; priors $\alpha_i=\frac1N\sum_k\mu^{(l-1)}_{ik}$\;
+  log-distances: $\log\Dsq=\tfrac12\log\det\mathbf{F}_{wi}-\log\alpha_i+\tfrac12(\xk-\mathbf{v}_i^{(l)})\T\mathbf{F}_{wi}^{-1}(\xk-\mathbf{v}_i^{(l)})$\;
+  partition: $\mu^{(l)}_{ik}$ by the softmax \eqref{eq:part:mugg}\;
+}
+\KwOut{$\V$, $\U$, $\{\mathbf{F}_{wi}\}$, priors $\{\alpha_i\}$, $\J$}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Gath--Geva}
+\begin{itemize}
+  \item Distance $=$ reciprocal of a prior-weighted Gaussian density; memberships are posterior probabilities (for $m=2$), the clusters a Gaussian mixture with fuzzy weights.
+  \item Volume, orientation \emph{and} density of every cluster adapt; handles clusters of very different size and spread, which FCM and GK cannot.
+  \item Exponential distance: nearly crisp borders, fast convergence to the nearest optimum, hence sensitive to the start---initialize from FCM or GK (\code{init=fcm.membership\_}).
+  \item Computed in the log domain (softmax) to avoid the overflow of the exponential; covariances regularized like GK if needed.
+  \item Parameters: \code{n\_clusters}, \code{m}, \code{gamma}, \code{beta}, \code{init}; attributes \code{covariances\_}, \code{priors\_}, \code{eigenvalues\_}, \code{eigenvectors\_}.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Comparison}\label{sec:part:comparison}
+
+\Cref{tab:part:comparison} summarizes the four algorithms. Read from left to right, every column adds freedom to the cluster description and removes an assumption about the data, at the cost of more parameters per cluster (from $n$ for a center to $n+n(n+1)/2+1$ for center, covariance, and prior), more computation (the $n\times n$ inversions of GK and GG), and greater sensitivity to the initial partition. In practice the data decide: FCM when the clusters are compact and the features scaled, GK when they are elongated or differently oriented, GG when their sizes or densities differ, and FCM first in any case, because it initializes the other two. The validity indices of the next chapter compare the resulting partitions on a common footing, and the examples below show what happens when each assumption is violated.
+
+\begin{table}[htbp]\centering\small
+\caption[The four partitioning algorithms at a glance.]{The four partitioning algorithms at a glance. $N$ samples, $n$ features, $c$ clusters.}
+\label{tab:part:comparison}
+\begin{tabularx}{\textwidth}{@{}l >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}\toprule
+ & k-means / k-medoids & FCM & GK & GG \\\midrule
+prototype & mean / medoid $\vi$ & center $\vi$ & center $\vi$, covariance $\Fi$ & center $\vi$, covariance $\mathbf{F}_{wi}$, prior $\alpha_i$ \\
+distance & Euclidean & fixed norm $\A$, eq.~\eqref{eq:part:Jfcm} & volume-scaled Mahalanobis, eq.~\eqref{eq:part:Agk} & inverse prior-weighted Gaussian density, eq.~\eqref{eq:part:Dgg} \\
+partition & crisp, $M_{hc}$ & fuzzy, $M_{fc}$ & fuzzy, $M_{fc}$ & fuzzy, nearly crisp borders \\
+cluster shape & spherical, equal size & spherical (or one common ellipsoid), similar size & ellipsoidal, any orientation, equal volume & ellipsoidal, any orientation, size, and density \\
+parameters & $c$ & $c$, $m$, $\A$ & $c$, $m$, $\rho_i$, $\gamma$, $\beta$ & $c$, $m$, $\gamma$, $\beta$ \\
+cost per iteration & $\mathcal{O}(Ncn)$ (medoids: $+\sum_iN_i^2n$) & $\mathcal{O}(Ncn)$ & $\mathcal{O}(Ncn^2+cn^3)$ & $\mathcal{O}(Ncn^2+cn^3)$ \\
+start dependence & high & low on compact data & medium (crossing or elongated clusters) & high: initialize from FCM/GK \\
+typical use & fast reference, representative samples & compact clusters, initializer & oriented clusters, local linear models & unequal sizes and densities, mixture interpretation \\\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{What is fuzzy about fuzzy clustering? Fuzzifiers and regularization}\label{sec:part:fuzzifiers}\index{fuzzifier}
+
+The fuzzy algorithms above owe their fuzziness to one device: the memberships enter the functional as $\mik^m$ with $m>1$. Without the exponent ($m=1$) the c-means functional is \emph{linear} in every column of $\U$, and a linear function on the simplex $\{\boldsymbol\mu_k:\sum_i\mik=1,\ \mik\ge0\}$ attains its minimum at a vertex: every sample goes entirely to its nearest prototype and the partition is crisp. Fuzziness therefore requires that the cost of a column be strictly convex in the memberships, and there are three ways to obtain this: raise the memberships to the power $m$ as FCM does, transform them with another \emph{fuzzifier} function \cite{klawonn:2003:fuzzifier}, or keep them linear and add a strictly convex \emph{regularization term} \cite{miyamoto:1997:entropy}. The choice decides the shape of the membership functions (\cref{fig:part:fuzzifiers}). This section presents the two regularizations, the deterministic-annealing view of the entropy regularization, and the polynomial fuzzifier.
+
+\paragraph{Entropy regularization.}\index{entropy regularization} Li and Mukaidono \cite{li:1995:entropy} and Miyamoto and Mukaidono \cite{miyamoto:1997:entropy} add the negative entropy of the partition to the hard functional,
+\begin{equation}
+  \J_E(\X;\U,\V)=\sum_{i=1}^{c}\sum_{k=1}^{N}\mik\Dsq+\lambda\sum_{i=1}^{c}\sum_{k=1}^{N}\mik\log\mik,\qquad\lambda>0 .
+  \label{eq:part:Jentropy}
+\end{equation}
+Adjoining the column constraint as in \eqref{eq:part:lagrange} and differentiating gives $\Dsq+\lambda(\log\mik+1)+\lambda_k=0$, so $\mik\propto\exp(-\Dsq/\lambda)$, and normalization yields the Gibbs (softmax) memberships
+\begin{equation}
+  \mik=\frac{\exp(-\Dsq/\lambda)}{\sum_{j=1}^{c}\exp(-D^2_{jk}/\lambda)},\qquad
+  \vi=\frac{\sum_{k}\mik\xk}{\sum_{k}\mik}.
+  \label{eq:part:muentropy}
+\end{equation}
+The prototypes are weighted means with the memberships themselves, not their powers, as weights. Two properties distinguish \eqref{eq:part:muentropy} from \eqref{eq:part:mufcm}. First, the membership depends on the \emph{differences} $D^2_{jk}-\Dsq$ of the squared distances, not on their ratios: far from all prototypes a sample belongs entirely to the nearest one instead of tending to $1/c$, and the membership function of a cluster is a Gaussian bump modulated by its neighbors. Second, $\lambda$ has the units of a squared distance. It acts as a \emph{temperature}, with $\lambda\to0$ giving k-means and $\lambda\to\infty$ uniform memberships, and it must be chosen relative to the squared radius of the clusters (standardize the data first).
+
+\paragraph{Deterministic annealing.}\index{deterministic annealing} Eliminating the memberships from \eqref{eq:part:Jentropy} with \eqref{eq:part:muentropy} turns the functional into the free energy of statistical physics,
+\begin{equation}
+  F(\V;\lambda)=-\lambda\sum_{k=1}^{N}\log\sum_{i=1}^{c}\exp\bigl(-\Dsq/\lambda\bigr),
+  \label{eq:part:freeenergy}
+\end{equation}
+and Rose's deterministic annealing \cite{rose:1998:annealing} minimizes it while the temperature is lowered. At a high temperature $F$ has a single minimum, at which every prototype sits at the grand mean of the data. Lowering $\lambda$ geometrically and re-converging from the previous solution tracks this minimum until it becomes unstable: a cluster with covariance $\Fi$ (weights $\mik$) \emph{splits} when $\lambda$ falls below the critical temperature
+\begin{equation}
+  \lambda_{c,i}=2\,\lambda_{\max}(\Fi),
+  \label{eq:part:critical}
+\end{equation}
+and the first split occurs at twice the largest eigenvalue of the data covariance. The number of distinct prototypes thus grows in \emph{phase transitions} as the temperature falls, and the annealing history reveals the cluster structure scale by scale: the temperatures at which the number of distinct prototypes jumps are the squared scales of the structure (\cref{sec:part:ex:fuzzifiers}). Because the start is the unique high-temperature minimum, annealing removes the dependence on the initial partition, at the price of one convergence per temperature. Coinciding prototypes must be perturbed slightly after every cooling step; otherwise they stay together by symmetry.
+
+\paragraph{Quadratic regularization.}\index{quadratic regularization} Miyamoto and Umayahara \cite{miyamoto:1998:quadratic} use the regularizer $\lambda\sum_{ik}\mik^2$ instead,
+\begin{equation}
+  \J_Q(\X;\U,\V)=\sum_{i=1}^{c}\sum_{k=1}^{N}\mik\Dsq+\lambda\sum_{i=1}^{c}\sum_{k=1}^{N}\mik^2 .
+  \label{eq:part:Jquadratic}
+\end{equation}
+The stationarity condition $\Dsq+2\lambda\mik+\lambda_k=0$ is linear in $\mik$, and it can hold only for the clusters of an \emph{active set} $A_k$; for the others the nonnegativity constraint binds and $\mik=0$. With $A_k$ the $\hat c_k$ nearest prototypes,
+\begin{equation}
+  \mik=\frac{1}{\hat c_k}\Bigl(1+\frac{1}{2\lambda}\sum_{j\in A_k}\bigl(D^2_{jk}-\Dsq\bigr)\Bigr)\ \ (i\in A_k),\qquad \mik=0\ \ (i\notin A_k),
+  \label{eq:part:muquadratic}
+\end{equation}
+where $\hat c_k$ is the largest number of nearest prototypes for which all these values are positive. Equivalently, the column $\boldsymbol\mu_k$ is the Euclidean projection of $-\mathbf{D}^2_{\cdot k}/(2\lambda)$ onto the simplex, which is computed exactly by sorting. For two clusters, $\mu_{1k}=\tfrac12+(D^2_{2k}-D^2_{1k})/(4\lambda)$ clipped to $[0,1]$: a linear ramp between the prototypes and \emph{exact} zeros and ones outside it.
+
+\paragraph{The polynomial fuzzifier.}\index{polynomial fuzzifier} Klawonn and H\"oppner \cite{klawonn:2003:fuzzifier} asked why FCM never assigns a zero membership and found the answer in the derivative of the fuzzifier: $\frac{d}{d\mu}\mu^m=0$ at $\mu=0$, so the marginal cost of giving a sample a tiny membership in a far-away cluster is zero, and the optimum always does so. Every FCM prototype is therefore pulled, if weakly, by every sample of the data set. Any fuzzifier $g$ with $g'(0)>0$ removes this effect; they proposed the quadratic polynomial
+\begin{equation}
+  g(\mu)=\frac{1-\beta}{1+\beta}\,\mu^2+\frac{2\beta}{1+\beta}\,\mu,\qquad 0\le\beta<1,
+  \label{eq:part:polyfuzzifier}
+\end{equation}
+which interpolates between $\mu^2$ ($\beta=0$, FCM with $m=2$) and $\mu$ ($\beta\to1$, k-means), and minimized $\J=\sum_{ik}g(\mik)\Dsq$. The Kuhn--Tucker conditions give, for the active set $A_k$ of the $\hat c_k$ nearest prototypes,
+\begin{equation}
+  \mik=\frac{1}{1-\beta}\biggl(\frac{1+(\hat c_k-1)\beta}{\sum_{j\in A_k}\Dsq/D^2_{jk}}-\beta\biggr)\ \ (i\in A_k),\qquad\mik=0\ \ (i\notin A_k),
+  \label{eq:part:mupoly}
+\end{equation}
+with $\hat c_k$ the largest size for which all values are positive, and prototypes $\vi=\sum_kg(\mik)\xk/\sum_kg(\mik)$. For two clusters the second membership vanishes as soon as $D^2_{1k}/D^2_{2k}\le\beta$: a sample whose nearest prototype is at distance $D_1$ ignores every cluster farther than $D_1/\sqrt\beta$. The memberships are thus fuzzy between neighboring clusters and crisp around each prototype; only a sample far from all prototypes, whose distance ratios approach one, again shares its membership among them. The distances still enter as ratios, so the result is scale-invariant, unlike that of the regularizations. The authors recommend $\beta=0.5$. The parameter keeps the name $\beta$ of the paper and of the code parameter \code{beta}; it is unrelated to the condition-number bound $\beta$ of GK.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}
+\pgfplotsset{fzax/.style={width=7.0cm, height=4.0cm, xmin=-0.8, xmax=1.8, ymin=-0.04, ymax=1.06,
+  xtick={0,1}, xticklabels={$v_1$,$v_2$}, ytick={0,0.5,1}, tick label style={font=\small},
+  title style={font=\small, yshift=-1.5mm}, grid=major, grid style={fcgray!25}, samples=241, domain=-0.8:1.8}}
+\begin{axis}[fzax, at={(0,0)}, title={FCM, $\mu^m$ with $m=2$}]
+  \addplot[fcblue, very thick] {(x-1)^2/((x-1)^2+x^2)};
+  \addplot[fcverm, very thick] {x^2/((x-1)^2+x^2)};
+\end{axis}
+\begin{axis}[fzax, at={(6.5cm,0)}, yticklabels={}, title={entropy regularization, $\lambda=0.2$}]
+  \addplot[fcblue, very thick] {1/(1+exp((2*x-1)/0.2))};
+  \addplot[fcverm, very thick] {1-1/(1+exp((2*x-1)/0.2))};
+\end{axis}
+\begin{axis}[fzax, at={(0,-3.9cm)}, title={quadratic regularization, $\lambda=0.25$}]
+  \addplot[fcblue, very thick] {max(0,min(1,1.5-2*x))};
+  \addplot[fcverm, very thick] {1-max(0,min(1,1.5-2*x))};
+\end{axis}
+\begin{axis}[fzax, at={(6.5cm,-3.9cm)}, yticklabels={}, title={polynomial fuzzifier, $\beta=0.3$}]
+  \addplot[fcblue, very thick] {max(0,min(1,(1.3*(x-1)^2/(x^2+(x-1)^2)-0.3)/0.7))};
+  \addplot[fcverm, very thick] {1-max(0,min(1,(1.3*(x-1)^2/(x^2+(x-1)^2)-0.3)/0.7))};
+\end{axis}
+\end{tikzpicture}
+\caption[Membership functions of two clusters with prototypes $v_1=0$ and $v_2=1$ under four fuzzification mechanisms.]{Membership functions of two clusters with prototypes $v_1=0$ (blue) and $v_2=1$ (vermilion) under four fuzzification mechanisms. FCM: the membership is one only at the prototypes and returns toward $1/2$ far away. Entropy regularization: a softmax of the squared-distance differences, crisp far from the border. Quadratic regularization: a linear ramp with exact zeros and ones outside the band $|D_2^2-D_1^2|<2\lambda$. Polynomial fuzzifier: exact zeros wherever one squared distance is less than $\beta$ times the other; fuzzy only between the prototypes.}
+\label{fig:part:fuzzifiers}
+\end{figure}
+
+\begin{algobox}{Regularized fuzzy c-means and deterministic annealing}{regfcm}\index{entropy regularization}\index{quadratic regularization}\index{deterministic annealing}\index{RegularizedFCM@\code{RegularizedFCM}}
+\begin{algorithm}[H]
+\KwIn{data $\X$, number of clusters $c$, regularization (entropy or quadratic) with weight $\lambda>0$, tolerance $\epsilon$; for annealing a cooling factor $\alpha\in(0,1)$ and a start temperature $\lambda_0>2\lambda_{\max}(\mathbf{F}_0)$}
+\eIf{annealing}{
+  all prototypes at the grand mean plus a small perturbation; $\lambda\leftarrow\lambda_0$\;
+}{
+  initialize $\U^{(0)}$ (random, k-means++, or given); $\lambda$ fixed\;
+}
+\Repeat{$\lambda$ has reached its final value (immediately without annealing)}{
+  \Repeat{$\max_{ik}\abs{\mu^{(l)}_{ik}-\mu^{(l-1)}_{ik}}<\epsilon$}{
+    prototypes: $\vi=\sum_k\mik\xk/\sum_k\mik$ (linear weights)\;
+    distances $\Dsq=\norm{\xk-\vi}^2$\;
+    memberships: softmax \eqref{eq:part:muentropy} (entropy) or simplex projection \eqref{eq:part:muquadratic} (quadratic)\;
+  }
+  record the number of distinct prototypes at this $\lambda$\;
+  \lIf{annealing}{$\lambda\leftarrow\max(\alpha\lambda,\lambda_{\mathrm{final}})$; perturb the prototypes slightly}
+}
+\KwOut{$\V$, $\U$ (exact zeros for the quadratic term), $\J_E$ or $\J_Q$; with annealing the history of distinct prototypes over $\lambda$ and the critical temperatures $2\lambda_{\max}(\Fi)$}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Regularized fuzzy c-means and deterministic annealing}
+\begin{itemize}
+  \item Hard c-means functional plus a convex regularizer: entropy (Gibbs/softmax memberships) or quadratic (piecewise linear memberships with exact zeros); prototypes are means with linear weights.
+  \item $\lambda$ is a squared length (temperature): $\lambda\to0$ gives k-means, $\lambda\to\infty$ uniform memberships; scale it with the squared cluster radius, standardize the data.
+  \item Entropy memberships depend on differences of squared distances: far samples belong fully to the nearest cluster.
+  \item Deterministic annealing lowers $\lambda$ from above $2\lambda_{\max}(\mathbf{F}_0)$; prototypes split at the critical temperatures $2\lambda_{\max}(\Fi)$, which reveals the cluster structure scale by scale and removes the start dependence.
+  \item Parameters: \code{regularization}, \code{lam}, \code{annealing}, \code{lam\_start}, \code{anneal\_rate}, \code{perturbation}; attributes \code{cluster\_history\_}, \code{n\_effective\_clusters\_}, \code{critical\_temperatures\_}.
+\end{itemize}
+\end{summarybox}
+
+\begin{algobox}{Fuzzy c-means with the polynomial fuzzifier}{polyfcm}\index{polynomial fuzzifier}\index{fuzzifier!polynomial}\index{PolynomialFuzzifierFCM@\code{PolynomialFuzzifierFCM}}
+\begin{algorithm}[H]
+\KwIn{data $\X$, number of clusters $c$, fuzzifier parameter $0\le\beta<1$, tolerance $\epsilon$}
+initialize $\U^{(0)}$; $l\leftarrow0$\;
+\Repeat{$\max_{ik}\abs{\mu^{(l)}_{ik}-\mu^{(l-1)}_{ik}}<\epsilon$}{
+  $l\leftarrow l+1$\;
+  prototypes: $\mathbf{v}_i^{(l)}=\sum_kg(\mu^{(l-1)}_{ik})\xk\big/\sum_kg(\mu^{(l-1)}_{ik})$ with $g$ from \eqref{eq:part:polyfuzzifier}\;
+  distances $\Dsq=\norm{\xk-\mathbf{v}_i^{(l)}}^2$; sort them for every sample\;
+  \For{$k=1,\dots,N$}{
+    $\hat c_k\leftarrow$ largest number of nearest prototypes for which \eqref{eq:part:mupoly} is positive for all of them\;
+    $\mu^{(l)}_{ik}$ by \eqref{eq:part:mupoly} for the $\hat c_k$ nearest prototypes, $0$ for the others\;
+  }
+}
+\KwOut{$\V$, $\U$ with exact zeros, number of active clusters per sample, $\J=\sum_{ik}g(\mik)\Dsq$}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Polynomial fuzzifier}
+\begin{itemize}
+  \item Replaces $\mu^m$ by $g(\mu)=\frac{1-\beta}{1+\beta}\mu^2+\frac{2\beta}{1+\beta}\mu$, whose positive slope at zero makes zero memberships optimal for far clusters.
+  \item Fuzzy between neighboring clusters, crisp around each prototype: a sample ignores every cluster farther than $D_1/\sqrt\beta$, so the members of one cluster no longer pull the distant prototypes.
+  \item Distances enter as ratios, so the partition is scale-invariant like FCM; $\beta=0$ is FCM with $m=2$, $\beta\to1$ k-means, $\beta=0.5$ recommended.
+  \item Same cost per iteration as FCM plus a sort of the $c$ distances per sample; sparse membership matrix.
+  \item Parameters: \code{n\_clusters}, \code{beta}; attribute \code{n\_active\_}.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Estimating the number and location of clusters from density}\label{sec:part:density}\index{number of clusters!density-based estimate}
+
+The iterative algorithms of this chapter need the number of clusters and a start. Before the validity indices of \cref{ch:validity} judge finished partitions, a cheaper question can be put to the data directly: where the density peaks are and how many there are. The mountain method of Yager and Filev \cite{yager:1994:mountain} and its data-point version, the subtractive clustering of Chiu \cite{chiu:1994:subtractive}, answer it in one pass without iteration and without random initialization (\cref{fig:part:subtractive}).
+
+\paragraph{The mountain method.}\index{mountain method} The data are scaled to the unit hypercube and a grid of nodes $\mathbf{g}$ is laid over it. Every node receives the value of the \emph{mountain function}, the sum of Gaussian influences of all samples,
+\begin{equation}
+  M(\mathbf{g})=\sum_{k=1}^{N}\exp\bigl(-\alpha\norm{\mathbf{g}-\xk}^2\bigr),\qquad\alpha=4/r_a^2,
+  \label{eq:part:mountain}
+\end{equation}
+where $r_a$ is the neighborhood radius: samples farther than $r_a$ contribute less than $e^{-4}\approx0.02$. The highest node $\mathbf{g}^*_1$ with height $M^*_1$ is the first center. Its mountain is then \emph{destroyed}: $M(\mathbf{g})\leftarrow M(\mathbf{g})-M^*_1\exp(-4\norm{\mathbf{g}-\mathbf{g}^*_1}^2/r_b^2)$ with a second radius $r_b$, so that nodes near the center lose most of their height and distant nodes keep theirs. The next highest node is the next center. The procedure stops when the highest remaining node falls below a fraction $\delta$ of $M^*_1$. The grid is the method's weakness: with $G$ nodes per axis there are $G^n$ nodes, which is affordable for two or three features only.
+
+\paragraph{Subtractive clustering.}\index{subtractive clustering} Chiu \cite{chiu:1994:subtractive} took the data points themselves as the candidate centers, which makes the cost $\mathcal{O}(N^2n)$, linear instead of exponential in the dimension. The \emph{potential} of sample $k$ is
+\begin{equation}
+  P_k=\sum_{l=1}^{N}\exp\bigl(-\alpha\norm{\xk-\mathbf{x}_l}^2\bigr),\qquad \alpha=4/r_a^2,
+  \label{eq:part:potential}
+\end{equation}
+a kernel density estimate with bandwidth $r_a/\sqrt8$. After the selection of the center $\mathbf{x}^*_i$ with potential $P^*_i$ all potentials are revised,
+\begin{equation}
+  P_k\leftarrow P_k-P^*_i\exp\bigl(-4\norm{\xk-\mathbf{x}^*_i}^2/r_b^2\bigr),\qquad r_b=\eta\,r_a,
+  \label{eq:part:subtract}
+\end{equation}
+with the \emph{squash factor} $\eta>1$ (Chiu suggests $r_b=1.5r_a$; a common default is $\eta=1.25$), so that no second center is placed close to an existing one. The stopping rule has a gray zone. A candidate with $P^*>\bar\varepsilon P^*_1$ is accepted, one with $P^*<\underline\varepsilon P^*_1$ ends the search ($\bar\varepsilon=0.5$, $\underline\varepsilon=0.15$ in Chiu's paper), and in between the candidate is accepted only if it is far enough from the existing centers relative to its potential, $d_{\min}/r_a+P^*/P^*_1\ge1$; otherwise its potential is set to zero and the next candidate is examined. The radius $r_a$, a fraction of the data range, is the parameter that matters; it sets the scale at which the data are viewed, small radii giving many centers and large radii few. Counting the centers over a range of radii and looking for a \emph{plateau} gives a quick, model-free estimate of the number of clusters (\cref{sec:part:ex:subtractive}).
+
+\paragraph{Uses.} The centers are good initial prototypes for FCM, GK, and GG, and their number is an estimate of $c$. Chiu's own application was fuzzy modeling: run on the product space $\mathbf{z}_k=[\xk\T\ y_k]\T$ of inputs and output, every center becomes the center of a rule of a Takagi--Sugeno model, so the number of centers is a \emph{rule-number estimate} and the radius controls the granularity of the model (\cref{ch:models}).
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[x=1cm, y=1cm]
+  \begin{axis}[width=12.4cm, height=4.6cm, xmin=0, xmax=10, ymin=0, ymax=1.42, axis lines=left,
+    xtick=\empty, ytick=\empty, xlabel={data space}, ylabel={potential}, label style={font=\small},
+    samples=300, domain=0:10, clip=false]
+    % potential before any subtraction: three groups of different mass
+    \addplot[fcgray, thick, dashed] {exp(-(x-2)^2/0.5) + 0.75*exp(-(x-5.2)^2/0.4) + 0.45*exp(-(x-8.2)^2/0.35)};
+    % after subtracting the first center
+    \addplot[fcblue, very thick] {max(0, exp(-(x-2)^2/0.5) + 0.75*exp(-(x-5.2)^2/0.4) + 0.45*exp(-(x-8.2)^2/0.35) - 1.0*exp(-(x-2)^2/0.78))};
+    \draw[fcverm, thick, -{Latex[length=2mm]}] (axis cs:2,1.12) -- (axis cs:2,0.25);
+    \node[note, anchor=south, text=fcverm!80!black] at (axis cs:2.6,1.12) {1st center, $P^*_1$: subtract a bump of radius $r_b$};
+    \draw[fcgreen!70!black, thick, -{Latex[length=2mm]}] (axis cs:5.2,0.95) -- (axis cs:5.2,0.8);
+    \node[note, anchor=south, text=fcgreen!70!black] at (axis cs:5.6,0.95) {next highest: 2nd center};
+    \draw[fcgray, thin] (axis cs:0,0.15*1.0) -- (axis cs:10,0.15*1.0);
+    \node[note, anchor=south west] at (axis cs:6.15,0.15) {stop below $\underline\varepsilon P^*_1$};
+    \draw[fcgray, thin] (axis cs:0,0.5) -- (axis cs:10,0.5);
+    \node[note, anchor=south west] at (axis cs:6.15,0.5) {accept above $\bar\varepsilon P^*_1$};
+  \end{axis}
+\end{tikzpicture}
+\caption[Subtractive clustering in one dimension.]{Subtractive clustering in one dimension. The dashed curve is the initial potential, a kernel density estimate of the data. The highest point becomes the first center and a Gaussian bump of radius $r_b=\eta r_a$ scaled to its potential is subtracted (solid curve); the highest remaining potential gives the next center. Candidates above $\bar\varepsilon P^*_1$ are accepted, the search stops below $\underline\varepsilon P^*_1$, and in between a candidate must also be far enough from the existing centers.}
+\label{fig:part:subtractive}
+\end{figure}
+
+\begin{algobox}{Subtractive clustering}{subtractive}\index{subtractive clustering}\index{SubtractiveClustering@\code{SubtractiveClustering}}
+\begin{algorithm}[H]
+\KwIn{data $\X$, radius $r_a$ (fraction of the data range, scalar or per feature), squash factor $\eta$, acceptance and rejection ratios $\bar\varepsilon>\underline\varepsilon$}
+scale the data to $[0,1]^n$; potentials $P_k$ by \eqref{eq:part:potential}; $\mathcal{C}\leftarrow\emptyset$\;
+\While{true}{
+  $k^*\leftarrow\argmax_kP_k$, $P^*\leftarrow P_{k^*}$; for the first candidate $P^*_1\leftarrow P^*$\;
+  \uIf{$P^*>\bar\varepsilon P^*_1$ or $\mathcal{C}=\emptyset$}{accept}
+  \uElseIf{$P^*<\underline\varepsilon P^*_1$}{stop}
+  \Else{
+    $d_{\min}\leftarrow$ distance of $\mathbf{x}_{k^*}$ to the nearest center in $\mathcal{C}$\;
+    \lIf{$d_{\min}/r_a+P^*/P^*_1\ge1$}{accept}
+    \lElse{$P_{k^*}\leftarrow0$ and examine the next candidate}
+  }
+  on acceptance: $\mathcal{C}\leftarrow\mathcal{C}\cup\{\mathbf{x}_{k^*}\}$ and revise all potentials by \eqref{eq:part:subtract}\;
+}
+\KwOut{centers $\mathcal{C}$ (data points, original units), their number $c$, and relative potentials $P^*_i/P^*_1$}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Subtractive clustering}
+\begin{itemize}
+  \item Selects data points of high potential (kernel density) as centers, subtracting the influence of every selected center; no number of clusters, no initialization, no iteration.
+  \item One essential parameter: the radius $r_a$ as a fraction of the data range; a plateau of the number of centers over $r_a$ indicates a stable structure.
+  \item $\mathcal{O}(N^2n)$ time and $\mathcal{O}(N^2)$ memory: practical for thousands of samples in any dimension.
+  \item Uses: initial centers and $c$ for FCM/GK/GG; on product-space data a rule-number estimate for Takagi--Sugeno models.
+  \item Parameters: \code{radii}, \code{squash}, \code{accept\_ratio}, \code{reject\_ratio}, \code{max\_clusters}; attributes \code{n\_clusters\_}, \code{center\_indices\_}, \code{potentials\_}, \code{initial\_potentials\_}.
+\end{itemize}
+\end{summarybox}
+
+\begin{algobox}{Mountain method}{mountain}\index{mountain method}\index{MountainClustering@\code{MountainClustering}}
+\begin{algorithm}[H]
+\KwIn{data $\X$, grid size $G$ per feature, radius $r_a$, squash factor $\eta$, stopping ratio $\delta$}
+scale the data to $[0,1]^n$; build the grid of $G^n$ nodes; mountain function $M(\mathbf{g})$ by \eqref{eq:part:mountain}\;
+$\mathbf{g}^*_1\leftarrow\argmax M$, $M^*_1\leftarrow M(\mathbf{g}^*_1)$; $i\leftarrow1$\;
+\Repeat{$M^*_{i}<\delta M^*_1$}{
+  destroy the mountain of the last center: $M(\mathbf{g})\leftarrow M(\mathbf{g})-M^*_i\exp(-4\norm{\mathbf{g}-\mathbf{g}^*_i}^2/r_b^2)$, $r_b=\eta r_a$\;
+  $i\leftarrow i+1$; $\mathbf{g}^*_i\leftarrow\argmax M$, $M^*_i\leftarrow M(\mathbf{g}^*_i)$\;
+}
+\KwOut{the grid nodes $\mathbf{g}^*_1,\dots,\mathbf{g}^*_{i-1}$ as centers, their number, the mountain function}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Mountain method}
+\begin{itemize}
+  \item The grid-based predecessor of subtractive clustering: a density (mountain) function on grid nodes, peaks selected and destroyed one by one.
+  \item Centers are grid nodes, so their precision is the grid spacing; the stop rule is a single ratio $\delta$.
+  \item $G^n$ nodes: exponential in the number of features, practical for $n\le3$; \code{max\_nodes} bounds the grid explicitly.
+  \item Parameters: \code{grid\_size}, \code{max\_nodes}, \code{radii}, \code{squash}, \code{stop\_ratio}; attributes \code{grid\_}, \code{mountain\_}.
+\end{itemize}
+\end{summarybox}
+
+\section{Using it in fuzzyclust}\label{sec:part:api}
+
+The five core estimators are in \code{fuzzyclust.cluster} and are re-exported at the package top level; the estimators of \cref{sec:part:fuzzifiers,sec:part:density} are in \code{fuzzyclust.cluster} only. The iterative estimators share the constructor parameters, attributes, and methods of \cref{sec:found:api}, so only their algorithm-specific additions are listed here; the two density-based estimators have no \code{n\_clusters}, \code{tol}, or \code{init} and are listed in full.
+
+\begin{apibox}{fuzzyclust.cluster.KMeans}
+\code{n\_clusters=3}, \code{tol=1e-4}, \code{max\_iter=300}, \code{init="random"}, \code{n\_init=1}, \code{random\_state=None}, \code{verbose=0}. The exponent is fixed at $m=1$ and the partition is crisp; \code{membership\_} holds one-hot rows, \code{objective\_} the within-cluster sum of squares. An emptied cluster keeps its previous prototype. For large data sets \code{sklearn.cluster.KMeans} is faster; this class exists so that hard and fuzzy methods share one interface and one loop.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.cluster.KMedoids}
+\code{n\_clusters=3}, \code{medoid="exact"}, \code{tol}, \code{max\_iter}, \code{init}, \code{n\_init}, \code{random\_state}, \code{verbose}. \code{medoid="exact"} selects the member with minimal total distance to the other members, \code{"nearest\_mean"} the member closest to the cluster mean (MATLAB behavior). \code{cluster\_centers\_} are rows of \code{X}, and \code{medoid\_indices\_} holds their row indices.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.cluster.FCM}
+\code{n\_clusters=3}, \code{m=2.0}, \code{norm="euclidean"}, \code{tol}, \code{max\_iter}, \code{init}, \code{n\_init}, \code{random\_state}, \code{verbose}. \code{norm} is \code{"euclidean"} ($\A=\mathbf{I}$), \code{"diagonal"} (inverse feature variances), \code{"mahalanobis"} (pseudo-inverse of the data covariance), or an explicit $(n,n)$ matrix; the matrix used is stored in \code{norm\_matrix\_}. Requires $m>1$. \code{covariances\_} holds the fuzzy covariance matrices of the final partition for inspection and plotting (they are not used by the algorithm).
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.cluster.GK}
+\code{n\_clusters=3}, \code{m=2.0}, \code{rho=None}, \code{gamma=0.0}, \code{beta=1e15}, \code{tol}, \code{max\_iter}, \code{init}, \code{n\_init}, \code{random\_state}, \code{verbose}. \code{rho} is a scalar or a vector of $c$ volumes (\code{None}: all one); \code{gamma}$\in[0,1]$ the shrinkage weight \eqref{eq:part:gamma}; \code{beta} the condition-number bound \eqref{eq:part:beta}. Attributes: \code{covariances\_} $(c,n,n)$ after regularization, \code{norm\_matrices\_} $(c,n,n)$, \code{eigenvalues\_} $(c,n)$ ascending, \code{eigenvectors\_} $(c,n,n)$ with the normal direction in the first column, \code{rho\_}.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.cluster.GG}
+\code{n\_clusters=3}, \code{m=2.0}, \code{gamma=0.0}, \code{beta=1e15}, \code{tol}, \code{max\_iter}, \code{init}, \code{n\_init}, \code{random\_state}, \code{verbose}. \code{m=1} gives the original FMLE algorithm, \code{m=2} is recommended; the covariance exponent is $w=m$. Pass \code{init=fcm.membership\_} (or \code{gk.membership\_}) for the recommended initialization. Attributes: \code{covariances\_}, \code{priors\_} $(c,)$, \code{eigenvalues\_}, \code{eigenvectors\_}; \code{distances\_} and \code{transform} return $\sqrt{\Dsq}$ capped at $e^{350}$.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.cluster.RegularizedFCM}
+\code{n\_clusters=3}, \code{regularization="entropy"}, \code{lam=1.0}, \code{annealing=False}, \code{lam\_start=None}, \code{anneal\_rate=0.8}, \code{perturbation=1e-3}, \code{tol}, \code{max\_iter}, \code{init}, \code{n\_init}, \code{random\_state}, \code{verbose}. \code{regularization} is \code{"entropy"} \eqref{eq:part:muentropy} or \code{"quadratic"} \eqref{eq:part:muquadratic}; \code{lam} is $\lambda$ in squared data units (the final temperature when annealing). \code{annealing=True} (entropy only) starts at \code{lam\_start} (\code{None}: $2.2\lambda_{\max}$ of the data covariance) with all prototypes at the grand mean and cools by \code{anneal\_rate}; \code{max\_iter} then applies per temperature. Attributes: \code{lam\_} and \code{covariances\_}; with annealing \code{cluster\_history\_} (a \code{DataFrame} with columns \code{lam}, \code{n\_effective}, and \code{objective}), \code{n\_effective\_clusters\_}, and \code{critical\_temperatures\_}. The functions \code{entropy\_memberships(d2, lam)} and \code{quadratic\_memberships(d2, lam)} evaluate the membership formulas for given squared distances.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.cluster.PolynomialFuzzifierFCM}
+\code{n\_clusters=3}, \code{beta=0.5}, \code{tol}, \code{max\_iter}, \code{init}, \code{n\_init}, \code{random\_state}, \code{verbose}. \code{beta}$\in[0,1)$ is the fuzzifier parameter of \eqref{eq:part:polyfuzzifier}. Attributes: \code{n\_active\_} (number of positive memberships per training sample), \code{covariances\_} (weights $g(\mik)$). The functions \code{polynomial\_fuzzifier(U, beta)} and \code{polynomial\_memberships(d2, beta)} implement \eqref{eq:part:polyfuzzifier} and \eqref{eq:part:mupoly}.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.cluster.SubtractiveClustering}
+\code{radii=0.5}, \code{squash=1.25}, \code{accept\_ratio=0.5}, \code{reject\_ratio=0.15}, \code{max\_clusters=None}. \code{radii} is $r_a$ as a fraction of the range of every feature (a scalar or one value per feature). There is no \code{n\_clusters} parameter; the number of clusters is a result, \code{n\_clusters\_}. Attributes: \code{cluster\_centers\_} (data points in original units), \code{center\_indices\_}, \code{potentials\_} (relative potentials at selection), \code{initial\_potentials\_} (the density estimate), \code{membership\_}, \code{labels\_}. \code{predict\_proba} returns normalized Gaussian memberships $\exp(-4D^2/r_a^2)$, \code{transform} the Euclidean distances to the centers in the original units.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.cluster.MountainClustering}
+\code{grid\_size=None}, \code{max\_nodes=10000}, \code{radii=0.5}, \code{squash=1.25}, \code{stop\_ratio=0.15}, \code{max\_clusters=None}. \code{grid\_size=None} chooses the largest grid with at most \code{max\_nodes} nodes; an explicit grid that exceeds the bound raises an error. Attributes: \code{grid\_}, \code{grid\_size\_}, \code{mountain\_} (before destruction), \code{potentials\_}, \code{n\_clusters\_}, \code{cluster\_centers\_}; inference methods as for \code{SubtractiveClustering}.
+\end{apibox}
+
+Fitting is one line, and the fitted object exposes prototypes, memberships, and labels:
+\pysnippet{examples/01_clustering/plot_01_fcm_basics.py}{fit}
+The membership function between two prototypes is \eqref{eq:part:mufcm} in three lines of \code{numpy}:
+\pysnippet{examples/01_clustering/plot_09_fuzziness_exponent.py}{membership1d}
+The recommended way to run the three fuzzy algorithms on the same data chains them:
+\begin{lstlisting}
+fcm = FCM(n_clusters=3, random_state=0).fit(X)
+gk  = GK(n_clusters=3, random_state=0, n_init=5).fit(X)
+gg  = GG(n_clusters=3, init=fcm.membership_).fit(X)   # GG started from the FCM partition
+print(gg.priors_)                                     # estimated cluster proportions
+U_new = gg.predict_proba(X_new)                       # memberships of unseen data
+\end{lstlisting}
+The four fuzzification mechanisms are interchangeable estimators:
+\pysnippet{examples/01_clustering/plot_12_fuzzifiers_annealing.py}{fit}
+Deterministic annealing is a flag of \code{RegularizedFCM}, and the history of the phase transitions is a \code{DataFrame}:
+\pysnippet{examples/01_clustering/plot_12_fuzzifiers_annealing.py}{annealing}
+Subtractive clustering returns the number of clusters and the centers, which initialize any of the iterative algorithms:
+\pysnippet{examples/01_clustering/plot_13_subtractive_clustering.py}{fit}
+\pysnippet{examples/01_clustering/plot_13_subtractive_clustering.py}{init}
+On product-space data the number of centers is the number of rules of a Takagi--Sugeno model:
+\pysnippet{examples/01_clustering/plot_13_subtractive_clustering.py}{rules}
+
+\section{Examples}\label{sec:part:examples}
+
+\subsection{Fuzzy c-means: memberships and prototypes}\label{sec:part:ex:fcm}
+
+The script \code{plot\_01\_fcm\_basics.py} fits FCM to three well-separated Gaussian clusters (\cref{fig:intro:first}). It converges in six iterations, and the memberships printed for the least and the most ambiguous samples show the two faces of a fuzzy partition: samples at the prototypes have memberships $(0,1,0)$, while samples between two clusters share theirs, for example $(0.22,0.74,0.03)$. \Cref{fig:part:ex:fcm-m} shows the contour maps for $m=1.2$, $2$, and $4$. For $m=1.2$ the regions of high membership are wide and the boundaries sharp (partition coefficient $PC=1.00$); for $m=4$ only the immediate neighborhood of a prototype has a high membership ($PC=0.54$). On well-separated data the prototypes barely move with $m$.
+
+\exfig{01_clustering/plot_01_fcm_basics_2}[Fuzzy c-means on three separated clusters for $m=1.2$, $2$, and $4$.]{Fuzzy c-means on three separated clusters for $m=1.2$, $2$, and $4$. The partition coefficient $PC$ in the titles falls from $1.00$ to $0.54$: a small exponent gives wide regions of high membership and sharp borders, a large one nearly uniform memberships with the same prototypes.}{part:ex:fcm-m}
+
+\subsection{The fuzziness exponent}\label{sec:part:ex:m}
+
+The script \code{plot\_09\_fuzziness\_exponent.py} isolates the exponent. \Cref{fig:part:ex:m1d} plots \eqref{eq:part:mufcm} for two fixed prototypes on a line; for $m=2$ it is the classical curve $\mu_1(x)=(x-1)^2/((x-1)^2+x^2)$, and the return of every curve toward $1/2$ outside the prototypes is the mark of the column constraint. On three overlapping clusters (\cref{fig:part:ex:m2d}) the same trend appears in the plane. The third figure of the script (not shown) records, for $m$ from $1.1$ to $10$, how the partition coefficient falls from $0.98$ to $0.34$, close to $1/c$; how the mean distance of the prototypes from the grand mean, after a slight rise from $3.18$ to $3.24$ at $m=1.75$--$2$, falls to $2.73$ as they drift together; and how the number of iterations behaves. It is lowest, $14$, near $m=1.5$--$1.75$, and grows above $m\approx2$ to $47$ at $m=10$ because the memberships change more slowly; at $m=1.1$ it is $19$, because the nearly crisp partition takes several iterations to settle.
+
+\exfig[0.7\textwidth]{01_clustering/plot_09_fuzziness_exponent_1}[Membership in the cluster of $v_1=0$ along the line to $v_2=1$ for five exponents.]{Membership in the cluster of $v_1=0$ along the line to $v_2=1$ for five exponents. $m\to1$ gives the Voronoi step of k-means, large $m$ a flat function at $1/2$; far from both prototypes every curve tends to $1/2$.}{part:ex:m1d}
+\exfig{01_clustering/plot_09_fuzziness_exponent_2}{FCM on three overlapping clusters for $m=1.2$, $2$, and $4$: as $m$ grows, the partition becomes less sharp and the prototypes move slightly toward the grand mean.}{part:ex:m2d}
+
+\subsection{Hard versus fuzzy partitions}\label{sec:part:ex:hard}
+
+The script \code{plot\_02\_hard\_vs\_fuzzy.py} runs k-means, k-medoids, and FCM on three overlapping clusters. The hard labels of the three methods are identical here (adjusted Rand index $0.975$ with the generating labels for each of them), and the script verifies that the medoids are rows of the data matrix. \Cref{fig:part:ex:hard} shows what FCM adds: the mixed colors mark the overlap regions, and the confidence map identifies the samples that a crisp label would misrepresent; with $m=2$, $3.9\,\%$ of the samples have a maximal membership below $0.6$. The parameter study of the script shows how this share depends on the exponent while the labels stay put: it is $0.3\,\%$ for $m=1.2$, $11.7\,\%$ for $m=2.5$, and $61\,\%$ for $m=4$, with the agreement with the generating labels between $0.97$ and $0.98$ throughout.
+
+\exfig{01_clustering/plot_02_hard_vs_fuzzy_2}[The information a fuzzy partition carries beyond the labels.]{The information a fuzzy partition carries beyond the labels. Left: FCM memberships blended into the cluster colors; the overlap regions are mixed. Right: the maximal membership as the confidence of the hard assignment; the ambiguous samples lie between the prototypes.}{part:ex:hard}
+
+\subsection{Gustafson--Kessel: shape, volume, and regularization}\label{sec:part:ex:gk}
+
+The script \code{plot\_03\_gk\_ellipses.py} generates three elongated clusters with different orientations. In the comparison of FCM and GK (\cref{fig:part:ex:gk}), the $2\sigma$ ellipses of the fuzzy covariance matrices show what each algorithm ``sees.'' The elongation ratios $\sqrt{\lambda_{i2}/\lambda_{i1}}$ read from \code{eigenvalues\_} are $6.9$, $8.7$, and $8.4$. \Cref{fig:part:ex:gk-rho} varies the volume of the first cluster, $\rho_1\in\{0.2,1,5\}$: its membership region shrinks or expands while the neighbors adjust, which is the lever to use when one cluster is known to be larger. \Cref{fig:part:ex:gk-reg} adds a perfectly collinear fourth cluster. Without regularization the condition number of its fuzzy covariance matrix is about $6000$, two orders of magnitude above those of the other clusters ($50$ to $80$), and its membership region is a razor-thin line. With $\gamma=0.1$ it obtains a finite width, but the shrinkage acts on every cluster and rounds the other ellipses as well; the bound $\beta=10^4$ is not active, because no condition number reaches it. The parameter study of the script separates the two safeguards: $\beta=10^2$ or $10^3$ bounds the collinear cluster alone and keeps the adjusted Rand index at $0.93$--$0.94$ (against $0.945$ without regularization), whereas $\gamma\ge0.05$ shortens every elongation ratio to below $3$ and lowers the index to $0.81$ and less.
+
+\exfig{01_clustering/plot_03_gk_ellipses_1}[Three elongated clusters.]{Three elongated clusters. FCM (left) draws circular contours that cut across the groups; GK (right) adapts an ellipse to each cluster and recovers the generating labels. Colored ellipses: $2\sigma$ ellipses of the fuzzy covariance matrices.}{part:ex:gk}
+\exfig{01_clustering/plot_03_gk_ellipses_2}[The volume parameter of GK.]{The volume parameter of GK. The first cluster is given $\rho_1=0.2$, $1$, and $5$; its region of high membership shrinks and grows accordingly while the partition of the well-separated data stays stable.}{part:ex:gk-rho}
+\exfig{01_clustering/plot_03_gk_ellipses_3}[Covariance regularization on a perfectly collinear cluster.]{Covariance regularization on a perfectly collinear cluster. Left: without regularization the condition number of its covariance matrix is two orders of magnitude above those of the other clusters, and its membership region degenerates to a line. Right: the shrinkage $\gamma=0.1$ gives the cluster a finite width but also rounds its neighbors; the condition bound $\beta=10^4$ is not reached.}{part:ex:gk-reg}
+
+\subsection{Local optima of Gustafson--Kessel}\label{sec:part:ex:init}
+
+Elongated clusters are also where GK shows its start dependence. \Cref{sec:found:ex:init} reported the twenty random starts of \code{plot\_10\_initialisation\_restarts.py} on three noisy line segments, together with the remedy (restarts) and the failure of k-means++ seeding on these data; \cref{fig:part:ex:init} shows what the two optima look like. The best run ($\J=142$) recovers the three lines. The worst ($\J=229$) fits one prototype along the diagonal line and splits the two upper lines into left and right halves, a configuration that is locally consistent with thin ellipsoids and from which the iteration cannot escape.
+
+\exfig{01_clustering/plot_10_initialisation_restarts_2}[Twenty random starts of GK on three line segments.]{Twenty random starts of GK on three line segments. Left: the final objectives fall into two groups. Middle: the best run recovers the lines. Right: the worst run is a converged local optimum in which two lines are split into halves and a third prototype follows the diagonal.}{part:ex:init}
+
+\subsection{Gath--Geva: size and density}\label{sec:part:ex:gg}
+
+The script \code{plot\_04\_gg\_densities.py} generates a large diffuse cluster of 300 points next to two small dense ones of 60 points each. In \cref{fig:part:ex:gg}, FCM and GK, whose clusters have equal volume, let the two small clusters take over the margin of the big one (adjusted Rand indices $0.70$ and $0.44$), whereas GG, started from the FCM partition, gives the big cluster a large covariance and a large prior and leaves the small ones intact. The estimated priors $(0.14, 0.15, 0.71)$ match the true proportions $(0.71, 0.14, 0.14)$ up to the order of the clusters. The script also runs GG from ten random starts: the agreement with the generating labels varies between $0.83$ and $0.98$, and the FCM-initialized run matches the best of them without any restarts. \Cref{fig:part:ex:gg-density} displays the fitted components as the mixture density $\sum_i\alpha_i\,\mathcal{N}(\mathbf{x};\vi,\Fi)$, the reading of \eqref{eq:part:Dgg} as a Gaussian mixture.
+
+\exfig{01_clustering/plot_04_gg_densities_1}[Clusters of very different size and density.]{Clusters of very different size and density. FCM and GK give the margin of the large diffuse cluster to the small ones because their clusters have equal volume; GG, initialized from FCM, adapts volume and prior and recovers the structure.}{part:ex:gg}
+\exfig[0.55\textwidth]{01_clustering/plot_04_gg_densities_2}{The GG result read as a Gaussian mixture: the density $\sum_i\alpha_i\mathcal{N}(\mathbf{x};\vi,\Fi)$ of the three fitted components over the data.}{part:ex:gg-density}
+
+\subsection{Evaluating new data}\label{sec:part:ex:predict}
+
+A fitted model defines a membership function over the whole space, not only a partition of the training data. The script \code{plot\_06\_predict\_new\_data.py} fits GK to 60\,\% of the samples of three elongated clusters and evaluates the rest with \code{predict\_proba}, \code{predict}, and \code{transform}; the test samples fall into the regions of the training clusters (first figure of the script). \Cref{fig:part:ex:predict}, the classical comparison figure of the toolbox manual drawn for these data, confirms the sketch of \cref{fig:part:concept}. The script ends with a monitoring application: for a point far outside the data the maximal GK membership drops to $0.52$ and its distance to the nearest prototype is $28$, against a median of $1.2$ for the training samples, so both quantities can serve as novelty scores. The same mechanism is used for validation in \cref{ch:validity}.
+
+\exfig{01_clustering/plot_06_predict_new_data_2}[The membership function learned from the same training data by four algorithms.]{The membership function learned from the same training data by four algorithms: Voronoi cells (k-means), circles (FCM), ellipses (GK), and density-shaped regions with sharp borders (GG). Every algorithm defines its own distance, and \code{predict\_proba} evaluates it for any new sample.}{part:ex:predict}
+
+\subsection{Real data: motorcycle and iris}\label{sec:part:ex:real}
+
+Two scripts discussed in \cref{sec:found:examples} also belong here. On the standardized motorcycle data (\code{plot\_07\_motorcycle\_scaling.py}), four GK clusters segment the acceleration signal into the phases before, during, and after the impact. In the scaled space (\cref{fig:part:ex:motorcycle}) the orientation of each cluster is the local slope of the signal, the first appearance of the local-linear-model reading of GK that \cref{ch:models,ch:timeseries} develop. On the iris data (\code{plot\_08\_sklearn\_pandas\_workflow.py}), GK with three clusters separates setosa cleanly and divides versicolor and virginica with the overlap reported in \cref{sec:found:ex:sklearn}; the misclassification rate of about $10\,\%$ agrees with the figures reported for the MATLAB toolbox.
+
+\exfig[0.6\textwidth]{01_clustering/plot_07_motorcycle_scaling_2}[Gustafson--Kessel contours on the standardized motorcycle data.]{Gustafson--Kessel contours on the standardized motorcycle data. Each ellipse follows the local slope of the acceleration signal: the covariance of a GK cluster encodes a local linear model.}{part:ex:motorcycle}
+
+\subsection{Fuzzifiers, regularization, and deterministic annealing}\label{sec:part:ex:fuzzifiers}
+
+The script \code{plot\_12\_fuzzifiers\_annealing.py} puts the mechanisms of \cref{sec:part:fuzzifiers} side by side. \Cref{fig:part:ex:fuzz-line} evaluates the membership formulas for three prototypes on a line at $0$, $1$, and $4$. The FCM memberships are positive everywhere: the third cluster keeps a small membership even between the first two prototypes (about $0.01$ at their midpoint) and $0.07$ at $x=-2$. The entropy memberships are softmax functions that become crisp a short distance from every border. The quadratic and polynomial memberships are exactly zero for at least one cluster almost everywhere, and between $v_1$ and $v_2$ the third cluster has no influence at all. On four groups in the plane (\cref{fig:part:ex:fuzz-plane}) all four mechanisms recover the groups (adjusted Rand index $0.98$), but the membership matrices differ: the quadratic regularization ($\lambda=2$) gives $71\,\%$ and the polynomial fuzzifier ($\beta=0.5$) $74\,\%$ exact zeros, close to the maximum $(c-1)/c=75\,\%$, while FCM and the entropy regularization give none. In the contours this appears as flat plateaus of membership one inside the groups for the two sparse mechanisms and as ripples around every prototype for FCM.
+
+\exfig{01_clustering/plot_12_fuzzifiers_annealing_1}[Memberships of three clusters with prototypes at $0$, $1$, and $4$ on a line under four fuzzification mechanisms.]{Memberships of three clusters with prototypes at $0$, $1$, and $4$ on a line under four fuzzification mechanisms. The dark bar below the curves marks where at least one membership is exactly zero: nowhere for FCM and the entropy regularization, almost everywhere for the quadratic regularization and the polynomial fuzzifier.}{part:ex:fuzz-line}
+\exfig[0.85\textwidth]{01_clustering/plot_12_fuzzifiers_annealing_2}{Maximal membership on four groups for FCM, entropy and quadratic regularization, and the polynomial fuzzifier: the sparse mechanisms are crisp inside the groups and fuzzy only between neighbors.}{part:ex:fuzz-plane}
+
+Deterministic annealing on the same data (\cref{fig:part:ex:annealing}) starts at $\lambda=35.4$, just above the critical temperature $2\lambda_{\max}(\mathbf{F}_0)=32.2$ of the whole data set, and cools by the factor $0.9$. The four prototypes stay together until $\lambda=28.7$, where they split into two pairs (the left and the right halves of the data), and the pairs split at $\lambda=3.14$, just below the critical temperatures $3.27$ and $3.53$ of the two halves predicted by \eqref{eq:part:critical}. The final partition at $\lambda=0.5$ recovers the four groups with an adjusted Rand index of $0.98$, without any random initialization. The parameter study (\cref{fig:part:ex:fuzz-study}) shows the same transition from the other side: at a fixed temperature, the partition coefficient of the entropy-regularized partition stays near one up to $\lambda=1$ ($0.97$) and drops to $1/2$ for $\lambda\ge5$ ($0.500$ and $0.498$), because above the critical temperature of the halves the two prototypes of each half coincide and the four prototypes describe two clusters. The polynomial fuzzifier produces exact zeros as soon as $\beta>0$ ($70\,\%$ already at $\beta=0.1$); a larger $\beta$ only sharpens the borders, and the partition coefficient rises from $0.87$ ($\beta=0$, FCM) to $0.99$ at $\beta=0.5$.
+
+\exfig{01_clustering/plot_12_fuzzifiers_annealing_3}[Deterministic annealing on four groups.]{Deterministic annealing on four groups. Left: the number of distinct prototypes against the decreasing temperature jumps from one to two near the critical temperature of the whole data and from two to four near those of the two halves (vertical lines, $2\lambda_{\max}$ of the covariances). Right: the final partition.}{part:ex:annealing}
+\exfig{01_clustering/plot_12_fuzzifiers_annealing_4}{Parameter study: partition coefficient of the entropy regularization against $\lambda$ (left; the drop to $1/2$ is the merging of the prototype pairs above the critical temperature) and partition coefficient and fraction of exact zeros of the polynomial fuzzifier against $\beta$ (right).}{part:ex:fuzz-study}
+
+\subsection{Subtractive clustering: number of clusters, initialization, and rules}\label{sec:part:ex:subtractive}
+
+The script \code{plot\_13\_subtractive\_clustering.py} generates eight elongated groups with $40$ to $150$ samples each. With $r_a=0.25$, subtractive clustering selects eight centers, one per group, in the order of decreasing potential: the relative potentials at selection fall from $1$ and $0.97$ for the two large groups to $0.26$ for the last small one (\cref{fig:part:ex:subtractive}, left). The mountain method on a $100\times100$ grid finds the same eight centers (right panel); its mountain function is visibly the same density estimate as the potential of the samples. Passed to GK as \code{init}, the subtractive centers lead to the optimum ($\J=353.9$, adjusted Rand index $0.97$) in $33$ iterations, against a median of $44$ and a maximum of $126$ for twenty random starts that all reach the same optimum (second figure of the script).
+
+\exfig{01_clustering/plot_13_subtractive_clustering_1}[Subtractive clustering and the mountain method on eight elongated groups.]{Subtractive clustering and the mountain method on eight elongated groups. Left: the potential of every sample and the centers numbered in the order of selection. Right: the mountain function on a $100\times100$ grid and the selected nodes.}{part:ex:subtractive}
+
+The radius study (\cref{fig:part:ex:radius}) shows how the method is used in practice. The number of centers falls with the radius and, with the default squash factor, stays at eight for $r_a\in[0.18,0.30]$: below the plateau the elongated groups are cut into pieces, above it neighboring groups fall within one radius. A larger squash factor shifts the plateau to smaller radii ($[0.14,0.24]$ for $\eta=1.5$, $[0.22,0.38]$ for $\eta=1$), because the subtracted bump has the radius $\eta r_a$; the mountain method follows the subtractive curve closely. The last part of the script uses subtractive clustering as Chiu did, as a rule-number estimator for a Takagi--Sugeno model of $\sin(x)/x$ (\cref{fig:part:ex:rules}). Run on the product space of input and output, it suggests $12$, $10$, $6$, $4$, and $3$ rules for $r_a=0.15$, $0.2$, $0.3$, $0.4$, and $0.5$. The test error, computed for every number of rules, decreases steeply up to six rules ($\mathrm{RMSE}=0.039$) and flattens beyond ten ($0.024$); the radius $0.3$ thus gives the smallest accurate model and $0.2$ the accurate end of the curve, while $0.5$ is too coarse ($\mathrm{RMSE}=0.13$ with three rules).
+
+\exfig[0.7\textwidth]{01_clustering/plot_13_subtractive_clustering_3}[Number of centers against the radius for three squash factors and for the mountain method.]{Number of centers against the radius for three squash factors and for the mountain method. The plateau at eight (dotted line) indicates the stable structure.}{part:ex:radius}
+\exfig[0.7\textwidth]{01_clustering/plot_13_subtractive_clustering_4}{Test error of Takagi--Sugeno models of $\sin(x)/x$ against the number of rules, with the rule numbers estimated by subtractive clustering in the input--output space for five radii (dashed lines).}{part:ex:rules}
+
+\section{Further reading}\label{sec:part:reading}
+
+k-means goes back to MacQueen \cite{macqueen:1967:kmeans}, k-medoids to Kaufman and Rousseeuw \cite{kaufman:1990:groups}; k-means++ seeding is due to Arthur and Vassilvitskii \cite{arthur:2007:kmeanspp}. Fuzzy c-means was introduced by Dunn \cite{dunn:1973:fcm} and generalized and analyzed by Bezdek and co-workers \cite{bezdek:1981,bezdek:1980:convergence,bezdek:1984:fcm,bezdek:1987:convergence}. The Gustafson--Kessel algorithm appeared in \cite{gustafson:1979}, its covariance regularization in Babu\v{s}ka, van der Veen, and Kaymak \cite{babuska:2002:covariance}; the use of the eigenstructure of $\Fi$ for local linear models is developed in Babu\v{s}ka's monograph \cite{babuska:1998:book}. Fuzzy maximum likelihood estimation is due to Bezdek and Dunn \cite{bezdek:1975:fmle} and the Gath--Geva algorithm to Gath and Geva \cite{gath:1989}, whose paper also introduced the volume-based validity measures of the next chapter. The exposition of the four algorithms follows the MATLAB toolbox manual \cite{balasko:2005:toolbox} and the same monograph \cite{babuska:1998:book}; H\"oppner et al.\ \cite{hoppner:1999:book} discuss all of them with their shell and variety relatives. The entropy regularization is due to Li and Mukaidono \cite{li:1995:entropy} and Miyamoto and Mukaidono \cite{miyamoto:1997:entropy}, the quadratic one to Miyamoto and Umayahara \cite{miyamoto:1998:quadratic}; Rose \cite{rose:1998:annealing} surveys deterministic annealing with its phase transitions and its applications beyond clustering. Klawonn and H\"oppner \cite{klawonn:2003:fuzzifier} analyze what makes a fuzzifier and propose the polynomial one. The mountain method is from Yager and Filev \cite{yager:1994:mountain}, subtractive clustering and its use for fuzzy model identification from Chiu \cite{chiu:1994:subtractive}.

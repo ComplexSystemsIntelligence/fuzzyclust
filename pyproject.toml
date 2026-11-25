@@ -1,0 +1,76 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fuzzyclust"
+version = "1.0"
+description = "Fuzzy clustering and data analysis toolbox: FCM, GK, GG, validity indices, fuzzy Sammon mapping, Takagi-Sugeno identification, time-series segmentation and more, scikit-learn compatible."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+authors = [
+  { name = "János Abonyi", email = "janos@abonyilab.com" },
+]
+keywords = ["fuzzy clustering", "fuzzy c-means", "Gustafson-Kessel", "Gath-Geva", "Takagi-Sugeno", "Sammon mapping", "cluster validity", "time-series segmentation"]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Operating System :: OS Independent",
+]
+dependencies = [
+  "numpy>=1.24",
+  "scipy>=1.10",
+  "scikit-learn>=1.6",
+  "pandas>=2.0",
+  "matplotlib>=3.7",
+]
+
+[project.optional-dependencies]
+graph = ["networkx>=3.0"]
+docs = [
+  "sphinx>=7", "pydata-sphinx-theme", "sphinx-gallery>=0.15", "numpydoc",
+  "myst-parser", "sphinx-copybutton", "sphinx-design", "networkx>=3.0",
+]
+test = ["pytest>=7", "pytest-cov", "networkx>=3.0"]
+dev = ["fuzzyclust[graph,docs,test]", "ruff", "build", "twine"]
+
+[project.urls]
+Homepage = "https://github.com/ComplexSystemsIntelligence/fuzzyclust"
+Documentation = "https://complexsystemsintelligence.github.io/fuzzyclust"
+Repository = "https://github.com/ComplexSystemsIntelligence/fuzzyclust"
+Issues = "https://github.com/ComplexSystemsIntelligence/fuzzyclust/issues"
+Changelog = "https://github.com/ComplexSystemsIntelligence/fuzzyclust/blob/main/CHANGELOG.md"
+"Book (PDF)" = "https://complexsystemsintelligence.github.io/fuzzyclust/fuzzyclust-book.pdf"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/fuzzyclust"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/fuzzyclust", "tests", "examples", "README.md", "LICENSE", "CITATION.cff", "CHANGELOG.md"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "src/fuzzyclust"]
+addopts = "-q --doctest-modules --ignore=examples --ignore=docs --ignore=book"
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+src = ["src", "tests", "examples"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "NPY"]
+ignore = ["E741", "B028"]
+
+[tool.ruff.lint.per-file-ignores]
+"examples/**" = ["E402", "E501"]

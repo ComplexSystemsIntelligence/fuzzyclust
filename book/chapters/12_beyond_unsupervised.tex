@@ -1,0 +1,520 @@
+\chapter[Beyond a single unsupervised run]{Beyond a single unsupervised run: partial supervision, co-clustering, collaboration, and ensembles}\label{ch:beyond}
+\begin{roadmap}
+All algorithms so far take one data matrix, cluster its rows without outside knowledge, and return the partition of one run. This chapter relaxes each of these restrictions. Partial supervision lets a few class labels (Pedrycz and Waletzky) or a few must-link and cannot-link pairs (Grira, Crucianu, and Boujemaa) steer the partition toward the structure the user means; co-clustering (FCCM of Oh, Honda, and Ichihashi; Fuzzy CoDoK of Kummamuru, Dhawale, and Krishnapuram) clusters the rows \emph{and} the columns of an object--item matrix at once; collaborative clustering (Pedrycz) reconciles the partitions of several data sites that describe the same objects without exchanging their data; and cluster ensembles (Strehl and Ghosh, Punera and Ghosh, and Fred and Jain) combine a library of runs into a consensus that is typically more accurate than its members and more reproducible than a single run, and they read the number of clusters off the agreement of the runs. Partial supervision and collaboration add a term to the c-means functional of \cref{ch:partitioning}, co-clustering replaces it by an aggregation criterion, and ensembles combine its results; the methods live in \code{fuzzyclust.semisupervised}, \code{.coclustering}, \code{.collaborative}, and \code{.ensemble}.
+\end{roadmap}
+
+\section{Problem and idea}\label{sec:beyond:problem}
+
+Fuzzy c-means finds the partition that the distance and the prototype shape make optimal, and that partition is not always the one the user wants. Two long parallel bars of points are a simple example (\cref{fig:beyond:supervision}): with two spherical prototypes the c-means functional prefers a split \emph{across} the bars, because the variance along the bars dominates the gap between them, whereas the user knows that the bars are the classes. Pedrycz and Waletzky \cite{pedrycz:1997:ssfcm} observed that the user often knows the class of a few samples, and added to the functional a term that penalizes the difference between the memberships of these labeled samples and their labels. Since the labeled and the unlabeled samples share the prototypes, a handful of labels moves the prototypes and rotates the whole partition. Labels presuppose an agreed list of classes; a weaker and often cheaper kind of knowledge says only that two samples belong together (must-link) or not (cannot-link): two images show the same scene, two records describe the same customer. Grira, Crucianu, and Boujemaa \cite{grira:2006:pcca} penalize the expected number of violated pairs and combine the penalty with the competitive agglomeration of Frigui and Krishnapuram \cite{frigui:1997:ca}, which lets an overestimated number of clusters shrink to the number the data and the constraints support.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[scale=1.0, >={Latex[length=2mm]}]
+  \def\ptsUp{0.25/0.81,1.04/0.73,-1.05/0.70,0.05/0.52,1.96/0.98,1.98/0.60,-1.87/0.59,-1.46/0.76,-2.24/1.07,-0.30/0.84,-2.35/0.62,-0.22/0.67,0.75/0.91,-1.11/0.77,0.88/0.66,0.45/0.76,1.45/0.85,2.40/0.80}
+  \def\ptsLo{0.77/-0.96,0.29/-0.79,-0.69/-1.20,-1.37/-0.85,-0.47/-0.62,-0.16/-0.65,-1.15/-0.60,-1.04/-0.60,-0.21/-0.53,1.80/-1.00,0.43/-0.65,-1.08/-1.13,-1.11/-0.91,-0.23/-1.14,1.30/-0.82,2.30/-0.75,2.00/-0.90,-2.10/-0.80}
+  % ---------- left: labels ----------
+  \begin{scope}
+    \node[font=\small, anchor=south] at (0,1.55) {(a) a few class labels};
+    \draw[fcgray, thick, dashed] (-0.62,-1.38) -- (0.62,1.38);
+    \draw[black, thick] (-2.7,0) -- (2.7,0);
+    \foreach \x/\y in \ptsUp { \fill[fcgray!70] (\x,\y) circle (1.5pt); }
+    \foreach \x/\y in \ptsLo { \fill[fcgray!70] (\x,\y) circle (1.5pt); }
+    \foreach \x/\y in {-2.24/1.07,1.96/0.98,0.75/0.91} { \filldraw[fill=fcverm, draw=black] (\x-0.08,\y-0.08) rectangle (\x+0.08,\y+0.08); }
+    \foreach \x/\y in {-1.37/-0.85,1.80/-1.00,0.29/-0.79} { \filldraw[fill=fcblue, draw=black] (\x,\y) circle (2.6pt); }
+    \draw[->, fcgray!80!black, thick] (-1.0,0.42) -- (-0.15,0.70);
+    \draw[->, fcgray!80!black, thick] (1.0,-0.42) -- (0.15,-0.70);
+    \node[fcgray, font=\large] at (-1.0,0.42) {$\times$};
+    \node[fcgray, font=\large] at (1.0,-0.42) {$\times$};
+    \node[font=\large] at (0,0.75) {$\times$};
+    \node[font=\large] at (0,-0.75) {$\times$};
+    \node[note, text width=5.6cm, anchor=north] at (0,-1.45) {gray: FCM prototypes and boundary (dashed); black: with the labeled samples (squares, disks), whose term $\alpha\sum_{i,k}(\mik-f_{ik}b_k)^2\Dsq$ pulls the shared prototypes};
+  \end{scope}
+  % ---------- right: pairs ----------
+  \begin{scope}[shift={(6.3,0)}]
+    \node[font=\small, anchor=south] at (0,1.55) {(b) must-link and cannot-link pairs};
+    \foreach \x/\y in \ptsUp { \fill[fcgray!70] (\x,\y) circle (1.5pt); }
+    \foreach \x/\y in \ptsLo { \fill[fcgray!70] (\x,\y) circle (1.5pt); }
+    \draw[fcgreen!80!black, very thick] (-2.24,1.07) -- (1.96,0.98);
+    \draw[fcgreen!80!black, very thick] (-1.05,0.70) -- (1.04,0.73);
+    \draw[fcgreen!80!black, very thick] (-1.37,-0.85) -- (1.80,-1.00);
+    \draw[fcverm, very thick, dashed] (0.25,0.81) -- (0.29,-0.79);
+    \draw[fcverm, very thick, dashed] (-1.87,0.59) -- (-1.47,-0.61);
+    \draw[fcverm, very thick, dashed] (1.45,0.85) -- (2.30,-0.75);
+    \foreach \x/\y in {-2.24/1.07,1.96/0.98,-1.05/0.70,1.04/0.73,-1.37/-0.85,1.80/-1.00,0.25/0.81,0.29/-0.79,-1.87/0.59,-1.47/-0.61,1.45/0.85,2.30/-0.75} { \fill[black] (\x,\y) circle (1.8pt); }
+    \node[note, text width=5.6cm, anchor=north] at (0,-1.45) {\textcolor{fcgreen!60!black}{solid}: pair $(k,l)\in\mathcal{M}$, cost $\sum_i\sum_{j\ne i}\mik\mu_{jl}$; \textcolor{fcverm!80!black}{dashed}: pair $(k,l)\in\mathcal{C}$, cost $\sum_i\mik\mu_{il}$---the expected number of violated pairs is penalized};
+  \end{scope}
+\end{tikzpicture}
+\caption[Two kinds of partial supervision.]{Two kinds of partial supervision on two parallel bars that FCM splits across. (a) Labels: a few samples carry a class label, and the supervision term pulls their memberships, and with them the shared prototypes, toward the classes. (b) Pairs: must-link and cannot-link constraints say only whether two samples belong together; their expected violation is penalized.}
+\label{fig:beyond:supervision}
+\end{figure}
+
+A second limitation is the data matrix itself. For a document--term matrix, a user--product table, or any other non-negative \emph{co-occurrence} matrix, the rows and the columns are both entities worth clustering, and a cluster is a \emph{pair}: a group of documents and the vocabulary that makes them a group (\cref{fig:beyond:cocluster}). Clustering the rows with a distance between sparse count vectors misses this duality. Oh, Honda, and Ichihashi \cite{oh:2001:fccm} give each co-cluster two membership vectors, one over the objects and one over the items, and maximize the \emph{aggregation} of the matrix entries that both memberships select; Kummamuru, Dhawale, and Krishnapuram \cite{kummamuru:2003:codok} solve the same problem with a different regularizer that scales to large document collections.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[x=0.42cm, y=-0.42cm, >={Latex[length=2mm]}]
+  % matrix cells: 9 objects x 12 items, three co-clusters on the diagonal (reordered)
+  \foreach \r in {0,...,8} { \foreach \c in {0,...,11} {
+      \pgfmathtruncatemacro{\br}{int(\r/3)} \pgfmathtruncatemacro{\bc}{int(\c/4)}
+      \pgfmathsetmacro{\shade}{ifthenelse(\br==\bc, 55 + mod(7*\r+5*\c,4)*10, mod(3*\r+11*\c,3)*6)}
+      \fill[black!\shade] (\c,\r) rectangle ++(1,1);
+  } }
+  \draw[fcgray!60, thin] (0,0) grid (12,9);
+  \draw[fcblue, very thick] (0,0) rectangle (4,3);
+  \draw[fcverm, very thick] (4,3) rectangle (8,6);
+  \draw[fcgreen!80!black, very thick] (8,6) rectangle (12,9);
+  % object memberships (stacked bars, left)
+  \foreach \r/\a/\b in {0/0.85/0.10,1/0.80/0.12,2/0.60/0.30,3/0.15/0.75,4/0.05/0.90,5/0.10/0.70,6/0.05/0.10,7/0.10/0.15,8/0.20/0.25} {
+    \pgfmathsetmacro{\ab}{\a+\b}
+    \fill[fcblue] (-4,\r+0.15) rectangle (-4+3*\a,\r+0.85);
+    \fill[fcverm] (-4+3*\a,\r+0.15) rectangle (-4+3*\ab,\r+0.85);
+    \fill[fcgreen] (-4+3*\ab,\r+0.15) rectangle (-1,\r+0.85);
+  }
+  \node[font=\small, anchor=south] at (-2.5,-0.2) {$u_{ik}$};
+  % item memberships (bars on top), colored by the co-cluster of largest membership
+  \foreach \c/\h in {0/2.2,1/1.6,2/1.9,3/1.2,4/1.8,5/2.3,6/1.1,7/1.5,8/2.0,9/1.4,10/1.7,11/0.9} {
+    \pgfmathtruncatemacro{\bc}{int(\c/4)}
+    \ifnum\bc=0 \def\col{fcblue}\fi \ifnum\bc=1 \def\col{fcverm}\fi \ifnum\bc=2 \def\col{fcgreen}\fi
+    \fill[\col] (\c+0.15,-0.4) rectangle (\c+0.85,-0.4-\h);
+  }
+  \node[font=\small, anchor=west] at (12.1,-1.2) {$w_{ij}$};
+  \node[font=\small, anchor=north] at (6,9.3) {items (terms) $j=1,\dots,M$};
+  \node[font=\small, rotate=90, anchor=south] at (-4.4,4.5) {objects (documents) $k$};
+  % annotation
+  \node[note, text width=4.4cm, anchor=west] at (12.7,3.5) {co-cluster $i$: a group of objects (memberships $u_{ik}$, $\sum_i u_{ik}=1$) and its items ($w_{ij}$, $\sum_j w_{ij}=1$); FCCM maximizes the aggregation $\sum_{i,k,j}u_{ik}w_{ij}r_{kj}$ minus $\lambda_u$ and $\lambda_w$ times the membership entropies};
+\end{tikzpicture}
+\caption[Co-clustering of an object--item matrix.]{Co-clustering of an object--item matrix (rows and columns reordered). Every co-cluster has a membership vector over the objects (stacked bars, left) and one over the items (bars on top, colored by the co-cluster of largest membership); the dense blocks on the diagonal are the co-occurrences that both memberships select.}
+\label{fig:beyond:cocluster}
+\end{figure}
+
+The third limitation is organizational. The same objects---patients, customers, production batches---are often described at several \emph{data sites} by different features, and the raw data cannot be pooled for reasons of confidentiality, size, or ownership. Pedrycz's collaborative clustering \cite{pedrycz:2002:collaborative} runs fuzzy c-means at every site and lets the sites exchange only their partition matrices (\cref{fig:beyond:sites}): each site re-clusters its own data with an additional term that pulls its memberships toward those of the other sites, weighted by a collaboration matrix. The structures are reconciled without moving any data, and how far each site has to move tells how much it disagrees with the rest.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[>={Latex[length=2mm]}, node distance=4mm]
+  \foreach \p/\x/\n in {1/0/2,2/4.3/3,3/8.6/2} {
+    \node[data, minimum width=3.0cm] (X\p) at (\x,0) {site \p: $\X[\p]$\\ $N\times n_{\p}$ features};
+    \node[block, minimum width=3.0cm, below=of X\p] (F\p) {FCM with\\ collaboration term};
+    \node[result, minimum width=3.0cm, below=of F\p] (U\p) {partition $\U[\p]$};
+    \draw[arrow] (X\p) -- (F\p);
+    \draw[arrow] (F\p) -- (U\p);
+    \draw[dashed, fcgray, rounded corners=3pt] ($(X\p.north west)+(-0.15,0.15)$) rectangle ($(U\p.south east)+(0.15,-0.15)$);
+  }
+  \draw[<->, thick, fcorange!80!black] (U1.south) to[bend right=25] node[below, font=\small, text=black] {$\alpha[1,2]$, $\alpha[2,1]$} (U2.south);
+  \draw[<->, thick, fcorange!80!black] (U2.south) to[bend right=25] node[below, font=\small, text=black] {$\alpha[2,3]$, $\alpha[3,2]$} (U3.south);
+  \draw[<->, thick, fcorange!80!black] ($(U1.south)+(-0.6,0)$) to[bend right=32] node[below, font=\small, text=black, fill=white, inner sep=1pt] {$\alpha[1,3]$, $\alpha[3,1]$} ($(U3.south)+(0.6,0)$);
+  \node[font=\small, anchor=south] at (4.3,1.1) {the same $N$ objects, different features at every site};
+  \node[note, text width=10cm] at (4.3,-5.8) {raw data stay inside the dashed boxes; only the $c\times N$ partition matrices travel (orange)};
+\end{tikzpicture}
+\caption[Collaborative clustering of three data sites.]{Collaborative clustering of three data sites. Every site clusters its own features of the same $N$ objects; the sites exchange only their partition matrices, and the collaboration weight $\alpha[ii,jj]$ says how strongly site $ii$ is pulled toward the partition of site $jj$.}
+\label{fig:beyond:sites}
+\end{figure}
+
+The last limitation is the single run. An alternating-optimization clusterer finds a local optimum that depends on its start, and the partition depends on the sample and on the features it saw; restarts (\py{n_init}) keep the run with the lowest objective but discard the information in the others. A \emph{cluster ensemble} \cite{strehl:2002:ensembles} keeps all of them (\cref{fig:beyond:ensemble}). A library of partitions is generated by random starts, sub-samples, feature subsets, or different numbers of clusters. It is summarized by the \emph{co-association matrix}, the average similarity of the membership vectors of two objects, which needs no matching of cluster labels between the members, and a consensus function partitions the objects from this matrix. Punera and Ghosh \cite{punera:2008:soft} showed how to use the soft partitions directly instead of hardening them first. Fred and Jain \cite{fred:2005:eac} used the co-association matrix to choose the number of clusters: when the members over-segment the data, the natural groups form the partition of its dendrogram that survives the widest range of thresholds.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[>={Latex[length=2mm]}]
+  \node[data] (X) at (0,0) {data $\X$\\ $N\times n$};
+  % library
+  \foreach \q/\y/\w in {1/0.75/0.45,2/0/0.6,3/-0.75/0.5} {
+    \draw[fcblue!70!black, fill=fcblue!8] (2.3,\y-0.28) rectangle (2.3+\w*2,\y+0.28);
+  }
+  \node[font=\small] at (2.75,0.75) {$\U^{(1)}$};
+  \node[font=\small] at (2.9,0) {$\U^{(2)}$};
+  \node[font=\small] at (2.8,-0.75) {$\U^{(Q)}$};
+  \node[note, text width=3.2cm, anchor=north] at (3.1,-1.15) {random starts, sub-samples, feature subsets, various $c_q$};
+  \draw[arrow] (X) -- (2.2,0);
+  % co-association matrix
+  \begin{scope}[shift={(5.4,-0.9)}, x=0.2cm, y=0.2cm]
+    \foreach \r in {0,...,8} { \foreach \c in {0,...,8} {
+        \pgfmathtruncatemacro{\br}{int(\r/3)} \pgfmathtruncatemacro{\bc}{int(\c/3)}
+        \pgfmathsetmacro{\shade}{ifthenelse(\br==\bc, 75 + mod(\r+\c,2)*15, mod(2*\r+\c,3)*8)}
+        \fill[black!\shade] (\c,8-\r) rectangle ++(1,1);
+    } }
+    \draw[fcgray] (0,0) rectangle (9,9);
+  \end{scope}
+  \node[font=\small, anchor=south] at (6.3,0.95) {co-association $s_{kl}$};
+  \draw[arrow] (4.15,0) -- (5.3,0);
+  % consensus functions
+  \node[block, text width=3.3cm, anchor=west] (C) at (7.75,0) {consensus function:\\ FCM on the rows of $\mathbf{S}$, spectral, dendrogram of $1-s_{kl}$, sMCLA, ITK};
+  \draw[arrow] (7.3,0) -- (C.west);
+  \node[result, anchor=north] (Ustar) at (C.south) [yshift=-6mm] {consensus $\U^{*}$\\ ($c$ or chosen by the lifetime)};
+  \draw[arrow] (C) -- (Ustar);
+\end{tikzpicture}
+\caption[From a library of soft partitions to a consensus.]{From a library of soft partitions to a consensus. The members may have different numbers of clusters; the co-association matrix compares only co-memberships, so their cluster labels need not be matched, and the consensus function partitions the objects from it.}
+\label{fig:beyond:ensemble}
+\end{figure}
+
+\section{Theory}\label{sec:beyond:theory}
+
+The notation is that of the book: $\X\in\R^{N\times n}$ with rows $\xk$, memberships $\mik$ in $\U\in\R^{c\times N}$ (stored transposed in the code), prototypes $\vi$, squared Euclidean distances $\Dsq=\norm{\xk-\vi}^2$, index $i$ or $j$ for clusters and $k$ or $l$ for samples. The starting point is fuzzy c-means with $m=2$: the functional $\J=\sum_i\sum_k\mik^2\Dsq$ \eqref{eq:part:Jfcm}, its membership formula $\mik=1/\sum_j(\Dsq/D^2_{jk})$ \eqref{eq:part:mufcm}, and its prototype update \eqref{eq:part:vfcm}. The supervised and the collaborative algorithms add a quadratic term to $\J$ and keep $m=2$, the value for which their papers derive closed-form updates. We treat partial supervision by labels (\cref{sec:beyond:ssfcm}) and by pairs (\cref{sec:beyond:pcca}), co-clustering (\cref{sec:beyond:fccm}), collaboration (\cref{sec:beyond:cfcm}), and ensembles (\cref{sec:beyond:ensemble,sec:beyond:eac}).
+
+\subsection{Fuzzy c-means with partial supervision}\label{sec:beyond:ssfcm}
+
+Let $b_k\in\{0,1\}$ indicate whether sample $k$ is labeled and let $f_{ik}\ge0$, $\sum_i f_{ik}=1$, be its label---the indicator of its class or, more generally, a fuzzy label vector; class $j$ is tied to cluster $j$, and surplus clusters are unsupervised. Pedrycz and Waletzky \cite{pedrycz:1997:ssfcm} minimize
+\begin{equation}
+  \J=\sum_{i=1}^{c}\sum_{k=1}^{N}\mik^2\Dsq+\alpha\sum_{i=1}^{c}\sum_{k=1}^{N}\big(\mik-f_{ik}b_k\big)^2\Dsq
+  \label{eq:beyond:Jss}
+\end{equation}
+under $\sum_i\mik=1$. The second term measures, in the metric of the clustering, how far the memberships of the labeled samples are from their labels; for an unlabeled sample it reads $\alpha\mik^2\Dsq$ and merely rescales the c-means term. Setting the derivative of the Lagrangian to zero gives
+\begin{equation}
+  \mik=\frac{1}{1+\alpha}\left[\frac{1+\alpha\big(1-b_k\sum_{j=1}^{c}f_{jk}\big)}{\sum_{j=1}^{c}\Dsq/D^2_{jk}}+\alpha f_{ik}b_k\right],
+  \label{eq:beyond:muss}
+\end{equation}
+which is the FCM membership for an unlabeled sample and, for a labeled one, the convex combination $\frac{1}{1+\alpha}\mu^{\mathrm{FCM}}_{ik}+\frac{\alpha}{1+\alpha}f_{ik}$: the label is followed to the degree $\alpha/(1+\alpha)$. The prototypes are weighted means with the weights of both terms,
+\begin{equation}
+  \vi=\frac{\sum_{k=1}^{N}w_{ik}\xk}{\sum_{k=1}^{N}w_{ik}},\qquad w_{ik}=\mik^2+\alpha\big(\mik-f_{ik}b_k\big)^2 .
+  \label{eq:beyond:vss}
+\end{equation}
+The influence of the labels on the prototypes is not monotone in $\alpha$. For a labeled sample whose membership has reached its label, the supervision weight $\alpha(\mik-f_{ik})^2$ vanishes, while every unlabeled sample carries the weight $(1+\alpha)\mik^2$; a very large $\alpha$ therefore clamps the labeled memberships but lets the unlabeled majority outweigh them in \eqref{eq:beyond:vss}. The paper recommends $\alpha$ proportional to $N/N_b$, the ratio of all samples to the $N_b=\sum_k b_k$ labeled ones, so that the labeled minority is not ignored; the examples show that moderate values, $\alpha\approx1$, move the partition most. Because class $j$ is tied to cluster $j$, a random start that places cluster $j$ next to the samples of another class makes the supervision fight the geometry; starting every supervised prototype at the mean of its labeled samples avoids this. New samples carry no label and receive FCM memberships to the supervised prototypes.
+
+\begin{algobox}{Fuzzy c-means with partial supervision}{ssfcm}
+\begin{algorithm}[H]
+\KwIn{data $\X$; labels $f_{ik}$ and indicators $b_k$ of the labeled samples; $c\ge$ number of classes; weight $\alpha\ge0$ (or $N/N_b$); tolerance $\epsilon$}
+initialize $\vi$ at the means of the labeled samples of class $i$ (random for unsupervised clusters)\;
+\Repeat{$\max_{ik}\abs{\mik^{(l)}-\mik^{(l-1)}}<\epsilon$}{
+  $\Dsq=\norm{\xk-\vi}^2$\;
+  memberships by \eqref{eq:beyond:muss}\;
+  prototypes by \eqref{eq:beyond:vss}\;
+}
+\KwOut{$\U$, $\V$; predicted class of a sample $=$ class tied to its cluster of largest membership}
+\end{algorithm}
+\end{algobox}
+\index{partial supervision}\index{semi-supervised fuzzy c-means}\index{SSFCM|see{semi-supervised fuzzy c-means}}\index{SemiSupervisedFCM@\code{SemiSupervisedFCM}}
+\begin{summarybox}{Fuzzy c-means with partial supervision}
+\begin{itemize}
+  \item Adds to the c-means functional the distance-weighted squared difference between the memberships of the labeled samples and their labels; the labels act on the whole partition through the shared prototypes.
+  \item Labeled memberships are convex combinations of the FCM membership and the label, with weight $\alpha/(1+\alpha)$ on the label; unlabeled samples keep the FCM formula.
+  \item Parameters: the weight $\alpha$ (moderate values move the partition most; $N/N_b$ is the paper's rule), the number of clusters (at least the number of classes), and the start (at the labeled means).
+  \item Use when a few samples of every class are known and the unsupervised optimum differs from the classes; $m=2$.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Pairwise constraints and competitive agglomeration}\label{sec:beyond:pcca}
+
+Let $\mathcal{M}$ be the set of must-link and $\mathcal{C}$ the set of cannot-link pairs $(k,l)$. Under memberships $\mik$, the degree to which a must-link pair is \emph{separated} is $\sum_i\sum_{j\ne i}\mik\mu_{jl}$ and the degree to which a cannot-link pair is \emph{together} is $\sum_i\mik\mu_{il}$; summed over all pairs, these degrees give the expected number of violated constraints when every sample is assigned at random according to its memberships. Grira, Crucianu, and Boujemaa \cite{grira:2006:pcca} minimize, with the fuzzy cardinalities $N_i=\sum_k\mik$,
+\begin{equation}
+  \J=\sum_{i=1}^{c}\sum_{k=1}^{N}\mik^2\Dsq+\alpha\Bigg[\sum_{(k,l)\in\mathcal{M}}\sum_{i=1}^{c}\sum_{j\ne i}\mik\mu_{jl}+\sum_{(k,l)\in\mathcal{C}}\sum_{i=1}^{c}\mik\mu_{il}\Bigg]-\beta\sum_{i=1}^{c}N_i^2 .
+  \label{eq:beyond:Jpcca}
+\end{equation}
+The last term is the competitive agglomeration bias of Frigui and Krishnapuram \cite{frigui:1997:ca}: it rewards large clusters, so the clusters compete for samples and those that lose them can be discarded. Let $C_{ik}=\sum_{l:(k,l)\in\mathcal{M}}(1-\mu_{il})+\sum_{l:(k,l)\in\mathcal{C}}\mu_{il}$ be the cost of placing sample $k$ in cluster $i$: the expected number of constraints it would violate there, given the current memberships of its partners. The Lagrange conditions, solved with the cross terms held at their previous values, give the FCM membership plus two corrections,
+\begin{equation}
+  \mik=\frac{1/\Dsq}{\sum_{j}1/D^2_{jk}}+\frac{\alpha}{2\Dsq}\big(\bar C_k-C_{ik}\big)+\frac{\beta}{\Dsq}\big(N_i-\bar N_k\big),
+  \label{eq:beyond:mupcca}
+\end{equation}
+where $\bar C_k$ and $\bar N_k$ are the means of $C_{jk}$ and $N_j$ over the clusters, weighted by $1/D^2_{jk}$. A cluster in which $k$ violates fewer constraints than on average gains membership, and with $\beta>0$ a cluster larger than average gains membership. The corrections are weighted by $1/\Dsq$ and cancel for a sample that is much closer to one prototype than to the others, so the constraints act most strongly on the ambiguous samples near the cluster boundaries. Negative values are clipped and the memberships renormalized, as in competitive agglomeration. The penalty $\alpha$ is in the units of the squared distances. Grira et al.\ renew it at every iteration so that the constraint term is commensurate with the data term: the mean membership-weighted squared distance, scaled by the ratio of samples to constraints,
+\begin{equation*}
+  \alpha=\frac{N}{|\mathcal{M}|+|\mathcal{C}|}\,\frac{\sum_{i,k}\mik^2\Dsq}{\sum_{i,k}\mik^2}.
+\end{equation*}
+The automatic rule of \code{fuzzyclust} omits the normalization by $\sum_{i,k}\mik^2$ and uses $\alpha=\sum_{i,k}\mik^2\Dsq/(|\mathcal{M}|+|\mathcal{C}|)$, the published value times $\sum_{i,k}\mik^2/N\in[1/c,1]$; the two agree for a crisp partition. The agglomeration weight follows the schedule of competitive agglomeration,
+\begin{equation}
+  \beta(l)=\eta_0\,e^{-l/\tau}\,\frac{\sum_{i,k}\mik^2\Dsq}{\sum_i N_i^2},
+  \label{eq:beyond:beta}
+\end{equation}
+strong at the start and decaying with the iteration $l$, and clusters whose cardinality $N_i$ falls below a minimum are removed. The prototypes are the FCM means \eqref{eq:part:vfcm}.
+
+\begin{algobox}{Pairwise-constrained competitive agglomeration (PCCA)}{pcca}
+\begin{algorithm}[H]
+\KwIn{data $\X$; constraint sets $\mathcal{M}$, $\mathcal{C}$; initial (maximal) $c$; penalty $\alpha$ (or the automatic rule); $\eta_0$, $\tau$, minimal cardinality; tolerance $\epsilon$}
+random initial partition $\U$\;
+\Repeat{$\max_{ik}\abs{\Delta\mik}<\epsilon$}{
+  prototypes $\vi$ by \eqref{eq:part:vfcm}; $\Dsq=\norm{\xk-\vi}^2$\;
+  costs $C_{ik}$ from the constraints and the current $\U$; $N_i=\sum_k\mik$; $\beta(l)$ by \eqref{eq:beyond:beta}\;
+  memberships by \eqref{eq:beyond:mupcca}; clip at zero and renormalize\;
+  \lIf{$\eta_0>0$}{discard clusters with $N_i$ below the minimum, renormalize}
+}
+\KwOut{$\U$, $\V$, final number of clusters, share of satisfied constraints}
+\end{algorithm}
+\end{algobox}
+\index{pairwise constraints}\index{must-link constraint}\index{cannot-link constraint}\index{competitive agglomeration}\index{PCCA}\index{PairwiseConstrainedFCM@\code{PairwiseConstrainedFCM}}
+\begin{summarybox}{Pairwise-constrained competitive agglomeration}
+\begin{itemize}
+  \item Penalizes the expected number of violated must-link and cannot-link pairs; the membership update shifts membership toward the clusters in which a sample violates fewer constraints.
+  \item Pairs need no list of classes and are cheap to collect; fewer pairs need a larger penalty, and a few pairs may be satisfied by bending the boundary locally.
+  \item Optional competitive agglomeration: start with too many clusters, let them compete, and discard the small ones; the usable window of $\eta_0$ lies between ``no competition'' and ``one cluster takes all''.
+  \item Parameters: $\alpha$ (or the automatic rule), $\eta_0$, $\tau$, minimal cardinality; $m=2$.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Fuzzy co-clustering of objects and items}\label{sec:beyond:fccm}
+
+Let $\mathbf{R}=[r_{kj}]\in\R_{\ge0}^{N\times M}$ be an object--item matrix (counts, frequencies, TF-IDF weights). A co-cluster $i$ has object memberships $u_{ik}$ and item memberships $w_{ij}$, with the constraints $\sum_i u_{ik}=1$ for every object (an object is shared among the co-clusters, as in FCM) and $\sum_j w_{ij}=1$ for every co-cluster (each co-cluster distributes one unit of membership over the items). The quantity to be maximized is the \emph{aggregation degree}
+\begin{equation}
+  \sum_{i=1}^{c}\sum_{k=1}^{N}\sum_{j=1}^{M}u_{ik}w_{ij}r_{kj}=\sum_{i,k}u_{ik}a_{ik}=\sum_{i,j}w_{ij}b_{ij},\qquad
+  \begin{aligned} a_{ik}&=\textstyle\sum_j w_{ij}r_{kj},\\ b_{ij}&=\textstyle\sum_k u_{ik}r_{kj},\end{aligned}
+  \label{eq:beyond:aggregation}
+\end{equation}
+large when the objects of a co-cluster cooccur with its items. The aggregation $a_{ik}$ is a weighted \emph{mean} of the row of object $k$ over the items of co-cluster $i$, and $b_{ij}$ is a weighted \emph{sum} of the column of item $j$ over the objects of the co-cluster. The aggregation degree alone is linear in each membership set and is maximized by crisp, degenerate memberships, with the whole item membership of a co-cluster on its single most frequent item. Oh, Honda, and Ichihashi \cite{oh:2001:fccm} regularize both sets by their entropies, the device of Miyamoto and Mukaidono for fuzzy c-means \cite{miyamoto:1997:entropy}, and maximize
+\begin{equation}
+  \J_{\mathrm{FCCM}}=\sum_{i,k,j}u_{ik}w_{ij}r_{kj}-\lambda_u\sum_{i,k}u_{ik}\log u_{ik}-\lambda_w\sum_{i,j}w_{ij}\log w_{ij}.
+  \label{eq:beyond:Jfccm}
+\end{equation}
+The necessary conditions are soft-max assignments,
+\begin{equation}
+  u_{ik}=\frac{\exp(a_{ik}/\lambda_u)}{\sum_{l=1}^{c}\exp(a_{lk}/\lambda_u)},\qquad
+  w_{ij}=\frac{\exp(b_{ij}/\lambda_w)}{\sum_{l=1}^{M}\exp(b_{il}/\lambda_w)},
+  \label{eq:beyond:ufccm}
+\end{equation}
+alternated until the object memberships settle. The weights are measured in the units of the aggregations they temper: $\lambda_u$ like a typical entry of $\mathbf{R}$, and $\lambda_w$ like an entry summed over the objects of a co-cluster, so its scale grows with the size of the data. A small $\lambda$ makes the corresponding memberships crisp; a large one drives them to the uniform values $1/c$ and $1/M$. New objects receive memberships by the first formula with the fitted item memberships.
+
+\begin{algobox}{Fuzzy clustering for categorical multivariate data (FCCM)}{fccm}
+\begin{algorithm}[H]
+\KwIn{non-negative matrix $\mathbf{R}$; $c$; $\lambda_u,\lambda_w>0$; tolerance $\epsilon$}
+random object memberships $u_{ik}$ with $\sum_i u_{ik}=1$\;
+\Repeat{$\max_{ik}\abs{\Delta u_{ik}}<\epsilon$}{
+  $b_{ij}=\sum_k u_{ik}r_{kj}$; item memberships $w_{ij}$ by \eqref{eq:beyond:ufccm}\;
+  $a_{ik}=\sum_j w_{ij}r_{kj}$; object memberships $u_{ik}$ by \eqref{eq:beyond:ufccm}\;
+}
+\KwOut{object and item memberships; hard co-clusters of objects and items by the largest membership}
+\end{algorithm}
+\end{algobox}
+\index{co-clustering}\index{aggregation degree}\index{FCCM@\code{FCCM}}
+\begin{summarybox}{FCCM}
+\begin{itemize}
+  \item Clusters rows and columns of a non-negative co-occurrence matrix at once; a co-cluster is a group of objects with the items that characterize it.
+  \item Maximizes the aggregation degree regularized by the entropies of both membership sets; the updates are soft-max assignments, and no distance between rows is needed.
+  \item Parameters: $\lambda_u$ (in the units of a row mean) and $\lambda_w$ (in the units of a column sum over a co-cluster); outside a window of $\lambda_w$ the solution degenerates.
+  \item Use for document--term, user--item, or other count tables; restarts (\py{n_init}) keep the largest objective.
+\end{itemize}
+\end{summarybox}
+
+Kummamuru, Dhawale, and Krishnapuram \cite{kummamuru:2003:codok} replace the entropies by quadratic regularizers,
+\begin{equation}
+  \J_{\mathrm{CoDoK}}=\sum_{i,k,j}u_{ik}w_{ij}r_{kj}-T_u\sum_{i,k}u_{ik}^2-T_w\sum_{i,j}w_{ij}^2 .
+  \label{eq:beyond:Jcodok}
+\end{equation}
+The necessary conditions are then \emph{linear}: a membership is the uniform value plus a multiple of the deviation of its aggregation from the mean aggregation,
+\begin{equation}
+  u_{ik}=\frac1c+\frac{1}{2T_u}\Big(a_{ik}-\frac1c\sum_{l=1}^{c}a_{lk}\Big),\qquad
+  w_{ij}=\frac1M+\frac{1}{2T_w}\Big(b_{ij}-\frac1M\sum_{l=1}^{M}b_{il}\Big),
+  \label{eq:beyond:ucodok}
+\end{equation}
+followed by clipping at zero and renormalization. No exponentials are evaluated, which removes the overflow of \eqref{eq:beyond:ufccm} for large aggregations, and the clipping sets the item memberships of the irrelevant terms to exactly zero, which gives a sparse and readable result for document collections with large vocabularies.
+
+\begin{algobox}{Fuzzy co-clustering of documents and keywords (Fuzzy CoDoK)}{codok}
+\begin{enumerate}[leftmargin=*]
+  \item Random object memberships $u_{ik}$ with $\sum_i u_{ik}=1$.
+  \item Item memberships by \eqref{eq:beyond:ucodok} from $b_{ij}=\sum_k u_{ik}r_{kj}$; clip at zero and renormalize every co-cluster to $\sum_j w_{ij}=1$.
+  \item Object memberships by \eqref{eq:beyond:ucodok} from $a_{ik}=\sum_j w_{ij}r_{kj}$; clip at zero and renormalize every object to $\sum_i u_{ik}=1$.
+  \item Repeat 2--3 until $\max_{ik}\abs{\Delta u_{ik}}<\epsilon$.
+\end{enumerate}
+\end{algobox}
+\index{Fuzzy CoDoK}\index{FCoDoK@\code{FCoDoK}}
+\begin{summarybox}{Fuzzy CoDoK}
+\begin{itemize}
+  \item The FCCM aggregation with quadratic instead of entropy regularizers: linear updates, clipping instead of exponentials.
+  \item Sparse item memberships (irrelevant items get zero), no overflow for large aggregations, and a wider usable range of the item weight $T_w$.
+  \item Parameters: $T_u$ and $T_w$ in the units of FCCM's $\lambda_u$ and $\lambda_w$.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Collaborative fuzzy clustering}\label{sec:beyond:cfcm}
+
+The same $N$ objects are described at $P$ sites by data $\X[ii]\in\R^{N\times n_{ii}}$, $ii=1,\dots,P$. All sites look for $c$ clusters, with memberships $\mik[ii]$, prototypes $\vi[ii]$ in their own feature spaces, and squared distances $\Dsq[ii]$. The collaboration matrix $\alpha[ii,jj]\ge0$ states how strongly site $ii$ takes the partition of site $jj$ into account. Pedrycz \cite{pedrycz:2002:collaborative} lets site $ii$ minimize
+\begin{equation}
+  Q[ii]=\sum_{i,k}\mik^2[ii]\,\Dsq[ii]+\sum_{jj\ne ii}\alpha[ii,jj]\sum_{i,k}\big(\mik[ii]-\mik[jj]\big)^2\Dsq[ii],
+  \label{eq:beyond:Q}
+\end{equation}
+in which the other sites enter only through their memberships. With $\bar\alpha[ii]=\sum_{jj\ne ii}\alpha[ii,jj]$ and the \emph{communicated memberships}
+\begin{equation}
+  \varphi_{ik}[ii]=\frac{\sum_{jj\ne ii}\alpha[ii,jj]\,\mik[jj]}{1+\bar\alpha[ii]},
+  \label{eq:beyond:phi}
+\end{equation}
+the Lagrange conditions give
+\begin{gather}
+  \mik[ii]=\varphi_{ik}[ii]+\frac{1-\sum_{l=1}^{c}\varphi_{lk}[ii]}{\sum_{l=1}^{c}\Dsq[ii]/D^2_{lk}[ii]},
+  \label{eq:beyond:mucfcm}\\
+  \vi[ii]=\frac{\sum_k w_{ik}[ii]\,\xk[ii]}{\sum_k w_{ik}[ii]},
+  \label{eq:beyond:vcfcm}\\
+  w_{ik}[ii]=\mik^2[ii]+\sum_{jj\ne ii}\alpha[ii,jj]\big(\mik[ii]-\mik[jj]\big)^2 \notag
+\end{gather}
+The membership is a convex combination of the other sites' memberships, with total weight $\bar\alpha/(1+\bar\alpha)$, and of the site's own FCM membership; the prototype weights add to the FCM weight the disagreement with the other sites. The algorithm has two phases. In the first, every site runs FCM independently, and the clusters of the sites are matched by the Hungarian algorithm on the membership overlap $\U[1]\U[jj]\T$, because the sites must refer to the same clusters. In the second, the sites iterate synchronously: each updates its prototypes and memberships by \eqref{eq:beyond:mucfcm} and \eqref{eq:beyond:vcfcm} from the partitions the others communicated in the previous round, until no membership changes by more than $\epsilon$. A site whose row of the collaboration matrix is zero keeps minimizing its plain FCM functional in the second phase, so it stays at its phase-one solution up to the tolerance of the first phase. The collaboration matrix need not be symmetric: a site may listen without being listened to.
+
+Two quantities summarize the result. The distance between the partitions of two sites, $\frac1N\sum_{i,k}(\mik[ii]-\mik[jj])^2$, or their fuzzy Rand index \eqref{eq:val:fuzzyrand}, measures how well the sites agree; the mean absolute change of a site's memberships from the first to the second phase measures how much the site had to give in, and therefore how much its view of the objects differed from the others'.
+
+\begin{algobox}{Collaborative fuzzy clustering}{cfcm}
+\begin{algorithm}[H]
+\KwIn{sites $\X[1],\dots,\X[P]$ with the same $N$ rows; $c$; collaboration matrix $\alpha[ii,jj]$; tolerance $\epsilon$}
+\tcp{phase 1: independent clustering}
+\lFor{$ii=1,\dots,P$}{FCM on $\X[ii]$ with $c$ clusters}
+match the clusters of every site to those of site 1 (Hungarian algorithm on $\U[1]\U[ii]\T$)\;
+\tcp{phase 2: collaboration, synchronous}
+\Repeat{no membership changes by more than $\epsilon$}{
+  \For{$ii=1,\dots,P$}{
+    prototypes $\vi[ii]$ by \eqref{eq:beyond:vcfcm} and memberships $\mik[ii]$ by \eqref{eq:beyond:mucfcm} from the partitions $\U[jj]$ of the previous round\;
+  }
+}
+\KwOut{partitions and prototypes of all sites; partition distances; change of every site}
+\end{algorithm}
+\end{algobox}
+\index{collaborative fuzzy clustering}\index{data sites}\index{CollaborativeFCM@\code{CollaborativeFCM}}
+\begin{summarybox}{Collaborative fuzzy clustering}
+\begin{itemize}
+  \item The same objects are described at several sites by different features; the sites exchange only partition matrices, never data.
+  \item Each site minimizes its FCM functional plus the distance-weighted disagreement with the other sites' memberships; memberships become convex combinations of own and communicated memberships.
+  \item The collaboration matrix sets how much site $ii$ trusts site $jj$ and may be asymmetric; a larger weight pulls the partitions together monotonically.
+  \item The membership change of a site from the independent to the collaborative phase locates the sites that disagree; $m=2$.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Cluster ensembles and consensus functions}\label{sec:beyond:ensemble}
+
+Consider a library of $Q$ soft partitions $\U^{(1)},\dots,\U^{(Q)}$ of the same $N$ objects; member $q$ has $c_q$ clusters and membership vectors $\boldsymbol{\mu}^{(q)}_k\in\R^{c_q}$. In \code{fuzzyclust} the ensemble generates the library itself: every member is the base clusterer (fuzzy c-means by default), fitted with its own random start on a random share of the samples and of the features and with a number of clusters drawn from a given set, and the memberships of \emph{all} samples come from its \code{predict\_proba}. Strehl and Ghosh \cite{strehl:2002:ensembles} call the task of combining such partitions without access to the data \emph{knowledge reuse}; the members' cluster labels are arbitrary, so a consensus function must be invariant to them.
+
+\paragraph{The co-association matrix.} Comparing objects rather than clusters makes the labels irrelevant. The soft co-association of two objects is the library average of the similarity of their membership vectors,
+\begin{equation}
+  s_{kl}=\frac{1}{Q}\sum_{q=1}^{Q}\frac{\big\langle\boldsymbol{\mu}^{(q)}_k,\boldsymbol{\mu}^{(q)}_l\big\rangle}{\norm{\boldsymbol{\mu}^{(q)}_k}\,\norm{\boldsymbol{\mu}^{(q)}_l}}
+  \qquad\text{or}\qquad
+  s_{kl}=\frac{1}{Q}\sum_{q=1}^{Q}\sum_{i=1}^{c_q}\mu^{(q)}_{ik}\mu^{(q)}_{il}.
+  \label{eq:beyond:coassoc}
+\end{equation}
+For crisp members both equal the fraction of members that put $k$ and $l$ into the same cluster, which is the evidence accumulation matrix of Fred and Jain \cite{fred:2005:eac} and the similarity of the CSPA algorithm of Strehl and Ghosh. For soft members the inner product (right) is the probability that two independent draws from the membership vectors land in the same cluster; it is below one even for $k=l$, and the more so the fuzzier the member. The cosine (left, the default) normalizes the membership vectors of every member, so that an object is fully co-associated with itself and with every object that has the same membership vector; the scale of $\mathbf{S}=[s_{kl}]$ then does not depend on the fuzziness or the number of clusters of the members. The matrix $\mathbf{S}$ is symmetric with entries in $[0,1]$.
+
+\paragraph{Consensus functions.} Five ways to obtain $c$ consensus clusters are implemented. (i) \emph{FCM on the rows of $\mathbf{S}$}: the row $\mathbf{s}_k$ is the profile of object $k$'s co-associations with all objects, and objects of one consensus cluster have similar profiles; fuzzy c-means with $m=2$ clusters these $N$-dimensional rows. In such a high dimension FCM from a random partition drifts to the trivial fixed point of all prototypes at the grand mean, so the prototypes are seeded with k-means++. (ii) \emph{Spectral partitioning} \cite{ng:2002:spectral} of the graph with adjacency $\mathbf{S}$; it takes the place of the METIS partitioner \cite{karypis:1998:metis} used in CSPA and in the soft sCSPA of Punera and Ghosh \cite{punera:2008:soft}. (iii) \emph{Hierarchical clustering} of the distance $1-s_{kl}$ (evidence accumulation, \cref{sec:beyond:eac}). (iv) The \emph{soft meta-clustering algorithm} sMCLA \cite{punera:2008:soft}: every cluster of every member is a \emph{hyperedge}, its membership vector over the $N$ objects; the $\sum_q c_q$ hyperedges are grouped into $c$ meta-clusters by the similarity of these vectors (\code{fuzzyclust} uses their cosine similarity and spectral partitioning in place of METIS), every meta-cluster is collapsed into its mean membership vector, and an object's consensus membership is its collapsed membership normalized over the meta-clusters. (v) \emph{Information-theoretic k-means} ITK \cite{punera:2008:soft}: the concatenated membership vectors of an object, divided by $Q$, form a distribution $\mathbf{p}_k$ over all clusters of the library, and k-means with the Kullback--Leibler divergence $\mathrm{KL}(\mathbf{p}_k\|\mathbf{m}_i)$ as distortion partitions these distributions; its centroids $\mathbf{m}_i$ are arithmetic means, and restarts keep the smallest total divergence. The hard consensus functions (ii), (iii), and (v) receive soft memberships in the space of the co-associations: the mean row of every consensus cluster is its prototype $\mathbf{z}_i=\sum_{k\in i}\mathbf{s}_k/|i|$, and every object receives the FCM membership of its row,
+\begin{equation}
+  \mu^{*}_{ik}=\frac{1}{\sum_{j=1}^{c}\norm{\mathbf{s}_k-\mathbf{z}_i}^2/\norm{\mathbf{s}_k-\mathbf{z}_j}^2},
+  \label{eq:beyond:softconsensus}
+\end{equation}
+the same rule as for (i), so that all consensus memberships are on one scale. A new object is passed through every member, its co-associations with the training objects follow from \eqref{eq:beyond:coassoc}, and \eqref{eq:beyond:softconsensus} (or the meta-clusters of sMCLA) gives its consensus membership. The classical hard consensus functions CSPA and MCLA of Strehl and Ghosh are (ii) and (iv) applied to crisp members.
+
+\begin{algobox}{Fuzzy cluster ensemble}{ensemble}
+\begin{algorithm}[H]
+\KwIn{data $\X$; base clusterer; library size $Q$; sample and feature fractions; set of member cluster numbers; $c$ (or none); consensus function}
+\For{$q=1,\dots,Q$}{
+  draw a sub-sample, a feature subset and $c_q$; fit the base clusterer with its own random start\;
+  $\U^{(q)}\gets$ its memberships of all $N$ objects (\code{predict\_proba})\;
+}
+co-association matrix $\mathbf{S}$ by \eqref{eq:beyond:coassoc}\;
+\lIf{$c$ is not given}{$c\gets$ the number of clusters of longest lifetime (\cref{alg:eac})}
+consensus partition by FCM on the rows of $\mathbf{S}$, spectral partitioning, evidence accumulation, sMCLA or ITK; soft memberships by \eqref{eq:beyond:softconsensus}\;
+\KwOut{consensus memberships $\U^{*}$; $\mathbf{S}$; the library}
+\end{algorithm}
+\end{algobox}
+\index{cluster ensemble}\index{consensus clustering}\index{co-association matrix}\index{sMCLA}\index{information-theoretic k-means}\index{FuzzyClusterEnsemble@\code{FuzzyClusterEnsemble}}
+\begin{summarybox}{Fuzzy cluster ensemble}
+\begin{itemize}
+  \item Combines a library of soft partitions (random starts, sub-samples, feature subsets, various $c$) through the co-association matrix, which needs no matching of cluster labels.
+  \item The consensus is typically better than the average member and far more reproducible than a single run; most of the gain comes with the first few members.
+  \item Parameters: library size, sample and feature fractions, member cluster numbers, consensus function (FCM on the rows of $\mathbf{S}$, spectral, hierarchical, sMCLA, ITK), similarity (cosine or inner product).
+  \item Costs $Q$ fits plus an $N\times N$ matrix; use for unstable clusterers, weak views of the data, or to choose $c$ (next section).
+\end{itemize}
+\end{summarybox}
+
+\subsection{Evidence accumulation and the lifetime criterion}\label{sec:beyond:eac}
+
+Fred and Jain \cite{fred:2005:eac} use the co-association matrix of members that deliberately \emph{over-segment} the data: k-means runs with many more clusters than expected and a different number for each run. Objects of one natural group are split differently by different members but stay together in most of them; objects of different groups are rarely together. The distance $d_{kl}=1-s_{kl}$ is clustered hierarchically (single or average link); let $h_1\le h_2\le\dots\le h_{N-1}$ be the merge heights of the dendrogram and $h_N=1$ the largest possible distance. Cutting the dendrogram at a threshold in $[h_{N-k},h_{N-k+1})$ yields exactly $k$ clusters, and the length of this interval,
+\begin{equation}
+  \tau_k=h_{N-k+1}-h_{N-k},\qquad k=1,2,\dots,
+  \label{eq:beyond:lifetime}
+\end{equation}
+is the \emph{lifetime} of the $k$-cluster partition. The chosen number of clusters is the one of longest lifetime, the partition least sensitive to the choice of the threshold. The criterion inherits the behavior of the linkage. Average link copes with soft members; single link merges two groups as soon as one chain of objects connects them, and since the co-associations of soft members between neighboring groups never vanish, the one-cluster partition then lives longest. The members must also over-segment: a member with fewer clusters than groups merges some groups, and no amount of evidence separates what no member separates.
+
+\begin{algobox}{Evidence accumulation with the lifetime criterion}{eac}
+\begin{enumerate}[leftmargin=*]
+  \item Generate a library of over-segmenting partitions (e.g.\ FCM with $c_q$ drawn from a range well above the expected number of groups) and its co-association matrix $\mathbf{S}$.
+  \item Cluster the distance $1-s_{kl}$ hierarchically (average or single link); merge heights $h_1\le\dots\le h_{N-1}$, $h_N=1$.
+  \item Lifetimes $\tau_k$ by \eqref{eq:beyond:lifetime} for $k=1,\dots,k_{\max}$; $c=\argmax_k\tau_k$.
+  \item Cut the dendrogram into $c$ groups (or pass $c$ to another consensus function).
+\end{enumerate}
+\end{algobox}
+\index{evidence accumulation}\index{lifetime criterion}\index{number of clusters!lifetime criterion}\index{evidence\_accumulation@\code{evidence\_accumulation}}
+\begin{summarybox}{Evidence accumulation}
+\begin{itemize}
+  \item The chosen number of clusters is that of the partition of the co-association dendrogram that persists over the widest range of thresholds.
+  \item Needs over-segmenting members; beyond that, the exact range of member cluster numbers hardly matters.
+  \item Average link works with soft members; single link can be defeated by chains of intermediate objects.
+  \item Parameters: range of member cluster numbers, linkage, largest $k$ considered.
+\end{itemize}
+\end{summarybox}
+
+\section{Using it in fuzzyclust}\label{sec:beyond:api}
+
+The four sub-packages follow the conventions of the toolbox. The supervised estimators derive from \code{BaseFuzzyClusterer} and take the supervision as arguments of \code{fit}; the co-clustering estimators and the ensemble are scikit-learn clusterers with \code{fit(X)}; the collaborative estimator takes a \emph{list} of data sites. All accept pandas input and have a \code{random\_state}, and their partitions can be compared with the fuzzy Rand indices of \code{fuzzyclust.validity} (\cref{sec:val:compare}).
+
+\begin{apibox}{fuzzyclust.semisupervised.SemiSupervisedFCM}
+\code{n\_clusters=3}, \code{alpha=1.0|\allowbreak "auto"} ($N/N_b$), \code{m=2.0} (fixed), \code{tol}, \code{max\_iter}, \code{init="labels"|\allowbreak "random"|\allowbreak "kmeans++"|\allowbreak array}, \code{n\_init}, \code{random\_state}, \code{verbose}.\\
+\code{fit(X,\allowbreak\ y)} with \code{y} a label vector (\code{-1} = unlabeled) or a label-membership matrix $(N,c)$ whose zero rows mark the unlabeled samples. Attributes \code{membership\_}, \code{cluster\_centers\_}, \code{labels\_}, \code{classes\_}, \code{label\_mapping\_} (class of every cluster, \code{-1} for unsupervised ones), \code{labelled\_mask\_}, \code{label\_membership\_}, \code{alpha\_}, \code{covariances\_}; methods \code{predict\_classes(X)}, \code{score\_labels(X,\allowbreak\ y)}.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.semisupervised.PairwiseConstrainedFCM}
+\code{n\_clusters=3}, \code{alpha=1.0|\allowbreak "auto"}, \code{agglomeration=0.0} ($\eta_0$), \code{agglomeration\_decay=10.0} ($\tau$), \code{min\_cardinality=1.0}, \code{m=2.0} (fixed), \code{tol}, \code{max\_iter}, \code{init}, \code{n\_init}, \code{random\_state}, \code{verbose}.\\
+\code{fit(X,\allowbreak\ must\_link=pairs,\allowbreak\ cannot\_link=pairs)}. Attributes \code{n\_clusters\_}, \code{membership\_}, \code{cluster\_centers\_}, \code{must\_link\_}, \code{cannot\_link\_}, \code{must\_link\_satisfied\_}, \code{cannot\_link\_satisfied\_}, \code{alpha\_}, \code{cardinalities\_}. Utilities \code{constraint\_satisfaction(labels,\allowbreak\ must\_link,\allowbreak\ cannot\_link)}, \code{check\_pairwise\_constraints}; generators \code{make\_partially\_labeled\_pair}, \code{make\_partial\_labels}, \code{make\_pairwise\_constraints}; plots \code{plot\_label\_propagation}, \code{plot\_pairwise\_constraints}.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.coclustering.FCCM, FCoDoK}
+\code{n\_clusters=3}, \code{lambda\_u=1.0} ($\lambda_u$ or $T_u$), \code{lambda\_w=1.0} ($\lambda_w$ or $T_w$), \code{tol}, \code{max\_iter}, \code{init="random"|\allowbreak "kmeans++"|\allowbreak array}, \code{n\_init} (largest objective kept), \code{random\_state}, \code{verbose}.\\
+\code{fit(R)} with a non-negative matrix. Attributes \code{membership\_} $(N,c)$, \code{item\_membership\_} $(M,c)$, \code{labels\_}, \code{item\_labels\_}, \code{aggregation\_}, \code{objective\_}, \code{objective\_history\_}; \code{transform} returns the aggregations $a_{ik}$, \code{predict\_proba} the object memberships of new rows. Generator \code{make\_block\_matrix}; plots \code{plot\_coclusters} (reordered heat map), \code{plot\_item\_memberships}.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.collaborative.CollaborativeFCM}
+\code{n\_clusters=3}, \code{alpha=0.5} (scalar or $P\times P$ matrix), \code{m=2.0} (fixed), \code{tol}, \code{max\_iter}, \code{init}, \code{n\_init}, \code{random\_state}, \code{verbose}.\\
+\code{fit([X\_1,\allowbreak\ ...,\allowbreak\ X\_P])}. Attributes (lists over the sites) \code{memberships\_}, \code{cluster\_centers\_}, \code{labels\_}, \code{independent\_memberships\_}, \code{independent\_centers\_}; arrays \code{alpha\_}, \code{objective\_}, \code{objective\_history\_}, \code{partition\_distances\_}, \code{collaboration\_change\_}, \code{consensus\_membership\_}. Methods \code{predict\_proba}, \code{predict}, \code{transform} on lists of sites, \code{site\_agreement(index=fuzzy\_rand\_index)}. Utility \code{align\_partitions}; generator \code{make\_collaborative\_sites}; plots \code{plot\_site\_partitions}, \code{plot\_collaboration\_trajectory}.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.ensemble.FuzzyClusterEnsemble}
+\code{n\_clusters=3|\allowbreak None} (lifetime criterion), \code{base\_estimator=None} (FCM; any clusterer with \code{predict\_proba}), \code{n\_estimators=10}, \code{base\_n\_clusters=None|\allowbreak int|\allowbreak sequence}, \code{sample\_fraction=1.0}, \code{feature\_fraction=1.0}, \code{consensus="fcm"|\allowbreak "spectral"|\allowbreak "hierarchical"|\allowbreak "smcla"|\allowbreak "itk"}, \code{linkage="average"|\allowbreak "single"|\allowbreak "complete"}, \code{similarity="cosine"|\allowbreak "product"}, \code{max\_clusters=20}, \code{random\_state}, \code{verbose}.\\
+Attributes \code{base\_estimators\_}, \code{base\_memberships\_}, \code{base\_feature\_subsets\_}, \code{coassociation\_}, \code{consensus\_membership\_} (= \code{membership\_}), \code{labels\_}, \code{n\_clusters\_}, \code{consensus\_centers\_}, \code{lifetimes\_}, \code{linkage\_}, \code{meta\_cluster\_labels\_}, \code{base\_agreement\_}. Functions \code{coassociation\_matrix}, \code{evidence\_accumulation}, \code{soft\_mcla}, \code{information\_theoretic\_kmeans}, \code{cspa}, \code{mcla}, \code{stability\_curve(X,\allowbreak\ n\_estimators\_grid,\allowbreak\ n\_repeats,\allowbreak\ index)}; generator \code{make\_overlapping\_blobs}; plots \code{plot\_coassociation}, \code{plot\_lifetimes}.
+\end{apibox}
+
+Partial labels and pairwise constraints are passed to \code{fit}:
+\pysnippet{examples/09_beyond_unsupervised/plot_01_ssfcm_partial_labels.py}{fit}
+\pysnippet{examples/09_beyond_unsupervised/plot_02_pcca_pairwise_constraints.py}{fit}
+A co-clustering returns memberships for the rows and for the columns:
+\pysnippet{examples/09_beyond_unsupervised/plot_03_fccm_document_term.py}{fit}
+The collaborative estimator takes the sites as a list and reports how much every site moved:
+\pysnippet{examples/09_beyond_unsupervised/plot_04_collaborative_sites.py}{fit}
+An ensemble is configured by its library and its consensus function; with \py{n_clusters=None} it chooses the number of clusters, and \code{stability\_curve} measures its reproducibility:
+\pysnippet{examples/09_beyond_unsupervised/plot_05_ensemble_consensus.py}{fit}
+\pysnippet{examples/09_beyond_unsupervised/plot_06_ensemble_lifetime.py}{fit}
+\pysnippet{examples/09_beyond_unsupervised/plot_05_ensemble_consensus.py}{stability}
+
+\section{Examples}\label{sec:beyond:examples}
+
+\subsection{How many labels, how much weight?}
+
+The two parallel bars of 150 points each (\cref{fig:beyond:ex1a}) are split by FCM across the bars (ARI $0.39$). With 10\,\% labeled samples and $\alpha=1$ the prototypes move toward the bars and the ARI rises to $0.60$; $87\,\%$ of all samples are assigned to their class. Plotted against the position along the bars (\cref{fig:beyond:ex1b}), the memberships are clear in the middle of the bars and drift toward $0.5$ at their ends, where both prototypes are almost equally far away. At the ends spherical prototypes cannot tell the bars apart, and that is where the remaining errors lie. The study of \cref{fig:beyond:ex1c} varies the label fraction from 1 to 30\,\% and the weight. Up to $\alpha=3$ more labels always help ($\alpha=1$: from $0.38$ at 1\,\% to $0.77$ at 30\,\%), while the weight acts non-monotonically: $\alpha=10$ never exceeds $0.56$, and the paper's rule $\alpha=N/N_b$, which gives a large weight when labels are scarce, does no better than $\alpha=10$ up to 10\,\% labels and approaches $\alpha=3$ only at 30\,\% ($0.69$). The reason is the weighting in \eqref{eq:beyond:vss}: once the labeled memberships match their labels, their supervision weight vanishes, while the unlabeled samples are weighted by $1+\alpha$.
+
+\exfig{09_beyond_unsupervised/plot_01_ssfcm_partial_labels_1}{FCM splits the two bars across (left); with 10\,\% labeled samples (large markers) and $\alpha=1$ the partition turns toward the bars (right).}{beyond:ex1a}
+\exfig[0.7\textwidth]{09_beyond_unsupervised/plot_01_ssfcm_partial_labels_2}{Membership in the upper-bar cluster along the bars: clear in the middle, ambiguous at the ends; labeled samples (black) are pulled toward their label.}{beyond:ex1b}
+\exfig[0.7\textwidth]{09_beyond_unsupervised/plot_01_ssfcm_partial_labels_3}{Agreement with the true bars against the share of labeled samples for several weights $\alpha$: more labels help, and moderate weights help most.}{beyond:ex1c}
+
+\subsection{Must-link, cannot-link, and competitive agglomeration}
+
+On the same bars, 50 must-link and 50 cannot-link pairs drawn from the classes are given (\cref{fig:beyond:ex2a}). FCM violates 24 of them; PCCA with $\alpha=5$ satisfies all and reaches an ARI of $0.95$. The penalty study (\cref{fig:beyond:ex2b}) shows that the fewer the pairs, the larger the penalty needed: 100 pairs of each kind reach an ARI of $0.99$ at $\alpha=2$, 25 pairs need $\alpha=10$, and 10 pairs reach only $0.7$ even at $\alpha=20$, although nine tenths of them are satisfied already at $\alpha=0.5$, because a handful of pairs can be honored by bending the boundary locally. The automatic penalty, renewed as the FCM term over the number of constraints, ends at $\alpha=4.3$ for 100 pairs and at $42$ for 10 pairs, and gives ARIs of $0.99$ and $0.72$. Started with eight clusters on three Gaussian groups (\cref{fig:beyond:ex2c}), competitive agglomeration keeps all eight for $\eta_0\le1$, ends with exactly three for $\eta_0$ from 5 to 20 at the default decay $\tau=10$, and collapses to one cluster at $\eta_0=40$; a longer competition ($\tau=30$) shifts the window toward weaker weights.
+
+\exfig[0.62\textwidth]{09_beyond_unsupervised/plot_02_pcca_pairwise_constraints_1}{The 24 constraints that FCM violates (top) and the partition of PCCA with $\alpha=5$, which satisfies all 100 constraints (bottom); green: must-link, vermilion dashed: cannot-link.}{beyond:ex2a}
+\exfig{09_beyond_unsupervised/plot_02_pcca_pairwise_constraints_2}{Agreement with the classes (left) and share of satisfied constraints (right) against the penalty $\alpha$ for 10 to 100 pairs of each kind.}{beyond:ex2b}
+\exfig{09_beyond_unsupervised/plot_02_pcca_pairwise_constraints_3}{Competitive agglomeration from eight clusters: final number of clusters against $\eta_0$ for three decays (left) and the three clusters found with $\eta_0=5$ (right).}{beyond:ex2c}
+
+\subsection{Co-clustering a document--term matrix}
+
+A synthetic corpus of 180 documents in four topics of 30 to 60 documents, with topic vocabularies of 15 to 30 terms and 20 general terms, has Poisson counts of mean $3$ inside the topic blocks and $0.3$ elsewhere; rows and columns are shuffled (\cref{fig:beyond:ex3a}, left). FCCM with $\lambda_u=0.1$ and $\lambda_w=20$ recovers the topics of the documents and of the topical terms exactly (both ARIs $1.0$), and the matrix reordered by the co-clusters shows the four blocks (right). The scaled item memberships (\cref{fig:beyond:ex3b}) rank every topic's own terms by frequency and give the general terms a membership near zero in all co-clusters. The grid study (\cref{fig:beyond:ex3c}) shows the units of the two weights at work. A small $\lambda_u$ gives nearly crisp document memberships, $\lambda_u\ge1$ fuzzy ones, and $\lambda_u=3$ dissolves them. For $\lambda_w$ there is a window, from $20$ to $200$ for $\lambda_u\le0.1$, below which a co-cluster concentrates on a few frequent terms and above which the term memberships become uniform; the window closes from above as $\lambda_u$ grows ($20$--$50$ at $\lambda_u=0.3$, only $20$ at $\lambda_u=1$). Fuzzy CoDoK recovers the topics exactly for $T_u\le0.3$ and every $T_w$ from $20$ to $1000$, and its clipped item memberships list the topic vocabularies with exact zeros elsewhere (\cref{fig:beyond:ex3d}).
+
+\exfig{09_beyond_unsupervised/plot_03_fccm_document_term_1}{A shuffled document--term matrix (left) and the same matrix reordered by the four FCCM co-clusters (right).}{beyond:ex3a}
+\exfig{09_beyond_unsupervised/plot_03_fccm_document_term_2}{Scaled term memberships of the four co-clusters: every topic owns its vocabulary, and the general terms (right of the dotted line) belong to none.}{beyond:ex3b}
+\exfig{09_beyond_unsupervised/plot_03_fccm_document_term_3}{FCCM on a grid of the two entropy weights: agreement with the topics (left) and crispness of the document memberships (right).}{beyond:ex3c}
+\exfig{09_beyond_unsupervised/plot_03_fccm_document_term_4}{Fuzzy CoDoK: the 40 terms of largest scaled membership, grouped by co-cluster.}{beyond:ex3d}
+
+\subsection{Three collaborating sites}
+
+Three sites describe the same 300 objects in three groups with feature spreads $0.6$, $1.2$, and $1.8$, and at the third site 15\,\% of the objects are moved to another group (\cref{fig:beyond:ex4a}). Independently, the sites reach ARIs of $1.00$, $0.93$, and $0.37$. With $\alpha=3$ the clear site keeps its partition, the second improves to $0.98$, and the third follows the majority even on its moved objects (ARI $0.98$ with the common groups), so that its clusters now overlap in its own feature space. The study of \cref{fig:beyond:ex4b} shows the fuzzy Rand index between every pair of sites rising monotonically with $\alpha$ toward one, site 3 joining the majority from $\alpha\approx1$, and site 3 giving in most (mean membership change $0.13$ against $0.10$ and $0.07$); every site moves, because a membership pulled toward the others is also a softer one. Asymmetric collaboration matrices, whose results the example prints, give trust selectively: when only site 3 listens, sites 1 and 2 keep their independent partitions and site 3 is corrected alone (ARI $1.00$); when only the clear site 1 listens, it is pulled toward the noisier sites and drops to $0.91$.
+
+\exfig{09_beyond_unsupervised/plot_04_collaborative_sites_1}{The three sites clustered independently (top) and with collaboration $\alpha=3$ (bottom); colors are the clusters matched across the sites.}{beyond:ex4a}
+\exfig{09_beyond_unsupervised/plot_04_collaborative_sites_2}{Against the collaboration weight: fuzzy Rand index between the sites (left), agreement of every site with the true groups (middle), and mean membership change of every site (right).}{beyond:ex4b}
+
+\subsection{A library beats a single run}
+
+Four overlapping groups in six dimensions are clustered by an ensemble of 20 FCM members, each seeing two random features and 30\,\% of the samples (\cref{fig:beyond:ex5a}). The members reach a mean ARI of $0.37$ and at best $0.77$; their consensus reaches $0.86$, better than every member because the members err in different directions, and close to the $0.91$ of one FCM run on all data. The co-association matrix ordered by the consensus shows the four blocks. Over the library size (\cref{fig:beyond:ex5b}), a single member is as weak as any, three to ten members bring most of the gain, and the five consensus functions behave alike, with sMCLA a few points behind from ten members on. Accuracy needs ground truth, but reproducibility does not: on ten overlapping groups in the plane, FCM with ten clusters lands in different local optima, and the fuzzy adjusted Rand index between repeated consensus partitions rises from $0.62\pm0.26$ for single runs to $0.86\pm0.04$ for libraries of 20 (\cref{fig:beyond:ex5c}).
+
+\exfig{09_beyond_unsupervised/plot_05_ensemble_consensus_1}{Twenty weak members and their consensus: distribution of the member ARIs with the consensus and the member mean (left), co-association matrix ordered by the consensus (right).}{beyond:ex5a}
+\exfig[0.7\textwidth]{09_beyond_unsupervised/plot_05_ensemble_consensus_2}{ARI of the consensus against the library size for the five consensus functions.}{beyond:ex5b}
+\exfig[0.7\textwidth]{09_beyond_unsupervised/plot_05_ensemble_consensus_3}{Fuzzy adjusted Rand index between repeated consensus partitions against the library size: the ensemble makes an unstable clusterer reproducible.}{beyond:ex5c}
+
+\subsection{Choosing the number of clusters by the lifetime}
+
+Five groups are clustered by 30 FCM members with 6 to 12 clusters each (\cref{fig:beyond:ex6a}). The average-link dendrogram of $1-s_{kl}$ gives the five-cluster partition a lifetime of $0.53$, against at most $0.06$ for any other number, and the consensus recovers the groups exactly. The top of the dendrogram (\cref{fig:beyond:ex6b}) shows where this comes from: below the band the groups fall apart into the fragments the members produced, and above it neighboring groups merge. The study of \cref{fig:beyond:ex6c} varies the members' numbers of clusters and the linkage. Members with fewer clusters than groups (2 to 4) give three clusters, every over-segmenting range gives five with average link, and single link always returns one cluster, because chains of objects between the groups merge them at a low height. The repetition on four and six groups, printed by the example, finds four groups from every range and six groups from members with 6 to 12 or 10 to 20 clusters (five from members with 4 to 8).
+
+\exfig{09_beyond_unsupervised/plot_06_ensemble_lifetime_1}{Evidence accumulation on five groups: the consensus with the number of clusters chosen by the lifetime (left), the co-association matrix (middle), and the lifetimes of $k$ clusters (right).}{beyond:ex6a}
+\exfig[0.8\textwidth]{09_beyond_unsupervised/plot_06_ensemble_lifetime_2}{Top of the average-link dendrogram of the co-association distances; the band is the range of thresholds that yields five clusters.}{beyond:ex6b}
+\exfig[0.7\textwidth]{09_beyond_unsupervised/plot_06_ensemble_lifetime_3}{Number of clusters chosen by the lifetime against the range of the members' numbers of clusters, for average and single link.}{beyond:ex6c}
+
+\section{Further reading}\label{sec:beyond:reading}
+
+Partial supervision by labels goes back to Pedrycz and Waletzky \cite{pedrycz:1997:ssfcm}; pairwise constraints combined with competitive agglomeration are due to Grira, Crucianu, and Boujemaa \cite{grira:2006:pcca}, and competitive agglomeration itself to Frigui and Krishnapuram \cite{frigui:1997:ca}. Fuzzy co-clustering with entropy regularization was introduced by Oh, Honda, and Ichihashi \cite{oh:2001:fccm}, building on Miyamoto and Mukaidono \cite{miyamoto:1997:entropy}, and the quadratic variant by Kummamuru, Dhawale, and Krishnapuram \cite{kummamuru:2003:codok}. Collaborative clustering is due to Pedrycz \cite{pedrycz:2002:collaborative}. Cluster ensembles were framed by Strehl and Ghosh \cite{strehl:2002:ensembles} (CSPA, MCLA, and the METIS graph partitioner of Karypis and Kumar \cite{karypis:1998:metis}), extended to soft partitions by Punera and Ghosh \cite{punera:2008:soft} (sCSPA, sMCLA, ITK), and turned into a criterion for the number of clusters by Fred and Jain \cite{fred:2005:eac}; the spectral partitioning follows Ng, Jordan, and Weiss \cite{ng:2002:spectral}. Partitions are compared with the fuzzy Rand indices of H\"ullermeier et al.\ \cite{hullermeier:2012:rand} and Campello \cite{campello:2007:rand} and the chance correction of Hubert and Arabie \cite{hubert:1985:ari}; the c-means functional is that of Bezdek \cite{bezdek:1981}, and Jain and Dubes \cite{jain:1988:book} cover hierarchical clustering in general.

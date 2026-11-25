@@ -1,0 +1,571 @@
+\chapter{Clustering of time series}\label{ch:timeseries}
+\begin{roadmap}
+The previous chapter turned clusters into local models of static and dynamic functions; this chapter adds the ingredient that ordered data bring, time. Four problems of time-series analysis are solved with one tool, a fuzzy clustering whose prototype is adapted to the question. For segmentation the prototype combines a Gaussian membership function in time with a local PCA model of the observations, and the number of segments follows from merging compatible neighbors; for model-order selection Gath--Geva clusters supply the threshold of the false-nearest-neighbor test as local slopes of the regression surface. Clustering the delay vectors of a chaotic series together with their successors gives the embedding dimension, the local dimension of the attractor and a predictor, and fuzzy c-means partitions let structure selection treat continuous inputs like categorical ones. All methods live in \code{fuzzyclust.timeseries}; the fuzzy Sammon mapping of \cref{ch:visualization} displays the clusters of a reconstructed state space.
+\end{roadmap}
+
+\section{Problem and idea}\label{sec:ts:problem}
+
+A time series $T=\{\xk\mid 1\le k\le N\}$ is a sequence of observations $\xk\in\R^n$ labeled by time points $t_1<\dots<t_N$. The observations are not exchangeable: their order carries information, and the questions asked of a time series are questions about that order. Four such questions recur in the analysis of process data, and each has a clustering-based answer in this chapter.
+
+\emph{Segmentation.} A $c$-segmentation splits $T$ into $c$ disjoint intervals that are internally homogeneous---stable periods of operation, product grades, regimes---separated by change points. For one variable the cost of a segment is the error of a constant or linear fit; for many correlated variables the right notion of homogeneity is that the samples lie on a common hyperplane, i.e.\ that one PCA model with a few components describes them. Changes of the mean, of the variance \emph{and} of the correlation structure then all become changes of the hyperplane, and the last kind is invisible to any univariate method. Minimizing the summed segment costs by dynamic programming is too expensive for long series, so greedy top-down, bottom-up and sliding-window heuristics are used instead \cite{keogh:2001:online,himberg:2001:segmentation}. Abonyi, Feil, N\'emeth and \'Arva \cite{abonyi:2005:segmentation} treat segmentation as clustering with a time-ordered structure (their conference paper \cite{abonyi:2003:segmentation}, the precursor of the method, used the simpler $Q$ and $T^2$ distances of \cref{sec:ts:segmentation}). They cluster the extended samples $\mathbf{z}_k=[t_k\ \xk\T]\T$ with a prototype made of a Gaussian membership function in time, which keeps the cluster contiguous, and a probabilistic PCA model in the feature space, which measures homogeneity (\cref{fig:ts:concept}). The borders are fuzzy, as the transitions of real processes are, and the number of segments is found by merging compatible neighbors.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[scale=0.78, >={Latex[length=2mm]}]
+  % ---------- left: multivariate series with three regimes ----------
+  \begin{scope}
+    \node[note, anchor=south] at (4.0,3.85) {multivariate series $\mathbf{x}_k$, three regimes};
+    \fill[fcblue!8] (0,0) rectangle (2.6,3.7);
+    \fill[fcverm!8] (2.6,0) rectangle (5.4,3.7);
+    \fill[fcgreen!8] (5.4,0) rectangle (8.0,3.7);
+    \draw[fcgray, thin, ->] (-0.1,0) -- (8.3,0) node[below left, note] {time $t_k$};
+    % variable 1: mean shifts
+    \draw[black!70, thick, samples=120, domain=0:2.6] plot (\x, {3.0 + 0.12*sin(deg(9*\x)) + 0.06*sin(deg(23*\x))});
+    \draw[black!70, thick, samples=120, domain=2.6:5.4] plot (\x, {3.35 + 0.12*sin(deg(9*\x)) + 0.06*cos(deg(19*\x))});
+    \draw[black!70, thick, samples=120, domain=5.4:8.0] plot (\x, {2.75 + 0.12*sin(deg(9*\x)) + 0.06*sin(deg(27*(\x-5.4)))});
+    \node[note, anchor=east] at (-0.15,3.05) {$x_1$};
+    % variable 2: correlated with x1 in regime 1, anti-correlated in regime 2, independent in 3
+    \draw[black!70, thick, samples=120, domain=0:2.6] plot (\x, {1.6 + 0.12*sin(deg(9*\x)) + 0.05*cos(deg(31*\x))});
+    \draw[black!70, thick, samples=120, domain=2.6:5.4] plot (\x, {1.6 - 0.12*sin(deg(9*\x)) + 0.05*sin(deg(29*(\x-2.6)))});
+    \draw[black!70, thick, samples=120, domain=5.4:8.0] plot (\x, {1.6 + 0.14*sin(deg(17*\x)) + 0.05*cos(deg(37*(\x-5.4)))});
+    \node[note, anchor=east] at (-0.15,1.6) {$x_2$};
+    \draw[fcgray, dashed] (2.6,0) -- (2.6,3.7); \draw[fcgray, dashed] (5.4,0) -- (5.4,3.7);
+    \node[note, fcblue!70!black] at (1.3,0.4) {segment 1}; \node[note, fcverm!70!black] at (4.0,0.4) {segment 2}; \node[note, fcgreen!60!black] at (6.7,0.4) {segment 3};
+    % Gaussian memberships in time below
+    \begin{scope}[shift={(0,-2.3)}]
+      \draw[fcgray, thin, ->] (-0.1,0) -- (8.3,0) node[below left, note] {$t_k$};
+      \draw[fcgray, thin, ->] (0,-0.1) -- (0,1.5) node[above, note] {$\beta_i(t_k)$};
+      \draw[fcblue, very thick, domain=0:8, samples=60, smooth] plot (\x, {1.2*exp(-0.5*((\x-1.3)/0.9)^2)});
+      \draw[fcverm, very thick, domain=0:8, samples=60, smooth] plot (\x, {1.2*exp(-0.5*((\x-4.0)/0.95)^2)});
+      \draw[fcgreen, very thick, domain=0:8, samples=60, smooth] plot (\x, {1.2*exp(-0.5*((\x-6.7)/0.9)^2)});
+      \node[note, anchor=north, text width=6.3cm] at (4.0,-0.4) {time part of the prototype: Gaussian $A_i(t_k)$ with center $v^t_i$ and width $\sigma_{i,t}$; normalized over the segments it gives $\beta_i(t_k)$};
+    \end{scope}
+  \end{scope}
+  % ---------- right: feature space with local PCA models ----------
+  \begin{scope}[shift={(9.3,-1.0)}]
+    \node[note, anchor=south, text width=4.6cm] at (2.6,4.85) {feature space $(x_1,x_2)$: one PCA model per segment};
+    \draw[fcgray, thin, ->] (-0.2,0) -- (5.4,0) node[below left, note] {$x_1$};
+    \draw[fcgray, thin, ->] (0,-0.2) -- (0,4.6) node[left, note] {$x_2$};
+    \begin{scope}[rotate around={38:(1.6,1.5)}]
+      \draw[fcblue, thick, fill=fcblue!12] (1.6,1.5) ellipse (1.1 and 0.3);
+    \end{scope}
+    \draw[fcblue!70!black, very thick] (0.75,0.85) -- (2.45,2.15);
+    \begin{scope}[rotate around={-35:(3.4,3.3)}]
+      \draw[fcverm, thick, fill=fcverm!12] (3.4,3.3) ellipse (1.1 and 0.3);
+    \end{scope}
+    \draw[fcverm!70!black, very thick] (2.5,3.93) -- (4.3,2.67);
+    \draw[fcgreen, thick, fill=fcgreen!12] (3.9,1.1) ellipse (0.75 and 0.55);
+    \draw[fcgreen!60!black, very thick] (3.15,1.1) -- (4.65,1.1);
+    \foreach \p in {(1.0,1.0),(1.3,1.3),(1.6,1.45),(1.9,1.8),(2.2,2.0),(1.45,1.2),(1.75,1.7)} \fill[fcblue!70!black] \p circle (1.2pt);
+    \foreach \p in {(2.7,3.8),(3.0,3.55),(3.3,3.4),(3.6,3.15),(3.95,2.9),(4.15,2.75),(3.2,3.25)} \fill[fcverm!70!black] \p circle (1.2pt);
+    \foreach \p in {(3.4,1.3),(3.7,0.8),(3.9,1.35),(4.2,0.9),(4.45,1.2),(3.6,1.05),(4.1,1.15)} \fill[fcgreen!60!black] \p circle (1.2pt);
+    \node[note, text width=4.6cm, anchor=north] at (2.7,-0.5) {feature part of the prototype: center $\mathbf{v}^x_i$, loading matrix $\mathbf{W}_i$ ($q$ components) and noise variance $\sigma^2_{i,x}$; the hyperplane rotates when the correlation changes and moves when the mean changes};
+  \end{scope}
+  % ---------- distance ----------
+  \node[result, anchor=north, text width=10.6cm, font=\small] at (7.5,-6.2) {%
+    $\dfrac{1}{D^2(\mathbf{z}_k,\eta_i)} = \underbrace{\alpha_i}_{p(\eta_i)}\;\underbrace{\dfrac{e^{-\frac12 (t_k-v^t_i)^2/\sigma^2_{i,t}}}{\sqrt{2\pi\sigma^2_{i,t}}}}_{p(t_k\mid\eta_i)}\;\underbrace{\dfrac{e^{-\frac12(\xk-\mathbf{v}^x_i)\T\Ai^{-1}(\xk-\mathbf{v}^x_i)}}{(2\pi)^{n/2}\sqrt{\det\Ai}}}_{p(\xk\mid\eta_i)}$\\[4pt]
+    a sample belongs to a segment if it is observed \emph{at the right time} and lies \emph{on the right hyperplane}};
+\end{tikzpicture}
+\caption[Fuzzy segmentation as clustering with a time-aware prototype.]{Fuzzy segmentation as clustering with a time-aware prototype. Left: three regimes of a bivariate series; each differs from the previous one in the mean of $x_1$ and in the correlation of the two variables (reversed in the second regime, absent in the third), and the change of correlation is visible in neither variable alone. Below them: the Gaussian membership functions in time, normalized to $\beta_i(t_k)$, are the fuzzy segments. Right: every segment carries a probabilistic PCA model in the feature space whose hyperplane reacts to changes of mean, variance and correlation. Bottom: the distance of the clustering is the inverse of the joint probability density of the time stamp and the observation.}
+\label{fig:ts:concept}
+\end{figure}
+
+\emph{Model order.} Before a nonlinear dynamic model $y_k=f(\xk)$ can be identified, the regression vector $\xk=[y_{k-1},\dots,y_{k-n_a},u_{k-1},\dots,u_{k-n_b}]\T$ has to be chosen. Information criteria (AIC, FPE, MDL) presuppose a model class; the false-nearest-neighbor (FNN) test \cite{kennel:1992:fnn,rhodes:1998:fnn,bomberger:1998:narx} does not: it checks whether samples that are close in the regression space have close outputs. Its weak point is a threshold that depends on the slope of the unknown function, and Feil, Abonyi and Szeifert \cite{feil:2003:fnn,feil:2004:fnn} estimate that slope locally from Gath--Geva clusters, which are local linear models of the regression surface.
+
+\emph{State-space reconstruction.} The state space of a chaotic system observed through one variable $y_k$ can be reconstructed from the delay vectors $\mathbf{y}_k=[y_k,\allowbreak y_{k-\tau},\allowbreak\dots,\allowbreak y_{k-\tau(d_e-1)}]\T$ \cite{takens:1981,sauer:1991:embedology}. Choosing the embedding dimension $d_e$, estimating the intrinsic dimension of the attractor and building a predictor are usually three separate tasks; the clustering method of \cite{abonyi:2004:chaotic} solves them together, because the clusters of the pairs $(\mathbf{y}_k,\mathbf{y}_{k+1})$ are local linear models of the map whose prediction error decides $d_e$ and whose flatness reveals the local dimension.
+
+\emph{Structure selection.} A nonlinear model often has many candidate inputs, some continuous and some categorical, of which only a few are needed. Girimonte, Babu\v{s}ka and Abonyi \cite{girimonte:2004:structure} rank all small subsets of inputs by the variance of the output inside the segments spanned by the values of the inputs; fuzzy c-means partitions turn continuous inputs into fuzzy ``values'', so that no model has to be fitted and the two kinds of input are treated alike.
+
+\section{Theory}\label{sec:ts:theory}
+
+The notation is that of the book: $\X\in\R^{N\times n}$ with rows $\xk$, memberships $\mik$ in the matrix $\U\in\R^{c\times N}$ (stored transposed in the code), prototypes with index $i$, samples with index $k$. Time stamps are $t_k$, the extended sample is $\mathbf{z}_k=[t_k\ \xk\T]\T$, delay vectors are $\mathbf{y}_k$, and $\eta_i$ denotes cluster $i$ together with the parameters of its prototype. We treat segmentation first (\cref{sec:ts:segmentation,sec:ts:bottomup}), then FNN-based model-order selection (\cref{sec:ts:fnn}), the reconstruction of chaotic series (\cref{sec:ts:chaotic}) and structure selection (\cref{sec:ts:structure}).
+
+\subsection{Fuzzy segmentation by modified Gath--Geva clustering}\label{sec:ts:segmentation}
+
+A crisp $c$-segmentation with the variance as cost minimizes
+\begin{equation}
+  \begin{aligned}
+  \mathrm{cost}(S^c_T)&=\sum_{i=1}^{c}\sum_{k=s_{i-1}+1}^{s_i}\norm{\xk-\mathbf{v}^x_i}^2=\sum_{i=1}^{c}\sum_{k=1}^{N}\beta_i(t_k)\,D^2(\xk,\mathbf{v}^x_i),\\
+  \beta_i(t_k)&=\begin{cases}1 & s_{i-1}<k\le s_i\\ 0 & \text{otherwise},\end{cases}
+  \end{aligned}
+  \label{eq:ts:crispcost}
+\end{equation}
+which is the $k$-means functional with clusters restricted to time intervals instead of Voronoi cells. Fuzzy segments replace the indicator by normalized Gaussian membership functions in time,
+\begin{equation}
+  A_i(t_k)=\exp\!\Big(-\frac12\frac{(t_k-v^t_i)^2}{\sigma^2_{i,t}}\Big),\qquad
+  \beta_i(t_k)=\frac{A_i(t_k)}{\sum_{j=1}^{c}A_j(t_k)},
+  \label{eq:ts:timemf}
+\end{equation}
+whose centers $v^t_i$ and widths $\sigma_{i,t}$ are identified by the clustering. The algorithm minimizes the usual functional $\J=\sum_i\sum_k\mik^m D^2(\mathbf{z}_k,\eta_i)$ under the partition constraints, with a Gath--Geva-type distance that is the inverse of a probability density (\cref{fig:ts:concept}, bottom):
+\begin{equation}
+  \begin{aligned}
+  \frac{1}{D^2(\mathbf{z}_k,\eta_i)}=\alpha_i\;&
+  \frac{1}{\sqrt{2\pi\sigma^2_{i,t}}}\exp\!\Big(-\frac12\frac{(t_k-v^t_i)^2}{\sigma^2_{i,t}}\Big)\\
+  &\times\frac{1}{(2\pi)^{r/2}\sqrt{\det\Ai}}\exp\!\Big(-\frac12(\xk-\mathbf{v}^x_i)\T\Ai^{-1}(\xk-\mathbf{v}^x_i)\Big).
+  \end{aligned}
+  \label{eq:ts:segdist}
+\end{equation}
+Within a segment, time is treated as independent of the observations, so the density factorizes into the prior $\alpha_i$, a Gaussian in time and a Gaussian in the feature space with covariance $\Ai$ of rank $r$. For $m=2$ the memberships are the posterior probabilities $p(\eta_i\mid\mathbf{z}_k)$ of this mixture, and the alternating optimization is a fuzzy relative of the EM identification of the mixture, which would weight the prototype updates by $\mik$ instead of $\mik^m$ \cite{gath:1989,abonyi:2002:mgg}.
+
+\paragraph{The feature-space model.} Choosing $\Ai=\Fi$, the fuzzy covariance matrix, gives Gath--Geva clustering of the extended samples; when the variables are strongly correlated, $\Fi$ is ill-conditioned, and regularizing it \cite{babuska:2002:covariance} hides exactly the low-dimensional structure one wants to detect. The journal version of the method therefore uses \emph{probabilistic PCA} \cite{tipping:1999:ppca}: the observations of a segment are $\xk=\mathbf{W}_i\mathbf{y}_{ik}+\mathbf{v}^x_i+\boldsymbol\varepsilon$ with $q$ latent variables and isotropic noise, so that
+\begin{equation}
+  \Ai=\sigma^2_{i,x}\mathbf{I}+\mathbf{W}_i\mathbf{W}_i\T,
+  \label{eq:ts:ppcacov}
+\end{equation}
+a full-rank covariance ($r=n$) whose $q$ large eigen-directions span the hyperplane of the segment and whose remaining $n-q$ eigenvalues all equal $\sigma^2_{i,x}$. The maximum-likelihood solution is known in closed form: with $\Fi=\mathbf{U}_i\boldsymbol\Lambda_i\mathbf{U}_i\T$ (eigenvalues in decreasing order),
+\begin{equation}
+  \mathbf{W}_i=\mathbf{U}_{i,q}\big(\boldsymbol\Lambda_{i,q}-\sigma^2_{i,x}\mathbf{I}\big)^{1/2}\mathbf{R}_i,\qquad
+  \sigma^2_{i,x}=\frac{1}{n-q}\sum_{j=q+1}^{n}\lambda_{i,j},
+  \label{eq:ts:ppcaml}
+\end{equation}
+with an arbitrary rotation $\mathbf{R}_i$. The journal version instead interleaves one EM step of PPCA with every clustering iteration: with $\mathbf{M}_i=\sigma^2_{i,x}\mathbf{I}+\mathbf{W}_i\T\mathbf{W}_i$ and the latent expectations $\langle\mathbf{y}_{ik}\rangle=\mathbf{M}_i^{-1}\mathbf{W}_i\T(\xk-\mathbf{v}^x_i)$,
+\begin{equation}
+  \tilde{\mathbf{W}}_i=\Fi\mathbf{W}_i\big(\sigma^2_{i,x}\mathbf{I}+\mathbf{M}_i^{-1}\mathbf{W}_i\T\Fi\mathbf{W}_i\big)^{-1},\quad
+  \sigma^2_{i,x}=\frac1n\tr\big(\Fi-\Fi\mathbf{W}_i\mathbf{M}_i^{-1}\tilde{\mathbf{W}}_i\T\big),
+  \label{eq:ts:ppcaem}
+\end{equation}
+where the center $\mathbf{v}^x_i=\sum_k\mik^m(\xk-\mathbf{W}_i\langle\mathbf{y}_{ik}\rangle)/\sum_k\mik^m$ and the fuzzy covariance $\Fi$ around it are computed with the weights $\mik^m$. Both routes have the same fixed point; \code{fuzzyclust} offers the EM step (\py{pca_update="em"}) and the eigen-solution (\py{"eig"}). The noise variance in \eqref{eq:ts:ppcaem} carries the factor $1/n$ of the EM algorithm of Tipping and Bishop \cite{tipping:1999:ppca}; the segmentation paper prints $1/q$ there, which the book and the code correct. The prior and the time part are updated by
+\begin{equation}
+  \alpha_i=\frac1N\sum_{k=1}^{N}\mik,\qquad
+  v^t_i=\frac{\sum_k\mik^m t_k}{\sum_k\mik^m},\qquad
+  \sigma^2_{i,t}=\frac{\sum_k\mik^m(t_k-v^t_i)^2}{\sum_k\mik^m},
+  \label{eq:ts:timeupdate}
+\end{equation}
+and the partition by $\mik=1/\sum_j(D_{ik}/D_{jk})^{2/(m-1)}$.
+
+\paragraph{Two older variants.} The conference version \cite{abonyi:2003:segmentation} restricted the feature-space Gaussian to a subspace of the PCA model and used a pseudo-inverse and pseudo-determinant in \eqref{eq:ts:segdist}. The \emph{fuzzy-PCA-$Q$} method keeps the $n-q$ smallest eigen-directions, so the exponent is the reconstruction error $Q_{ik}=\norm{(\mathbf{I}-\mathbf{U}_{i,q}\mathbf{U}_{i,q}\T)(\xk-\mathbf{v}^x_i)}^2$ with every residual direction divided by its eigenvalue: it detects changes of the correlation structure but is blind to displacements inside the hyperplane. The \emph{fuzzy-PCA-$T^2$} method keeps the $q$ largest, so the exponent is the Hotelling statistic $T^2_{ik}=\mathbf{y}_{ik}\T\boldsymbol\Lambda_{i,q}^{-1}\mathbf{y}_{ik}$ of the projection: it detects shifts of the operating point but not rotations of the hyperplane. Both are sensitive to $q$ (with $q\to n$ the reconstruction error vanishes everywhere; the $T^2$ variant needs a $q$ defined by a required accuracy so that all segments keep comparable models). The PPCA covariance \eqref{eq:ts:ppcacov} covers both subspaces and is insensitive to $q$; the two statistics remain available as diagnostics (\py{hotelling_t2}, \py{q_reconstruction_error}).
+
+\paragraph{Number of components.} The eigenvalues of the covariance matrices of the \emph{initial} segments---a uniform partition into $c$ intervals---are inspected in a scree plot, or $q$ is chosen as the smallest number of components that explains a required fraction of the variance in every initial segment,
+\begin{equation}
+  \sum_{j=1}^{q-1}\lambda_{i,j}\Big/\sum_{j=1}^{n}\lambda_{i,j}<\text{accuracy}\le\sum_{j=1}^{q}\lambda_{i,j}\Big/\sum_{j=1}^{n}\lambda_{i,j}.
+  \label{eq:ts:accuracy}
+\end{equation}
+
+\paragraph{Number of segments by compatible cluster merging.} Clustering starts from a deliberately large number of segments (ten in the paper) and merges adjacent segments that are compatible, re-clustering after every merge, in the spirit of the bottom-up algorithm and of compatible cluster merging for fuzzy modeling \cite{kaymak:1995:merging}. Two criteria are evaluated for every pair: the similarity of the PCA models by Krzanowski's factor \cite{krzanowski:1979:pca},
+\begin{equation}
+  S^{ij}_{PCA}=\frac1q\sum_{a=1}^{q}\sum_{b=1}^{q}\cos^2\theta_{ab}=\frac1q\tr\big(\mathbf{U}_{i,q}\T\mathbf{U}_{j,q}\mathbf{U}_{j,q}\T\mathbf{U}_{i,q}\big),
+  \label{eq:ts:spca}
+\end{equation}
+the mean squared cosine between the principal directions of one segment and the principal subspace of the other, and the distance of the centers $D(\mathbf{v}^x_i,\mathbf{v}^x_j)=\norm{\mathbf{v}^x_i-\mathbf{v}^x_j}$, because a change of the mean alone leaves $S_{PCA}=1$. Each criterion is turned into a degree of fulfillment by a triangular membership function: \emph{parallelism} $\mu^1_{ij}$ rises from $0$ at $\nu^1$ to $1$ at $S_{PCA}=1$, and \emph{closeness} $\mu^2_{ij}$ falls from $1$ at distance $0$ to $0$ at $\nu^2$. The knots are the averages of the criteria over all pairs,
+\begin{equation}
+  \nu^1=\frac{1}{c(c-1)}\sum_{i}\sum_{j\ne i}S^{ij}_{PCA},\qquad
+  \nu^2=\frac{1}{c(c-1)}\sum_{i}\sum_{j\ne i}D(\mathbf{v}^x_i,\mathbf{v}^x_j),
+  \label{eq:ts:knots}
+\end{equation}
+and the two degrees are aggregated to the compatibility
+\begin{equation}
+  O_{ij}=\Big[\tfrac12\big((\mu^1_{ij})^2+(\mu^2_{ij})^2\big)\Big]^{1/2}.
+  \label{eq:ts:compat}
+\end{equation}
+The most compatible \emph{adjacent} pair is merged whenever $O_{i,i+1}$ exceeds a threshold $\gamma$ (0.3--0.75 in the paper, depending on the homogeneity of the series). Kelly's formulas \cite{kelly:1994:merging} give the parameters of the merged cluster from those of its parts, with $N_i=\sum_k\mik$ and $N_{i*}=N_i+N_{i+1}$:
+\begin{equation}
+  \begin{aligned}
+  \mathbf{v}^x_{i*}&=\frac{N_i}{N_{i*}}\mathbf{v}^x_i+\frac{N_{i+1}}{N_{i*}}\mathbf{v}^x_{i+1},\\
+  \mathbf{F}_{i*}&=\frac{N_i-1}{N_{i*}-1}\Fi+\frac{N_{i+1}-1}{N_{i*}-1}\mathbf{F}_{i+1}+\frac{N_iN_{i+1}}{N_{i*}(N_{i*}-1)}(\mathbf{v}^x_i-\mathbf{v}^x_{i+1})(\mathbf{v}^x_i-\mathbf{v}^x_{i+1})\T,
+  \end{aligned}
+  \label{eq:ts:kelly}
+\end{equation}
+and analogous formulas merge the time center and variance; the priors add, $\alpha_{i*}=\alpha_i+\alpha_{i+1}$, and the PPCA model of the new segment follows from the eigen-decomposition of $\mathbf{F}_{i*}$ by \eqref{eq:ts:ppcaml}. Two segments with identical PCA models but different means have $\mu^1=1$ and $O=\sqrt{(1+(\mu^2)^2)/2}\ge1/\sqrt2\approx0.71$, so the threshold has to be raised above the compatibility of the smallest mean shift that should survive; this is how $\gamma$ encodes how different two regimes must be. The compatibility matrix of all pairs, adjacent or not, is informative in itself: repeated regimes show up as compatible nonadjacent segments. (\code{fuzzyclust} adds a safeguard, \py{min_segment_weight}, that absorbs a segment with a negligible prior into its more compatible neighbor regardless of $\gamma$; such slivers arise between regimes when the initial number of segments is far above the true one.)
+
+\begin{algobox}{Fuzzy segmentation by modified Gath--Geva clustering}{fuzzyseg}\index{fuzzy segmentation}\index{time series!segmentation}\index{probabilistic PCA}\index{FuzzySegmentation@\code{FuzzySegmentation}}
+\begin{algorithm}[H]
+\KwIn{series $\X$ with time stamps $t_k$, initial number of segments $c$, components $q$ (or an accuracy), exponent $m$, threshold $\gamma$, tolerance $\epsilon$}
+partition the series uniformly into $c$ intervals (crisp $\U^{(0)}$); choose $q$ from the scree plot or by \eqref{eq:ts:accuracy}\;
+\Repeat{$\max_{ik}\abs{\mu^{(l)}_{ik}-\mu^{(l-1)}_{ik}}<\epsilon$ \emph{and} no merge was made}{
+  \For{every segment $i$}{
+    prior, time center and width by \eqref{eq:ts:timeupdate}\;
+    center $\mathbf{v}^x_i$ with the latent expectations, fuzzy covariance $\Fi$\;
+    PPCA step \eqref{eq:ts:ppcaem} (or the eigen-solution \eqref{eq:ts:ppcaml}); $\Ai=\sigma^2_{i,x}\mathbf{I}+\tilde{\mathbf{W}}_i\tilde{\mathbf{W}}_i\T$\;
+  }
+  distances $D^2(\mathbf{z}_k,\eta_i)$ by \eqref{eq:ts:segdist}; partition $\mik=1/\sum_j(D_{ik}/D_{jk})^{2/(m-1)}$\;
+  \If{the tolerance is reached or a fixed number of iterations has passed}{
+    compatibilities $O_{i,i+1}$ by \eqref{eq:ts:spca}--\eqref{eq:ts:compat}\;
+    \lIf{$\max_i O_{i,i+1}>\gamma$}{merge that pair by \eqref{eq:ts:kelly}, $c\leftarrow c-1$, recompute $\U$}
+  }
+}
+\KwOut{fuzzy segments $\beta_i(t_k)$, posteriors $\mik=p(\eta_i\mid\mathbf{z}_k)$, borders where the dominant $\beta_i$ changes, one PCA model per segment}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Fuzzy segmentation}
+\begin{itemize}
+  \item Segmentation is clustering of $\mathbf{z}_k=[t_k\ \xk\T]\T$ with a prototype made of a Gaussian in time (contiguity) and a probabilistic PCA model in the feature space (homogeneity); the distance is the inverse joint density.
+  \item Detects changes of the mean, the variance and the correlation structure of multivariate series; for $m=2$ the memberships are the posteriors of a mixture of PPCA models, and the alternating optimization is a fuzzy relative of its EM algorithm.
+  \item $q$ from the scree plot or an accuracy on the initial segments; the number of segments by merging compatible adjacent segments (PCA similarity and center distance, threshold $\gamma$) from a large initial number.
+  \item Fuzzy borders, posterior memberships and a PCA model per segment for process monitoring; $Q$ and $T^2$ remain available as diagnostics.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Bottom-up segmentation with PCA models}\label{sec:ts:bottomup}
+
+The classical competitor is the bottom-up algorithm \cite{keogh:2001:online}, extended to multivariate data by using one PCA model per segment \cite{abonyi:2005:segmentation}. The series is cut into short pieces; for every pair of adjacent segments the cost of their union is computed; the cheapest pair is merged, and its merge costs with its two neighbors are updated; the loop stops when the cheapest merge would cost more than a tolerance or when the wanted number of segments is reached. For a segment $S_i=\{a_i,\dots,b_i\}$ and a PCA model with $p$ components, the cost is either the mean reconstruction error or the mean Hotelling statistic,
+\begin{equation}
+  \begin{aligned}
+  \mathrm{cost}_Q(S_i)&=\frac{1}{b_i-a_i+1}\sum_{k=a_i}^{b_i}Q_{i,k}=\sum_{j>p}\lambda_{i,j},\\
+  \mathrm{cost}_{T^2}(S_i)&=\frac{1}{b_i-a_i+1}\sum_{k=a_i}^{b_i}T^2_{i,k}=\sum_{j\le p}\lambda_{i,j}^2,
+  \end{aligned}
+  \label{eq:ts:bucost}
+\end{equation}
+where the right-hand sides hold for centered data, with $T^2$ computed as in the paper from the scores $\mathbf{y}_k=\boldsymbol\Lambda_p^{1/2}\mathbf{U}_p\T\xk$. The cost measures the level of the model error of the merged segment, not its increase, so the natural stopping rule is a maximal error. Each cost is blind to one kind of change, $Q$ to displacements along the hyperplane and $T^2$ to rotations of it, and a greedy merge made early is never revised. This is the baseline against which the fuzzy segmentation is judged.
+
+\begin{algobox}{Bottom-up segmentation with PCA models}{bottomup}\index{bottom-up segmentation}\index{bottom\_up\_segmentation@\code{bottom\_up\_segmentation}}
+\begin{algorithm}[H]
+\KwIn{series $\X$, number of components $p$, cost ($Q$ or $T^2$), stopping rule (maximal error or number of segments), initial piece length}
+cut the series into pieces of the initial length; $\mathrm{mergecost}(i)=\mathrm{cost}(S(a_i,b_{i+1}))$ for all adjacent pairs\;
+\While{$\min_i\mathrm{mergecost}(i)<\mathrm{maxerror}$ (or more segments than wanted)}{
+  $i=\argmin_i\mathrm{mergecost}(i)$; merge $S_i$ and $S_{i+1}$\;
+  recompute $\mathrm{mergecost}(i)=\mathrm{cost}(S(a_i,b_{i+1}))$ and $\mathrm{mergecost}(i-1)=\mathrm{cost}(S(a_{i-1},b_i))$\;
+}
+\KwOut{crisp segments, their borders and the sequence of merge costs}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Bottom-up segmentation}
+\begin{itemize}
+  \item Greedy merging of adjacent pieces by the PCA cost of the union; fast and simple, the multivariate counterpart of piecewise-linear approximation.
+  \item The $Q$ cost finds changes of the correlation structure, the $T^2$ cost shifts of the operating point; neither finds both, and the $Q$ cost depends strongly on $p$.
+  \item Stop by a maximal error (the jump of the merge-cost curve) or by a given number of segments; useful as a first look and to validate the fuzzy result.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Model order by false nearest neighbors with cluster-based thresholds}\label{sec:ts:fnn}
+
+Let $y_k=f(\xk)$ with the NARX regression vector $\xk=[y_{k-1},\allowbreak\dots,\allowbreak y_{k-n_a},\allowbreak u_{k-1},\allowbreak\dots,\allowbreak u_{k-n_b}]\T$. If the regressors carry all the information about $y_k$ and $f$ is smooth, close regression vectors have close outputs: by a first-order Taylor expansion and the Cauchy--Schwarz inequality,
+\begin{equation}
+  y_k-y_j=\mathrm{d}f(\xk)\T(\xk-\mathbf{x}_j)+O(\norm{\xk-\mathbf{x}_j}^2)\quad\Longrightarrow\quad
+  \frac{\abs{y_k-y_j}}{\norm{\xk-\mathbf{x}_j}}\lesssim\norm{\mathrm{d}f(\xk)},
+  \label{eq:ts:fnnbound}
+\end{equation}
+where $\mathrm{d}f$ is the gradient (Jacobian) of $f$; the bound holds up to a term of order $\norm{\xk-\mathbf{x}_j}$, that is, approximately for close neighbors. The FNN algorithm \cite{kennel:1992:fnn,rhodes:1998:fnn} finds for every $\xk$ its nearest neighbor $\mathbf{x}_j$ in the regression space, declares the neighbor \emph{false} when the ratio exceeds a threshold $R$, and tabulates the percentage $J(n_a,n_b)$ of false neighbors over the orders. The percentage is 100 for the empty regressor, stays high while a regressor is missing (points that are close in the incomplete space have different outputs because they differ in the missing coordinate; see \cref{fig:ts:fnn}), and drops to zero, or to a small, flat level when the data are noisy, as soon as the regression vector is complete. The smallest order in the corner of the table where this happens is the model order. For a scalar time series ($u$ absent, regressors $y_{k-\tau},\dots,y_{k-n_a\tau}$) the same test gives the embedding dimension, the problem for which it was introduced \cite{kennel:1992:fnn}.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[scale=0.9, >={Latex[length=2mm]}]
+  % ---- top left: one regressor is missing ----
+  \begin{scope}
+    \node[note, anchor=south, text width=5.4cm] at (2.9,4.1) {regression space too small: $\mathbf{x}_k=[y_{k-1}]$};
+    \draw[fcgray, thin, ->] (-0.2,0) -- (6.0,0) node[below left, note] {$y_{k-1}$};
+    \draw[fcgray, thin, ->] (0,-0.2) -- (0,3.8) node[left, note] {$y_k$};
+    % the true surface projected: two branches (depends on y_{k-2})
+    \draw[black!50, thick, domain=0.3:5.6, samples=60, smooth] plot (\x, {1.0 + 0.35*\x + 0.25*sin(deg(1.3*\x))});
+    \draw[black!50, thick, dashed, domain=0.3:5.6, samples=60, smooth] plot (\x, {2.6 + 0.2*\x - 0.3*sin(deg(1.1*\x))});
+    \fill[fcblue] (2.9,{1.0 + 0.35*2.9 + 0.25*sin(deg(1.3*2.9))}) circle (2pt) node[below right, note, text=fcblue!70!black] {$(\mathbf{x}_k,y_k)$};
+    \fill[fcverm] (3.05,{2.6 + 0.2*3.05 - 0.3*sin(deg(1.1*3.05))}) circle (2pt) node[above left, note, text=fcverm!70!black] {$(\mathbf{x}_j,y_j)$};
+    \draw[fcverm!80, very thick, <->] (2.97,{1.0 + 0.35*2.97 + 0.25*sin(deg(1.3*2.97))+0.1}) -- (2.97,{2.6 + 0.2*2.97 - 0.3*sin(deg(1.1*2.97))-0.1});
+    \node[note, anchor=west, text width=2.4cm] at (3.6,0.8) {neighbors in $\mathbf{x}$, far apart in $y$};
+    \node[note, text=fcverm!70!black, anchor=north, text width=5.6cm] at (2.9,-0.4) {\emph{false} neighbor: the output depends on the missing $y_{k-2}$, so $\abs{y_k-y_j}/\norm{\mathbf{x}_k-\mathbf{x}_j}\gg R$};
+  \end{scope}
+  % ---- top right: complete regression space ----
+  \begin{scope}[shift={(7.0,0)}]
+    \node[note, anchor=south, text width=5.4cm] at (2.9,4.1) {complete: $\mathbf{x}_k=[y_{k-1}\ y_{k-2}]$};
+    \draw[fcgray, thin, ->] (-0.2,0) -- (6.0,0) node[below left, note] {$y_{k-1}$};
+    \draw[fcgray, thin, ->] (0,-0.2) -- (0,3.8) node[left, note] {$y_{k-2}$};
+    % smooth surface as shaded contours
+    \foreach \r/\op in {2.6/8, 2.0/14, 1.4/20, 0.8/26} { \fill[fcblue!\op] (3.0,1.9) ellipse [x radius=\r, y radius={0.62*\r}]; }
+    \fill[fcblue] (2.9,1.8) circle (2pt) node[below, note, text=fcblue!70!black] {$\mathbf{x}_k$};
+    \fill[fcgreen!70!black] (3.25,1.95) circle (2pt) node[above right, note, text=fcgreen!50!black] {$\mathbf{x}_j$};
+    \node[note, text width=2.2cm, anchor=west] at (3.6,0.8) {close in $\mathbf{x}$ $\Rightarrow$ close in $y$ (shading)};
+    \node[note, text=fcgreen!50!black, anchor=north, text width=5.6cm] at (2.9,-0.4) {\emph{true} neighbor: $\abs{y_k-y_j}/\norm{\mathbf{x}_k-\mathbf{x}_j}\lesssim\norm{\mathrm{d}f(\mathbf{x}_k)}$; the percentage of false ones drops to zero};
+  \end{scope}
+  % ---- bottom: cluster-based threshold ----
+  \begin{scope}[shift={(0,-7.0)}]
+    \node[note, anchor=south] at (2.9,4.1) {the threshold from Gath--Geva clusters};
+    \draw[fcgray, thin, ->] (-0.2,0) -- (6.0,0) node[below left, note] {$x$};
+    \draw[fcgray, thin, ->] (0,-0.2) -- (0,3.8) node[left, note] {$y$};
+    \draw[black!50, thick, domain=0.3:5.6, samples=60, smooth] plot (\x, {0.5 + 0.9*\x - 0.09*\x*\x});
+    \begin{scope}[rotate around={38:(1.2,1.45)}] \draw[fcblue, thick, fill=fcblue!12] (1.2,1.45) ellipse (0.9 and 0.22); \end{scope}
+    \begin{scope}[rotate around={22:(3.0,2.4)}] \draw[fcverm, thick, fill=fcverm!12] (3.0,2.4) ellipse (0.9 and 0.22); \end{scope}
+    \begin{scope}[rotate around={5:(4.8,2.75)}] \draw[fcgreen, thick, fill=fcgreen!12] (4.8,2.75) ellipse (0.9 and 0.22); \end{scope}
+    \draw[fcblue!70!black, ->, thick] (1.2,1.45) -- ++(-0.35,0.45) node[above, note, text=fcblue!70!black] {$\mathbf{t}_i$};
+    \node[note, text width=4.4cm, anchor=west] at (6.4,2.0) {each cluster is a local linear model with slope $\mathbf{a}_i=-\mathbf{t}^{x}_i/t^{y}_i$ ($\mathbf{t}_i$: eigenvector of the smallest eigenvalue of $\Fi$); the point-wise threshold is $R_k=\norm{\sum_i\mik\mathbf{a}_i}$};
+  \end{scope}
+\end{tikzpicture}
+\caption[The false-nearest-neighbor idea and its clustering-based threshold.]{The false-nearest-neighbor idea and its clustering-based threshold. Top left: with a regressor missing, the output is not a function of the regression vector, so points that are neighbors in the regression space can have very different outputs. Top right: with the complete regression vector the output is a smooth function and the ratio $\abs{y_k-y_j}/\norm{\mathbf{x}_k-\mathbf{x}_j}$ is bounded by the local gradient. Bottom: Gath--Geva clusters of the regression data are flat ellipsoids whose normal, the eigenvector of the smallest eigenvalue, gives the local slope, and the membership-weighted slopes give a threshold that follows the nonlinearity.}
+\label{fig:ts:fnn}
+\end{figure}
+
+The difficulty is the threshold. Heuristic values ($10\le R\le50$, after Kennel et al.\ \cite{kennel:1992:fnn}) work for some systems and not for others \cite{bomberger:1998:narx}, and the exact bound $R=\max_k\norm{\mathrm{d}f(\xk)}$ requires a nonlinear model of the unknown function \cite{rhodes:1998:fnn}---the very thing the order selection is supposed to precede. Feil, Abonyi and Szeifert \cite{feil:2003:fnn,feil:2004:fnn} observe that when the regression vector is adequate, Gath--Geva clusters of the joint data $\mathbf{z}_k=[\xk\T\ y_k]\T$ approximate the regression surface piecewise linearly (\cref{fig:ts:fnn}, bottom): the smallest eigenvalue of $\Fi$ is much smaller than the others and its eigenvector $\mathbf{t}_i=[(\mathbf{t}^x_i)\T\ t^y_i]\T$ is the normal of the local hyperplane, so that
+\begin{equation}
+  (\mathbf{t}_i)\T(\mathbf{z}_k-\vi)=0\quad\Longrightarrow\quad
+  y_k=\underbrace{\frac{-1}{t^y_i}(\mathbf{t}^x_i)\T}_{\mathbf{a}_i\T}\xk+\underbrace{\frac{1}{t^y_i}\mathbf{t}_i\T\vi}_{b_i},
+  \label{eq:ts:localslope}
+\end{equation}
+the total-least-squares estimate of a local linear model. The gradient at $\xk$ is approximated by the membership-weighted average of the local slopes, which gives a \emph{point-wise} threshold,
+\begin{equation}
+  \mathrm{d}f(\xk)\approx\sum_{i=1}^{c}\mik\,\mathbf{a}_i,\qquad
+  R_k=\Big\lVert\sum_{i=1}^{c}\mik\frac{-1}{t^y_i}\mathbf{t}^x_i\Big\rVert_2,
+  \label{eq:ts:Rk}
+\end{equation}
+so that neighbor $j$ of $k$ is false when $\abs{y_k-y_j}/\norm{\xk-\mathbf{x}_j}>R_k$. The threshold adapts to the nonlinearity, large where the surface is steep and small where it is flat, and the only remaining parameter, the number of clusters, has little influence. Gath--Geva clustering, initialized by fuzzy c-means, is preferred to Gustafson--Kessel because the clusters may have different volumes. Regressors and output are standardized first so that the ratio and $R_k$ are dimensionless.
+
+\begin{algobox}{Model-order selection by FNN with a cluster-based threshold}{fnn}\index{false nearest neighbors (FNN)}\index{model-order selection}\index{fnn\_model\_order@\code{fnn\_model\_order}}
+\begin{algorithm}[H]
+\KwIn{output $y$ and input $u$ sequences, maximal orders, number of clusters $c$, tolerance on the percentage of false neighbors}
+\For{every order $(n_a,n_b)$ with $n_a+n_b>0$}{
+  build the regression vectors $\xk$ and outputs $y_k$; standardize\;
+  cluster $\mathbf{z}_k=[\xk\T\ y_k]\T$ with $c$ Gath--Geva clusters (FCM initialization)\;
+  local slopes $\mathbf{a}_i$ from the eigenvectors of the smallest eigenvalues by \eqref{eq:ts:localslope}; thresholds $R_k$ by \eqref{eq:ts:Rk}\;
+  \For{every sample $k$}{nearest neighbor $j$ in the regression space; false if $\abs{y_k-y_j}/\norm{\xk-\mathbf{x}_j}>R_k$}
+  $J(n_a,n_b)=$ percentage of false neighbors\;
+}
+\KwOut{table $J(n_a,n_b)$; the selected order is the smallest $n_a+n_b$ with $J$ not above the tolerance}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{FNN model-order selection}
+\begin{itemize}
+  \item Geometric, model-free test: a regression vector is complete when neighbors in the regression space have neighboring outputs.
+  \item The threshold of the test is the local gradient norm; Gath--Geva clusters of the regression data supply it point-wise as the norm of the membership-weighted local slopes.
+  \item Read the order off the corner of the $J(n_a,n_b)$ table where the percentage collapses; the number of clusters hardly matters, a constant threshold does.
+  \item With $u$ absent and a lag $\tau$ the same function estimates the embedding dimension of a scalar series.
+\end{itemize}
+\end{summarybox}
+
+\subsection{State-space reconstruction and prediction of chaotic series}\label{sec:ts:chaotic}
+
+Let the state $\mathbf{s}_k\in M$ of a deterministic system evolve as $\mathbf{s}_{k+1}=\mathbf{f}(\mathbf{s}_k)$ and be observed through a smooth scalar function $y_k=g(\mathbf{s}_k)$. Takens' theorem \cite{takens:1981} states that, if $M$ is a compact manifold of dimension $d_M$, then for a generic observation the delay vectors
+\begin{equation}
+  \mathbf{y}_k=[y_k,\ y_{k-\tau},\ \dots,\ y_{k-\tau(d_e-1)}]\T
+  \label{eq:ts:delay}
+\end{equation}
+embed $M$ when $d_e\ge2d_M+1$. Sauer, Yorke and Casdagli \cite{sauer:1991:embedology} replaced the manifold by the attractor itself: if its box-counting dimension is $d_A$, almost every delay map is one-to-one on the attractor when $d_e>2d_A$. In practice $d_e\ge d_l+1$ often suffices, where $d_l$ is the local dimension of the attractor, the dimension of the surface on which the trajectory lies. The lag $\tau$ is taken as the first zero of the autocorrelation or the first minimum of the mutual information \cite{fraser:1986:mutualinfo}. In the reconstructed space the dynamics is a smooth map $\mathbf{y}_{k+1}=\mathbf{f}_r(\mathbf{y}_k)$, and since the data are typically confined to a $d_l$-dimensional surface of the $d_e$-dimensional space, local linear models \cite{farmer:1987:prediction,casdagli:1989:prediction} are the natural approximators (\cref{fig:ts:embedding}).
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[scale=0.88, >={Latex[length=2mm]}]
+  % ---- top left: scalar series with the delay samples ----
+  \begin{scope}
+    \node[note, anchor=south] at (3.6,2.9) {scalar observation $y_k$};
+    \draw[fcgray, thin, ->] (-0.2,0.6) -- (7.4,0.6) node[below left, note] {$k$};
+    \draw[fcgray, thin, ->] (0,0.4) -- (0,2.7) node[left, note] {$y$};
+    \draw[black!70, thick, domain=0.1:7.1, samples=160, smooth] plot (\x, {1.6 + 0.55*sin(deg(2.1*\x)) + 0.3*sin(deg(5.3*\x+40))});
+    \foreach \x/\lab/\col in {5.9/$y_k$/fcblue, 4.3/$y_{k-\tau}$/fcverm, 2.7/$y_{k-2\tau}$/fcgreen} {
+      \fill[\col] (\x, {1.6 + 0.55*sin(deg(2.1*\x)) + 0.3*sin(deg(5.3*\x+40))}) circle (2.2pt);
+      \draw[\col, dashed] (\x, 0.6) -- (\x, {1.6 + 0.55*sin(deg(2.1*\x)) + 0.3*sin(deg(5.3*\x+40))});
+      \node[note, text=\col!70!black, anchor=north] at (\x, 0.55) {\lab};
+    }
+    \draw[fcgray, |-|] (2.7,0.05) -- (4.3,0.05) node[midway, below, note] {$\tau$};
+    \draw[fcgray, |-|] (4.3,0.05) -- (5.9,0.05) node[midway, below, note] {$\tau$};
+  \end{scope}
+  % ---- top right: the two criteria ----
+  \begin{scope}[shift={(8.4,-0.6)}]
+    \node[note, anchor=south] at (2.3,3.6) {two criteria from one clustering};
+    \draw[fcgray, thin, ->] (0,1.9) -- (4.6,1.9) node[below, note] {$d_e$};
+    \draw[fcgray, thin, ->] (0,1.9) -- (0,3.5) node[left, note] {MSE};
+    \draw[fcverm, very thick] (0.4,3.3) -- (1.2,2.85) -- (2.0,2.2) -- (2.8,2.1) -- (3.6,2.08) -- (4.3,2.07);
+    \draw[fcgray, dashed] (2.0,1.9) -- (2.0,3.3); \node[note, anchor=south west] at (2.05,2.25) {$d_e$: error saturates};
+    \draw[fcgray, thin, ->] (0,-0.1) -- (4.6,-0.1) node[below, note] {$d_e$};
+    \draw[fcgray, thin, ->] (0,-0.1) -- (0,1.5) node[left, note] {$J^{d_e}$};
+    \draw[fcgreen!70!black, very thick] (0.4,1.1) -- (1.2,1.3) -- (2.0,0.35) -- (2.8,0.2) -- (3.6,0.1) -- (4.3,0.05);
+    \draw[fcgray, dashed] (2.0,-0.1) -- (2.0,1.4); \node[note, anchor=west] at (2.05,0.9) {$d_l+1$: $J^{d_e}$ collapses};
+  \end{scope}
+  % ---- arrow down ----
+  \draw[arrow, very thick] (3.6,-0.55) -- (3.6,-1.55) node[midway, right=2pt, note] {delay embedding};
+  % ---- bottom: reconstructed space with a trajectory and clusters ----
+  \begin{scope}[shift={(0.6,-5.9)}]
+    \node[note, anchor=south] at (3.0,3.75) {reconstructed space, $\mathbf{y}_k=[y_k\ y_{k-\tau}\ y_{k-2\tau}]\T$ ($d_e=3$)};
+    \draw[fcgray, thin, ->] (-0.2,0) -- (6.2,0) node[below left, note] {$y_k$};
+    \draw[fcgray, thin, ->] (0,-0.2) -- (0,3.6) node[left, note] {$y_{k-\tau}$};
+    \draw[fcgray, thin, ->] (0,0) -- (1.3,1.1) node[midway, below right, note] {$y_{k-2\tau}$};
+    % attractor-like loops
+    \draw[black!55, thin, samples=200, domain=0:1440, smooth, variable=\t] plot ({3.1 + (1.6+0.5*sin(0.7*\t))*cos(\t)}, {1.75 + (1.0+0.3*sin(0.7*\t))*sin(\t)});
+    % clusters along the trajectory
+    \begin{scope}[rotate around={60:(4.9,2.2)}] \draw[fcblue, thick, fill=fcblue!18, opacity=0.9] (4.9,2.2) ellipse (0.55 and 0.2); \end{scope}
+    \begin{scope}[rotate around={-15:(3.0,3.0)}] \draw[fcverm, thick, fill=fcverm!18, opacity=0.9] (3.0,3.0) ellipse (0.6 and 0.2); \end{scope}
+    \begin{scope}[rotate around={70:(1.3,1.6)}] \draw[fcgreen, thick, fill=fcgreen!18, opacity=0.9] (1.3,1.6) ellipse (0.55 and 0.2); \end{scope}
+    \begin{scope}[rotate around={10:(3.1,0.6)}] \draw[fcpurple, thick, fill=fcpurple!18, opacity=0.9] (3.1,0.6) ellipse (0.6 and 0.2); \end{scope}
+    \fill[fcblue] (4.75,2.55) circle (1.6pt); \fill[fcblue!60!black] (4.95,2.0) circle (1.6pt);
+    \draw[fcblue!70!black, ->, thick] (4.75,2.55) -- (4.93,2.07);
+    \node[note, anchor=west, text=fcblue!70!black] at (5.1,2.45) {$\mathbf{y}_k\mapsto\mathbf{y}_{k+1}$};
+    \node[note, text width=5.2cm, anchor=west] at (6.6,1.1) {operating regimes: Gaussian clusters $(\vi,\Fi)$ along the trajectory, each with a local linear map $\mathbf{A}_i\mathbf{y}_k+\mathbf{b}_i$; the clusters are flat because the attractor is a $d_l$-dimensional surface};
+  \end{scope}
+\end{tikzpicture}
+\caption[State-space reconstruction by delay embedding and clustering.]{State-space reconstruction by delay embedding and clustering. Top left: three samples of the scalar series spaced by the lag $\tau$ form one delay vector. Bottom: the delay vectors trace the attractor in the reconstructed space; the clusters of the pairs $(\mathbf{y}_k,\mathbf{y}_{k+1})$ are operating regimes with local linear maps, flat because the trajectory lives on a low-dimensional surface. Top right: the one-step prediction error of the model saturates at the embedding dimension, and the prior-weighted smallest eigenvalue of the cluster covariances collapses one dimension above the local dimension.}
+\label{fig:ts:embedding}
+\end{figure}
+
+The operating-regime model of \cite{abonyi:2004:chaotic} is the MIMO Takagi--Sugeno model of \cref{ch:models} on the delay vectors,
+\begin{equation}
+  \begin{aligned}
+  \hat{\mathbf{y}}_{k+1}&=\sum_{i=1}^{c}\beta_i(\mathbf{y}_k)\big(\mathbf{A}_i\mathbf{y}_k+\mathbf{b}_i\big)=\sum_{i=1}^{c}\beta_i(\mathbf{y}_k)[\mathbf{y}_k\T\ 1]\boldsymbol\theta_i,\\
+  \beta_i(\mathbf{y})&=\frac{\exp\!\big(-\frac12(\mathbf{y}-\vi)\T\Fi^{-1}(\mathbf{y}-\vi)\big)}{\sum_{j=1}^{c}\exp\!\big(-\frac12(\mathbf{y}-\mathbf{v}_j)\T\mathbf{F}_j^{-1}(\mathbf{y}-\mathbf{v}_j)\big)},
+  \end{aligned}
+  \label{eq:ts:regimemodel}
+\end{equation}
+whose Gaussian regimes and local models are identified simultaneously by clustering the pairs $(\mathbf{y}_k,\mathbf{y}_{k+1})$ with the distance
+\begin{equation}
+  \begin{aligned}
+  \frac{1}{D^2_{ik}}&=p(\eta_i)\;
+  \frac{\exp\!\big(-\frac12(\mathbf{y}_k-\vi)\T\Fi^{-1}(\mathbf{y}_k-\vi)\big)}{(2\pi)^{d_e/2}\sqrt{\det\Fi}}\;
+  \frac{\exp\!\big(-\frac12\mathbf{e}_{ik}\T\mathbf{P}_i^{-1}\mathbf{e}_{ik}\big)}{(2\pi)^{p/2}\sqrt{\det\mathbf{P}_i}},\\
+  \mathbf{e}_{ik}&=\mathbf{y}_{k+1}-[\mathbf{y}_k\T\ 1]\boldsymbol\theta_i,
+  \end{aligned}
+  \label{eq:ts:chaosdist}
+\end{equation}
+the product of the prior, the Gaussian domain of influence and the Gaussian likelihood of the $p$-dimensional local prediction error with covariance $\mathbf{P}_i$. The alternating optimization updates $\vi$ and $\Fi$ as the $\mik^m$-weighted mean and covariance of the delay vectors, the local models by weighted least squares $\boldsymbol\theta_i=(\mathbf{Y}\T\mathbf{B}_i\mathbf{Y})^{-1}\mathbf{Y}\T\mathbf{B}_i\mathbf{Y}_{(+1)}$ with $\mathbf{B}_i=\diag(\mu_{i1},\dots,\mu_{iN})$ (local estimation, which keeps the interpretation as a linear parameter-varying system), the error covariances $\mathbf{P}_i=\sum_k\mik^m\mathbf{e}_{ik}\mathbf{e}_{ik}\T/\sum_k\mik^m$, the priors $p(\eta_i)=\frac1N\sum_k\mik$ and the partition by the usual formula. Since all but the first component of $\mathbf{y}_{k+1}$ are past samples, which a free-run simulation simply shifts along, \code{fuzzyclust} by default identifies only the map to the next sample $y_{k+1}$ ($p=1$, \py{target="scalar"}). The full MIMO map is available as \py{target="full"}; with $\tau=1$ its components copied from $\mathbf{y}_k$ make $\mathbf{P}_i$ singular unless it is regularized.
+
+Three results come out of this clustering. (i) \emph{Embedding dimension}: the model is identified for $d_e=1,2,\dots$ and the one-step prediction errors on test data are compared; the error decreases as long as a coordinate is missing and stops improving at the right $d_e$, where the ratio of consecutive errors approaches one. (ii) \emph{Local dimension}: the clusters approximate the tangent space of the attractor, so their smallest eigenvalues $\lambda_{i,\min}$ are orders of magnitude below the others once $d_e$ exceeds the dimension of the surface the trajectory lives on; the prior-weighted index
+\begin{equation}
+  J^{d_e}=\sum_{i=1}^{c}p(\eta_i)\,\lambda_{i,\min}
+  \label{eq:ts:localdim}
+\end{equation}
+drops sharply at $d_e=d_l+1$. The integer $d_l$ is complemented by the fractal correlation dimension of Grassberger and Procaccia \cite{grassberger:1983}, the slope of $\log C(r)$ against $\log r$ for the correlation sum $C(r)$ of the reconstructed vectors, which the fuzzy Sammon paper \cite{feil:2007:fuzzsam} uses to confirm the clustering-based estimate. (iii) \emph{Prediction}: the model predicts one step ahead or, fed with its own outputs, simulates the series in free run; because the system is chaotic, the simulated trajectory leaves the measured one after a horizon set by the largest Lyapunov exponent, but it stays on (a model of) the attractor. The regimes of the reconstructed space are $d_e$-dimensional ellipsoids with Mahalanobis geometry; the fuzzy Sammon mapping of \cref{sec:viz:fuzzsam} draws them as compact groups in the plane and shows how the trajectory wanders from regime to regime \cite{feil:2007:fuzzsam}.
+
+\begin{algobox}{State-space reconstruction and prediction by fuzzy clustering}{chaotic}\index{state-space reconstruction}\index{delay embedding}\index{chaotic time series}\index{ChaoticPredictor@\code{ChaoticPredictor}}
+\begin{algorithm}[H]
+\KwIn{scalar series $y_k$, lag $\tau$ (mutual information or autocorrelation), range of $d_e$, number of regimes $c$, exponent $m$, tolerance $\epsilon$}
+\For{every embedding dimension $d_e$ in the range}{
+  delay vectors $\mathbf{y}_k$ by \eqref{eq:ts:delay}; identification pairs $(\mathbf{y}_k,\mathbf{y}_{k+1})$; initial partition from FCM on the $\mathbf{y}_k$\;
+  \Repeat{$\max_{ik}\abs{\mu^{(l)}_{ik}-\mu^{(l-1)}_{ik}}<\epsilon$}{
+    centers $\vi$ and covariances $\Fi$ of the delay vectors; local models $\boldsymbol\theta_i$ by weighted least squares; error covariances $\mathbf{P}_i$; priors $p(\eta_i)$\;
+    distances by \eqref{eq:ts:chaosdist}; partition $\mik=1/\sum_j(D_{ik}/D_{jk})^{2/(m-1)}$\;
+  }
+  record the one-step test error of \eqref{eq:ts:regimemodel} and the index $J^{d_e}$ of \eqref{eq:ts:localdim}\;
+}
+$d_e$: the smallest dimension after which the error stops improving; $d_l$: one less than the dimension where $J^{d_e}$ collapses\;
+\KwOut{embedding and local dimension, operating-regime model for one-step prediction and free-run simulation}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Chaotic series by clustering in the reconstructed space}
+\begin{itemize}
+  \item Delay vectors reconstruct the state space (Takens); the dynamics is identified as an operating-regime model with Gaussian regimes and local linear maps by modified Gath--Geva clustering of $(\mathbf{y}_k,\mathbf{y}_{k+1})$.
+  \item Clustering over a range of $d_e$ gives the embedding dimension (saturation of the one-step error), the local dimension (collapse of the prior-weighted smallest eigenvalue) and a predictor.
+  \item Free-run simulation reproduces the attractor but diverges from the measured trajectory with the horizon, as it must for a chaotic system.
+  \item Parameters: lag $\tau$, number of regimes $c$ (10--20), regularization of $\Fi$ and $\mathbf{P}_i$; visualize the regimes with the fuzzy Sammon mapping.
+\end{itemize}
+\end{summarybox}
+
+\subsection{Structure selection with mixed discrete and continuous inputs}\label{sec:ts:structure}
+
+Suppose every candidate input $x_j$ takes values in a finite set $A_j=\{a^1_j,\dots,a^{c_j}_j\}$. For a subset $U$ of the inputs the data decompose into \emph{segments}---one for every combination of values $a_U\in\times_{j\in U}A_j$---and if $U$ contains the inputs that drive the output, $y$ varies little inside each segment. The variance of $y$ within the segments, summed over the segments, is therefore a model-free measure of how well the subset explains the output, as in a (discrete) analysis of variance. There are $n_s=\prod_{j\in U}c_j$ segments, so only subsets up to a maximal cardinality are enumerated; exhaustive enumeration up to that size is feasible for up to about fifteen candidate inputs.
+
+Continuous inputs do not take finitely many values, and quantizing them into crisp bins introduces an arbitrary choice of levels. Girimonte, Babu\v{s}ka and Abonyi \cite{girimonte:2004:structure} fuzzify the decomposition: every continuous input $x_j$ is clustered on its own by fuzzy c-means into $c_j$ fuzzy sets ($c_j$ fixed or chosen by the Xie--Beni index \cite{xie:1991:validity}), giving a membership matrix $\U^j\in[0,1]^{c_j\times N}$, and a discrete input gets one crisp set per value. The fuzzy segments of a structure $U$ are the product-space conjunctions of the sets of its inputs,
+\begin{equation}
+  \beta_{ik}=\prod_{j\in U}\mu^{j}_{i_jk},\qquad i=(i_1,\dots,i_{n_i})\in\times_{j\in U}\{1,\dots,c_j\},\qquad
+  \gamma_{ik}=\frac{\beta_{ik}}{\sum_{i'}\beta_{i'k}},
+  \label{eq:ts:segments}
+\end{equation}
+(because the memberships of every input sum to one for each sample, the $\beta_{ik}$ already sum to one over the segments), every segment is represented by the membership-weighted mean of the output, and the \emph{total fuzzy variance} is the sum of squared errors of the singleton fuzzy model that the segments define:
+\begin{equation}
+  b_i=\frac{\sum_k\gamma_{ik}y_k}{\sum_k\gamma_{ik}},\qquad
+  \sigma_t=\sum_{k=1}^{N}\Big(y_k-\sum_{i}\gamma_{ik}b_i\Big)^2.
+  \label{eq:ts:sigmat}
+\end{equation}
+Structures are ranked by increasing $\sigma_t$. An irrelevant input only splits every segment into $c_j$ smaller ones; it does not increase $\sigma_t$ and usually lowers it a little, so the structures at the top of the list tend to contain the relevant inputs plus one or two dummies. The \emph{variance--complexity trade-off}
+\begin{equation}
+  VCT=\sigma_t\,n_i
+  \label{eq:ts:vct}
+\end{equation}
+penalizes the number of inputs $n_i$ and separates structures of \emph{similar} variance: plotted along the ranking it shows a clear dip at the structure with the relevant inputs only. The paper compares the VCT only among structures of similar $\sigma_t$, and \code{fuzzyclust} follows this reading: it recommends the structure with the smallest VCT among those whose $\sigma_t$ lies within a relative tolerance of the smallest one. The method is a screening tool: it returns a ranked list, and the final choice is made by fitting models for a few top candidates, since the eventual validation criterion (e.g.\ free-run simulation error) differs from the one used in the selection.
+
+\begin{algobox}{Structure selection by fuzzy variance decomposition}{structure}\index{structure selection}\index{fuzzy variance decomposition}\index{MixedInputStructureSelection@\code{MixedInputStructureSelection}}
+\begin{algorithm}[H]
+\KwIn{candidate inputs $\X$ (discrete and continuous), output $\mathbf{y}$, numbers of fuzzy sets $c_j$ (or Xie--Beni), maximal number of inputs}
+\For{every input $j$}{
+  \lIf{$x_j$ is discrete}{$\U^j$: one crisp set per value}
+  \lElse{$\U^j$: fuzzy c-means of $x_j$ with $c_j$ sets (ordered by center)}
+}
+\For{every subset $U$ of at most the maximal number of inputs}{
+  segment memberships $\gamma_{ik}$ by \eqref{eq:ts:segments}; segment means $b_i$ and $\sigma_t$ by \eqref{eq:ts:sigmat}; $VCT=\sigma_t n_i$\;
+}
+sort the structures by $\sigma_t$; among those with $\sigma_t$ close to the minimum pick the smallest $VCT$\;
+\KwOut{ranked list of structures with $\sigma_t$ and $VCT$, recommended structure, the partitions $\U^j$}
+\end{algorithm}
+\end{algobox}
+\begin{summarybox}{Structure selection with mixed inputs}
+\begin{itemize}
+  \item Fuzzy c-means turns continuous inputs into fuzzy values, so discrete and continuous inputs are treated alike and no model is fitted.
+  \item Every subset of inputs is scored by the total fuzzy variance of the output over its product-space segments; the VCT separates structures of similar variance by their size.
+  \item Exhaustive search up to a maximal cardinality (about 15 candidate inputs at most); the result is a ranked list to be confirmed by modeling.
+  \item Parameters: sets per input (3 is a good default; many sets need many samples), maximal cardinality, tolerance for ``similar variance''.
+\end{itemize}
+\end{summarybox}
+
+\section{Using it in fuzzyclust}\label{sec:ts:api}
+
+All methods of this chapter are in \code{fuzzyclust.timeseries}. The segmentation is a \code{BaseFuzzyClusterer} whose \code{fit} accepts an optional time axis \code{t}; the other methods are functions or small estimators with their own signatures, because most of them take sequences rather than sample matrices. Data generators reproduce the benchmarks of the papers, and plot helpers draw the typical figures. Note that the merging threshold $\gamma$ of \cref{sec:ts:segmentation} is the parameter \code{merge\_threshold}; the parameter \code{gamma} of \code{FuzzySegmentation} and \code{ChaoticPredictor} is the covariance shrinkage of \cref{sec:part:gk}.
+
+\begin{apibox}{fuzzyclust.timeseries.FuzzySegmentation}
+\code{n\_segments=5}, \code{m=2.0}, \code{n\_components=None|\allowbreak int|\allowbreak accuracy}, \code{distance="ppca"|\allowbreak "q"|\allowbreak "t2"}, \code{pca\_update="em"|\allowbreak "eig"}, \code{merge=False}, \code{merge\_threshold=0.75}, \code{merge\_every=100}, \code{min\_segment\_weight=0.02}, \code{gamma=0.0}, \code{beta=1e15}, \code{tol}, \code{max\_iter}, \code{init="uniform"|\allowbreak "random"|\allowbreak "kmeans++"|\allowbreak array}, \code{n\_init=1}, \code{random\_state}, \code{verbose}.\\
+\code{fit(X,\allowbreak\ y=None,\allowbreak\ t=None)}; attributes \code{boundaries\_} (crisp borders), \code{time\_membership\_} ($\beta_i(t_k)$), \code{membership\_} (posteriors), \code{labels\_}, \code{n\_segments\_}, \code{n\_components\_}, \code{segment\_centers\_}, \code{segment\_variances\_}, \code{cluster\_centers\_}, \code{covariances\_}, \code{pca\_loadings\_}, \code{noise\_variances\_}, \code{norm\_matrices\_}, \code{eigenvalues\_}, \code{eigenvectors\_}, \code{local\_pca\_}, \code{priors\_}. Methods \code{predict(X,\allowbreak\ t=None)}, \code{predict\_proba(X,\allowbreak\ t=None)}, \code{transform(X,\allowbreak\ t=None)}, \code{compatibility\_matrix()} ($O$, $S_{PCA}$, center distances), \code{merge\_compatible\_segments(threshold,\allowbreak\ max\_merges)}, \code{hotelling\_t2(X)}, \code{q\_reconstruction\_error(X)}.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.timeseries.bottom\_up\_segmentation(\allowbreak X,\allowbreak\ n\_components=2,\allowbreak\ max\_error=None,\allowbreak\ n\_segments=None,\allowbreak\ cost="q"|\allowbreak "t2",\allowbreak\ init\_length=10,\allowbreak\ center=True)}
+Returns a \code{Bunch} with \code{labels}, \code{boundaries}, \code{segments}, \code{merge\_costs}, \code{n\_segments}; \code{pca\_segment\_cost(X,\allowbreak\ n\_components,\allowbreak\ cost)} is the cost of one segment.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.timeseries.fnn\_model\_order(\allowbreak y,\allowbreak\ u=None,\allowbreak\ max\_na=4,\allowbreak\ max\_nb=0,\allowbreak\ n\_clusters=6,\allowbreak\ threshold=None,\allowbreak\ fnn\_tol=5.0,\allowbreak\ m=2.0,\allowbreak\ scale=True,\allowbreak\ delay=1,\allowbreak\ random\_state=None)}
+Returns a \code{Bunch} with \code{table} (DataFrame of percentages, rows $n_a$, columns $n_b$), the selected \code{n\_a} and \code{n\_b}, and \code{thresholds} (the point-wise $R_k$ of every order); \code{threshold=} replaces $R_k$ by a constant, \code{delay=} is the embedding lag for a scalar series. \code{select\_model\_order(...)} returns only \code{(n\_a,\allowbreak\ n\_b)}, \code{false\_nearest\_neighbors(y,\allowbreak\ u,\allowbreak\ max\_na,\allowbreak\ max\_nb,\allowbreak\ R\_tol,\allowbreak\ A\_tol,\allowbreak\ scale,\allowbreak\ delay)} is the classical test of Kennel et al., and \code{cluster\_based\_threshold(Phi,\allowbreak\ target,\allowbreak\ n\_clusters)} returns the thresholds of one order and the fitted \code{GG} model.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.timeseries.ChaoticPredictor}
+\code{dim=3}, \code{delay=1}, \code{n\_clusters=10}, \code{m=2.0}, \code{target="scalar"|\allowbreak "full"}, \code{gamma=0.0}, \code{beta=1e8}, \code{tol}, \code{max\_iter}, \code{init="fcm"|\allowbreak "random"|\allowbreak array}, \code{random\_state}, \code{verbose}.\\
+\code{fit(y)} on a scalar series; \code{predict(Y)} for delay vectors, \code{predict\_series(y)}, \code{one\_step\_error(y)}, \code{simulate(y\_history,\allowbreak\ n\_steps)}, \code{multi\_step\_error(y,\allowbreak\ horizons)}, \code{regime\_membership(Y)} (= \code{predict\_proba}), \code{transform(Y)} (Mahalanobis distances, for \code{FuzzySammon}); attributes \code{embedding\_}, \code{membership\_}, \code{cluster\_centers\_}, \code{covariances\_}, \code{local\_models\_}, \code{error\_covariances\_}, \code{priors\_}, \code{eigenvalues\_}, \code{local\_dimension\_index\_}. Helpers: \code{delay\_embedding(y,\allowbreak\ dim,\allowbreak\ delay)}, \code{select\_delay(y,\allowbreak\ max\_lag,\allowbreak\ method)}, \code{embedding\_scan(y,\allowbreak\ dims,\allowbreak\ delay,\allowbreak\ n\_clusters,\allowbreak\ train\_fraction)}, \code{select\_embedding\_dimension(table,\allowbreak\ ratio\_tol)}, \code{correlation\_dimension(Y)}.
+\end{apibox}
+
+\begin{apibox}{fuzzyclust.timeseries.MixedInputStructureSelection}
+\code{n\_clusters=3|\allowbreak "xie-beni"|\allowbreak sequence}, \code{max\_inputs=None}, \code{m=2.0}, \code{vct\_tolerance=0.2}, \code{random\_state}.\\
+\code{fit(X,\allowbreak\ y,\allowbreak\ discrete=None,\allowbreak\ feature\_names=None)}; \code{ranking\_} (DataFrame with \code{inputs}, \code{n\_inputs}, \code{sigma\_t}, \code{vct}, indexed by rank), \code{best\_structure\_}, \code{memberships\_}, \code{centers\_}, \code{transform\_segments(inputs)}. \code{select\_structure\_mixed(X,\allowbreak\ y,\allowbreak\ discrete,\allowbreak\ ...)} returns the ranking directly; \code{fuzzy\_variance(memberships,\allowbreak\ y)} is $\sigma_t$ of one structure.
+\end{apibox}
+
+\begin{apibox}{data generators and plot helpers}
+\code{make\_piecewise\_timeseries} (hidden regime changes of kind mean / correlation / both), \code{make\_nonlinear\_io\_system} (the polymerization reactor), \code{make\_mackey\_glass}, \code{make\_lorenz}, \code{make\_rossler}, \code{make\_mixed\_input\_system}; \code{plot\_segmentation(model,\allowbreak\ X)}, \code{plot\_fnn\_table(table)}, \code{plot\_embedding\_scan(table)}, \code{plot\_phase\_space(Y,\allowbreak\ labels)}, \code{plot\_structure\_ranking(ranking)}.
+\end{apibox}
+
+A series is segmented and its borders are read off in a few lines, and the number of segments is found by merging from a large initial number:
+\pysnippet{examples/04_timeseries/plot_01_fuzzy_segmentation.py}{fit}
+\pysnippet{examples/04_timeseries/plot_01_fuzzy_segmentation.py}{merge}
+The bottom-up baseline and the model-order selection are single calls:
+\pysnippet{examples/04_timeseries/plot_02_bottom_up_vs_fuzzy.py}{fit}
+\pysnippet{examples/04_timeseries/plot_03_fnn_model_order.py}{fit}
+For a chaotic series the lag is chosen, the embedding dimension is scanned and the model is identified and simulated:
+\pysnippet{examples/04_timeseries/plot_04_chaotic_reconstruction.py}{data}
+\pysnippet{examples/04_timeseries/plot_04_chaotic_reconstruction.py}{scan}
+\pysnippet{examples/04_timeseries/plot_04_chaotic_reconstruction.py}{fit}
+The structure selection ranks all small subsets of inputs:
+\pysnippet{examples/04_timeseries/plot_05_mixed_input_structure.py}{fit}
+
+\section{Examples}\label{sec:ts:examples}
+
+\subsection{Fuzzy segmentation of a multivariate series}
+
+Two hidden variables generate six observed ones through a mixing matrix that changes at $t=500$ (correlation change), while their mean jumps at $t=1000$ and both change at $t=1500$ (\cref{fig:ts:ex1a}); the first change leaves every mean in place and is invisible in any single variable. The scree plot of ten uniform initial segments (\cref{fig:ts:ex1b}) shows two dominant eigenvalues followed by four small ones at the noise level ($0.15^2\approx0.02$), so $q=2$; inside one regime the two components explain $85$--$88\,\%$ of the variance, so an accuracy of $95\,\%$ in \eqref{eq:ts:accuracy} would ask for more components. With four segments the borders are found at 498, 1001 and 1500 (\cref{fig:ts:ex1c}). The Gaussian segments in time overlap only around the borders, and the posteriors are almost crisp inside the segments because the PCA models of neighboring regimes explain each other's data badly. The PCA similarity factors of the adjacent models are $0.28$, $1.00$ and $0.58$, small where the correlation structure changed and one where only the mean moved, as in the paper. \Cref{fig:ts:ex1d} varies the two structural parameters. With fewer than four segments, borders are sacrificed: three segments keep the correlation change (found at 539) and the change at 1500 but drop the mean shift at 1000, and two segments keep only the mean shift at 1000. With more than four segments a regime is split, and the surplus borders fall inside the regimes or next to the true ones. The number of components hardly matters for the PPCA distance: $q=1$ moves one border by sixty samples, and from $q=2$ on the result is stable. The printed comparison of the distance measures confirms the discussion of \cref{sec:ts:segmentation}: $Q$ works with $q=2$ and fails with $q=5$, $T^2$ fails with $q=2$ and works with the $q$ given by an accuracy of 99\,\%, and PPCA works with both. Finally, merging from ten segments with $\gamma=0.75$ (\cref{fig:ts:ex1e}) reduces the number of segments to four with the right borders. The compatibility matrix of the initial segments shows blocks of mutually compatible surplus segments inside each regime, and the printed scan of $\gamma$ shows that a lower threshold (0.5--0.65) merges the two regimes that differ only in their mean (and moves the first border to 539), whereas $0.75$ and $0.85$ keep all four.
+
+\exfig[0.9\textwidth]{04_timeseries/plot_01_fuzzy_segmentation_1}{The six observed variables of the synthetic series change regime at the dashed lines; the first change alters only the correlation and is visible in no single variable.}{ts:ex1a}
+\exfig[0.85\textwidth]{04_timeseries/plot_01_fuzzy_segmentation_2}{The scree plot (left) and the cumulative fraction of variance (right) of the ten initial segments show two dominant components above a noise floor; the dashed line marks an accuracy of 95\,\%, which two components reach only in the segment dominated by a mean shift.}{ts:ex1b}
+\exfig[0.9\textwidth]{04_timeseries/plot_01_fuzzy_segmentation_3}{Two variables colored by the hard segment, the Gaussian segments in time $\beta_i(t_k)$ and the posterior memberships show the fuzzy segmentation with four segments; dashed lines mark the crisp borders.}{ts:ex1c}
+\exfig{04_timeseries/plot_01_fuzzy_segmentation_4}{The borders found for different numbers of segments (left, $q=2$) and of components (right, $c=4$) are compared with the true change points (dashed lines).}{ts:ex1d}
+\exfig{04_timeseries/plot_01_fuzzy_segmentation_5}{The compatibility matrix of the ten initial segments is shown on the left, the fuzzy segments after merging to four with $\gamma=0.75$ on the right.}{ts:ex1e}
+
+\subsection{Bottom-up baseline versus fuzzy segmentation}
+
+On the same series the bottom-up algorithm with the $Q$ cost finds the two correlation changes and misses the mean shift, with the $T^2$ cost it finds the two mean shifts and misses the correlation change, and the fuzzy segmentation finds all three (\cref{fig:ts:ex2a}); each cost also places one spurious border because it has to deliver four segments. The merge-cost curves (\cref{fig:ts:ex2b}) jump when pieces of different regimes have to be joined, and for both costs the knee is at three segments, the number of regimes each cost can see. The parameter scan printed by the script shows that the $Q$ cost depends strongly on $p$ (with $p=1$ the displacement of a mean shift leaves the one-dimensional model and is detected by accident; with $p=5$ the residual is noise), that the $T^2$ cost is insensitive to $p$ but blind to the correlation change, and that a long initial piece coarsens the borders. The fuzzy segmentation with $q=1,2,3,5$ finds the three borders every time, with $q=1$ one of them sixty samples off.
+
+\exfig[0.9\textwidth]{04_timeseries/plot_02_bottom_up_vs_fuzzy_1}{The borders found by the bottom-up algorithm with the $Q$ cost, by the bottom-up algorithm with the $T^2$ cost and by the fuzzy segmentation, all with four segments, are compared with the true change points (gray dashed lines).}{ts:ex2a}
+\exfig[0.85\textwidth]{04_timeseries/plot_02_bottom_up_vs_fuzzy_2}{The cost of every merge of the bottom-up algorithm with the $Q$ cost (left) and the $T^2$ cost (right) is plotted against the number of segments left; the jump marks the merge of two different regimes.}{ts:ex2b}
+
+\subsection{Model order of the polymerization reactor}
+
+Six hundred samples of the reactor under a random initiator flow (\cref{fig:ts:ex3a}) are analyzed for orders up to $n_a=n_b=3$. With the cluster-based threshold (\cref{fig:ts:ex3b}) the percentage of false neighbors collapses in the corner $n_a\ge1$, $n_b\ge2$, and the smallest order there, $(1,2)$, is the one reported in the paper. The point-wise thresholds of that order (\cref{fig:ts:ex3c}) differ by more than 60\,\% between the six operating regions found by the clusters, so no constant threshold fits everywhere. \Cref{fig:ts:ex3d} shows how a constant threshold moves the corner. A strict constant ($R=0.5$, below every local slope) keeps flagging more than a third of the neighbors at every order, so no corner appears; $R=1$ happens to give the right order; a loose constant ($R=3$, above every local slope) also passes wrong orders of the same size, $(0,3)$ and $(2,1)$, and selects $(0,3)$. Kennel's two-criterion test is looser still and accepts models that are too small, $(0,2)$ and $(1,1)$. The selected order is the same for 3, 6 and 10 clusters. A model-based check with linear ARX models of all orders (\cref{fig:ts:ex3e}) agrees: the normalized error drops sharply up to $(1,2)$ and then flattens.
+
+\exfig[0.9\textwidth]{04_timeseries/plot_03_fnn_model_order_1}{The polymerization reactor benchmark is driven by a random initiator flow (top) and observed through the molecular weight (bottom).}{ts:ex3a}
+\exfig[0.55\textwidth]{04_timeseries/plot_03_fnn_model_order_2}{The table gives the percentage of false nearest neighbors over the orders with the cluster-based threshold; the frame marks the selected order $(n_a,n_b)=(1,2)$.}{ts:ex3b}
+\exfig{04_timeseries/plot_03_fnn_model_order_3}{The point-wise thresholds $R_k$ of the order $(1,2)$ are plotted along the lagged input and colored by cluster (left), and their distribution is shown on the right.}{ts:ex3c}
+\exfig{04_timeseries/plot_03_fnn_model_order_4}{The percentage of false nearest neighbors with the cluster-based threshold, with three constant thresholds and with the classical test of Kennel et al.\ shows that the corner moves with the constant.}{ts:ex3d}
+\exfig[0.55\textwidth]{04_timeseries/plot_03_fnn_model_order_5}{The normalized one-step error of linear ARX models over the orders confirms the selected order with a model-based check.}{ts:ex3e}
+
+\subsection{Reconstruction and prediction of the R\"ossler series}
+
+The R\"ossler system is observed through $x_1$ (\cref{fig:ts:ex4a}); the first minimum of the mutual information gives a lag of 15 samples. The embedding scan with eight regimes (\cref{fig:ts:ex4b}) shows the one-step test error dropping by a factor of nine from $d_e=1$ to $2$ and by $1.8$ to $d_e=3$, after which it fluctuates around a floor, so $d_e=3$. The prior-weighted smallest eigenvalue drops by a factor of three at $d_e=3$ (from $1.26$ to $0.41$) and keeps falling, because the clusters are flat from three dimensions on, so $d_l=2$, which reflects the well-known band structure of the R\"ossler attractor. The FNN test with the cluster-based threshold on the same series collapses at $d_e=3$ as well, and the correlation dimension of the reconstructed vectors is $1.92$. With twelve regimes the model tiles the reconstructed attractor (\cref{fig:ts:ex4c}, left); its free-run simulation keeps spiraling on a R\"ossler-like band but visits the outer part more often than the system does (right). In time (\cref{fig:ts:ex4d}) the simulation follows the measured series for about two and a half cycles (some 280 samples) before the chaotic divergence takes over, and the multi-step error grows with the horizon from $3\cdot10^{-4}$ of the variance one step ahead to $0.4$ of the variance after 80 steps. The fuzzy Sammon mapping (\cref{fig:ts:ex4e}) shows the twelve regimes as compact groups arranged in the cyclic order in which the trajectory visits them, whereas the PCA projection of the same vectors overlaps the clusters that differ in the third coordinate. The parameter scan printed by the script shows that more regimes lower both the one- and the ten-step error at the lags 5 and 15, that a very short lag gives small one-step errors (consecutive samples are almost collinear) but a stretched attractor, and that a long lag (30 samples, about a third of the mean cycle) folds the attractor and raises the errors. The three systems compared at the end have correlation dimensions close to two ($1.97$, $1.90$ and $2.00$); the percentage of false neighbors of the classical test falls below the tolerance of $5\,\%$ at $d_e=3$ for the R\"ossler and Mackey--Glass series and already at $d_e=2$ ($3.9\,\%$) for the Lorenz series.
+
+\exfig{04_timeseries/plot_04_chaotic_reconstruction_1}{The R\"ossler system is observed through $x_1$ (left); its true attractor is shown in the $(x_1,x_2)$ plane (right).}{ts:ex4a}
+\exfig[0.62\textwidth]{04_timeseries/plot_04_chaotic_reconstruction_2}{The embedding scan plots the one-step training and test errors (top) and the prior-weighted smallest eigenvalue $J^{d_e}$ (bottom) against the embedding dimension and marks the selected $d_e=3$ and $d_l=2$.}{ts:ex4b}
+\exfig{04_timeseries/plot_04_chaotic_reconstruction_3}{The reconstructed state space is shown with the twelve regimes and their centers (left) and with the free-run simulation of the test part (right).}{ts:ex4c}
+\exfig{04_timeseries/plot_04_chaotic_reconstruction_4}{The free-run prediction of the test part is compared with the measured series in time (left), and its error is plotted against the horizon (right).}{ts:ex4d}
+\exfig{04_timeseries/plot_04_chaotic_reconstruction_5}{The delay vectors and the regime centers are projected to the plane by PCA (left) and by the fuzzy Sammon mapping (right).}{ts:ex4e}
+
+\subsection{Structure selection with a switching input}
+
+The output switches between $x_1^2$ and $x_4^2+x_3$ according to the binary input $x_2$, and two irrelevant inputs are added. With three fuzzy sets per continuous input and structures of up to five inputs, the three best structures by $\sigma_t$ all contain the four true inputs; the two with a dummy have a marginally smaller variance but a larger VCT, and $\{x_1,x_2,x_3,x_4\}$ is the first dip of the VCT curve (\cref{fig:ts:ex5a}), as in the paper. \Cref{fig:ts:ex5b} shows the fuzzy sets of $x_1$ and the crisp sets of $x_2$ behind the decomposition. The parameter scan printed by the script shows the trade-off in the number of sets. Two sets resolve the quadratic terms poorly and drop $x_1$ under strong noise; five sets spread the thousand samples over the 250 segments of the true structure and let a dummy input in; three sets are the best choice for a thousand samples, although with 300 samples a dummy enters there too. On the Friedman function with five relevant and five irrelevant inputs (\cref{fig:ts:ex5c}) the six best structures by $\sigma_t$ are the true one and the true one plus each dummy, the VCT singles out the true one, and $x_3$ is the first relevant input to be dropped further down the list, as in Table~I of the paper.
+
+\exfig[0.8\textwidth]{04_timeseries/plot_05_mixed_input_structure_1}{The variance--complexity trade-off is plotted for the 30 best structures of the mixed-input problem; the framed dip is the recommended structure $\{x_1,x_2,x_3,x_4\}$.}{ts:ex5a}
+\exfig{04_timeseries/plot_05_mixed_input_structure_2}{Fuzzy c-means gives three fuzzy sets of the continuous input $x_1$ (left), and the binary input $x_2$ has two crisp sets (right).}{ts:ex5b}
+\exfig[0.8\textwidth]{04_timeseries/plot_05_mixed_input_structure_3}{The variance--complexity trade-off is plotted for the 70 best structures of the Friedman function with five dummy inputs; the dip at structure six is the true set of inputs.}{ts:ex5c}
+
+\section{Further reading}\label{sec:ts:reading}
+
+The fuzzy segmentation was published in \cite{abonyi:2005:segmentation}; its conference precursor with the $Q$ and $T^2$ variants is \cite{abonyi:2003:segmentation}. The method builds on Gath--Geva clustering \cite{gath:1989}, on the modified Gath--Geva algorithm of \cref{ch:models} \cite{abonyi:2002:mgg}, on probabilistic PCA and its mixtures \cite{tipping:1999:ppca}, on Krzanowski's similarity of principal components \cite{krzanowski:1979:pca}, on compatible cluster merging \cite{kaymak:1995:merging} with Kelly's merging formulas \cite{kelly:1994:merging}, and on the covariance regularization of \cite{babuska:2002:covariance}. The bottom-up algorithm and its relatives are described in \cite{keogh:2001:online,himberg:2001:segmentation}. The false-nearest-neighbor test originates in \cite{kennel:1992:fnn}, its input--output version in \cite{rhodes:1998:fnn,bomberger:1998:narx} and the Lipschitz-quotient idea in \cite{he:1993:lipschitz}; the cluster-based threshold was proposed in \cite{feil:2003:fnn} and published in journal form in \cite{feil:2004:fnn}, the polymerization benchmark comes from \cite{doyle:1995:polymerization}, and model-order selection for linear systems is covered by \cite{ljung:1999:sysid}. State-space reconstruction rests on \cite{takens:1981,sauer:1991:embedology}, the choice of the lag on \cite{fraser:1986:mutualinfo}, embedding-dimension methods on \cite{kennel:1992:fnn,cao:1997:embedding,jiang:2003:embedding}, local prediction on \cite{farmer:1987:prediction,casdagli:1989:prediction}, operating-regime modeling on \cite{murraysmith:1997:multiple,babuska:1998:book}, and the correlation dimension on \cite{grassberger:1983}; the clustering-based method was proposed in \cite{abonyi:2004:chaotic} and its visualization by fuzzy Sammon mapping in \cite{feil:2007:fuzzsam}. The benchmark systems are those of Mackey and Glass \cite{mackey:1977:oscillation}, Lorenz \cite{lorenz:1963} and R\"ossler \cite{rossler:1976}. The structure selection with mixed inputs was proposed in \cite{girimonte:2004:structure}, which uses the Xie--Beni index \cite{xie:1991:validity} and the Friedman function of \cite{friedman:1991:mars}. The c-means functional behind all these methods is Bezdek's \cite{bezdek:1981}.
