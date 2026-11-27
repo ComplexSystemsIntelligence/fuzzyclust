@@ -120,14 +120,59 @@ FOOTER = ("<footer class='foot'>© 2026 János Abonyi, University of Pannonia ·
           "<code>pip install fuzzyclust</code></footer>")
 
 
-def wrap(title: str, body: str, left: str, right: str, extra_class: str = "") -> str:
+BASE = "https://complexsystemsintelligence.github.io/fuzzyclust/book/"
+DOI = "10.5281/zenodo.24543754"
+DESCRIPTION = ("Open-access book on fuzzy clustering and data analysis in Python with the fuzzyclust toolbox: "
+               "fuzzy c-means, Gustafson-Kessel, Gath-Geva, cluster validity, visualisation, Takagi-Sugeno "
+               "models, time-series segmentation and more, with runnable Colab examples.")
+
+# Bibliographic metadata of the book (Google Scholar inclusion guidelines: citation_* tags on the
+# landing page, https://scholar.google.com/intl/en/scholar/inclusion.html; schema.org Book for search).
+SCHOLAR_META = f"""<meta name="citation_title" content="{TITLE}: {SUBTITLE}" />
+<meta name="citation_author" content="Abonyi, János" />
+<meta name="citation_author_institution" content="University of Pannonia, Veszprém, Hungary" />
+<meta name="citation_author_orcid" content="0000-0001-8593-1493" />
+<meta name="citation_publication_date" content="2026/11/25" />
+<meta name="citation_publisher" content="University of Pannonia, Complex Systems Intelligence" />
+<meta name="citation_doi" content="{DOI}" />
+<meta name="citation_language" content="en" />
+<meta name="citation_pdf_url" content="https://complexsystemsintelligence.github.io/fuzzyclust/fuzzyclust-book.pdf" />
+<meta name="citation_abstract_html_url" content="{BASE}" />
+<meta name="citation_keywords" content="fuzzy clustering; fuzzy c-means; Gustafson-Kessel; Gath-Geva; cluster validity; Python; scikit-learn" />
+<meta name="DC.rights" content="CC BY 4.0" />
+<script type="application/ld+json">
+{{"@context": "https://schema.org", "@type": "Book", "name": "{TITLE}", "alternativeHeadline": "{SUBTITLE}",
+ "author": {{"@type": "Person", "name": "János Abonyi", "sameAs": "https://orcid.org/0000-0001-8593-1493",
+   "affiliation": {{"@type": "CollegeOrUniversity", "name": "University of Pannonia"}}}},
+ "datePublished": "2026-11-25", "inLanguage": "en", "bookFormat": "https://schema.org/EBook", "numberOfPages": 384,
+ "isAccessibleForFree": true, "license": "https://creativecommons.org/licenses/by/4.0/",
+ "url": "{BASE}", "identifier": "https://doi.org/{DOI}",
+ "publisher": {{"@type": "Organization", "name": "University of Pannonia, Complex Systems Intelligence"}},
+ "description": "{DESCRIPTION}",
+ "encoding": [{{"@type": "MediaObject", "encodingFormat": "application/pdf", "contentUrl": "https://complexsystemsintelligence.github.io/fuzzyclust/fuzzyclust-book.pdf"}},
+   {{"@type": "MediaObject", "encodingFormat": "application/epub+zip", "contentUrl": "https://complexsystemsintelligence.github.io/fuzzyclust/fuzzyclust-book.epub"}}]}}
+</script>
+"""
+
+
+def wrap(title: str, body: str, left: str, right: str, extra_class: str = "", page: str = "index.html",
+         head_extra: str = "") -> str:
+    canonical = BASE if page == "index.html" else BASE + page
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>{html.escape(title)} · {TITLE}</title>
-<link rel="icon" href="../_static/favicon.png" />
+<meta name="description" content="{html.escape(DESCRIPTION)}" />
+<meta name="author" content="János Abonyi" />
+<link rel="canonical" href="{canonical}" />
+<meta property="og:title" content="{html.escape(title)} · {TITLE}" />
+<meta property="og:type" content="book" />
+<meta property="og:url" content="{canonical}" />
+<meta property="og:image" content="{BASE}cover.png" />
+<meta property="og:description" content="{html.escape(DESCRIPTION)}" />
+{head_extra}<link rel="icon" href="../_static/favicon.png" />
 <link rel="stylesheet" href="main_web.css" />
 <link rel="stylesheet" href="web.css" />
 </head>
@@ -215,7 +260,8 @@ def build_site() -> None:
         pager += "</nav>"
         content = body.decode_contents() + pager
         title = f"{p['number']} {p['title']}".strip()
-        (SITE / p["new"]).write_text(wrap(title, content, nav_html(pages, p["new"]), right), encoding="utf-8")
+        (SITE / p["new"]).write_text(wrap(title, content, nav_html(pages, p["new"]), right, page=p["new"]),
+                                     encoding="utf-8")
 
     # title page with the cover, the links and the full table of contents
     front = BeautifulSoup((STAGE / "main_web.html").read_text(encoding="utf-8"), "lxml")
@@ -246,7 +292,12 @@ change the result. Every figure of a computed result comes from an example scrip
 <h2 class="toc-head">Contents</h2>
 <ol class="fulltoc">{''.join(toc_items)}</ol>
 <div class="imprint">{imprint}</div>"""
-    (SITE / "index.html").write_text(wrap("Title page", index, nav_html(pages, None), "", "home"), encoding="utf-8")
+    (SITE / "index.html").write_text(wrap("Title page", index, nav_html(pages, None), "", "home",
+                                          head_extra=SCHOLAR_META), encoding="utf-8")
+    urls = [BASE] + [BASE + p["new"] for p in pages]
+    (SITE / "sitemap.xml").write_text(
+        '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        + "".join(f"<url><loc>{u}</loc></url>\n" for u in urls) + "</urlset>\n", encoding="utf-8")
 
     for f in STAGE.glob("main_web*.svg"):
         shutil.copy(f, SITE)
