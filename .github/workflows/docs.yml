@@ -1,6 +1,6 @@
 # Build the documentation (executing every gallery example) and publish it on
 # GitHub Pages from the gh-pages branch. The book PDF already on gh-pages
-# (fuzzyclust-book.pdf and fuzzyclust-book.epub) is kept.
+# (web edition in book/, fuzzyclust-book.pdf and fuzzyclust-book.epub) is kept.
 name: docs
 
 on:
@@ -43,6 +43,7 @@ jobs:
             for f in fuzzyclust-book.pdf fuzzyclust-book.epub; do
               git show "origin/gh-pages:$f" > "docs/_build/html/$f" || rm -f "docs/_build/html/$f"
             done
+            git archive origin/gh-pages book | tar -x -C docs/_build/html || true
           fi
       - name: Publish on the gh-pages branch
         env:

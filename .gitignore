@@ -44,3 +44,4 @@ book/cover/*.png
 book/cover/logo.svg
 *.blg
 book/_build_epub/
+book/_build_web/

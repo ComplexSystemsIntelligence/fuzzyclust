@@ -72,7 +72,8 @@ accepts NumPy arrays or pandas DataFrames and works inside a `Pipeline`.
   method and ends with a study of its parameters. Every example is also a
   Jupyter notebook (download button in the gallery).
 * **Book**: *Fuzzy Clustering and Data Analysis in Python: The fuzzyclust
-  toolbox*, [PDF](https://complexsystemsintelligence.github.io/fuzzyclust/fuzzyclust-book.pdf)
+  toolbox*: [read online](https://complexsystemsintelligence.github.io/fuzzyclust/book/),
+  [PDF](https://complexsystemsintelligence.github.io/fuzzyclust/fuzzyclust-book.pdf)
   (384 pages) and [EPUB](https://complexsystemsintelligence.github.io/fuzzyclust/fuzzyclust-book.epub),
   CC BY 4.0; LaTeX source in `book/`, both files are also attached to every
   release. Theory in one notation, algorithm boxes, and the gallery

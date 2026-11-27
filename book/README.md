@@ -4,6 +4,8 @@
 Build: `book/build.sh` (cover artwork, figures, generated appendices, PDF in `book/_build/`).
 EPUB edition: `python book/epub/make_epub.py` after `book/build.sh` (needs tex4ebook, biber and dvisvgm;
 output in `book/_build_epub/`). It is generated from the same chapters with an e-book preamble.
+Web edition: `python book/web/make_web.py` (same requirements plus beautifulsoup4; output in
+`book/_build_web/site/`, published as `book/` on the documentation site).
 
 ## Chapter template (follow exactly)
 

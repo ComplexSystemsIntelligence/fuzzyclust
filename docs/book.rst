@@ -14,9 +14,11 @@ scripts of the :doc:`example gallery <auto_examples/index>`, so the book, the
 documentation and the code show the same results. The book is published
 under the CC BY 4.0 license.
 
-Download: `PDF <fuzzyclust-book.pdf>`__ (384 pages) or
-`EPUB <fuzzyclust-book.epub>`__ for e-book readers, generated from the same
-LaTeX source. Both files of each version are also attached to its GitHub
+`Read it online <book/index.html>`__, with a link to Google Colab next to
+every figure computed by an example script, or download the
+`PDF <fuzzyclust-book.pdf>`__ (384 pages) or the `EPUB <fuzzyclust-book.epub>`__
+for e-book readers. All three editions are generated from the same LaTeX
+source. Both files of each version are also attached to its GitHub
 release.
 
 Contents

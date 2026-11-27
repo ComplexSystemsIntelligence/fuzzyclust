@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+* Web edition of the book (one page per chapter, a Google Colab link next to every computed figure; `book/web/make_web.py`), published at https://complexsystemsintelligence.github.io/fuzzyclust/book/.
 * EPUB edition of the book, generated from the LaTeX source (`book/epub/make_epub.py`); published next to the PDF on the documentation site.
 
 ## 1.0 (2026-11-25) — first public release

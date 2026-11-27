@@ -73,6 +73,7 @@ sphinx_gallery_conf = {
         "use_jupyter_lab": True,
     },
     "promote_jupyter_magic": True,
+    "first_notebook_cell": "%pip install -q fuzzyclust",
     "default_thumb_file": os.path.join(os.path.dirname(__file__), "_static", "logo.png"),
 }
 from sphinx_gallery.sorting import ExplicitOrder  # noqa: E402

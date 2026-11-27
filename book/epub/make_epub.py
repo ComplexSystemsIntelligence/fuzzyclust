@@ -1,3 +1,4 @@
+# ruff: noqa: E501
 """Build the EPUB edition of the book from the LaTeX source.
 
 The PDF sources stay untouched: everything is staged in book/_build_epub/,
@@ -54,6 +55,8 @@ def make_preamble() -> str:
     s = s.replace(r"\includegraphics[width=#1]{figures/#2.pdf}",
                   r"\includegraphics[width=#1]{figures/#2.png}")
     s = s.replace("{../#1}", "{../../#1}")  # code listings: the stage is one level deeper
+    # inline code: no break points after underscores (they show up as spaces in HTML)
+    s = s.replace(r"\DeclareRobustCommand{\code}[1]{{\ttfamily\let\_\fc@us#1}}", r"\DeclareRobustCommand{\code}[1]{{\ttfamily#1}}")
     s = s.replace("fcbase=fcbrand, unbreakable, float=tbp,", "fcbase=fcbrand, unbreakable,")
     i = s.index(r"% summary box at the end of a theory section")
     j = s.index(r"% --- TikZ styles")
