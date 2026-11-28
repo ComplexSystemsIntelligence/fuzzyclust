@@ -26,6 +26,7 @@ a:hover { color: var(--verm); text-decoration: underline; }
 .toplinks { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 14.5px; }
 .toplinks a { color: #dce7f2; }
 .toplinks a:hover { color: #fff; }
+.toplinks a.hub { border: 1px solid rgba(255,255,255,.55); border-radius: 3px; padding: 0 8px; }
 
 /* three-column layout */
 .layout { display: grid; grid-template-columns: 270px minmax(0, 1fr) 230px; gap: 40px; max-width: 1420px;

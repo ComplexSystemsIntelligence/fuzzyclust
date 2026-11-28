@@ -109,7 +109,8 @@ def header_html() -> str:
         f"height='34' /><span><b>{TITLE}</b><small>{SUBTITLE}</small></span></a>"
         "<nav class='toplinks'><a href='../'>Documentation</a><a href='../auto_examples/index.html'>Examples</a>"
         "<a href='../fuzzyclust-book.pdf'>PDF</a><a href='../fuzzyclust-book.epub'>EPUB</a>"
-        f"<a href='https://github.com/{REPO}'>GitHub</a></nav></header>")
+        f"<a href='https://github.com/{REPO}'>GitHub</a>"
+        "<a class='hub' href='https://complexsystemsintelligence.github.io/#textbooks'>All textbooks</a></nav></header>")
 
 
 FOOTER = ("<footer class='foot'>© 2026 János Abonyi, University of Pannonia · licensed under "

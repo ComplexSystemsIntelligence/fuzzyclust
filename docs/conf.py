@@ -102,6 +102,10 @@ html_title = "fuzzyclust"
 html_theme_options = {
     "github_url": "https://github.com/ComplexSystemsIntelligence/fuzzyclust",
     "logo": {"text": "fuzzyclust"},
+    # common link of the ComplexSystemsIntelligence open-textbook series
+    "external_links": [
+        {"name": "All textbooks", "url": "https://complexsystemsintelligence.github.io/#textbooks"},
+    ],
     "navbar_end": ["theme-switcher", "navbar-icon-links"],
     "show_toc_level": 2,
     "navigation_with_keys": False,
