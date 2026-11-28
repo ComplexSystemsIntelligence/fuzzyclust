@@ -1,0 +1,12 @@
+﻿fuzzyclust.timeseries.plot\_structure\_ranking
+==============================================
+
+.. currentmodule:: fuzzyclust.timeseries
+
+.. autofunction:: plot_structure_ranking
+
+.. include:: fuzzyclust.timeseries.plot_structure_ranking.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

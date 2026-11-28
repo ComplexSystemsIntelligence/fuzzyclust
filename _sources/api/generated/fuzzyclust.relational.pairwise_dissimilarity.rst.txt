@@ -1,0 +1,12 @@
+﻿fuzzyclust.relational.pairwise\_dissimilarity
+=============================================
+
+.. currentmodule:: fuzzyclust.relational
+
+.. autofunction:: pairwise_dissimilarity
+
+.. include:: fuzzyclust.relational.pairwise_dissimilarity.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

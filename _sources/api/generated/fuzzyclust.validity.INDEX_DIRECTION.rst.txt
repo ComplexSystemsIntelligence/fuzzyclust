@@ -1,0 +1,6 @@
+﻿fuzzyclust.validity.INDEX\_DIRECTION
+====================================
+
+.. currentmodule:: fuzzyclust.validity
+
+.. autodata:: INDEX_DIRECTION

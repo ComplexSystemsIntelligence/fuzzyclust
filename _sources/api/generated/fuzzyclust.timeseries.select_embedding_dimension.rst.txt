@@ -1,0 +1,12 @@
+﻿fuzzyclust.timeseries.select\_embedding\_dimension
+==================================================
+
+.. currentmodule:: fuzzyclust.timeseries
+
+.. autofunction:: select_embedding_dimension
+
+.. include:: fuzzyclust.timeseries.select_embedding_dimension.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

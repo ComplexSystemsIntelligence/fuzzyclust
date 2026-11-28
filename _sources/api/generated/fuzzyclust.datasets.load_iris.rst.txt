@@ -1,0 +1,12 @@
+﻿fuzzyclust.datasets.load\_iris
+==============================
+
+.. currentmodule:: fuzzyclust.datasets
+
+.. autofunction:: load_iris
+
+.. include:: fuzzyclust.datasets.load_iris.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>fuzzyclust.timeseries.fnn &#8212; fuzzyclust</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=c83e6b79" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=6a604523" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=e6ebbe3b" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
+
+    <script src="../../../_static/documentation_options.js?v=f2a433a1"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/sg-tags.js?v=d80f6fa4"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../../_static/design-tabs.js?v=fcb327ea"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/fuzzyclust/timeseries/fnn';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="icon" href="../../../_static/favicon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="1.0" />
+  
+    
+    <script src="../../../_static/searchtools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/logo.svg" class="logo__image only-light" alt=""/>
+    <img src="../../../_static/logo.svg" class="logo__image only-dark pst-js-only" alt=""/>
+  
+  
+    <p class="title logo__title">fuzzyclust</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../auto_examples/index.html">
+    Example gallery
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../book.html">
+    The book
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../migration.html">
+    Migrating from the MATLAB toolbox
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../citing.html">
+    Citing
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://complexsystemsintelligence.github.io/#textbooks">
+    All textbooks
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ComplexSystemsIntelligence/fuzzyclust" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../auto_examples/index.html">
+    Example gallery
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../book.html">
+    The book
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../migration.html">
+    Migrating from the MATLAB toolbox
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../citing.html">
+    Citing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://complexsystemsintelligence.github.io/#textbooks">
+    All textbooks
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ComplexSystemsIntelligence/fuzzyclust" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">fuzzyclust.timeseries.fnn</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for fuzzyclust.timeseries.fnn</h1><div class="highlight"><pre>
+<span></span><span class="c1"># SPDX-License-Identifier: MIT</span>
+<span class="c1"># Copyright (c) 2026 János Abonyi</span>
+<span class="sa">r</span><span class="sd">"""Model-order selection by false nearest neighbors (classical and clustering-based)."""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.neighbors</span><span class="w"> </span><span class="kn">import</span> <span class="n">NearestNeighbors</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">Bunch</span><span class="p">,</span> <span class="n">check_random_state</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.._utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">EPS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..cluster</span><span class="w"> </span><span class="kn">import</span> <span class="n">FCM</span><span class="p">,</span> <span class="n">GG</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_regressors</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"false_nearest_neighbors"</span><span class="p">,</span> <span class="s2">"fnn_model_order"</span><span class="p">,</span> <span class="s2">"select_model_order"</span><span class="p">,</span> <span class="s2">"cluster_based_threshold"</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_regression_pairs</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">n_a</span><span class="p">,</span> <span class="n">n_b</span><span class="p">,</span> <span class="n">delay</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Regressors and targets for order (n_a, n_b) with unit input delay; None for (0, 0).</span>
+
+<span class="sd">    For a scalar series (``u is None``) ``delay`` is the lag of the delay embedding:</span>
+<span class="sd">    the regressors are ``y[k-delay], ..., y[k-delay*n_a]`` and the target is ``y[k]``.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">n_a</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">n_b</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">u</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">n_b</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"n_b &gt; 0 requires an input sequence u."</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">u</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">delay</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">span</span> <span class="o">=</span> <span class="n">delay</span> <span class="o">*</span> <span class="n">n_a</span>
+        <span class="n">Phi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">y</span><span class="p">[</span><span class="n">span</span> <span class="o">-</span> <span class="n">j</span> <span class="o">*</span> <span class="n">delay</span> <span class="p">:</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">j</span> <span class="o">*</span> <span class="n">delay</span><span class="p">]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_a</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)])</span>
+        <span class="k">return</span> <span class="n">Phi</span><span class="p">,</span> <span class="n">y</span><span class="p">[</span><span class="n">span</span><span class="p">:]</span>
+    <span class="n">Phi</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">make_regressors</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">n_a</span><span class="o">=</span><span class="n">n_a</span><span class="p">,</span> <span class="n">n_b</span><span class="o">=</span><span class="n">n_b</span><span class="p">,</span> <span class="n">n_k</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Phi</span><span class="p">,</span> <span class="n">target</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_delay</span><span class="p">(</span><span class="n">delay</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">delay</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"delay must be a positive integer."</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">u</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">delay</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"delay &gt; 1 is only defined for a scalar time series (u=None)."</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">delay</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_scale</span><span class="p">(</span><span class="n">Phi</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+    <span class="n">sx</span> <span class="o">=</span> <span class="n">Phi</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">sx</span><span class="p">[</span><span class="n">sx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="n">sy</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">std</span><span class="p">()</span> <span class="ow">or</span> <span class="mf">1.0</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">Phi</span> <span class="o">-</span> <span class="n">Phi</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">/</span> <span class="n">sx</span><span class="p">,</span> <span class="p">(</span><span class="n">target</span> <span class="o">-</span> <span class="n">target</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">/</span> <span class="n">sy</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_nearest</span><span class="p">(</span><span class="n">Phi</span><span class="p">):</span>
+    <span class="n">nn</span> <span class="o">=</span> <span class="n">NearestNeighbors</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Phi</span><span class="p">)</span>
+    <span class="n">dist</span><span class="p">,</span> <span class="n">idx</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">kneighbors</span><span class="p">(</span><span class="n">Phi</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dist</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">idx</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_orders</span><span class="p">(</span><span class="n">max_na</span><span class="p">,</span> <span class="n">max_nb</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
+    <span class="n">nas</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_na</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">nbs</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="n">max_nb</span> <span class="k">if</span> <span class="n">u</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">nas</span><span class="p">),</span> <span class="nb">list</span><span class="p">(</span><span class="n">nbs</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="false_nearest_neighbors">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.timeseries.false_nearest_neighbors.html#fuzzyclust.timeseries.false_nearest_neighbors">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">false_nearest_neighbors</span><span class="p">(</span>
+    <span class="n">y</span><span class="p">,</span>
+    <span class="n">u</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">max_na</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="n">max_nb</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">R_tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">15.0</span><span class="p">,</span>
+    <span class="n">A_tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">scale</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">delay</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Classical false-nearest-neighbor percentages over the model orders :math:`(n_a, n_b)`.</span>
+
+<span class="sd">    For every regression vector</span>
+<span class="sd">    :math:`\mathbf{x}_k=[y_{k-1},\dots,y_{k-n_a},u_{k-1},\dots,u_{k-n_b}]^T`</span>
+<span class="sd">    the nearest neighbor :math:`\mathbf{x}_j` in the regression space is</span>
+<span class="sd">    found. If the regressors carry enough information the outputs of</span>
+<span class="sd">    neighbors are close too; following Kennel, Brown &amp; Abarbanel the</span>
+<span class="sd">    neighbor is declared *false* when</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        \frac{|y_k-y_j|}{\|\mathbf{x}_k-\mathbf{x}_j\|} &gt; R_{tol}</span>
+<span class="sd">        \qquad\text{or}\qquad</span>
+<span class="sd">        \frac{\sqrt{\|\mathbf{x}_k-\mathbf{x}_j\|^2+(y_k-y_j)^2}}{R_A} &gt; A_{tol},</span>
+
+<span class="sd">    where :math:`R_A` is the standard deviation of the output (the size of the</span>
+<span class="sd">    attractor). The percentage of false neighbors is tabulated over the</span>
+<span class="sd">    orders; it drops to (nearly) zero once the regression vector is complete.</span>
+<span class="sd">    With ``u=None`` this is the original embedding-dimension test for a</span>
+<span class="sd">    scalar time series (the new coordinate being :math:`y_k`), with inputs it</span>
+<span class="sd">    is the input–output extension of Rhodes &amp; Morari.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    y : array-like of shape (T,)</span>
+<span class="sd">    u : array-like of shape (T,), optional</span>
+<span class="sd">    max_na, max_nb : int</span>
+<span class="sd">        Largest numbers of lagged outputs and inputs considered.</span>
+<span class="sd">    R_tol : float, default=15.0</span>
+<span class="sd">        Threshold of the slope criterion (Kennel: 10–50).</span>
+<span class="sd">    A_tol : float, default=2.0</span>
+<span class="sd">        Threshold of the attractor-size criterion.</span>
+<span class="sd">    scale : bool, default=True</span>
+<span class="sd">        Standardize regressors and output before measuring distances</span>
+<span class="sd">        (strongly recommended for input–output data of different units).</span>
+<span class="sd">    delay : int, default=1</span>
+<span class="sd">        Lag :math:`\tau` of the delay embedding for a scalar time series</span>
+<span class="sd">        (``u=None``): the regressors are :math:`y_{k-\tau},\dots,y_{k-n_a\tau}`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    table : pandas.DataFrame</span>
+<span class="sd">        Percentage of false nearest neighbors; rows :math:`n_a`, columns</span>
+<span class="sd">        :math:`n_b` (a single column ``0`` for a time series). The entry</span>
+<span class="sd">        :math:`(0,0)` is 100 by definition.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] M. B. Kennel, R. Brown, H. D. I. Abarbanel, "Determining embedding</span>
+<span class="sd">           dimension for phase-space reconstruction using a geometrical</span>
+<span class="sd">           construction", Physical Review A 45 (1992) 3403–3411.</span>
+<span class="sd">    .. [2] C. Rhodes, M. Morari, "Determining the model order of nonlinear</span>
+<span class="sd">           input/output systems", AIChE Journal 44 (1998) 151–163.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.timeseries import false_nearest_neighbors</span>
+<span class="sd">    &gt;&gt;&gt; rng = np.random.RandomState(0); y = np.zeros(400)</span>
+<span class="sd">    &gt;&gt;&gt; for k in range(2, 400): y[k] = 0.6 * y[k-1] - 0.3 * y[k-2] + 0.1 * rng.randn()</span>
+<span class="sd">    &gt;&gt;&gt; table = false_nearest_neighbors(y, max_na=4)</span>
+<span class="sd">    &gt;&gt;&gt; bool(table.loc[2, 0] &lt; table.loc[1, 0])</span>
+<span class="sd">    True</span>
+<span class="sd">    """</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">u</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+    <span class="n">delay</span> <span class="o">=</span> <span class="n">_check_delay</span><span class="p">(</span><span class="n">delay</span><span class="p">,</span> <span class="n">u</span><span class="p">)</span>
+    <span class="n">nas</span><span class="p">,</span> <span class="n">nbs</span> <span class="o">=</span> <span class="n">_orders</span><span class="p">(</span><span class="n">max_na</span><span class="p">,</span> <span class="n">max_nb</span><span class="p">,</span> <span class="n">u</span><span class="p">)</span>
+    <span class="n">table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="n">nas</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"n_a"</span><span class="p">),</span> <span class="n">columns</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="n">nbs</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"n_b"</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">na</span> <span class="ow">in</span> <span class="n">nas</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">nb</span> <span class="ow">in</span> <span class="n">nbs</span><span class="p">:</span>
+            <span class="n">Phi</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="n">_regression_pairs</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">na</span><span class="p">,</span> <span class="n">nb</span><span class="p">,</span> <span class="n">delay</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">Phi</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">table</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">na</span><span class="p">,</span> <span class="n">nb</span><span class="p">]</span> <span class="o">=</span> <span class="mf">100.0</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">scale</span><span class="p">:</span>
+                <span class="n">Phi</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="n">_scale</span><span class="p">(</span><span class="n">Phi</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+            <span class="n">R_A</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">std</span><span class="p">()</span> <span class="ow">or</span> <span class="mf">1.0</span>
+            <span class="n">dist</span><span class="p">,</span> <span class="n">idx</span> <span class="o">=</span> <span class="n">_nearest</span><span class="p">(</span><span class="n">Phi</span><span class="p">)</span>
+            <span class="n">dy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">target</span> <span class="o">-</span> <span class="n">target</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+            <span class="n">crit1</span> <span class="o">=</span> <span class="n">dy</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">EPS</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">R_tol</span>
+            <span class="n">crit2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">dist</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">dy</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">R_A</span> <span class="o">&gt;</span> <span class="n">A_tol</span>
+            <span class="n">table</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">na</span><span class="p">,</span> <span class="n">nb</span><span class="p">]</span> <span class="o">=</span> <span class="mf">100.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">crit1</span> <span class="o">|</span> <span class="n">crit2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">table</span></div>
+
+
+
+<div class="viewcode-block" id="cluster_based_threshold">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.timeseries.cluster_based_threshold.html#fuzzyclust.timeseries.cluster_based_threshold">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cluster_based_threshold</span><span class="p">(</span><span class="n">Phi</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">n_clusters</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span> <span class="n">m</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Point-wise FNN thresholds :math:`R_k` from Gath–Geva clusters in the regression space.</span>
+
+<span class="sd">    The joint data :math:`\mathbf{z}_k=[\mathbf{x}_k^T\,y_k]^T` are clustered</span>
+<span class="sd">    with the Gath–Geva algorithm (initialized by fuzzy c-means). Every</span>
+<span class="sd">    cluster is a local linear model: the eigenvector :math:`\mathbf{t}_i`</span>
+<span class="sd">    of the smallest eigenvalue of the fuzzy covariance matrix</span>
+<span class="sd">    :math:`\mathbf{F}_i` is the normal of the hyperplane</span>
+<span class="sd">    :math:`y=\mathbf{a}_i^T\mathbf{x}+b_i` with</span>
+<span class="sd">    :math:`\mathbf{a}_i=-\mathbf{t}^{x}_i/t^{y}_i`. The gradient of the</span>
+<span class="sd">    unknown regression function at :math:`\mathbf{x}_k` is approximated by</span>
+<span class="sd">    the membership-weighted average of the local slopes, which gives the</span>
+<span class="sd">    adaptive threshold of Feil, Abonyi &amp; Szeifert:</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        R_k = \Big\|\sum_{i=1}^{c}\mu_{ik}\,\frac{-1}{t^{y}_i}\,\mathbf{t}^{x}_i\Big\|_2 .</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    R : ndarray of shape (n_samples,)</span>
+<span class="sd">    gg : fitted :class:`~fuzzyclust.cluster.GG`</span>
+<span class="sd">    """</span>
+    <span class="n">rng</span> <span class="o">=</span> <span class="n">check_random_state</span><span class="p">(</span><span class="n">random_state</span><span class="p">)</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">Phi</span><span class="p">,</span> <span class="n">target</span><span class="p">])</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">n_clusters</span><span class="p">,</span> <span class="n">Z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">fcm</span> <span class="o">=</span> <span class="n">FCM</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="n">m</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span>
+    <span class="n">gg</span> <span class="o">=</span> <span class="n">GG</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="n">m</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">fcm</span><span class="o">.</span><span class="n">membership_</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mf">1e8</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">Phi</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">slopes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
+        <span class="n">t_i</span> <span class="o">=</span> <span class="n">gg</span><span class="o">.</span><span class="n">eigenvectors_</span><span class="p">[</span><span class="n">i</span><span class="p">][:,</span> <span class="mi">0</span><span class="p">]</span>  <span class="c1"># smallest eigenvalue first (ascending order)</span>
+        <span class="n">ty</span> <span class="o">=</span> <span class="n">t_i</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">ty</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">ty</span><span class="p">)</span> <span class="o">*</span> <span class="nb">max</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">ty</span><span class="p">),</span> <span class="mf">1e-6</span><span class="p">)</span> <span class="k">if</span> <span class="n">ty</span> <span class="o">!=</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">1e-6</span>
+        <span class="n">slopes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">t_i</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">ty</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">gg</span><span class="o">.</span><span class="n">membership_</span> <span class="o">@</span> <span class="n">slopes</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">R</span><span class="p">,</span> <span class="n">gg</span></div>
+
+
+
+<div class="viewcode-block" id="fnn_model_order">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.timeseries.fnn_model_order.html#fuzzyclust.timeseries.fnn_model_order">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fnn_model_order</span><span class="p">(</span>
+    <span class="n">y</span><span class="p">,</span>
+    <span class="n">u</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">max_na</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="n">max_nb</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">n_clusters</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span>
+    <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">fnn_tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">5.0</span><span class="p">,</span>
+    <span class="n">m</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">scale</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">delay</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Bunch</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Model order of a NARX model by false nearest neighbors with a cluster-based threshold.</span>
+
+<span class="sd">    The false-nearest-neighbor test of :func:`false_nearest_neighbors`</span>
+<span class="sd">    needs a threshold :math:`R` for the ratio :math:`|y_k-y_j|/\|\mathbf{x}_k-\mathbf{x}_j\|`.</span>
+<span class="sd">    By the mean-value theorem the ratio is bounded by the norm of the gradient</span>
+<span class="sd">    of the regression function, :math:`\|\mathrm{d}f(\mathbf{x}_k)\|`, which</span>
+<span class="sd">    varies over the operating range of a nonlinear system; a single constant</span>
+<span class="sd">    (Rhodes &amp; Morari: :math:`R=\max_k\|\mathrm{d}f\|` from a nonlinear model,</span>
+<span class="sd">    or heuristics :math:`10\le R\le 50`) is therefore either too loose or too</span>
+<span class="sd">    strict. Feil, Abonyi &amp; Szeifert [1]_ estimate the local gradient from a</span>
+<span class="sd">    Gath–Geva clustering of the regression data</span>
+<span class="sd">    (:func:`cluster_based_threshold`) and use the point-wise threshold</span>
+<span class="sd">    :math:`R_k`; the neighbor :math:`j` of :math:`k` is false when</span>
+<span class="sd">    :math:`|y_k-y_j|/\|\mathbf{x}_k-\mathbf{x}_j\| &gt; R_k`.</span>
+<span class="sd">    The percentage :math:`J(n_a,n_b)` of false neighbors is tabulated for all</span>
+<span class="sd">    orders and the smallest order in the corner where :math:`J` drops to</span>
+<span class="sd">    (nearly) zero is selected.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    y, u : array-like of shape (T,)</span>
+<span class="sd">        Output and (optional) input sequences.</span>
+<span class="sd">    max_na, max_nb : int</span>
+<span class="sd">        Largest orders considered.</span>
+<span class="sd">    n_clusters : int, default=6</span>
+<span class="sd">        Number of Gath–Geva clusters :math:`c` per order (the paper used 6).</span>
+<span class="sd">    threshold : float, optional</span>
+<span class="sd">        If given, a constant :math:`R` is used instead of the cluster-based</span>
+<span class="sd">        :math:`R_k` (reference behavior, Table 2 of the paper).</span>
+<span class="sd">    fnn_tol : float, default=5.0</span>
+<span class="sd">        The selected order is the smallest :math:`n_a+n_b` whose percentage</span>
+<span class="sd">        of false neighbors is at most ``fnn_tol`` percent (ties: lower</span>
+<span class="sd">        percentage, then smaller :math:`n_a`).</span>
+<span class="sd">    m : float, default=2.0</span>
+<span class="sd">        Fuzziness exponent of the clustering.</span>
+<span class="sd">    scale : bool, default=True</span>
+<span class="sd">        Standardize regressors and output first (the threshold and the</span>
+<span class="sd">        distances are then dimensionless).</span>
+<span class="sd">    delay : int, default=1</span>
+<span class="sd">        Lag of the delay embedding for a scalar time series (``u=None``);</span>
+<span class="sd">        ``n_a`` is then the embedding dimension at lag ``delay``.</span>
+<span class="sd">    random_state : int, RandomState instance or None</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    result : :class:`sklearn.utils.Bunch`</span>
+<span class="sd">        ``table`` (DataFrame, rows :math:`n_a`, columns :math:`n_b`, in per</span>
+<span class="sd">        cent), ``n_a``, ``n_b`` (selected orders), ``thresholds`` (dict</span>
+<span class="sd">        mapping ``(n_a, n_b)`` to the array :math:`R_k`).</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] B. Feil, J. Abonyi, F. Szeifert, "Determining the model order of</span>
+<span class="sd">           nonlinear input-output systems by fuzzy clustering", in: Advances in</span>
+<span class="sd">           Soft Computing -- Engineering Design and Manufacturing, Springer,</span>
+<span class="sd">           2003.</span>
+<span class="sd">    .. [2] C. Rhodes, M. Morari, "Determining the model order of nonlinear</span>
+<span class="sd">           input/output systems", AIChE Journal 44 (1998) 151–163.</span>
+<span class="sd">    .. [3] J. D. Bomberger, D. E. Seborg, "Determination of model order for</span>
+<span class="sd">           NARX models directly from input-output data", J. Process Control 8</span>
+<span class="sd">           (1998) 459–468.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.timeseries import fnn_model_order, make_nonlinear_io_system</span>
+<span class="sd">    &gt;&gt;&gt; u, y = make_nonlinear_io_system(n_samples=600, random_state=0)</span>
+<span class="sd">    &gt;&gt;&gt; res = fnn_model_order(y, u, max_na=2, max_nb=2, n_clusters=4, random_state=0)</span>
+<span class="sd">    &gt;&gt;&gt; res.table.shape, bool(res.table.loc[1, 2] &lt; res.table.loc[0, 0])</span>
+<span class="sd">    ((3, 3), True)</span>
+<span class="sd">    """</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">u</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+    <span class="n">rng</span> <span class="o">=</span> <span class="n">check_random_state</span><span class="p">(</span><span class="n">random_state</span><span class="p">)</span>
+    <span class="n">delay</span> <span class="o">=</span> <span class="n">_check_delay</span><span class="p">(</span><span class="n">delay</span><span class="p">,</span> <span class="n">u</span><span class="p">)</span>
+    <span class="n">nas</span><span class="p">,</span> <span class="n">nbs</span> <span class="o">=</span> <span class="n">_orders</span><span class="p">(</span><span class="n">max_na</span><span class="p">,</span> <span class="n">max_nb</span><span class="p">,</span> <span class="n">u</span><span class="p">)</span>
+    <span class="n">table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="n">nas</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"n_a"</span><span class="p">),</span> <span class="n">columns</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="n">nbs</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"n_b"</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">thresholds</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">na</span> <span class="ow">in</span> <span class="n">nas</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">nb</span> <span class="ow">in</span> <span class="n">nbs</span><span class="p">:</span>
+            <span class="n">Phi</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="n">_regression_pairs</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">na</span><span class="p">,</span> <span class="n">nb</span><span class="p">,</span> <span class="n">delay</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">Phi</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">table</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">na</span><span class="p">,</span> <span class="n">nb</span><span class="p">]</span> <span class="o">=</span> <span class="mf">100.0</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">scale</span><span class="p">:</span>
+                <span class="n">Phi</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="n">_scale</span><span class="p">(</span><span class="n">Phi</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">threshold</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">R</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">cluster_based_threshold</span><span class="p">(</span><span class="n">Phi</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">n_clusters</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">Phi</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">float</span><span class="p">(</span><span class="n">threshold</span><span class="p">))</span>
+            <span class="n">thresholds</span><span class="p">[(</span><span class="n">na</span><span class="p">,</span> <span class="n">nb</span><span class="p">)]</span> <span class="o">=</span> <span class="n">R</span>
+            <span class="n">dist</span><span class="p">,</span> <span class="n">idx</span> <span class="o">=</span> <span class="n">_nearest</span><span class="p">(</span><span class="n">Phi</span><span class="p">)</span>
+            <span class="n">ratio</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">target</span> <span class="o">-</span> <span class="n">target</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">EPS</span><span class="p">)</span>
+            <span class="n">table</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">na</span><span class="p">,</span> <span class="n">nb</span><span class="p">]</span> <span class="o">=</span> <span class="mf">100.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">ratio</span> <span class="o">&gt;</span> <span class="n">R</span><span class="p">)</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="n">na</span> <span class="o">+</span> <span class="n">nb</span><span class="p">,</span> <span class="n">table</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">na</span><span class="p">,</span> <span class="n">nb</span><span class="p">],</span> <span class="n">na</span><span class="p">,</span> <span class="n">nb</span><span class="p">)</span> <span class="k">for</span> <span class="n">na</span> <span class="ow">in</span> <span class="n">nas</span> <span class="k">for</span> <span class="n">nb</span> <span class="ow">in</span> <span class="n">nbs</span> <span class="k">if</span> <span class="n">table</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">na</span><span class="p">,</span> <span class="n">nb</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">fnn_tol</span>
+    <span class="p">]</span>
+    <span class="k">if</span> <span class="n">candidates</span><span class="p">:</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">na_sel</span><span class="p">,</span> <span class="n">nb_sel</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">candidates</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># nothing below the tolerance: take the overall minimum</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()),</span> <span class="n">table</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">na_sel</span><span class="p">,</span> <span class="n">nb_sel</span> <span class="o">=</span> <span class="n">nas</span><span class="p">[</span><span class="n">idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">nbs</span><span class="p">[</span><span class="n">idx</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+    <span class="n">best</span> <span class="o">=</span> <span class="p">(</span><span class="n">na_sel</span><span class="p">,</span> <span class="n">nb_sel</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Bunch</span><span class="p">(</span><span class="n">table</span><span class="o">=</span><span class="n">table</span><span class="p">,</span> <span class="n">n_a</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">best</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">n_b</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">best</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">thresholds</span><span class="o">=</span><span class="n">thresholds</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="select_model_order">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.timeseries.select_model_order.html#fuzzyclust.timeseries.select_model_order">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">select_model_order</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">u</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_na</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">max_nb</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Convenience wrapper of :func:`fnn_model_order` returning only the selected orders.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    y, u : array-like of shape (T,)</span>
+<span class="sd">        Output and (optional) input sequences.</span>
+<span class="sd">    max_na, max_nb : int</span>
+<span class="sd">        Largest orders considered.</span>
+<span class="sd">    **kwargs</span>
+<span class="sd">        Further keyword arguments of :func:`fnn_model_order` (``n_clusters``,</span>
+<span class="sd">        ``threshold``, ``fnn_tol``, ``m``, ``scale``, ``random_state``).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    n_a, n_b : int</span>
+<span class="sd">        Selected numbers of lagged outputs and inputs. For a scalar time</span>
+<span class="sd">        series (``u=None``) ``n_a`` is the embedding dimension and ``n_b``</span>
+<span class="sd">        is ``0``.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.timeseries import select_model_order, make_nonlinear_io_system</span>
+<span class="sd">    &gt;&gt;&gt; u, y = make_nonlinear_io_system(n_samples=600, random_state=0)</span>
+<span class="sd">    &gt;&gt;&gt; select_model_order(y, u, max_na=2, max_nb=2, n_clusters=4, random_state=0)</span>
+<span class="sd">    (1, 2)</span>
+<span class="sd">    """</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">fnn_model_order</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">max_na</span><span class="o">=</span><span class="n">max_na</span><span class="p">,</span> <span class="n">max_nb</span><span class="o">=</span><span class="n">max_nb</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="n">n_a</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">n_b</span></div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, János Abonyi.
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.1.
+  </p>
+</div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

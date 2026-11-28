@@ -1,0 +1,12 @@
+﻿fuzzyclust.relational.check\_dissimilarity\_matrix
+==================================================
+
+.. currentmodule:: fuzzyclust.relational
+
+.. autofunction:: check_dissimilarity_matrix
+
+.. include:: fuzzyclust.relational.check_dissimilarity_matrix.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

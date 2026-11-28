@@ -1,0 +1,12 @@
+﻿fuzzyclust.semisupervised.make\_partially\_labeled\_pair
+========================================================
+
+.. currentmodule:: fuzzyclust.semisupervised
+
+.. autofunction:: make_partially_labeled_pair
+
+.. include:: fuzzyclust.semisupervised.make_partially_labeled_pair.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

@@ -1,0 +1,12 @@
+﻿fuzzyclust.datasets.make\_fuzzy\_blobs
+======================================
+
+.. currentmodule:: fuzzyclust.datasets
+
+.. autofunction:: make_fuzzy_blobs
+
+.. include:: fuzzyclust.datasets.make_fuzzy_blobs.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

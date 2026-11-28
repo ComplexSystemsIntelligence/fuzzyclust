@@ -1,0 +1,12 @@
+﻿fuzzyclust.graph.plot\_similarity\_dendrogram
+=============================================
+
+.. currentmodule:: fuzzyclust.graph
+
+.. autofunction:: plot_similarity_dendrogram
+
+.. include:: fuzzyclust.graph.plot_similarity_dendrogram.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

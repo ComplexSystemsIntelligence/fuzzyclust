@@ -1,0 +1,12 @@
+﻿fuzzyclust.incomplete.plot\_imputation
+======================================
+
+.. currentmodule:: fuzzyclust.incomplete
+
+.. autofunction:: plot_imputation
+
+.. include:: fuzzyclust.incomplete.plot_imputation.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

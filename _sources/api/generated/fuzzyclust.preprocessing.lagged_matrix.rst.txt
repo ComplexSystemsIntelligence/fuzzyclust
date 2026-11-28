@@ -1,0 +1,12 @@
+﻿fuzzyclust.preprocessing.lagged\_matrix
+=======================================
+
+.. currentmodule:: fuzzyclust.preprocessing
+
+.. autofunction:: lagged_matrix
+
+.. include:: fuzzyclust.preprocessing.lagged_matrix.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

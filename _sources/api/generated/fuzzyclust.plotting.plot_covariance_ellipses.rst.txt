@@ -1,0 +1,12 @@
+﻿fuzzyclust.plotting.plot\_covariance\_ellipses
+==============================================
+
+.. currentmodule:: fuzzyclust.plotting
+
+.. autofunction:: plot_covariance_ellipses
+
+.. include:: fuzzyclust.plotting.plot_covariance_ellipses.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

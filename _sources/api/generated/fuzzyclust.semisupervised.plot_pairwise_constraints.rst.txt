@@ -1,0 +1,12 @@
+﻿fuzzyclust.semisupervised.plot\_pairwise\_constraints
+=====================================================
+
+.. currentmodule:: fuzzyclust.semisupervised
+
+.. autofunction:: plot_pairwise_constraints
+
+.. include:: fuzzyclust.semisupervised.plot_pairwise_constraints.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

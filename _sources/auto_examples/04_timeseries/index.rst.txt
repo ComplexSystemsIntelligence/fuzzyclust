@@ -1,0 +1,127 @@
+
+
+.. _sphx_glr_auto_examples_04_timeseries:
+
+Clustering of time series
+-------------------------
+
+Fuzzy segmentation of multivariate time series with local PCA models
+(modified Gath–Geva clustering with a time prototype) against the bottom-up
+baseline, model-order selection of NARX models by false nearest neighbours
+with a cluster-based threshold, state-space reconstruction and prediction of
+chaotic series by clustering in the delay-embedded space, and model-free
+structure selection for models with mixed discrete and continuous inputs.
+
+
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A multivariate time series is segmented into internally homogeneous pieces. The segments are found by a modified Gath–Geva clustering whose prototype has two parts: a Gaussian membership function in time, which makes the clusters contiguous, and a local probabilistic PCA model of the observations, which measures the homogeneity of a segment. Because a PCA hyperplane reacts to changes in the mean, in the variance, and in the correlation structure, all three kinds of regime change are detected, including those that are invisible in any single variable.">
+
+.. only:: html
+
+  .. image:: /auto_examples/04_timeseries/images/thumb/sphx_glr_plot_01_fuzzy_segmentation_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/04_timeseries/plot_01_fuzzy_segmentation`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fuzzy segmentation of a multivariate time series</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The classical way to segment a time series is bottom-up: start from a fine partition into short pieces, compute the cost of merging every pair of adjacent segments, merge the cheapest pair, and repeat until the cheapest merge would cost more than a tolerance or until the desired number of segments is left. For multivariate data, the cost of a segment is the error of one PCA model fitted to it: the mean reconstruction error Q (distance from the hyperplane) or the mean Hotelling T^2 (spread inside the hyperplane). This is the baseline against which the segmentation paper compares, and its two costs see different things: Q reacts to changes in the correlation structure, T^2 to shifts of the operating point. The fuzzy segmentation combines both in one model.">
+
+.. only:: html
+
+  .. image:: /auto_examples/04_timeseries/images/thumb/sphx_glr_plot_02_bottom_up_vs_fuzzy_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/04_timeseries/plot_02_bottom_up_vs_fuzzy`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Bottom-up segmentation with PCA models versus fuzzy segmentation</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Before a nonlinear dynamic model y_k=f(\mathbf{x}_k) can be identified, the regression vector \mathbf{x}_k=[y_{k-1},\dots,y_{k-n_a},u_{k-1},\dots,u_{k-n_b}]^T has to be chosen. The false nearest neighbors (FNN) test is geometric: if the regressors carry enough information, two regression vectors that are close have close outputs, so the ratio |y_k-y_j|/\|\mathbf{x}_k-\mathbf{x}_j\| of a sample and its nearest neighbor is bounded by the norm of the gradient of f. A neighbor that violates the bound is false; the percentage of false neighbors drops to (nearly) zero once the regression vector is complete. The weak point is the bound R. For a nonlinear system the gradient varies over the operating range, so one constant is either too loose or too strict. Feil, Abonyi, and Szeifert estimate the gradient locally from a Gath–Geva clustering of the regression data (every cluster is a local linear model whose slope is read off the eigenvector of the smallest eigenvalue of the cluster covariance) and use the membership-weighted slope as a point-wise threshold R_k.">
+
+.. only:: html
+
+  .. image:: /auto_examples/04_timeseries/images/thumb/sphx_glr_plot_03_fnn_model_order_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/04_timeseries/plot_03_fnn_model_order`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Model-order selection by false nearest neighbors with a cluster-based threshold</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A deterministic system is observed through one scalar measurement y_k. By Takens&#x27; theorem, the delay vectors \mathbf{y}_k=[y_k, y_{k-\tau},\dots,y_{k-\tau(d_e-1)}]^T reconstruct the state space if the embedding dimension d_e is large enough. Abonyi, Feil, Németh, Árva, and Babuška identify the map \mathbf{y}_{k+1}=\mathbf{f}(\mathbf{y}_k) in the reconstructed space as an operating-regime model (Gaussian regimes with local linear models) by a modified Gath–Geva clustering of the pairs (\mathbf{y}_k, \mathbf{y}_{k+1}). One clustering provides three results: the embedding dimension (the one-step prediction error stops improving when d_e is large enough), the local dimension of the attractor (the clusters become flat, with a collapsing smallest eigenvalue, once d_e exceeds the dimension of the manifold on which the trajectory lies), and a model that predicts the series.">
+
+.. only:: html
+
+  .. image:: /auto_examples/04_timeseries/images/thumb/sphx_glr_plot_04_chaotic_reconstruction_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/04_timeseries/plot_04_chaotic_reconstruction`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">State-space reconstruction and prediction of a chaotic time series</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Girimonte, Babuška, and Abonyi select the inputs of a nonlinear model without fitting any model. Every continuous candidate input is partitioned into a few fuzzy sets by fuzzy c-means, every discrete input into one crisp set per value, and for every subset of inputs the data are decomposed into the product-space segments of these sets. If the subset explains the output, the output varies little inside every segment, and the total fuzzy variance \sigma_t (the squared error of the singleton fuzzy model that assigns each segment its membership-weighted mean) is small. All subsets up to a maximal size are ranked by \sigma_t. Because an irrelevant input also lowers \sigma_t a little (more segments, fewer samples each), the variance–complexity trade-off VCT=\sigma_t n_i is used to compare structures of similar variance: the first dip of the VCT curve marks the structure with only the relevant inputs.">
+
+.. only:: html
+
+  .. image:: /auto_examples/04_timeseries/images/thumb/sphx_glr_plot_05_mixed_input_structure_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/04_timeseries/plot_05_mixed_input_structure`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Model-free structure selection with mixed discrete and continuous inputs</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/04_timeseries/plot_01_fuzzy_segmentation
+   /auto_examples/04_timeseries/plot_02_bottom_up_vs_fuzzy
+   /auto_examples/04_timeseries/plot_03_fnn_model_order
+   /auto_examples/04_timeseries/plot_04_chaotic_reconstruction
+   /auto_examples/04_timeseries/plot_05_mixed_input_structure
+

@@ -1,0 +1,12 @@
+﻿fuzzyclust.models.second\_order\_plant\_function
+================================================
+
+.. currentmodule:: fuzzyclust.models
+
+.. autofunction:: second_order_plant_function
+
+.. include:: fuzzyclust.models.second_order_plant_function.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

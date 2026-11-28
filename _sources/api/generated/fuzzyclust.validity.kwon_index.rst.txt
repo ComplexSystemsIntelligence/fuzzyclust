@@ -1,0 +1,12 @@
+﻿fuzzyclust.validity.kwon\_index
+===============================
+
+.. currentmodule:: fuzzyclust.validity
+
+.. autofunction:: kwon_index
+
+.. include:: fuzzyclust.validity.kwon_index.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

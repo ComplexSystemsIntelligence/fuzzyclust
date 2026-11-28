@@ -1,0 +1,12 @@
+﻿fuzzyclust.viz.pca\_projection
+==============================
+
+.. currentmodule:: fuzzyclust.viz
+
+.. autofunction:: pca_projection
+
+.. include:: fuzzyclust.viz.pca_projection.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

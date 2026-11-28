@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>fuzzyclust.relational.rfcm &#8212; fuzzyclust</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=c83e6b79" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=6a604523" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=e6ebbe3b" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
+
+    <script src="../../../_static/documentation_options.js?v=f2a433a1"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/sg-tags.js?v=d80f6fa4"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../../_static/design-tabs.js?v=fcb327ea"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/fuzzyclust/relational/rfcm';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="icon" href="../../../_static/favicon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="1.0" />
+  
+    
+    <script src="../../../_static/searchtools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/logo.svg" class="logo__image only-light" alt=""/>
+    <img src="../../../_static/logo.svg" class="logo__image only-dark pst-js-only" alt=""/>
+  
+  
+    <p class="title logo__title">fuzzyclust</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../auto_examples/index.html">
+    Example gallery
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../book.html">
+    The book
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../migration.html">
+    Migrating from the MATLAB toolbox
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../citing.html">
+    Citing
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://complexsystemsintelligence.github.io/#textbooks">
+    All textbooks
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ComplexSystemsIntelligence/fuzzyclust" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../auto_examples/index.html">
+    Example gallery
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../book.html">
+    The book
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../migration.html">
+    Migrating from the MATLAB toolbox
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../citing.html">
+    Citing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://complexsystemsintelligence.github.io/#textbooks">
+    All textbooks
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ComplexSystemsIntelligence/fuzzyclust" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">fuzzyclust.relational.rfcm</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for fuzzyclust.relational.rfcm</h1><div class="highlight"><pre>
+<span></span><span class="c1"># SPDX-License-Identifier: MIT</span>
+<span class="c1"># Copyright (c) 2026 János Abonyi</span>
+<span class="sa">r</span><span class="sd">"""Relational fuzzy c-means (RFCM) and its non-Euclidean extension (NERF c-means).</span>
+
+<span class="sd">Both algorithms minimize the fuzzy c-means functional although only the</span>
+<span class="sd">pairwise dissimilarities :math:`\mathbf{R}=[r_{jk}]` of the objects are</span>
+<span class="sd">known: the prototypes are convex combinations of the objects</span>
+<span class="sd">(:math:`\mathbf{v}_i=\mathbf{U}_i^m/\sum_k\mu_{ik}^m`) and the distance of an</span>
+<span class="sd">object to such a prototype follows from :math:`\mathbf{R}` alone when</span>
+<span class="sd">:math:`\mathbf{R}` holds squared Euclidean distances (Hathaway, Davenport</span>
+<span class="sd">and Bezdek, 1989). When it does not, the relational distances can become</span>
+<span class="sd">negative; the :math:`\beta`-spread transformation of Hathaway and Bezdek</span>
+<span class="sd">(1994) adds a constant to all off-diagonal dissimilarities until they are</span>
+<span class="sd">not.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.._utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">EPS</span><span class="p">,</span> <span class="n">memberships_from_distances</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseFuzzyClusterer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.dissimilarity</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_dissimilarity_matrix</span><span class="p">,</span> <span class="n">pairwise_dissimilarity</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"RelationalFCM"</span><span class="p">,</span> <span class="s2">"NERFCM"</span><span class="p">,</span> <span class="s2">"relational_distances"</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="relational_distances">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.relational.relational_distances.html#fuzzyclust.relational.relational_distances">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">relational_distances</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">beta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Squared relational distances of the training objects to relational prototypes.</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        d^2_{ik}=(\mathbf{R}\mathbf{v}_i)_k-\tfrac12\,\mathbf{v}_i\T\mathbf{R}\mathbf{v}_i</span>
+<span class="sd">                 +\tfrac{\beta}{2}\norm{\mathbf{e}_k-\mathbf{v}_i}^2 ,</span>
+
+<span class="sd">    where :math:`\mathbf{v}_i\in\mathbb{R}^N` sums to one and</span>
+<span class="sd">    :math:`\mathbf{e}_k` is the :math:`k`-th unit vector. The last term is</span>
+<span class="sd">    the effect of the :math:`\beta`-spread</span>
+<span class="sd">    :math:`\mathbf{R}_\beta=\mathbf{R}+\beta(\mathbf{1}\mathbf{1}\T-\mathbf{I})`</span>
+<span class="sd">    (Hathaway and Bezdek, 1994), computed without forming :math:`\mathbf{R}_\beta`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    R : ndarray of shape (n_samples, n_samples)</span>
+<span class="sd">        Square dissimilarity matrix of the objects.</span>
+<span class="sd">    V : ndarray of shape (n_clusters, n_samples)</span>
+<span class="sd">        Relational prototypes (rows sum to one).</span>
+<span class="sd">    beta : float, default=0.0</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    d2 : ndarray of shape (n_samples, n_clusters)</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.relational import relational_distances</span>
+<span class="sd">    &gt;&gt;&gt; R = np.array([[0.0, 1.0, 4.0], [1.0, 0.0, 1.0], [4.0, 1.0, 0.0]])  # points 0, 1, 2 on a line</span>
+<span class="sd">    &gt;&gt;&gt; V = np.array([[0.5, 0.5, 0.0]])  # prototype at 0.5</span>
+<span class="sd">    &gt;&gt;&gt; relational_distances(R, V).ravel()</span>
+<span class="sd">    array([0.25, 0.25, 2.25])</span>
+<span class="sd">    """</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">V</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">R</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">R</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">or</span> <span class="n">V</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">R</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"R must be square (n_samples, n_samples) and V of shape (n_clusters, n_samples)."</span><span class="p">)</span>
+    <span class="n">vRv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">"ij,jk,ik-&gt;i"</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+    <span class="n">d2</span> <span class="o">=</span> <span class="n">R</span> <span class="o">@</span> <span class="n">V</span><span class="o">.</span><span class="n">T</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">vRv</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="k">if</span> <span class="n">beta</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">d2</span> <span class="o">=</span> <span class="n">d2</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">_unit_minus_v_sq</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">R</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">same_objects</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">d2</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_unit_minus_v_sq</span><span class="p">(</span><span class="n">V</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">same_objects</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""``||e_k - v_i||^2`` for every sample k and prototype i, shape (n_samples, c).</span>
+
+<span class="sd">    For the training objects :math:`\norm{\mathbf{e}_k-\mathbf{v}_i}^2=1-2v_{ik}+\norm{\mathbf{v}_i}^2`;</span>
+<span class="sd">    a new object is orthogonal to the training simplex, so the term is</span>
+<span class="sd">    :math:`1+\norm{\mathbf{v}_i}^2`.</span>
+<span class="sd">    """</span>
+    <span class="n">v2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">"ij,ij-&gt;i"</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">V</span><span class="p">)[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="k">if</span> <span class="n">same_objects</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">V</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="n">v2</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">broadcast_to</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">v2</span><span class="p">,</span> <span class="p">(</span><span class="n">n_samples</span><span class="p">,</span> <span class="n">V</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="RelationalFCM">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.relational.RelationalFCM.html#fuzzyclust.relational.RelationalFCM">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">RelationalFCM</span><span class="p">(</span><span class="n">BaseFuzzyClusterer</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Relational fuzzy c-means (Hathaway, Davenport and Bezdek, 1989).</span>
+
+<span class="sd">    Fuzzy c-means needs feature vectors to compute prototypes and distances.</span>
+<span class="sd">    When only the pairwise dissimilarities :math:`\mathbf{R}=[r_{jk}]` of the</span>
+<span class="sd">    :math:`N` objects are available (a distance matrix, a dynamic-time-warping</span>
+<span class="sd">    matrix, a dissimilarity between graphs or documents), the *relational</span>
+<span class="sd">    dual* of FCM still minimizes the same functional. Its prototypes are</span>
+<span class="sd">    weight vectors over the objects, :math:`\mathbf{v}_i\in\mathbb{R}^N`, and</span>
+<span class="sd">    the squared distance of object :math:`k` to prototype :math:`i` is</span>
+<span class="sd">    expressed through :math:`\mathbf{R}` alone. If :math:`\mathbf{R}`</span>
+<span class="sd">    consists of squared Euclidean distances of some feature vectors, RFCM</span>
+<span class="sd">    produces exactly the FCM partition of those vectors (the duality</span>
+<span class="sd">    theorem of the paper); if not, the relational distances may become</span>
+<span class="sd">    negative and the algorithm is undefined -- then use :class:`NERFCM`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    n_clusters : int, default=3</span>
+<span class="sd">        Number of clusters :math:`c`.</span>
+<span class="sd">    metric : str, default="euclidean"</span>
+<span class="sd">        How ``fit(X)`` obtains :math:`\mathbf{R}`. ``"precomputed"``: ``X``</span>
+<span class="sd">        *is* the :math:`N\times N` dissimilarity matrix (symmetric, zero</span>
+<span class="sd">        diagonal, non-negative), whose entries play the role of **squared**</span>
+<span class="sd">        distances :math:`r_{jk}=d^2(\mathbf{x}_j,\mathbf{x}_k)`. Any other</span>
+<span class="sd">        value is a metric name of :func:`scipy.spatial.distance.pdist`; the</span>
+<span class="sd">        pairwise distances of the rows of ``X`` are computed and squared</span>
+<span class="sd">        (``"euclidean"`` therefore reproduces FCM).</span>
+<span class="sd">    m : float, default=2.0</span>
+<span class="sd">        Fuzziness exponent :math:`m&gt;1`.</span>
+<span class="sd">    tol : float, default=1e-4</span>
+<span class="sd">    max_iter : int, default=300</span>
+<span class="sd">    init : {"random", "kmeans++"} or ndarray, default="random"</span>
+<span class="sd">        ``"random"`` draws a random partition :math:`\mathbf{U}` (the paper</span>
+<span class="sd">        starts from an arbitrary partition); ``"kmeans++"`` seeds :math:`c`</span>
+<span class="sd">        objects by :math:`D^2`-weighted sampling on :math:`\mathbf{R}` and</span>
+<span class="sd">        derives :math:`\mathbf{U}` from the dissimilarities to them; an</span>
+<span class="sd">        array of shape ``(n_samples, n_clusters)`` is an initial partition,</span>
+<span class="sd">        an integer array of length ``n_clusters`` gives initial objects.</span>
+<span class="sd">    n_init : int, default=1</span>
+<span class="sd">        Number of random restarts; the run with the lowest :math:`J` is kept.</span>
+<span class="sd">    random_state : int, RandomState instance or None, default=None</span>
+<span class="sd">    verbose : int, default=0</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    relational_centers_ : ndarray of shape (n_clusters, n_samples)</span>
+<span class="sd">        Relational prototypes :math:`\mathbf{v}_i=\mathbf{U}_i^m/\sum_k\mu_{ik}^m`</span>
+<span class="sd">        (rows sum to one): the weight of every training object in cluster</span>
+<span class="sd">        :math:`i`.</span>
+<span class="sd">    cluster_centers_ : ndarray of shape (n_clusters, n_features) or (n_clusters, n_samples)</span>
+<span class="sd">        With a feature-based ``metric`` the dual centers in feature space,</span>
+<span class="sd">        :math:`\sum_k v_{ik}\mathbf{x}_k` (equal to the FCM centers for the</span>
+<span class="sd">        Euclidean metric); with ``metric="precomputed"`` the same as</span>
+<span class="sd">        ``relational_centers_``, since no feature space exists.</span>
+<span class="sd">    dissimilarity_matrix_ : ndarray of shape (n_samples, n_samples)</span>
+<span class="sd">        The matrix :math:`\mathbf{R}` the algorithm ran on (squared</span>
+<span class="sd">        distances when computed from features).</span>
+<span class="sd">    membership_, labels_, distances_, objective_, objective_history_, n_iter_</span>
+<span class="sd">        See :class:`~fuzzyclust.base.BaseFuzzyClusterer`; ``distances_``</span>
+<span class="sd">        is :math:`\sqrt{d^2_{ik}}` of the relational distances.</span>
+<span class="sd">    beta_ : float</span>
+<span class="sd">        Always ``0.0`` for RFCM (kept for a uniform interface with :class:`NERFCM`).</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    RFCM minimizes the c-means functional :math:`J=\sum_i\sum_k\mu_{ik}^m d^2_{ik}`</span>
+<span class="sd">    by alternating</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        \mathbf{v}_i=\frac{(\mu_{i1}^m,\dots,\mu_{iN}^m)\T}{\sum_{k=1}^{N}\mu_{ik}^m},\qquad</span>
+<span class="sd">        d^2_{ik}=(\mathbf{R}\mathbf{v}_i)_k-\tfrac12\,\mathbf{v}_i\T\mathbf{R}\mathbf{v}_i ,</span>
+
+<span class="sd">    and the FCM membership update</span>
+<span class="sd">    :math:`\mu_{ik}=1/\sum_j(d^2_{ik}/d^2_{jk})^{1/(m-1)}`. When</span>
+<span class="sd">    :math:`r_{jk}=\norm{\mathbf{x}_j-\mathbf{x}_k}^2`, the identity</span>
+<span class="sd">    :math:`\norm{\mathbf{x}_k-\sum_l v_{il}\mathbf{x}_l}^2=\sum_l v_{il}r_{kl}</span>
+<span class="sd">    -\tfrac12\sum_{l,q}v_{il}v_{iq}r_{lq}` (valid for any weights summing to one) makes :math:`d^2_{ik}` the</span>
+<span class="sd">    squared Euclidean distance to the FCM center, so RFCM and FCM generate</span>
+<span class="sd">    identical iterates from identical starts. The identity holds for *any*</span>
+<span class="sd">    object whose squared distances to the :math:`N` training objects are</span>
+<span class="sd">    known, which is how :meth:`predict_proba` assigns new objects: pass</span>
+<span class="sd">    their ``(n_new, n_samples)`` dissimilarities (with</span>
+<span class="sd">    ``metric="precomputed"``) or their feature vectors.</span>
+
+<span class="sd">    A matrix that is not Euclidean -- squared city-block or Chebyshev</span>
+<span class="sd">    distances, squared dynamic-time-warping distances, dissimilarities that</span>
+<span class="sd">    violate the triangle inequality -- can produce :math:`d^2_{ik}&lt;0`; RFCM</span>
+<span class="sd">    then raises an error and recommends :class:`NERFCM`. (Unsquared</span>
+<span class="sd">    Euclidean distances, or any power :math:`\norm{\cdot}^{p}` with</span>
+<span class="sd">    :math:`p\le2`, still form a Euclidean matrix by Schoenberg's theorem:</span>
+<span class="sd">    RFCM runs on them, but it is then the dual of FCM on a *different*</span>
+<span class="sd">    point configuration, not on :math:`\mathbf{X}`.) Memory and time are</span>
+<span class="sd">    :math:`O(N^2)`.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] R. J. Hathaway, J. W. Davenport, J. C. Bezdek, "Relational duals</span>
+<span class="sd">           of the c-means clustering algorithms", Pattern Recognition 22(2),</span>
+<span class="sd">           205--212, 1989.</span>
+<span class="sd">    .. [2] J. C. Bezdek, "Pattern Recognition with Fuzzy Objective Function</span>
+<span class="sd">           Algorithms", Plenum Press, 1981.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.cluster import FCM</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.datasets import make_fuzzy_blobs</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.relational import RelationalFCM, pairwise_dissimilarity</span>
+<span class="sd">    &gt;&gt;&gt; X, _ = make_fuzzy_blobs(random_state=0)</span>
+<span class="sd">    &gt;&gt;&gt; R = pairwise_dissimilarity(X, metric="sqeuclidean")</span>
+<span class="sd">    &gt;&gt;&gt; U0 = np.random.RandomState(0).rand(X.shape[0], 3)</span>
+<span class="sd">    &gt;&gt;&gt; rfcm = RelationalFCM(n_clusters=3, metric="precomputed", init=U0).fit(R)</span>
+<span class="sd">    &gt;&gt;&gt; fcm = FCM(n_clusters=3, init=U0).fit(X)</span>
+<span class="sd">    &gt;&gt;&gt; bool(np.allclose(rfcm.membership_, fcm.membership_, atol=1e-6))</span>
+<span class="sd">    True</span>
+<span class="sd">    """</span>
+
+    <span class="n">_spread</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">n_clusters</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"euclidean"</span><span class="p">,</span>
+        <span class="n">m</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
+        <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-4</span><span class="p">,</span>
+        <span class="n">max_iter</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">300</span><span class="p">,</span>
+        <span class="n">init</span><span class="o">=</span><span class="s2">"random"</span><span class="p">,</span>
+        <span class="n">n_init</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">n_clusters</span><span class="o">=</span><span class="n">n_clusters</span><span class="p">,</span>
+            <span class="n">m</span><span class="o">=</span><span class="n">m</span><span class="p">,</span>
+            <span class="n">tol</span><span class="o">=</span><span class="n">tol</span><span class="p">,</span>
+            <span class="n">max_iter</span><span class="o">=</span><span class="n">max_iter</span><span class="p">,</span>
+            <span class="n">init</span><span class="o">=</span><span class="n">init</span><span class="p">,</span>
+            <span class="n">n_init</span><span class="o">=</span><span class="n">n_init</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="o">=</span> <span class="n">metric</span>
+
+    <span class="c1"># ------------------------------------------------------------------ data handling</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_check_params</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Relational c-means requires m &gt; 1."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"metric must be a string (a SciPy metric name or 'precomputed')."</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_relation</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_relation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Dissimilarities (as the algorithm uses them: 'squared') between rows of X and Y."""</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="o">==</span> <span class="s2">"precomputed"</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">X</span>
+        <span class="n">D</span> <span class="o">=</span> <span class="n">pairwise_dissimilarity</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">D</span><span class="o">**</span><span class="mi">2</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_prepare_relation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="o">==</span> <span class="s2">"precomputed"</span><span class="p">:</span>
+            <span class="n">R</span> <span class="o">=</span> <span class="n">check_dissimilarity_matrix</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">R</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_relation</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_X_fit</span> <span class="o">=</span> <span class="n">X</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dissimilarity_matrix_</span> <span class="o">=</span> <span class="n">R</span>
+
+    <span class="c1"># ------------------------------------------------------------------ AO hooks</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
+        <span class="n">c</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_clusters</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dissimilarity_matrix_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beta_</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_spread_updates_</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">init</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">init</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">init</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">init</span> <span class="o">==</span> <span class="s2">"random"</span><span class="p">:</span>
+                <span class="n">U</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">U</span> <span class="o">/</span> <span class="n">U</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">init</span> <span class="o">==</span> <span class="s2">"kmeans++"</span><span class="p">:</span>
+                <span class="n">idx</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">N</span><span class="p">))]</span>
+                <span class="n">dmin</span> <span class="o">=</span> <span class="n">R</span><span class="p">[:,</span> <span class="n">idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">c</span><span class="p">:</span>
+                    <span class="n">dmin</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+                    <span class="n">probs</span> <span class="o">=</span> <span class="n">dmin</span> <span class="o">/</span> <span class="n">dmin</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="k">if</span> <span class="n">dmin</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">N</span><span class="p">)</span>
+                    <span class="n">j</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">probs</span><span class="p">))</span>
+                    <span class="n">idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+                    <span class="n">dmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">dmin</span><span class="p">,</span> <span class="n">R</span><span class="p">[:,</span> <span class="n">j</span><span class="p">])</span>
+                <span class="k">return</span> <span class="n">memberships_from_distances</span><span class="p">(</span><span class="n">R</span><span class="p">[:,</span> <span class="n">idx</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unknown init='</span><span class="si">{</span><span class="n">init</span><span class="si">}</span><span class="s2">'. Use 'random', 'kmeans++' or an array."</span><span class="p">)</span>
+        <span class="n">init</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">init</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">init</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+            <span class="n">U</span> <span class="o">=</span> <span class="n">init</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">U</span> <span class="o">/</span> <span class="n">U</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">init</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">c</span><span class="p">,)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">init</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">init</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">init</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">N</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"initial object indices out of range."</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">memberships_from_distances</span><span class="p">(</span><span class="n">R</span><span class="p">[:,</span> <span class="n">init</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">"init array must be a partition of shape (n_samples, n_clusters) or n_clusters object indices."</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_prototypes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Um</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Um</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">s</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">EPS</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+        <span class="n">V</span> <span class="o">=</span> <span class="p">(</span><span class="n">Um</span> <span class="o">/</span> <span class="n">s</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:])</span><span class="o">.</span><span class="n">T</span>  <span class="c1"># (c, N), rows sum to one</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">relational_centers_</span> <span class="o">=</span> <span class="n">V</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dissimilarity_matrix_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vRv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">"ij,jk,ik-&gt;i"</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="o">==</span> <span class="s2">"precomputed"</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cluster_centers_</span> <span class="o">=</span> <span class="n">V</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cluster_centers_</span> <span class="o">=</span> <span class="n">V</span> <span class="o">@</span> <span class="n">X</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_distances</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="n">V</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">relational_centers_</span>
+        <span class="n">training</span> <span class="o">=</span> <span class="n">X</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">_X_fit</span>
+        <span class="k">if</span> <span class="n">training</span><span class="p">:</span>
+            <span class="n">R</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dissimilarity_matrix_</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">R</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_relation</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_X_fit</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="o">==</span> <span class="s2">"precomputed"</span><span class="p">:</span>
+                <span class="n">R</span> <span class="o">=</span> <span class="n">check_dissimilarity_matrix</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">n_objects</span><span class="o">=</span><span class="n">V</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">square</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">d2</span> <span class="o">=</span> <span class="n">R</span> <span class="o">@</span> <span class="n">V</span><span class="o">.</span><span class="n">T</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vRv</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">e_v</span> <span class="o">=</span> <span class="n">_unit_minus_v_sq</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">R</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">same_objects</span><span class="o">=</span><span class="n">training</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta_</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">d2</span> <span class="o">=</span> <span class="n">d2</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta_</span> <span class="o">*</span> <span class="n">e_v</span>
+        <span class="k">if</span> <span class="n">training</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spread</span><span class="p">:</span>
+            <span class="n">d2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spread_if_needed</span><span class="p">(</span><span class="n">d2</span><span class="p">,</span> <span class="n">e_v</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">d2</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">1e-9</span> <span class="o">*</span> <span class="nb">max</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">R</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()))):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">"Negative relational distance: the dissimilarity matrix is not (squared) Euclidean, "</span>
+                <span class="s2">"so RFCM is undefined on it. Use NERFCM, which applies the beta-spread transformation."</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">d2</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_spread_if_needed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d2</span><span class="p">,</span> <span class="n">e_v</span><span class="p">):</span>  <span class="c1"># pragma: no cover - overridden in NERFCM</span>
+        <span class="k">return</span> <span class="n">d2</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_memberships</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d2</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">memberships_from_distances</span><span class="p">(</span><span class="n">d2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">)</span>
+
+    <span class="c1"># ------------------------------------------------------------------ sklearn plumbing</span>
+<div class="viewcode-block" id="RelationalFCM.fit">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.relational.RelationalFCM.html#fuzzyclust.relational.RelationalFCM.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Cluster the objects.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : array-like of shape (n_samples, n_samples) or (n_samples, n_features)</span>
+<span class="sd">            The dissimilarity matrix :math:`\mathbf{R}` when</span>
+<span class="sd">            ``metric="precomputed"``, otherwise the feature vectors from</span>
+<span class="sd">            which :math:`\mathbf{R}` is computed with ``metric``.</span>
+<span class="sd">        y : Ignored</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        self : object</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RelationalFCM.predict_proba">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.relational.RelationalFCM.html#fuzzyclust.relational.RelationalFCM.predict_proba">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Memberships of (new) objects in the fitted clusters.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : array-like of shape (n_new, n_samples) or (n_new, n_features)</span>
+<span class="sd">            With ``metric="precomputed"`` the dissimilarities of the new</span>
+<span class="sd">            objects to the ``n_samples`` *training* objects (same kind of</span>
+<span class="sd">            entries as the training matrix); otherwise feature vectors.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        U : ndarray of shape (n_new, n_clusters)</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RelationalFCM.transform">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.relational.RelationalFCM.html#fuzzyclust.relational.RelationalFCM.transform">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Relational distances :math:`\sqrt{d^2_{ik}}` of (new) objects to the prototypes."""</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__sklearn_tags__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">tags</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__sklearn_tags__</span><span class="p">()</span>
+        <span class="n">tags</span><span class="o">.</span><span class="n">input_tags</span><span class="o">.</span><span class="n">pairwise</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="o">==</span> <span class="s2">"precomputed"</span>
+        <span class="n">tags</span><span class="o">.</span><span class="n">input_tags</span><span class="o">.</span><span class="n">positive_only</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="o">==</span> <span class="s2">"precomputed"</span>  <span class="c1"># dissimilarities are &gt;= 0</span>
+        <span class="k">return</span> <span class="n">tags</span></div>
+
+
+
+<div class="viewcode-block" id="NERFCM">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.relational.NERFCM.html#fuzzyclust.relational.NERFCM">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NERFCM</span><span class="p">(</span><span class="n">RelationalFCM</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Non-Euclidean relational fuzzy c-means (Hathaway and Bezdek, 1994).</span>
+
+<span class="sd">    Relational fuzzy c-means (:class:`RelationalFCM`) is the exact dual of</span>
+<span class="sd">    FCM only when the dissimilarity matrix :math:`\mathbf{R}` is Euclidean</span>
+<span class="sd">    (squared distances of some point configuration). Many relational data</span>
+<span class="sd">    are not -- dynamic-time-warping distances, Gower dissimilarities with</span>
+<span class="sd">    missing values, subjective ratings -- and then the relational distance</span>
+<span class="sd">    :math:`d^2_{ik}=(\mathbf{R}\mathbf{v}_i)_k-\tfrac12\mathbf{v}_i\T\mathbf{R}\mathbf{v}_i`</span>
+<span class="sd">    can be negative. NERF c-means uses the :math:`\beta`-*spread*</span>
+<span class="sd">    transformation :math:`\mathbf{R}_\beta=\mathbf{R}+\beta(\mathbf{1}\mathbf{1}\T-\mathbf{I})`:</span>
+<span class="sd">    adding :math:`\beta` to every off-diagonal dissimilarity makes the</span>
+<span class="sd">    matrix Euclidean for a large enough :math:`\beta`, and the paper shows</span>
+<span class="sd">    that this shifts the relational distances by</span>
+<span class="sd">    :math:`\tfrac{\beta}{2}\norm{\mathbf{e}_k-\mathbf{v}_i}^2` -- a term that</span>
+<span class="sd">    is computed without ever forming :math:`\mathbf{R}_\beta`. The spread</span>
+<span class="sd">    is applied *adaptively*: :math:`\beta` starts at zero and is increased</span>
+<span class="sd">    only when, and only as much as, a negative distance appears, so the</span>
+<span class="sd">    partition stays as close to the RFCM result as the data allow.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    n_clusters, metric, m, tol, max_iter, init, n_init, random_state, verbose</span>
+<span class="sd">        As in :class:`RelationalFCM`. ``metric="precomputed"`` is the</span>
+<span class="sd">        typical use; a feature metric that is not Euclidean (e.g.</span>
+<span class="sd">        ``"cityblock"``, ``"cosine"``) also leads to a non-Euclidean</span>
+<span class="sd">        :math:`\mathbf{R}` after squaring.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    beta_ : float</span>
+<span class="sd">        Final spread :math:`\beta`. ``0.0`` means the matrix behaved as a</span>
+<span class="sd">        Euclidean one and the result is the RFCM partition.</span>
+<span class="sd">    n_spread_updates_ : int</span>
+<span class="sd">        How many times :math:`\beta` had to be increased during the run.</span>
+<span class="sd">    relational_centers_, cluster_centers_, dissimilarity_matrix_, membership_, labels_,</span>
+<span class="sd">    distances_, objective_, objective_history_, n_iter_</span>
+<span class="sd">        See :class:`RelationalFCM`. The objective is that of the spread</span>
+<span class="sd">        matrix :math:`\mathbf{R}_\beta`.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    At every iteration the relational distances are computed with the</span>
+<span class="sd">    current :math:`\beta`; if some :math:`d^2_{ik}&lt;0`, the increment</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        \Delta\beta=\max_{i,k}\frac{-2\,d^2_{ik}}{\norm{\mathbf{e}_k-\mathbf{v}_i}^2},\qquad</span>
+<span class="sd">        \beta\leftarrow\beta+\Delta\beta,\qquad</span>
+<span class="sd">        d^2_{ik}\leftarrow d^2_{ik}+\tfrac{\Delta\beta}{2}\norm{\mathbf{e}_k-\mathbf{v}_i}^2</span>
+
+<span class="sd">    is the smallest shift that makes all distances non-negative (the paper's</span>
+<span class="sd">    Step 3), and the iteration continues with the shifted distances. Since</span>
+<span class="sd">    :math:`\norm{\mathbf{e}_k-\mathbf{v}_i}^2=1-2v_{ik}+\norm{\mathbf{v}_i}^2`</span>
+<span class="sd">    is larger for objects far from the prototype, the shift affects weakly</span>
+<span class="sd">    related objects most and leaves the memberships of well-clustered</span>
+<span class="sd">    objects nearly unchanged; a large final :math:`\beta` nevertheless</span>
+<span class="sd">    flattens the partition toward :math:`1/c`, which is the price of a</span>
+<span class="sd">    strongly non-Euclidean matrix. New objects (``predict_proba``) receive</span>
+<span class="sd">    the same shift with :math:`\norm{\mathbf{e}-\mathbf{v}_i}^2=1+\norm{\mathbf{v}_i}^2`,</span>
+<span class="sd">    the value for an object outside the training set.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] R. J. Hathaway, J. C. Bezdek, "NERF c-means: non-Euclidean</span>
+<span class="sd">           relational fuzzy clustering", Pattern Recognition 27(3), 429--437,</span>
+<span class="sd">           1994.</span>
+<span class="sd">    .. [2] R. J. Hathaway, J. W. Davenport, J. C. Bezdek, "Relational duals</span>
+<span class="sd">           of the c-means clustering algorithms", Pattern Recognition 22(2),</span>
+<span class="sd">           205--212, 1989.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.datasets import make_fuzzy_blobs</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.relational import NERFCM, pairwise_dissimilarity</span>
+<span class="sd">    &gt;&gt;&gt; X, _ = make_fuzzy_blobs(random_state=0)</span>
+<span class="sd">    &gt;&gt;&gt; R = pairwise_dissimilarity(X, metric="cityblock") ** 2   # squared L1 distances: not Euclidean</span>
+<span class="sd">    &gt;&gt;&gt; nerf = NERFCM(n_clusters=3, metric="precomputed", random_state=0).fit(R)</span>
+<span class="sd">    &gt;&gt;&gt; bool(nerf.beta_ &gt; 0), nerf.n_spread_updates_, nerf.membership_.shape</span>
+<span class="sd">    (True, 1, (300, 3))</span>
+<span class="sd">    """</span>
+
+    <span class="n">_spread</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_spread_if_needed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d2</span><span class="p">,</span> <span class="n">e_v</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Step 3 of NERF: raise beta by the smallest amount that removes negative distances."""</span>
+        <span class="n">neg</span> <span class="o">=</span> <span class="n">d2</span> <span class="o">&lt;</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">neg</span><span class="p">):</span>
+            <span class="n">delta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="o">-</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">d2</span><span class="p">[</span><span class="n">neg</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">e_v</span><span class="p">[</span><span class="n">neg</span><span class="p">],</span> <span class="n">EPS</span><span class="p">)))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">beta_</span> <span class="o">+=</span> <span class="n">delta</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_spread_updates_</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"beta-spread: beta += </span><span class="si">{</span><span class="n">delta</span><span class="si">:</span><span class="s2">.4g</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">beta_</span><span class="si">:</span><span class="s2">.4g</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="n">d2</span> <span class="o">=</span> <span class="n">d2</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">delta</span> <span class="o">*</span> <span class="n">e_v</span>
+        <span class="k">return</span> <span class="n">d2</span></div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, János Abonyi.
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.1.
+  </p>
+</div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

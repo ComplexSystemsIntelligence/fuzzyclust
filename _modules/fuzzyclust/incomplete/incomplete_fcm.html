@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>fuzzyclust.incomplete.incomplete_fcm &#8212; fuzzyclust</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=c83e6b79" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=6a604523" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=e6ebbe3b" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
+
+    <script src="../../../_static/documentation_options.js?v=f2a433a1"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/sg-tags.js?v=d80f6fa4"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../../_static/design-tabs.js?v=fcb327ea"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/fuzzyclust/incomplete/incomplete_fcm';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="icon" href="../../../_static/favicon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="1.0" />
+  
+    
+    <script src="../../../_static/searchtools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/logo.svg" class="logo__image only-light" alt=""/>
+    <img src="../../../_static/logo.svg" class="logo__image only-dark pst-js-only" alt=""/>
+  
+  
+    <p class="title logo__title">fuzzyclust</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../auto_examples/index.html">
+    Example gallery
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../book.html">
+    The book
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../migration.html">
+    Migrating from the MATLAB toolbox
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../citing.html">
+    Citing
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://complexsystemsintelligence.github.io/#textbooks">
+    All textbooks
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ComplexSystemsIntelligence/fuzzyclust" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../auto_examples/index.html">
+    Example gallery
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../book.html">
+    The book
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../migration.html">
+    Migrating from the MATLAB toolbox
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../citing.html">
+    Citing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://complexsystemsintelligence.github.io/#textbooks">
+    All textbooks
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ComplexSystemsIntelligence/fuzzyclust" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">fuzzyclust.incomplete.incomplete_fcm</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for fuzzyclust.incomplete.incomplete_fcm</h1><div class="highlight"><pre>
+<span></span><span class="c1"># SPDX-License-Identifier: MIT</span>
+<span class="c1"># Copyright (c) 2026 János Abonyi</span>
+<span class="sa">r</span><span class="sd">"""Fuzzy c-means for incomplete data (Hathaway and Bezdek, 2001).</span>
+
+<span class="sd">An *incomplete* data set has samples with one or more missing feature</span>
+<span class="sd">values. Hathaway and Bezdek compared four strategies of running fuzzy</span>
+<span class="sd">c-means on such data; all four are implemented in :class:`IncompleteFCM`</span>
+<span class="sd">and selected by ``strategy``. Missing values are marked by ``NaN``.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_random_state</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.utils.validation</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_is_fitted</span><span class="p">,</span> <span class="n">validate_data</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.._utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">EPS</span><span class="p">,</span> <span class="n">fuzzy_centers</span><span class="p">,</span> <span class="n">fuzzy_covariances</span><span class="p">,</span> <span class="n">memberships_from_distances</span><span class="p">,</span> <span class="n">sq_euclidean</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseFuzzyClusterer</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"IncompleteFCM"</span><span class="p">,</span> <span class="s2">"partial_distances"</span><span class="p">,</span> <span class="s2">"STRATEGIES"</span><span class="p">]</span>
+
+<span class="c1">#: The four strategies of Hathaway and Bezdek (2001).</span>
+<span class="n">STRATEGIES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"wds"</span><span class="p">,</span> <span class="s2">"pds"</span><span class="p">,</span> <span class="s2">"ocs"</span><span class="p">,</span> <span class="s2">"nps"</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="partial_distances">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.incomplete.partial_distances.html#fuzzyclust.incomplete.partial_distances">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">partial_distances</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">V</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Squared *partial distances* of (incomplete) samples to prototypes.</span>
+
+<span class="sd">    For a sample :math:`\mathbf{x}_k` with the indicator :math:`I_{kj}=1`</span>
+<span class="sd">    when feature :math:`j` is observed and :math:`I_k=\sum_j I_{kj}`</span>
+<span class="sd">    observed features, the partial distance of Dixon (1979) is the squared</span>
+<span class="sd">    Euclidean distance over the observed features, rescaled to the full</span>
+<span class="sd">    dimension :math:`n`,</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        D^2_{ik} = \frac{n}{I_k}\sum_{j=1}^{n} I_{kj}\,(x_{kj}-v_{ij})^2 .</span>
+
+<span class="sd">    For a complete sample it is the ordinary squared Euclidean distance.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    X : array-like of shape (n_samples, n_features)</span>
+<span class="sd">        Samples; missing values are ``NaN``.</span>
+<span class="sd">    V : array-like of shape (n_clusters, n_features)</span>
+<span class="sd">        Prototypes (complete).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    d2 : ndarray of shape (n_samples, n_clusters)</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.incomplete import partial_distances</span>
+<span class="sd">    &gt;&gt;&gt; X = np.array([[0.0, 0.0], [1.0, np.nan]])</span>
+<span class="sd">    &gt;&gt;&gt; partial_distances(X, np.array([[1.0, 1.0]]))</span>
+<span class="sd">    array([[2.],</span>
+<span class="sd">           [0.]])</span>
+<span class="sd">    """</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">V</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    <span class="n">I</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">mask</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">X0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span>
+    <span class="n">d2</span> <span class="o">=</span> <span class="p">(</span><span class="n">X0</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="n">I</span> <span class="o">@</span> <span class="p">(</span><span class="n">V</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> <span class="o">-</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">X0</span> <span class="o">@</span> <span class="n">V</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">d2</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">d2</span><span class="p">)</span>
+    <span class="n">n_obs</span> <span class="o">=</span> <span class="n">I</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">n_obs</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Every sample must have at least one observed feature."</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">d2</span> <span class="o">*</span> <span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">n_obs</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="IncompleteFCM">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.incomplete.IncompleteFCM.html#fuzzyclust.incomplete.IncompleteFCM">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">IncompleteFCM</span><span class="p">(</span><span class="n">BaseFuzzyClusterer</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Fuzzy c-means clustering of incomplete data (Hathaway and Bezdek, 2001).</span>
+
+<span class="sd">    Missing feature values are marked by ``NaN``. Four strategies of running</span>
+<span class="sd">    fuzzy c-means on such data are available (``strategy``):</span>
+
+<span class="sd">    ``"wds"``</span>
+<span class="sd">        *Whole-data strategy*: samples with missing values are dropped and</span>
+<span class="sd">        FCM is run on the complete samples only. The incomplete samples</span>
+<span class="sd">        then receive memberships from their partial distances to the</span>
+<span class="sd">        prototypes (the paper's own suggestion for classifying them).</span>
+<span class="sd">        Adequate when few samples are incomplete.</span>
+<span class="sd">    ``"pds"``</span>
+<span class="sd">        *Partial-distance strategy*: every sample takes part, the distance</span>
+<span class="sd">        to a prototype is the partial distance :func:`partial_distances`</span>
+<span class="sd">        over the observed features (rescaled to the full dimension), and</span>
+<span class="sd">        every prototype coordinate is the membership-weighted mean of the</span>
+<span class="sd">        samples that observe it.</span>
+<span class="sd">    ``"ocs"``</span>
+<span class="sd">        *Optimal-completion strategy*: the missing values are additional</span>
+<span class="sd">        variables of the c-means functional. Each is updated to the value</span>
+<span class="sd">        that minimizes :math:`J` for the current partition, the</span>
+<span class="sd">        membership-weighted mean of the prototype coordinates; FCM then</span>
+<span class="sd">        runs on the completed data. OCS imputes the data as a by-product.</span>
+<span class="sd">    ``"nps"``</span>
+<span class="sd">        *Nearest-prototype strategy*: like OCS, but a missing value is</span>
+<span class="sd">        replaced by the coordinate of the *nearest* prototype of its</span>
+<span class="sd">        sample (a hard version of OCS, cheaper and a little less accurate).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    n_clusters : int, default=3</span>
+<span class="sd">        Number of clusters :math:`c`.</span>
+<span class="sd">    m : float, default=2.0</span>
+<span class="sd">        Fuzziness exponent :math:`m&gt;1`.</span>
+<span class="sd">    strategy : {"wds", "pds", "ocs", "nps"}, default="pds"</span>
+<span class="sd">        How the missing values are handled (see above).</span>
+<span class="sd">    tol : float, default=1e-4</span>
+<span class="sd">        Termination tolerance on :math:`\max_{ik}|\Delta\mu_{ik}|`.</span>
+<span class="sd">    max_iter : int, default=300</span>
+<span class="sd">    init : {"random", "kmeans++"} or ndarray, default="random"</span>
+<span class="sd">        Initialization, see :class:`~fuzzyclust.base.BaseFuzzyClusterer`.</span>
+<span class="sd">        It is computed on the data with the missing values provisionally</span>
+<span class="sd">        filled by the feature means of the observed values.</span>
+<span class="sd">    n_init : int, default=1</span>
+<span class="sd">        Random restarts; the run with the lowest final :math:`J` is kept.</span>
+<span class="sd">    random_state : int, RandomState instance or None, default=None</span>
+<span class="sd">    verbose : int, default=0</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cluster_centers_ : ndarray of shape (n_clusters, n_features)</span>
+<span class="sd">        Prototypes :math:`\mathbf{v}_i`.</span>
+<span class="sd">    membership_ : ndarray of shape (n_samples, n_clusters)</span>
+<span class="sd">        Fuzzy partition :math:`\mathbf{U}^T` of *all* samples (for</span>
+<span class="sd">        ``"wds"`` the incomplete samples are classified by their partial</span>
+<span class="sd">        distances after the fit).</span>
+<span class="sd">    labels_ : ndarray of shape (n_samples,)</span>
+<span class="sd">    distances_ : ndarray of shape (n_samples, n_clusters)</span>
+<span class="sd">        Distances at convergence: Euclidean on the completed data for</span>
+<span class="sd">        ``"ocs"``/``"nps"``, partial distances otherwise.</span>
+<span class="sd">    missing_mask_ : ndarray of bool of shape (n_samples, n_features)</span>
+<span class="sd">        ``True`` where a value was missing.</span>
+<span class="sd">    n_missing_ : int</span>
+<span class="sd">        Number of missing values.</span>
+<span class="sd">    X_completed_ : ndarray of shape (n_samples, n_features)</span>
+<span class="sd">        The data with the missing values filled in. For ``"ocs"`` and</span>
+<span class="sd">        ``"nps"`` these are the values the algorithm optimized; for</span>
+<span class="sd">        ``"pds"`` and ``"wds"`` they are a post-hoc estimate by the OCS</span>
+<span class="sd">        formula (membership-weighted prototype coordinates) from the final</span>
+<span class="sd">        partition, not used by the algorithm.</span>
+<span class="sd">    covariances_ : ndarray of shape (n_clusters, n_features, n_features)</span>
+<span class="sd">        Fuzzy covariances of the final partition on the completed data.</span>
+<span class="sd">    objective_, objective_history_, n_iter_</span>
+<span class="sd">        See :class:`~fuzzyclust.base.BaseFuzzyClusterer`.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Let :math:`I_{kj}=1` when :math:`x_{kj}` is observed (``0`` when it is</span>
+<span class="sd">    missing), :math:`I_k=\sum_j I_{kj}`, :math:`X_M` the set of missing</span>
+<span class="sd">    values and :math:`X_P` the observed ones. The strategies optimize the</span>
+<span class="sd">    c-means functional :math:`J=\sum_i\sum_k\mu_{ik}^m D^2_{ik}` as follows.</span>
+
+<span class="sd">    *PDS* -- the partial distance and the prototype update</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        D^2_{ik}=\frac{n}{I_k}\sum_{j=1}^{n}I_{kj}(x_{kj}-v_{ij})^2,\qquad</span>
+<span class="sd">        v_{ij}=\frac{\sum_{k=1}^{N}\mu_{ik}^m I_{kj}\,x_{kj}}{\sum_{k=1}^{N}\mu_{ik}^m I_{kj}},</span>
+
+<span class="sd">    with the usual membership formula.</span>
+
+<span class="sd">    *OCS* -- :math:`J` is minimized over :math:`(\mathbf{U},\mathbf{V},X_M)`;</span>
+<span class="sd">    the necessary condition for a missing value is</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        x_{kj}=\frac{\sum_{i=1}^{c}\mu_{ik}^m v_{ij}}{\sum_{i=1}^{c}\mu_{ik}^m},</span>
+<span class="sd">        \qquad x_{kj}\in X_M ,</span>
+
+<span class="sd">    and the memberships and prototypes are those of FCM on the completed</span>
+<span class="sd">    data. The three-block alternating optimization decreases :math:`J`</span>
+<span class="sd">    monotonically.</span>
+
+<span class="sd">    *NPS* -- the missing value is set to the coordinate of the prototype</span>
+<span class="sd">    nearest to the sample, :math:`x_{kj}=v_{ij}` with</span>
+<span class="sd">    :math:`i=\arg\min_l D^2_{lk}`, the nearest prototype being judged by</span>
+<span class="sd">    the partial distance over the observed features.</span>
+
+<span class="sd">    *WDS* -- plain FCM on the complete samples; the incomplete ones are</span>
+<span class="sd">    classified afterwards with partial distances.</span>
+
+<span class="sd">    Hathaway and Bezdek ran the strategies on IRIS with 0--75 % of the</span>
+<span class="sd">    values missing completely at random and compared the prototypes with</span>
+<span class="sd">    those of FCM on the complete data: PDS and OCS were the most accurate,</span>
+<span class="sd">    NPS close behind, and WDS degraded once a large share of the samples</span>
+<span class="sd">    was affected; OCS has the extra merit of imputing the data. OCS and NPS</span>
+<span class="sd">    change the data they cluster and therefore have more local optima than</span>
+<span class="sd">    PDS -- use ``n_init`` or start them from the PDS prototypes</span>
+<span class="sd">    (``init=pds.cluster_centers_``) when the result matters.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] R. J. Hathaway, J. C. Bezdek, "Fuzzy c-means clustering of</span>
+<span class="sd">           incomplete data", IEEE Transactions on Systems, Man, and</span>
+<span class="sd">           Cybernetics, Part B 31(5), 735--744, 2001.</span>
+<span class="sd">    .. [2] J. K. Dixon, "Pattern recognition with partly missing data",</span>
+<span class="sd">           IEEE Transactions on Systems, Man, and Cybernetics 9(10),</span>
+<span class="sd">           617--621, 1979.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.datasets import make_fuzzy_blobs</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.incomplete import IncompleteFCM, make_mcar</span>
+<span class="sd">    &gt;&gt;&gt; X, _ = make_fuzzy_blobs(random_state=0)</span>
+<span class="sd">    &gt;&gt;&gt; Xm = make_mcar(X, missing_rate=0.2, random_state=0)</span>
+<span class="sd">    &gt;&gt;&gt; model = IncompleteFCM(n_clusters=3, strategy="ocs", random_state=0).fit(Xm)</span>
+<span class="sd">    &gt;&gt;&gt; model.membership_.shape, bool(np.isnan(model.X_completed_).any())</span>
+<span class="sd">    ((300, 3), False)</span>
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">n_clusters</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="n">m</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
+        <span class="n">strategy</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"pds"</span><span class="p">,</span>
+        <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-4</span><span class="p">,</span>
+        <span class="n">max_iter</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">300</span><span class="p">,</span>
+        <span class="n">init</span><span class="o">=</span><span class="s2">"random"</span><span class="p">,</span>
+        <span class="n">n_init</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">n_clusters</span><span class="o">=</span><span class="n">n_clusters</span><span class="p">,</span>
+            <span class="n">m</span><span class="o">=</span><span class="n">m</span><span class="p">,</span>
+            <span class="n">tol</span><span class="o">=</span><span class="n">tol</span><span class="p">,</span>
+            <span class="n">max_iter</span><span class="o">=</span><span class="n">max_iter</span><span class="p">,</span>
+            <span class="n">init</span><span class="o">=</span><span class="n">init</span><span class="p">,</span>
+            <span class="n">n_init</span><span class="o">=</span><span class="n">n_init</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">strategy</span> <span class="o">=</span> <span class="n">strategy</span>
+
+    <span class="c1"># ------------------------------------------------------------------ validation</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_check_params</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"IncompleteFCM requires m &gt; 1."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strategy</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">STRATEGIES</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"strategy must be one of </span><span class="si">{</span><span class="n">STRATEGIES</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">strategy</span><span class="si">!r}</span><span class="s2">."</span><span class="p">)</span>
+
+    <span class="c1"># ------------------------------------------------------------------ fitting</span>
+<div class="viewcode-block" id="IncompleteFCM.fit">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.incomplete.IncompleteFCM.html#fuzzyclust.incomplete.IncompleteFCM.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Cluster incomplete data (``NaN`` marks a missing value).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : array-like of shape (n_samples, n_features)</span>
+<span class="sd">            Data with ``NaN`` for missing values. Every sample must observe</span>
+<span class="sd">            at least one feature and every feature must be observed at</span>
+<span class="sd">            least once.</span>
+<span class="sd">        y : Ignored</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        self : object</span>
+<span class="sd">        """</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">validate_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">ensure_all_finite</span><span class="o">=</span><span class="s2">"allow-nan"</span><span class="p">,</span> <span class="n">ensure_min_samples</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_params</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_init</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">))</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_init</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"n_init must be a positive integer."</span><span class="p">)</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mask</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Every sample must have at least one observed feature."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mask</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Every feature must be observed in at least one sample."</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">missing_mask_</span> <span class="o">=</span> <span class="n">mask</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_missing_</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+        <span class="n">complete</span> <span class="o">=</span> <span class="o">~</span><span class="n">mask</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">means</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_X_init</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">means</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strategy</span> <span class="o">==</span> <span class="s2">"wds"</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">complete</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_clusters</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">"strategy='wds' needs at least n_clusters=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_clusters</span><span class="si">}</span><span class="s2"> complete samples, "</span>
+                    <span class="sa">f</span><span class="s2">"found </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">complete</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span><span class="si">}</span><span class="s2">."</span>
+                <span class="p">)</span>
+            <span class="n">X_run</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">complete</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">X_run</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">X_run</span> <span class="o">=</span> <span class="n">X</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span> <span class="o">=</span> <span class="n">mask</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_X_fit</span> <span class="o">=</span> <span class="n">X_run</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_X0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mask</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">X_run</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_I</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">_mask</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_X_init_run</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_X_init</span><span class="p">[</span><span class="n">complete</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strategy</span> <span class="o">==</span> <span class="s2">"wds"</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_X_init</span>
+
+        <span class="n">rng</span> <span class="o">=</span> <span class="n">check_random_state</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
+        <span class="n">n_init</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_init</span>
+        <span class="n">best</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">run</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_init</span><span class="p">):</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit_single</span><span class="p">(</span><span class="n">X_run</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">best</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">result</span><span class="p">[</span><span class="s2">"history"</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">best</span><span class="p">[</span><span class="s2">"history"</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">best</span> <span class="o">=</span> <span class="n">result</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">and</span> <span class="n">n_init</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"restart </span><span class="si">{</span><span class="n">run</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">n_init</span><span class="si">}</span><span class="s2">: J = </span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s1">'history'</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.6g</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">best</span><span class="p">[</span><span class="s2">"state"</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objective_history_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">best</span><span class="p">[</span><span class="s2">"history"</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objective_</span> <span class="o">=</span> <span class="n">best</span><span class="p">[</span><span class="s2">"history"</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_iter_</span> <span class="o">=</span> <span class="n">best</span><span class="p">[</span><span class="s2">"n_iter"</span><span class="p">]</span>
+        <span class="n">V</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_centers_</span>
+
+        <span class="c1"># memberships of all samples (identical to the run's partition where the run saw them)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strategy</span> <span class="o">==</span> <span class="s2">"wds"</span><span class="p">:</span>
+            <span class="n">d2</span> <span class="o">=</span> <span class="n">partial_distances</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+            <span class="n">U</span> <span class="o">=</span> <span class="n">memberships_from_distances</span><span class="p">(</span><span class="n">d2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">U</span><span class="p">,</span> <span class="n">d2</span> <span class="o">=</span> <span class="n">best</span><span class="p">[</span><span class="s2">"U"</span><span class="p">],</span> <span class="n">best</span><span class="p">[</span><span class="s2">"d2"</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">membership_</span> <span class="o">=</span> <span class="n">U</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels_</span> <span class="o">=</span> <span class="n">U</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">distances_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">d2</span><span class="p">)</span>
+        <span class="n">Um</span> <span class="o">=</span> <span class="n">U</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">m</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strategy</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"ocs"</span><span class="p">,</span> <span class="s2">"nps"</span><span class="p">):</span>
+            <span class="n">Xc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Xc</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># post-hoc imputation by the OCS formula</span>
+            <span class="n">est</span> <span class="o">=</span> <span class="p">(</span><span class="n">Um</span> <span class="o">@</span> <span class="n">V</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">Um</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">EPS</span><span class="p">)</span>
+            <span class="n">Xc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">est</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X_completed_</span> <span class="o">=</span> <span class="n">Xc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">covariances_</span> <span class="o">=</span> <span class="n">fuzzy_covariances</span><span class="p">(</span><span class="n">Xc</span><span class="p">,</span> <span class="n">Um</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+    <span class="c1"># ------------------------------------------------------------------ AO hooks</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
+        <span class="c1"># The initial prototypes are seeded on the mean-filled data, but the</span>
+        <span class="c1"># initial partition is computed from the *partial* distances, so that</span>
+        <span class="c1"># the provisional fill-in values (column means) do not bias it; OCS and</span>
+        <span class="c1"># NPS then start from the imputation of this partition instead of the</span>
+        <span class="c1"># column means (a column mean can lie far from every cluster in its</span>
+        <span class="c1"># coordinate and lure a sample into the wrong cluster).</span>
+        <span class="n">Xi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_X_init_run</span>
+        <span class="n">c</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_clusters</span><span class="p">,</span> <span class="n">Xi</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">init</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">init</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">init</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">init</span> <span class="o">==</span> <span class="s2">"random"</span><span class="p">:</span>
+                <span class="n">mean</span> <span class="o">=</span> <span class="n">Xi</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">half_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">Xi</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">V0</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">half_range</span> <span class="o">*</span> <span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">+</span> <span class="n">mean</span>
+            <span class="k">elif</span> <span class="n">init</span> <span class="o">==</span> <span class="s2">"kmeans++"</span><span class="p">:</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.cluster</span><span class="w"> </span><span class="kn">import</span> <span class="n">kmeans_plusplus</span>
+
+                <span class="n">V0</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">kmeans_plusplus</span><span class="p">(</span><span class="n">Xi</span><span class="p">,</span> <span class="n">n_clusters</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unknown init='</span><span class="si">{</span><span class="n">init</span><span class="si">}</span><span class="s2">'. Use 'random', 'kmeans++' or an array."</span><span class="p">)</span>
+            <span class="n">U0</span> <span class="o">=</span> <span class="n">memberships_from_distances</span><span class="p">(</span><span class="n">partial_distances</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">V0</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">init</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+            <span class="n">V0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">init</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+            <span class="n">U0</span> <span class="o">=</span> <span class="n">memberships_from_distances</span><span class="p">(</span><span class="n">partial_distances</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">V0</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">U0</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_init_state</span><span class="p">(</span><span class="n">Xi</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
+            <span class="n">V0</span> <span class="o">=</span> <span class="n">fuzzy_centers</span><span class="p">(</span><span class="n">Xi</span><span class="p">,</span> <span class="n">U0</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_Xc</span> <span class="o">=</span> <span class="n">Xi</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strategy</span> <span class="o">==</span> <span class="s2">"ocs"</span><span class="p">:</span>
+            <span class="n">Um0</span> <span class="o">=</span> <span class="n">U0</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">m</span>
+            <span class="n">est</span> <span class="o">=</span> <span class="p">(</span><span class="n">Um0</span> <span class="o">@</span> <span class="n">V0</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">Um0</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">EPS</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_Xc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mask</span><span class="p">,</span> <span class="n">est</span><span class="p">,</span> <span class="n">Xi</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">strategy</span> <span class="o">==</span> <span class="s2">"nps"</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_Xc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mask</span><span class="p">,</span> <span class="n">V0</span><span class="p">[</span><span class="n">partial_distances</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">V0</span><span class="p">)</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)],</span> <span class="n">Xi</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">U0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_prototypes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Um</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strategy</span>
+        <span class="k">if</span> <span class="n">s</span> <span class="o">==</span> <span class="s2">"wds"</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cluster_centers_</span> <span class="o">=</span> <span class="n">fuzzy_centers</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Um</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="s2">"pds"</span><span class="p">:</span>
+            <span class="n">num</span> <span class="o">=</span> <span class="n">Um</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">_X0</span>
+            <span class="n">den</span> <span class="o">=</span> <span class="n">Um</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">_I</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cluster_centers_</span> <span class="o">=</span> <span class="n">num</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">den</span><span class="p">,</span> <span class="n">EPS</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">V</span> <span class="o">=</span> <span class="n">fuzzy_centers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Xc</span><span class="p">,</span> <span class="n">Um</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cluster_centers_</span> <span class="o">=</span> <span class="n">V</span>
+            <span class="k">if</span> <span class="n">s</span> <span class="o">==</span> <span class="s2">"ocs"</span><span class="p">:</span>
+                <span class="n">est</span> <span class="o">=</span> <span class="p">(</span><span class="n">Um</span> <span class="o">@</span> <span class="n">V</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">Um</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">EPS</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># nps: nearest prototype judged on the observed features</span>
+                <span class="n">nearest</span> <span class="o">=</span> <span class="n">partial_distances</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">est</span> <span class="o">=</span> <span class="n">V</span><span class="p">[</span><span class="n">nearest</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_Xc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mask</span><span class="p">,</span> <span class="n">est</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Xc</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_distances</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">X</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">_X_fit</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strategy</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"ocs"</span><span class="p">,</span> <span class="s2">"nps"</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">sq_euclidean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_Xc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_centers_</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strategy</span> <span class="o">==</span> <span class="s2">"wds"</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">sq_euclidean</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_centers_</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">partial_distances</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_centers_</span><span class="p">)</span>
+
+    <span class="c1"># ------------------------------------------------------------------ inference</span>
+<div class="viewcode-block" id="IncompleteFCM.predict_proba">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.incomplete.IncompleteFCM.html#fuzzyclust.incomplete.IncompleteFCM.predict_proba">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Memberships of (possibly incomplete) new samples from their partial distances.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        U : ndarray of shape (n_samples, n_clusters)</span>
+<span class="sd">        """</span>
+        <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"cluster_centers_"</span><span class="p">)</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">validate_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">ensure_all_finite</span><span class="o">=</span><span class="s2">"allow-nan"</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">memberships_from_distances</span><span class="p">(</span><span class="n">partial_distances</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_centers_</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="IncompleteFCM.transform">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.incomplete.IncompleteFCM.html#fuzzyclust.incomplete.IncompleteFCM.transform">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Partial distances :math:`D_{ik}` of (possibly incomplete) samples to the prototypes."""</span>
+        <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"cluster_centers_"</span><span class="p">)</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">validate_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">ensure_all_finite</span><span class="o">=</span><span class="s2">"allow-nan"</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">partial_distances</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_centers_</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="IncompleteFCM.score">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.incomplete.IncompleteFCM.html#fuzzyclust.incomplete.IncompleteFCM.score">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Negative c-means functional with partial distances on ``X`` (higher is better)."""</span>
+        <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"cluster_centers_"</span><span class="p">)</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">validate_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">ensure_all_finite</span><span class="o">=</span><span class="s2">"allow-nan"</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">d2</span> <span class="o">=</span> <span class="n">partial_distances</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_centers_</span><span class="p">)</span>
+        <span class="n">U</span> <span class="o">=</span> <span class="n">memberships_from_distances</span><span class="p">(</span><span class="n">d2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">)</span>
+        <span class="k">return</span> <span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">U</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">m</span> <span class="o">*</span> <span class="n">d2</span><span class="p">))</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__sklearn_tags__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">tags</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__sklearn_tags__</span><span class="p">()</span>
+        <span class="n">tags</span><span class="o">.</span><span class="n">input_tags</span><span class="o">.</span><span class="n">allow_nan</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">tags</span></div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, János Abonyi.
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.1.
+  </p>
+</div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

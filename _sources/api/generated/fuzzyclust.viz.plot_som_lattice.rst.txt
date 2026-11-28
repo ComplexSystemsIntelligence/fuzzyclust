@@ -1,0 +1,12 @@
+﻿fuzzyclust.viz.plot\_som\_lattice
+=================================
+
+.. currentmodule:: fuzzyclust.viz
+
+.. autofunction:: plot_som_lattice
+
+.. include:: fuzzyclust.viz.plot_som_lattice.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

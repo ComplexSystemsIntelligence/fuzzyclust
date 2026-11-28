@@ -1,0 +1,12 @@
+﻿fuzzyclust.ensemble.soft\_mcla
+==============================
+
+.. currentmodule:: fuzzyclust.ensemble
+
+.. autofunction:: soft_mcla
+
+.. include:: fuzzyclust.ensemble.soft_mcla.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

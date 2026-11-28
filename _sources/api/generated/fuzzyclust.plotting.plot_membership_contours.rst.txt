@@ -1,0 +1,12 @@
+﻿fuzzyclust.plotting.plot\_membership\_contours
+==============================================
+
+.. currentmodule:: fuzzyclust.plotting
+
+.. autofunction:: plot_membership_contours
+
+.. include:: fuzzyclust.plotting.plot_membership_contours.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

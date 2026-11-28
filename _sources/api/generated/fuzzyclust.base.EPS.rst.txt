@@ -1,0 +1,6 @@
+﻿fuzzyclust.base.EPS
+===================
+
+.. currentmodule:: fuzzyclust.base
+
+.. autodata:: EPS

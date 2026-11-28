@@ -1,0 +1,12 @@
+﻿fuzzyclust.models.set\_similarity
+=================================
+
+.. currentmodule:: fuzzyclust.models
+
+.. autofunction:: set_similarity
+
+.. include:: fuzzyclust.models.set_similarity.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

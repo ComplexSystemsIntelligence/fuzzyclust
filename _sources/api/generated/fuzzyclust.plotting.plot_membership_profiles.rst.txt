@@ -1,0 +1,12 @@
+﻿fuzzyclust.plotting.plot\_membership\_profiles
+==============================================
+
+.. currentmodule:: fuzzyclust.plotting
+
+.. autofunction:: plot_membership_profiles
+
+.. include:: fuzzyclust.plotting.plot_membership_profiles.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

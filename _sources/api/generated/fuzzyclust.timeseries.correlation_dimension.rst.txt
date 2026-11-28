@@ -1,0 +1,12 @@
+﻿fuzzyclust.timeseries.correlation\_dimension
+============================================
+
+.. currentmodule:: fuzzyclust.timeseries
+
+.. autofunction:: correlation_dimension
+
+.. include:: fuzzyclust.timeseries.correlation_dimension.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

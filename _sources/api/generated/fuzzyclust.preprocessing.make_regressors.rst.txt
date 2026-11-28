@@ -1,0 +1,12 @@
+﻿fuzzyclust.preprocessing.make\_regressors
+=========================================
+
+.. currentmodule:: fuzzyclust.preprocessing
+
+.. autofunction:: make_regressors
+
+.. include:: fuzzyclust.preprocessing.make_regressors.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

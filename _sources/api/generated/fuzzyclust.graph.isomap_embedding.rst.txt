@@ -1,0 +1,12 @@
+﻿fuzzyclust.graph.isomap\_embedding
+==================================
+
+.. currentmodule:: fuzzyclust.graph
+
+.. autofunction:: isomap_embedding
+
+.. include:: fuzzyclust.graph.isomap_embedding.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

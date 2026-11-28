@@ -1,0 +1,52 @@
+
+:orphan:
+
+.. _sphx_glr_auto_examples_09_beyond_unsupervised_sg_execution_times:
+
+
+Computation times
+=================
+**00:15.606** total execution time for 6 files **from auto_examples/09_beyond_unsupervised**:
+
+.. container::
+
+  .. raw:: html
+
+    <style scoped>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+    </style>
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script type="text/javascript" class="init">
+    $(document).ready( function () {
+        $('table.sg-datatable').DataTable({order: [[1, 'desc']]});
+    } );
+    </script>
+
+  .. list-table::
+   :header-rows: 1
+   :class: table table-striped sg-datatable
+
+   * - Example
+     - Time
+     - Mem (MB)
+   * - :ref:`sphx_glr_auto_examples_09_beyond_unsupervised_plot_05_ensemble_consensus.py` (``plot_05_ensemble_consensus.py``)
+     - 00:06.443
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_09_beyond_unsupervised_plot_06_ensemble_lifetime.py` (``plot_06_ensemble_lifetime.py``)
+     - 00:06.022
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_09_beyond_unsupervised_plot_04_collaborative_sites.py` (``plot_04_collaborative_sites.py``)
+     - 00:00.991
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_09_beyond_unsupervised_plot_02_pcca_pairwise_constraints.py` (``plot_02_pcca_pairwise_constraints.py``)
+     - 00:00.894
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_09_beyond_unsupervised_plot_03_fccm_document_term.py` (``plot_03_fccm_document_term.py``)
+     - 00:00.811
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_09_beyond_unsupervised_plot_01_ssfcm_partial_labels.py` (``plot_01_ssfcm_partial_labels.py``)
+     - 00:00.445
+     - 0.0

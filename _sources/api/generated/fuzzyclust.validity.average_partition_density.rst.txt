@@ -1,0 +1,12 @@
+﻿fuzzyclust.validity.average\_partition\_density
+===============================================
+
+.. currentmodule:: fuzzyclust.validity
+
+.. autofunction:: average_partition_density
+
+.. include:: fuzzyclust.validity.average_partition_density.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

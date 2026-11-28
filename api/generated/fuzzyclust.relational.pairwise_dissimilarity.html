@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>fuzzyclust.relational.pairwise_dissimilarity &#8212; fuzzyclust</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=c83e6b79" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=6a604523" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=e6ebbe3b" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
+
+    <script src="../../_static/documentation_options.js?v=f2a433a1"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/sg-tags.js?v=d80f6fa4"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../_static/design-tabs.js?v=fcb327ea"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/generated/fuzzyclust.relational.pairwise_dissimilarity';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="icon" href="../../_static/favicon.png"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="fuzzyclust.relational.check_dissimilarity_matrix" href="fuzzyclust.relational.check_dissimilarity_matrix.html" />
+    <link rel="prev" title="fuzzyclust.relational.matching_dissimilarity" href="fuzzyclust.relational.matching_dissimilarity.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="1.0" />
+  
+    
+    <script src="../../_static/searchtools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/logo.svg" class="logo__image only-light" alt=""/>
+    <img src="../../_static/logo.svg" class="logo__image only-dark pst-js-only" alt=""/>
+  
+  
+    <p class="title logo__title">fuzzyclust</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../auto_examples/index.html">
+    Example gallery
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../book.html">
+    The book
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../migration.html">
+    Migrating from the MATLAB toolbox
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../citing.html">
+    Citing
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://complexsystemsintelligence.github.io/#textbooks">
+    All textbooks
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ComplexSystemsIntelligence/fuzzyclust" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page" aria-expanded="false" aria-controls="pst-secondary-sidebar-modal">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../auto_examples/index.html">
+    Example gallery
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../book.html">
+    The book
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../migration.html">
+    Migrating from the MATLAB toolbox
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../citing.html">
+    Citing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://complexsystemsintelligence.github.io/#textbooks">
+    All textbooks
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ComplexSystemsIntelligence/fuzzyclust" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../cluster.html"><code class="docutils literal notranslate"><span class="pre">fuzzyclust.cluster</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.cluster.KMeans.html">fuzzyclust.cluster.KMeans</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.cluster.KMedoids.html">fuzzyclust.cluster.KMedoids</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.cluster.FCM.html">fuzzyclust.cluster.FCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.cluster.GK.html">fuzzyclust.cluster.GK</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.cluster.GG.html">fuzzyclust.cluster.GG</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.cluster.RegularizedFCM.html">fuzzyclust.cluster.RegularizedFCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.cluster.PolynomialFuzzifierFCM.html">fuzzyclust.cluster.PolynomialFuzzifierFCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.cluster.SubtractiveClustering.html">fuzzyclust.cluster.SubtractiveClustering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.cluster.MountainClustering.html">fuzzyclust.cluster.MountainClustering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.cluster.CompatibleClusterMerging.html">fuzzyclust.cluster.CompatibleClusterMerging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.cluster.entropy_memberships.html">fuzzyclust.cluster.entropy_memberships</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.cluster.quadratic_memberships.html">fuzzyclust.cluster.quadratic_memberships</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.cluster.polynomial_memberships.html">fuzzyclust.cluster.polynomial_memberships</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.cluster.polynomial_fuzzifier.html">fuzzyclust.cluster.polynomial_fuzzifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.cluster.cluster_similarity.html">fuzzyclust.cluster.cluster_similarity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.cluster.geometric_compatibility.html">fuzzyclust.cluster.geometric_compatibility</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.cluster.reference_fuzziness.html">fuzzyclust.cluster.reference_fuzziness</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../validity.html"><code class="docutils literal notranslate"><span class="pre">fuzzyclust.validity</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.validity.partition_coefficient.html">fuzzyclust.validity.partition_coefficient</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.validity.classification_entropy.html">fuzzyclust.validity.classification_entropy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.validity.modified_partition_coefficient.html">fuzzyclust.validity.modified_partition_coefficient</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.validity.partition_index.html">fuzzyclust.validity.partition_index</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.validity.separation_index.html">fuzzyclust.validity.separation_index</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.validity.xie_beni.html">fuzzyclust.validity.xie_beni</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.validity.fukuyama_sugeno.html">fuzzyclust.validity.fukuyama_sugeno</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.validity.dunn_index.html">fuzzyclust.validity.dunn_index</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.validity.alternative_dunn_index.html">fuzzyclust.validity.alternative_dunn_index</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.validity.silhouette.html">fuzzyclust.validity.silhouette</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.validity.fuzzy_hypervolume.html">fuzzyclust.validity.fuzzy_hypervolume</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.validity.partition_density.html">fuzzyclust.validity.partition_density</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.validity.average_partition_density.html">fuzzyclust.validity.average_partition_density</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.validity.pbmf_index.html">fuzzyclust.validity.pbmf_index</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.validity.kwon_index.html">fuzzyclust.validity.kwon_index</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.validity.pcaes_index.html">fuzzyclust.validity.pcaes_index</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.validity.fuzzy_rand_index.html">fuzzyclust.validity.fuzzy_rand_index</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.validity.fuzzy_adjusted_rand_index.html">fuzzyclust.validity.fuzzy_adjusted_rand_index</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.validity.fuzzy_jaccard_index.html">fuzzyclust.validity.fuzzy_jaccard_index</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.validity.stability_selection.html">fuzzyclust.validity.stability_selection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.validity.validity_indices.html">fuzzyclust.validity.validity_indices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.validity.scan_n_clusters.html">fuzzyclust.validity.scan_n_clusters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.validity.suggest_n_clusters.html">fuzzyclust.validity.suggest_n_clusters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.validity.INDEX_DIRECTION.html">fuzzyclust.validity.INDEX_DIRECTION</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../extensions.html"><code class="docutils literal notranslate"><span class="pre">fuzzyclust.extensions</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.extensions.PCM.html">fuzzyclust.extensions.PCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.extensions.PFCM.html">fuzzyclust.extensions.PFCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.extensions.NoiseClustering.html">fuzzyclust.extensions.NoiseClustering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.extensions.KernelFCM.html">fuzzyclust.extensions.KernelFCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.extensions.FuzzyCVarieties.html">fuzzyclust.extensions.FuzzyCVarieties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.extensions.FuzzyCShells.html">fuzzyclust.extensions.FuzzyCShells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.extensions.VolumePrototypeFCM.html">fuzzyclust.extensions.VolumePrototypeFCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.extensions.SCAD.html">fuzzyclust.extensions.SCAD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.extensions.FeatureWeightedFCM.html">fuzzyclust.extensions.FeatureWeightedFCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.extensions.rbf_kernel.html">fuzzyclust.extensions.rbf_kernel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.extensions.plot_shells.html">fuzzyclust.extensions.plot_shells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.extensions.plot_varieties.html">fuzzyclust.extensions.plot_varieties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.extensions.plot_typicality.html">fuzzyclust.extensions.plot_typicality</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.extensions.make_circles.html">fuzzyclust.extensions.make_circles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.extensions.make_close_blobs.html">fuzzyclust.extensions.make_close_blobs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.extensions.make_crossing_lines.html">fuzzyclust.extensions.make_crossing_lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.extensions.make_collinear_segments.html">fuzzyclust.extensions.make_collinear_segments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.extensions.KERNELS.html">fuzzyclust.extensions.KERNELS</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../graph.html"><code class="docutils literal notranslate"><span class="pre">fuzzyclust.graph</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.graph.MSTClustering.html">fuzzyclust.graph.MSTClustering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.graph.GeodesicFCM.html">fuzzyclust.graph.GeodesicFCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.graph.IsomapFCM.html">fuzzyclust.graph.IsomapFCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.graph.minimum_spanning_tree.html">fuzzyclust.graph.minimum_spanning_tree</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.graph.fuzzy_cluster_similarity.html">fuzzyclust.graph.fuzzy_cluster_similarity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.graph.neighbors_graph.html">fuzzyclust.graph.neighbors_graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.graph.geodesic_distances.html">fuzzyclust.graph.geodesic_distances</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.graph.isomap_embedding.html">fuzzyclust.graph.isomap_embedding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.graph.plot_mst.html">fuzzyclust.graph.plot_mst</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.graph.plot_neighbors_graph.html">fuzzyclust.graph.plot_neighbors_graph</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.graph.plot_geodesic_path.html">fuzzyclust.graph.plot_geodesic_path</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.graph.plot_similarity_dendrogram.html">fuzzyclust.graph.plot_similarity_dendrogram</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.graph.make_chained_blobs.html">fuzzyclust.graph.make_chained_blobs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.graph.make_density_blobs.html">fuzzyclust.graph.make_density_blobs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.graph.make_s_curve.html">fuzzyclust.graph.make_s_curve</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../viz.html"><code class="docutils literal notranslate"><span class="pre">fuzzyclust.viz</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.viz.Sammon.html">fuzzyclust.viz.Sammon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.viz.FuzzySammon.html">fuzzyclust.viz.FuzzySammon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.viz.FuzzySOM.html">fuzzyclust.viz.FuzzySOM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.viz.pca_projection.html">fuzzyclust.viz.pca_projection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.viz.grid_laplacian.html">fuzzyclust.viz.grid_laplacian</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.viz.sammon_stress.html">fuzzyclust.viz.sammon_stress</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.viz.recomputed_membership.html">fuzzyclust.viz.recomputed_membership</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.viz.projection_quality.html">fuzzyclust.viz.projection_quality</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.viz.plot_projection.html">fuzzyclust.viz.plot_projection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.viz.plot_stress.html">fuzzyclust.viz.plot_stress</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.viz.plot_map.html">fuzzyclust.viz.plot_map</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.viz.plot_som_lattice.html">fuzzyclust.viz.plot_som_lattice</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.viz.make_ellipsoids.html">fuzzyclust.viz.make_ellipsoids</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.viz.make_spiral_3d.html">fuzzyclust.viz.make_spiral_3d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.viz.make_hemisphere.html">fuzzyclust.viz.make_hemisphere</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../models.html"><code class="docutils literal notranslate"><span class="pre">fuzzyclust.models</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.models.ModifiedGG.html">fuzzyclust.models.ModifiedGG</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.models.TakagiSugeno.html">fuzzyclust.models.TakagiSugeno</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.models.FuzzyCRegression.html">fuzzyclust.models.FuzzyCRegression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.models.SupervisedFuzzyClassifier.html">fuzzyclust.models.SupervisedFuzzyClassifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.models.FuzzyPartitionDiscretizer.html">fuzzyclust.models.FuzzyPartitionDiscretizer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.models.HingingHyperplaneTree.html">fuzzyclust.models.HingingHyperplaneTree</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.models.HingeNode.html">fuzzyclust.models.HingeNode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.models.simulate_free_run.html">fuzzyclust.models.simulate_free_run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.models.weighted_least_squares.html">fuzzyclust.models.weighted_least_squares</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.models.select_features_by_separability.html">fuzzyclust.models.select_features_by_separability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.models.supervised_fuzzy_partition.html">fuzzyclust.models.supervised_fuzzy_partition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.models.ruspini_partition.html">fuzzyclust.models.ruspini_partition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.models.membership_1d.html">fuzzyclust.models.membership_1d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.models.set_similarity.html">fuzzyclust.models.set_similarity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.models.plot_membership_functions.html">fuzzyclust.models.plot_membership_functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.models.plot_local_models.html">fuzzyclust.models.plot_local_models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.models.plot_fuzzy_partition.html">fuzzyclust.models.plot_fuzzy_partition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.models.plot_hinge_tree_surface.html">fuzzyclust.models.plot_hinge_tree_surface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.models.plot_decision_regions.html">fuzzyclust.models.plot_decision_regions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.models.make_sinc.html">fuzzyclust.models.make_sinc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.models.make_piecewise_linear.html">fuzzyclust.models.make_piecewise_linear</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.models.piecewise_linear_function.html">fuzzyclust.models.piecewise_linear_function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.models.make_switching_lines.html">fuzzyclust.models.make_switching_lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.models.make_second_order_plant.html">fuzzyclust.models.make_second_order_plant</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.models.second_order_plant_function.html">fuzzyclust.models.second_order_plant_function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.models.make_mimo_plant.html">fuzzyclust.models.make_mimo_plant</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.models.make_two_class_overlap.html">fuzzyclust.models.make_two_class_overlap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.models.make_banded_classes.html">fuzzyclust.models.make_banded_classes</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../timeseries.html"><code class="docutils literal notranslate"><span class="pre">fuzzyclust.timeseries</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.timeseries.FuzzySegmentation.html">fuzzyclust.timeseries.FuzzySegmentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.timeseries.ChaoticPredictor.html">fuzzyclust.timeseries.ChaoticPredictor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.timeseries.MixedInputStructureSelection.html">fuzzyclust.timeseries.MixedInputStructureSelection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.timeseries.bottom_up_segmentation.html">fuzzyclust.timeseries.bottom_up_segmentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.timeseries.pca_segment_cost.html">fuzzyclust.timeseries.pca_segment_cost</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.timeseries.false_nearest_neighbors.html">fuzzyclust.timeseries.false_nearest_neighbors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.timeseries.fnn_model_order.html">fuzzyclust.timeseries.fnn_model_order</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.timeseries.select_model_order.html">fuzzyclust.timeseries.select_model_order</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.timeseries.cluster_based_threshold.html">fuzzyclust.timeseries.cluster_based_threshold</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.timeseries.delay_embedding.html">fuzzyclust.timeseries.delay_embedding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.timeseries.select_delay.html">fuzzyclust.timeseries.select_delay</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.timeseries.embedding_scan.html">fuzzyclust.timeseries.embedding_scan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.timeseries.select_embedding_dimension.html">fuzzyclust.timeseries.select_embedding_dimension</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.timeseries.correlation_dimension.html">fuzzyclust.timeseries.correlation_dimension</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.timeseries.select_structure_mixed.html">fuzzyclust.timeseries.select_structure_mixed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.timeseries.fuzzy_variance.html">fuzzyclust.timeseries.fuzzy_variance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.timeseries.plot_segmentation.html">fuzzyclust.timeseries.plot_segmentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.timeseries.plot_fnn_table.html">fuzzyclust.timeseries.plot_fnn_table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.timeseries.plot_embedding_scan.html">fuzzyclust.timeseries.plot_embedding_scan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.timeseries.plot_phase_space.html">fuzzyclust.timeseries.plot_phase_space</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.timeseries.plot_structure_ranking.html">fuzzyclust.timeseries.plot_structure_ranking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.timeseries.make_piecewise_timeseries.html">fuzzyclust.timeseries.make_piecewise_timeseries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.timeseries.make_mackey_glass.html">fuzzyclust.timeseries.make_mackey_glass</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.timeseries.make_lorenz.html">fuzzyclust.timeseries.make_lorenz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.timeseries.make_rossler.html">fuzzyclust.timeseries.make_rossler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.timeseries.make_nonlinear_io_system.html">fuzzyclust.timeseries.make_nonlinear_io_system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.timeseries.make_mixed_input_system.html">fuzzyclust.timeseries.make_mixed_input_system</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../relational.html"><code class="docutils literal notranslate"><span class="pre">fuzzyclust.relational</span></code></a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.relational.RelationalFCM.html">fuzzyclust.relational.RelationalFCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.relational.NERFCM.html">fuzzyclust.relational.NERFCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.relational.FuzzyCMedoids.html">fuzzyclust.relational.FuzzyCMedoids</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.relational.FuzzyKModes.html">fuzzyclust.relational.FuzzyKModes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.relational.FuzzyKPrototypes.html">fuzzyclust.relational.FuzzyKPrototypes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.relational.relational_distances.html">fuzzyclust.relational.relational_distances</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.relational.matching_dissimilarity.html">fuzzyclust.relational.matching_dissimilarity</a></li>
+<li class="toctree-l2 current active"><a aria-current="page" class="current reference internal" href="#">fuzzyclust.relational.pairwise_dissimilarity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.relational.check_dissimilarity_matrix.html">fuzzyclust.relational.check_dissimilarity_matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.relational.dtw_distance_matrix.html">fuzzyclust.relational.dtw_distance_matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.relational.dtw_alignment.html">fuzzyclust.relational.dtw_alignment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.relational.autocorrelation_features.html">fuzzyclust.relational.autocorrelation_features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.relational.autocorrelation_distance_matrix.html">fuzzyclust.relational.autocorrelation_distance_matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.relational.gower_distance_matrix.html">fuzzyclust.relational.gower_distance_matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.relational.plot_dissimilarity_matrix.html">fuzzyclust.relational.plot_dissimilarity_matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.relational.plot_dtw_alignment.html">fuzzyclust.relational.plot_dtw_alignment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.relational.plot_modes.html">fuzzyclust.relational.plot_modes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.relational.plot_series_clusters.html">fuzzyclust.relational.plot_series_clusters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.relational.make_categorical_blobs.html">fuzzyclust.relational.make_categorical_blobs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.relational.make_mixed_blobs.html">fuzzyclust.relational.make_mixed_blobs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.relational.make_warped_series.html">fuzzyclust.relational.make_warped_series</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../incomplete.html"><code class="docutils literal notranslate"><span class="pre">fuzzyclust.incomplete</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.incomplete.IncompleteFCM.html">fuzzyclust.incomplete.IncompleteFCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.incomplete.partial_distances.html">fuzzyclust.incomplete.partial_distances</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.incomplete.make_mcar.html">fuzzyclust.incomplete.make_mcar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.incomplete.make_incomplete_blobs.html">fuzzyclust.incomplete.make_incomplete_blobs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.incomplete.plot_incomplete_clusters.html">fuzzyclust.incomplete.plot_incomplete_clusters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.incomplete.plot_imputation.html">fuzzyclust.incomplete.plot_imputation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.incomplete.STRATEGIES.html">fuzzyclust.incomplete.STRATEGIES</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../large.html"><code class="docutils literal notranslate"><span class="pre">fuzzyclust.large</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.large.WeightedFCM.html">fuzzyclust.large.WeightedFCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.large.RandomSampleFCM.html">fuzzyclust.large.RandomSampleFCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.large.SinglePassFCM.html">fuzzyclust.large.SinglePassFCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.large.OnlineFCM.html">fuzzyclust.large.OnlineFCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.large.extend_partition.html">fuzzyclust.large.extend_partition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.large.make_large_blobs.html">fuzzyclust.large.make_large_blobs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.large.make_drifting_stream.html">fuzzyclust.large.make_drifting_stream</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.large.plot_chunk_timeline.html">fuzzyclust.large.plot_chunk_timeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.large.plot_center_trajectories.html">fuzzyclust.large.plot_center_trajectories</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../image.html"><code class="docutils literal notranslate"><span class="pre">fuzzyclust.image</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.image.SpatialFCM.html">fuzzyclust.image.SpatialFCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.image.neighborhood_sum.html">fuzzyclust.image.neighborhood_sum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.image.weighted_sum_image.html">fuzzyclust.image.weighted_sum_image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.image.local_similarity_image.html">fuzzyclust.image.local_similarity_image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.image.make_synthetic_image.html">fuzzyclust.image.make_synthetic_image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.image.add_image_noise.html">fuzzyclust.image.add_image_noise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.image.segmentation_accuracy.html">fuzzyclust.image.segmentation_accuracy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.image.match_labels.html">fuzzyclust.image.match_labels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.image.plot_segmentation.html">fuzzyclust.image.plot_segmentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.image.plot_image.html">fuzzyclust.image.plot_image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.image.plot_label_image.html">fuzzyclust.image.plot_label_image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.image.plot_membership_maps.html">fuzzyclust.image.plot_membership_maps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.image.METHODS.html">fuzzyclust.image.METHODS</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../semisupervised.html"><code class="docutils literal notranslate"><span class="pre">fuzzyclust.semisupervised</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.semisupervised.SemiSupervisedFCM.html">fuzzyclust.semisupervised.SemiSupervisedFCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.semisupervised.PairwiseConstrainedFCM.html">fuzzyclust.semisupervised.PairwiseConstrainedFCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.semisupervised.check_pairwise_constraints.html">fuzzyclust.semisupervised.check_pairwise_constraints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.semisupervised.constraint_satisfaction.html">fuzzyclust.semisupervised.constraint_satisfaction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.semisupervised.make_partially_labeled_pair.html">fuzzyclust.semisupervised.make_partially_labeled_pair</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.semisupervised.make_partial_labels.html">fuzzyclust.semisupervised.make_partial_labels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.semisupervised.make_pairwise_constraints.html">fuzzyclust.semisupervised.make_pairwise_constraints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.semisupervised.plot_label_propagation.html">fuzzyclust.semisupervised.plot_label_propagation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.semisupervised.plot_pairwise_constraints.html">fuzzyclust.semisupervised.plot_pairwise_constraints</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../coclustering.html"><code class="docutils literal notranslate"><span class="pre">fuzzyclust.coclustering</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.coclustering.FCCM.html">fuzzyclust.coclustering.FCCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.coclustering.FCoDoK.html">fuzzyclust.coclustering.FCoDoK</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.coclustering.make_block_matrix.html">fuzzyclust.coclustering.make_block_matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.coclustering.plot_coclusters.html">fuzzyclust.coclustering.plot_coclusters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.coclustering.plot_item_memberships.html">fuzzyclust.coclustering.plot_item_memberships</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../collaborative.html"><code class="docutils literal notranslate"><span class="pre">fuzzyclust.collaborative</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.collaborative.CollaborativeFCM.html">fuzzyclust.collaborative.CollaborativeFCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.collaborative.align_partitions.html">fuzzyclust.collaborative.align_partitions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.collaborative.make_collaborative_sites.html">fuzzyclust.collaborative.make_collaborative_sites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.collaborative.plot_site_partitions.html">fuzzyclust.collaborative.plot_site_partitions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.collaborative.plot_collaboration_trajectory.html">fuzzyclust.collaborative.plot_collaboration_trajectory</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../ensemble.html"><code class="docutils literal notranslate"><span class="pre">fuzzyclust.ensemble</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.ensemble.FuzzyClusterEnsemble.html">fuzzyclust.ensemble.FuzzyClusterEnsemble</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.ensemble.coassociation_matrix.html">fuzzyclust.ensemble.coassociation_matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.ensemble.evidence_accumulation.html">fuzzyclust.ensemble.evidence_accumulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.ensemble.soft_mcla.html">fuzzyclust.ensemble.soft_mcla</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.ensemble.information_theoretic_kmeans.html">fuzzyclust.ensemble.information_theoretic_kmeans</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.ensemble.cspa.html">fuzzyclust.ensemble.cspa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.ensemble.mcla.html">fuzzyclust.ensemble.mcla</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.ensemble.stability_curve.html">fuzzyclust.ensemble.stability_curve</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.ensemble.make_overlapping_blobs.html">fuzzyclust.ensemble.make_overlapping_blobs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.ensemble.plot_coassociation.html">fuzzyclust.ensemble.plot_coassociation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.ensemble.plot_lifetimes.html">fuzzyclust.ensemble.plot_lifetimes</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../datasets.html"><code class="docutils literal notranslate"><span class="pre">fuzzyclust.datasets</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.datasets.make_fuzzy_blobs.html">fuzzyclust.datasets.make_fuzzy_blobs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.datasets.make_ellipses.html">fuzzyclust.datasets.make_ellipses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.datasets.make_different_densities.html">fuzzyclust.datasets.make_different_densities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.datasets.make_rings.html">fuzzyclust.datasets.make_rings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.datasets.make_lines.html">fuzzyclust.datasets.make_lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.datasets.make_noisy_blobs.html">fuzzyclust.datasets.make_noisy_blobs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.datasets.make_curved_manifold.html">fuzzyclust.datasets.make_curved_manifold</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.datasets.make_two_moons.html">fuzzyclust.datasets.make_two_moons</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.datasets.load_motorcycle.html">fuzzyclust.datasets.load_motorcycle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.datasets.load_iris.html">fuzzyclust.datasets.load_iris</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.datasets.load_wine.html">fuzzyclust.datasets.load_wine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.datasets.load_breast_cancer.html">fuzzyclust.datasets.load_breast_cancer</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../preprocessing.html"><code class="docutils literal notranslate"><span class="pre">fuzzyclust.preprocessing</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.preprocessing.normalize.html">fuzzyclust.preprocessing.normalize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.preprocessing.make_regressors.html">fuzzyclust.preprocessing.make_regressors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.preprocessing.lagged_matrix.html">fuzzyclust.preprocessing.lagged_matrix</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../plotting.html"><code class="docutils literal notranslate"><span class="pre">fuzzyclust.plotting</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.plotting.plot_clusters.html">fuzzyclust.plotting.plot_clusters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.plotting.plot_membership_contours.html">fuzzyclust.plotting.plot_membership_contours</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.plotting.plot_covariance_ellipses.html">fuzzyclust.plotting.plot_covariance_ellipses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.plotting.plot_validity_scan.html">fuzzyclust.plotting.plot_validity_scan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.plotting.plot_objective.html">fuzzyclust.plotting.plot_objective</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.plotting.plot_membership_profiles.html">fuzzyclust.plotting.plot_membership_profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.plotting.PALETTE.html">fuzzyclust.plotting.PALETTE</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../base.html"><code class="docutils literal notranslate"><span class="pre">fuzzyclust.base</span></code></a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.base.BaseFuzzyClusterer.html">fuzzyclust.base.BaseFuzzyClusterer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fuzzyclust.base.EPS.html">fuzzyclust.base.EPS</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">API reference</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="../relational.html" class="nav-link"><code class="docutils literal notranslate"><span class="pre">fuzzyclust.relational</span></code></a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">fuzzyclust.relational.pairwise_dissimilarity</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="fuzzyclust-relational-pairwise-dissimilarity">
+<h1>fuzzyclust.relational.pairwise_dissimilarity<a class="headerlink" href="#fuzzyclust-relational-pairwise-dissimilarity" title="Link to this heading">#</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="fuzzyclust.relational.pairwise_dissimilarity">
+<span class="sig-prename descclassname"><span class="pre">fuzzyclust.relational.</span></span><span class="sig-name descname"><span class="pre">pairwise_dissimilarity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'euclidean'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/fuzzyclust/relational/dissimilarity.html#pairwise_dissimilarity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#fuzzyclust.relational.pairwise_dissimilarity" title="Link to this definition">#</a></dt>
+<dd><p>Pairwise dissimilarities of feature vectors by any SciPy metric.</p>
+<p>Thin wrapper around <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.pdist.html#scipy.spatial.distance.pdist" title="(in SciPy v1.18.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.spatial.distance.pdist()</span></code></a> /
+<a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.cdist.html#scipy.spatial.distance.cdist" title="(in SciPy v1.18.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">cdist()</span></code></a> that always returns a dense matrix.
+<code class="docutils literal notranslate"><span class="pre">metric=&quot;precomputed&quot;</span></code> validates and returns <code class="docutils literal notranslate"><span class="pre">X</span></code> itself, mirroring the
+convention of scikit-learn: the caller already holds the dissimilarities.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>X</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/glossary.html#term-array_like" title="(in NumPy v2.5)"><span>array_like</span></a> <code class="xref py py-obj docutils literal notranslate"><span class="pre">of</span></code> <code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">n_samples</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">n_features</span></code>)</span></dt><dd><p>Objects, or the dissimilarity matrix when <code class="docutils literal notranslate"><span class="pre">metric=&quot;precomputed&quot;</span></code>.</p>
+</dd>
+<dt><strong>Y</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/glossary.html#term-array_like" title="(in NumPy v2.5)"><span>array_like</span></a> <code class="xref py py-obj docutils literal notranslate"><span class="pre">of</span></code> <code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">n_other</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">n_features</span></code>), <code class="xref py py-obj docutils literal notranslate"><span class="pre">optional</span></code></span></dt><dd><p>Second set of objects; the result is then <code class="docutils literal notranslate"><span class="pre">(n_samples,</span> <span class="pre">n_other)</span></code>.</p>
+</dd>
+<dt><strong>metric</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a>, default=”euclidean”</span></dt><dd><p>Any metric name accepted by SciPy (<code class="docutils literal notranslate"><span class="pre">&quot;euclidean&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;sqeuclidean&quot;</span></code>,
+<code class="docutils literal notranslate"><span class="pre">&quot;cityblock&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;cosine&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;hamming&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;jaccard&quot;</span></code>, …), or
+<code class="docutils literal notranslate"><span class="pre">&quot;precomputed&quot;</span></code>.</p>
+</dd>
+<dt><strong>**kwargs</strong></dt><dd><p>Passed on to SciPy (e.g. <code class="docutils literal notranslate"><span class="pre">p=</span></code> for the Minkowski metric).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>R</strong><span class="classifier"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndarray</span></code></a> <code class="xref py py-obj docutils literal notranslate"><span class="pre">of</span></code> <code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">n_samples</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">n_samples</span></code>) <code class="xref py py-obj docutils literal notranslate"><span class="pre">or</span></code> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">n_samples</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">n_other</span></code>)</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">fuzzyclust.relational</span><span class="w"> </span><span class="kn">import</span> <span class="n">pairwise_dissimilarity</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">3.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pairwise_dissimilarity</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+<span class="go">array([[0., 5.],</span>
+<span class="go">       [5., 0.]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pairwise_dissimilarity</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">"cityblock"</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="go">np.float64(7.0)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<section id="examples-using-fuzzyclust-relational-pairwise-dissimilarity">
+<h2>Examples using <code class="docutils literal notranslate"><span class="pre">fuzzyclust.relational.pairwise_dissimilarity</span></code><a class="headerlink" href="#examples-using-fuzzyclust-relational-pairwise-dissimilarity" title="Link to this heading">#</a></h2>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="Fuzzy c-means needs the data as vectors: a prototype is a weighted mean and the distance to it is Euclidean. Hathaway, Davenport and Bezdek showed that the same functional can be minimized when only the matrix \mathbf{R} of squared pairwise distances is known. The prototype becomes a weight vector over the objects, \mathbf{v}_i=\mathbf{U}_i^m/\sum_k\mu_{ik}^m, and the squared distance of object k to it is d^2_{ik}=(\mathbf{R}\mathbf{v}_i)_k-\tfrac12\mathbf{v}_i^T\mathbf{R}\mathbf{v}_i, an identity that holds for any weights summing to one as long as \mathbf{R} is Euclidean. Relational FCM (RFCM) therefore reproduces FCM exactly, iterate by iterate, when \mathbf{R} comes from Euclidean data. When it does not (squared city-block distances, cubed distances, dynamic-time-warping dissimilarities), some d^2_{ik} turn negative and RFCM breaks down. NERF c-means (Hathaway and Bezdek) adds a constant \beta to all off-diagonal entries, which shifts every relational distance by \tfrac{\beta}{2}\lVert\mathbf{e}_k-\mathbf{v}_i\rVert^2; it raises \beta adaptively, only when a negative distance appears and only as much as needed."><img alt="" src="../../_images/sphx_glr_plot_01_rfcm_fcm_duality_thumb.png" />
+<p><a class="reference internal" href="../../auto_examples/07_relational/plot_01_rfcm_fcm_duality.html"><span class="doc">Relational fuzzy c-means and NERF for non-Euclidean data</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Relational fuzzy c-means and NERF for non-Euclidean data</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Time series of the same shape rarely line up in time: a peak comes a little earlier or later, a ramp is stretched or compressed. The Euclidean distance between two such series compares values at equal time indices and is large even when the shapes agree, whereas dynamic time warping (Sakoe and Chiba) aligns the series by a monotone path through their cost matrix, within a band of width w, and compares what belongs together. DTW is a dissimilarity, not a metric, and its square is not Euclidean, so relational c-means would need the \beta-spread; fuzzy c-medoids (Krishnapuram, Joshi, Nasraoui and Yi) needs nothing of the kind. Its prototypes are objects (the medoid of a cluster is the series that minimizes the membership-weighted sum of dissimilarities to the others), so it works with any dissimilarity and returns representative series that can be plotted. The search for a medoid among all N objects costs O(N^2) per cluster and iteration; the linear variant of the paper searches only among the n_candidates objects with the highest memberships."><img alt="" src="../../_images/sphx_glr_plot_02_fcmdd_dtw_series_thumb.png" />
+<p><a class="reference internal" href="../../auto_examples/07_relational/plot_02_fcmdd_dtw_series.html"><span class="doc">Fuzzy c-medoids on dynamic-time-warping dissimilarities of time series</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Fuzzy c-medoids on dynamic-time-warping dissimilarities of time series</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Some time series belong together not because their values agree but because they are generated by the same mechanism: two realizations of one stationary process have nothing in common point by point (their noise is independent), yet they share their dependence structure. D&#x27;Urso and Maharaj proposed representing every series by its estimated autocorrelation function up to lag L, (\hat\rho_k(1),\dots,\hat\rho_k(L)), and clustering these vectors with fuzzy c-means (A-FCM) or fuzzy c-medoids (A-FCMd) under the (optionally lag-weighted) squared Euclidean distance. The representation is independent of level, scale and phase and has the same length for series of any length; the fuzzy memberships express that a process can lie between two typical dependence patterns. The squared autocorrelation distance is Euclidean, so relational fuzzy c-means on it is exactly A-FCM."><img alt="" src="../../_images/sphx_glr_plot_06_autocorrelation_series_thumb.png" />
+<p><a class="reference internal" href="../../auto_examples/07_relational/plot_06_autocorrelation_series.html"><span class="doc">Autocorrelation-based fuzzy clustering of time series</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Autocorrelation-based fuzzy clustering of time series</div>
+</div></div><div class="clearer"></div></section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="fuzzyclust.relational.matching_dissimilarity.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">fuzzyclust.relational.matching_dissimilarity</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="fuzzyclust.relational.check_dissimilarity_matrix.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">fuzzyclust.relational.check_dissimilarity_matrix</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal" tabindex="-1"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fuzzyclust.relational.pairwise_dissimilarity"><code class="docutils literal notranslate"><span class="pre">pairwise_dissimilarity()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#examples-using-fuzzyclust-relational-pairwise-dissimilarity">Examples using <code class="docutils literal notranslate"><span class="pre">fuzzyclust.relational.pairwise_dissimilarity</span></code></a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../../_sources/api/generated/fuzzyclust.relational.pairwise_dissimilarity.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, János Abonyi.
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.1.
+  </p>
+</div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

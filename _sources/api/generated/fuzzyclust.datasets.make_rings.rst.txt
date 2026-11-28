@@ -1,0 +1,12 @@
+﻿fuzzyclust.datasets.make\_rings
+===============================
+
+.. currentmodule:: fuzzyclust.datasets
+
+.. autofunction:: make_rings
+
+.. include:: fuzzyclust.datasets.make_rings.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

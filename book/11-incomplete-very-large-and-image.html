@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>11 Incomplete, very large, and image data · Fuzzy Clustering and Data Analysis in Python</title>
+<meta name="description" content="Open-access book on fuzzy clustering and data analysis in Python with the fuzzyclust toolbox: fuzzy c-means, Gustafson-Kessel, Gath-Geva, cluster validity, visualisation, Takagi-Sugeno models, time-series segmentation and more, with runnable Colab examples." />
+<meta name="author" content="János Abonyi" />
+<link rel="canonical" href="https://complexsystemsintelligence.github.io/fuzzyclust/book/11-incomplete-very-large-and-image.html" />
+<meta property="og:title" content="11 Incomplete, very large, and image data · Fuzzy Clustering and Data Analysis in Python" />
+<meta property="og:type" content="book" />
+<meta property="og:url" content="https://complexsystemsintelligence.github.io/fuzzyclust/book/11-incomplete-very-large-and-image.html" />
+<meta property="og:image" content="https://complexsystemsintelligence.github.io/fuzzyclust/book/cover.png" />
+<meta property="og:description" content="Open-access book on fuzzy clustering and data analysis in Python with the fuzzyclust toolbox: fuzzy c-means, Gustafson-Kessel, Gath-Geva, cluster validity, visualisation, Takagi-Sugeno models, time-series segmentation and more, with runnable Colab examples." />
+<link rel="icon" href="../_static/favicon.png" />
+<link rel="stylesheet" href="main_web.css" />
+<link rel="stylesheet" href="web.css" />
+</head>
+<body class="">
+<header class='topbar'><a class='brand' href='index.html'><img src='logo.svg' alt='' width='34' height='34' /><span><b>Fuzzy Clustering and Data Analysis in Python</b><small>The fuzzyclust toolbox</small></span></a><nav class='toplinks'><a href='../'>Documentation</a><a href='../auto_examples/index.html'>Examples</a><a href='../fuzzyclust-book.pdf'>PDF</a><a href='../fuzzyclust-book.epub'>EPUB</a><a href='https://github.com/ComplexSystemsIntelligence/fuzzyclust'>GitHub</a><a class='hub' href='https://complexsystemsintelligence.github.io/#textbooks'>All textbooks</a></nav></header>
+<div class="layout">
+<aside class="left"><nav class='toc' aria-label='Contents'><p class='toc-title'>Contents</p><ol><li><a href='preface.html'><span class='num'></span>Preface</a></li><li><a href='01-introduction.html'><span class='num'>1</span>Introduction</a></li><li><a href='02-foundations-of-prototype-based-clustering.html'><span class='num'>2</span>Foundations of prototype-based clustering</a></li><li><a href='03-hard-and-fuzzy-partitioning-algorithms.html'><span class='num'>3</span>Hard and fuzzy partitioning algorithms</a></li><li><a href='04-cluster-validity-and-the-number.html'><span class='num'>4</span>Cluster validity and the number of clusters</a></li><li><a href='05-visualization-of-fuzzy-clustering-results.html'><span class='num'>5</span>Visualization of fuzzy clustering results</a></li><li><a href='06-robust-and-shape-oriented-variants.html'><span class='num'>6</span>Robust and shape-oriented variants of fuzzy c-means</a></li><li><a href='07-graph-based-fuzzy-clustering.html'><span class='num'>7</span>Graph-based fuzzy clustering</a></li><li><a href='08-clustering-for-model-identification.html'><span class='num'>8</span>Clustering for model identification</a></li><li><a href='09-clustering-of-time-series.html'><span class='num'>9</span>Clustering of time series</a></li><li><a href='10-clustering-relational-categorical-and-mixed.html'><span class='num'>10</span>Clustering relational, categorical, and mixed data</a></li><li class='current'><a href='11-incomplete-very-large-and-image.html'><span class='num'>11</span>Incomplete, very large, and image data</a></li><li><a href='12-beyond-a-single-unsupervised-run.html'><span class='num'>12</span>Beyond a single unsupervised run: partial supervision,
+co-clustering, collaboration, and ensembles</a></li><li><a href='a-api-reference.html'><span class='num'>A</span>API reference</a></li><li><a href='b-migrating-from-the-matlab-toolbox.html'><span class='num'>B</span>Migrating from the MATLAB toolbox</a></li><li><a href='c-the-example-gallery.html'><span class='num'>C</span>The example gallery</a></li><li><a href='bibliography.html'><span class='num'></span>Bibliography</a></li></ol></nav></aside>
+<main class="content">
+
+<!-- l. 1 -->
+<h2 class="chapterHead"><span class="titlemark">Chapter 11</span><br/><a id="x13-20900011"></a>Incomplete, very large, and image data</h2>
+<div class="box roadmap">
+<!-- l. 3 --><p class="indent">   The algorithms of the previous chapters assume a complete data
+matrix of moderate size whose rows are unrelated samples. Real data
+often violate all three assumptions. Values are <span class="ec-lmri-10x-x-109">missing </span>because sensors
+fail or records are merged from sources that measure different things;
+data sets are <span class="ec-lmri-10x-x-109">very large </span>or arrive as an endless stream; and the samples
+may be the pixels of an <span class="ec-lmri-10x-x-109">image</span>, where neighbors almost always belong to
+the same region. This chapter keeps the fuzzy c-means functional and
+adapts it to each situation: partial distances and optimal completion for
+incomplete data (Hathaway and Bezdek); weighted fuzzy c-means with
+sampling, single-pass, and online schemes for very large data and streams
+(Havens, Bezdek, and co-workers); and six ways of bringing the pixel
+neighborhood into the functional for image segmentation. The three sub-packages
+<span class="ec-lmtt-10x-x-109">fuzzyclust.incomplete</span>, <span class="ec-lmtt-10x-x-109">fuzzyclust.large</span>, and <span class="ec-lmtt-10x-x-109">fuzzyclust.image</span>
+share the notation and the membership formula of fuzzy c-means, and
+the image methods reuse weighted fuzzy c-means to cluster gray-level
+histograms.
+</p>
+</div>
+<h3 class="sectionHead"><span class="titlemark">11.1   </span> <a id="x13-21000011.1"></a>Problem and idea</h3>
+<!-- l. 8 --><p class="noindent"><span class="paragraphHead"><a id="x13-211000"></a><span class="ec-lmbx-10x-x-109">Missing values.</span></span>
+   Fuzzy c-means measures the distance of a sample to a prototype as a sum
+over all features, so a single missing value makes the distance undefined. The
+common remedies outside clustering—dropping incomplete samples, or filling the
+holes with the column mean before clustering—either waste data or invent values
+that ignore the cluster structure: a column mean lies <span class="ec-lmri-10x-x-109">between </span>the clusters and
+drags the filled samples there. Hathaway and Bezdek [<a id="x13-211001"></a><a href="bibliography.html#cite.0@hathaway:2001:incomplete">151</a>] compared four
+strategies for running fuzzy c-means on incomplete data (fig. <a href="#x13-211004r1">11.1</a>). The
+<span class="ec-lmri-10x-x-109">whole-data strategy </span>(WDS) drops the incomplete samples, which is defensible
+only when they are few. The <span class="ec-lmri-10x-x-109">partial-distance strategy </span>(PDS) measures the
+distance over the observed features only and rescales it to the full dimension,
+                                                                     
+
+                                                                     
+following Dixon [<a id="x13-211002"></a><a href="bibliography.html#cite.0@dixon:1979:missing">152</a>]; a sample is then judged by what is known about it.
+The <span class="ec-lmri-10x-x-109">optimal-completion strategy </span>(OCS) treats every missing value as an
+additional variable of the c-means functional and optimizes it together
+with the partition and the prototypes, so that the data are imputed
+while they are clustered; the optimal value is a membership-weighted
+mean of the prototype coordinates. The <span class="ec-lmri-10x-x-109">nearest-prototype strategy </span>(NPS)
+is its crisp version and copies the coordinate of the nearest prototype.
+All four assume that the values are missing completely at random, so
+that the hole pattern itself carries no information about the clusters
+[<a id="x13-211003"></a><a href="bibliography.html#cite.0@little:2002:missing">153</a>].
+</p>
+<figure class="figure">
+<!-- l. 11 --><p class="noindent"><img alt="Figure 11.1" src="main_web73x.svg"/>
+<a id="x13-211004r1"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 11.1. </span></span><span class="content"><span class="ec-lmr-10">Partial distances and the completion of a missing value. A sample
+with</span>
+<!-- l. 44 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>x</mi></mrow><mrow><mi>k</mi><mn>1</mn></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>2</mn></mrow></math>
+<span class="ec-lmr-10">observed                                                                                            and</span>
+<!-- l. 44 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>x</mi></mrow><mrow><mi>k</mi><mn>2</mn></mrow></msub></math>
+<span class="ec-lmr-10">missing can lie anywhere on the dashed line. The partial distance compares it with
+the prototypes along the observed axis only (arrows) and rescales the result to the
+full dimension; the memberships follow from these distances as in fuzzy c-means.
+Optimal completion places the missing value at the membership-weighted mean of
+the prototype coordinates (circle), the nearest-prototype strategy at the coordinate
+of the nearest prototype (square).</span>
+</span></figcaption><!-- tex4ht:label?: x13-211004r1  -->
+</figure>
+<!-- l. 48 --><p class="noindent"><span class="paragraphHead"><a id="x13-212000"></a><span class="ec-lmbx-10x-x-109">Very large data.</span></span>
+   Fuzzy c-means touches every sample in every iteration and stores the
+<!-- l. 48 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>N</mi> <mo class="MathClass-bin" stretchy="false">×</mo><mi>c</mi></mrow></math> partition.
+With <!-- l. 48 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>N</mi></math>
+in the millions, or with data that arrive as a stream, both become a
+problem. Since the efficient implementation of Cannon, Dave, and
+Bezdek [<a id="x13-212001"></a><a href="bibliography.html#cite.0@cannon:1986:efficient">154</a>], many schemes have been proposed that either make each
+iteration cheaper [<a id="x13-212002"></a><a href="bibliography.html#cite.0@kolen:2002:complexity">155</a>] or cluster only samples or chunks of the data;
+Havens, Bezdek, Leckie, Hall, and Palaniswami [<a id="x13-212003"></a><a href="bibliography.html#cite.0@havens:2012:large">156</a>] compared the latter
+systematically. This chapter covers three of them (fig. <a href="#x13-212006r2">11.2</a>). <span class="ec-lmri-10x-x-109">Random
+sample and extend </span>(rseFCM) clusters a random sample and computes the
+memberships of all samples in one pass from the fixed prototypes. The
+other two rest on <span class="ec-lmri-10x-x-109">weighted </span>fuzzy c-means, in which a sample with weight
+<!-- l. 48 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>w</mi></math> counts
+as <!-- l. 48 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>w</mi></math>
+identical samples, so that a prototype standing for a thousand observations can
+be clustered together with raw samples. <span class="ec-lmri-10x-x-109">Single-pass </span>FCM (spFCM) of Hore,
+Hall, and Goldgof [<a id="x13-212004"></a><a href="bibliography.html#cite.0@hore:2007:spfcm">157</a>] processes the data in chunks and carries the
+<!-- l. 48 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>c</mi></math>
+prototypes of a chunk, weighted by the membership mass they collected, into the
+next chunk. <span class="ec-lmri-10x-x-109">Online </span>FCM (oFCM) [<a id="x13-212005"></a><a href="bibliography.html#cite.0@hore:2009:scalable">158</a>] clusters every chunk separately and then
+clusters the weighted chunk prototypes. In both chunked schemes every chunk is
+seen once and only one chunk is held in memory, so they can also process a
+stream.
+</p>
+<figure class="figure">
+<!-- l. 51 --><p class="noindent"><img alt="Figure 11.2" src="main_web74x.svg"/>
+<a id="x13-212006r2"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 11.2. </span></span><span class="content"><span class="ec-lmr-10">The chunk pipelines of single-pass and online FCM. Top: spFCM
+clusters each chunk together with the weighted prototypes of the previous one, so
+the prototypes accumulate the whole history. Bottom: oFCM clusters the chunks
+independently and merges their weighted prototypes with weighted FCM. Both
+obtain  the  memberships  of  all  samples  by  one  extension  step  from  the  final
+prototypes; rseFCM is the special case of a single sampled chunk.</span>
+</span></figcaption><!-- tex4ht:label?: x13-212006r2  -->
+</figure>
+<!-- l. 100 --><p class="noindent"><span class="paragraphHead"><a id="x13-213000"></a><span class="ec-lmbx-10x-x-109">Images.</span></span>
+   A gray-level image is a data set of
+<!-- l. 100 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>N</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mi>H</mi> <mo class="MathClass-bin" stretchy="false">⋅</mo><mi>W</mi></mrow></math>
+one-dimensional samples, and fuzzy c-means on the pixel values is the simplest
+segmentation algorithm. It ignores what distinguishes an image from an
+arbitrary data set: a pixel and its neighbors almost always belong to
+the same region. Noise that pushes a pixel value across the midpoint
+between two prototypes therefore produces a wrong label, however clear the
+surrounding region is. The spatially constrained variants bring the neighborhood
+<!-- l. 100 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>N</mi></mrow><mrow><mi>k</mi></mrow></msub></math> of
+every pixel into the functional (fig. <a href="#x13-213006r3">11.3</a>). FCM_S of Ahmed et al. [<a id="x13-213001"></a><a href="bibliography.html#cite.0@ahmed:2002:fcms">159</a>] adds the
+distances of the neighbors to the prototype; FCM_S1 and FCM_S2 of Chen and
+Zhang [<a id="x13-213002"></a><a href="bibliography.html#cite.0@chen:2004:fcms12">160</a>] replace them with the distance of a mean- or median-filtered pixel
+computed once in advance; EnFCM of Szilágyi et al. [<a id="x13-213003"></a><a href="bibliography.html#cite.0@szilagyi:2003:enfcm">161</a>] forms a smoothed
+image once and clusters its gray-level <span class="ec-lmri-10x-x-109">histogram</span>, with iterations whose cost does
+not depend on the image size; FGFCM of Cai, Chen, and Zhang [<a id="x13-213004"></a><a href="bibliography.html#cite.0@cai:2007:fgfcm">162</a>] does the
+same with locally adaptive weights that respect edges and ignore outliers; and
+FLICM of Krinidis and Chatzis [<a id="x13-213005"></a><a href="bibliography.html#cite.0@krinidis:2010:flicm">163</a>] adds a parameter-free fuzzy factor that
+weighs each neighbor by its spatial distance and its lack of membership in the
+cluster.
+</p>
+<figure class="figure">
+<!-- l. 103 --><p class="noindent"><img alt="Figure 11.3" src="main_web75x.svg"/>
+<a id="x13-213006r3"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 11.3.   </span></span><span class="content"><span class="ec-lmr-10">Spatial   constraints   for   image   segmentation.   Top   left:   the</span>
+<!-- l. 146 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>3</mn> <mo class="MathClass-bin" stretchy="false">×</mo><mn>3</mn></mrow></math>
+<span class="ec-lmr-10">neighborhood of a pixel with the spatial weights of FLICM. Top right: the effective
+squared distance that every method substitutes into the FCM membership formula.
+Bottom: EnFCM and FGFCM smooth the image once and cluster the gray-level
+histogram with weighted FCM.</span>
+</span></figcaption><!-- tex4ht:label?: x13-213006r3  -->
+</figure>
+<h3 class="sectionHead"><span class="titlemark">11.2   </span> <a id="x13-21400011.2"></a>Theory</h3>
+<!-- l. 152 --><p class="noindent">We use the notation of section <a href="02-foundations-of-prototype-based-clustering.html#x4-250002.2.9">2.2.9</a>: rows
+<!-- l. 152 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub></math> of
+<!-- l. 152 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mstyle mathvariant="bold"><mi>X</mi></mstyle> <mo class="MathClass-rel" stretchy="false">∈</mo> <msup><mrow><mi>ℝ</mi></mrow><mrow><mi>N</mi><mo class="MathClass-bin" stretchy="false">×</mo><mi>n</mi></mrow></msup></mrow></math>, prototypes
+<!-- l. 152 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></math>, and
+memberships <!-- l. 152 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub></math>
+in <!-- l. 152 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mstyle mathvariant="bold"><mi>U</mi></mstyle> <mo class="MathClass-rel" stretchy="false">∈</mo> <msup><mrow><mi>ℝ</mi></mrow><mrow><mi>c</mi><mo class="MathClass-bin" stretchy="false">×</mo><mi>N</mi></mrow></msup></mrow></math> (stored
+transposed, <!-- l. 152 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>N</mi> <mo class="MathClass-bin" stretchy="false">×</mo><mi>c</mi></mrow></math>, in
+the code), with <!-- l. 152 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>i</mi></math>
+(or <!-- l. 152 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>j</mi></math>) indexing
+clusters and <!-- l. 152 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math>
+samples. All algorithms of the chapter use the membership formula of fuzzy
+c-means [<a id="x13-214001"></a><a href="bibliography.html#cite.0@bezdek:1981">3</a>], </p><table class="equation"><tr><td>
+<!-- l. 153 --><p class="indent">
+</p><!-- l. 153 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x13-214002r1"></mstyle><!-- endlabel --><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><mn>1</mn></mrow>
+<mrow><munderover accent="false" accentunder="false"><mrow><mo>∑</mo>
+</mrow><mrow><mi>j</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><mstyle mathsize="1.19em"><mrow><mo fence="true" form="prefix"> (</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle><msubsup><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup><mo class="MathClass-bin" stretchy="false">∕</mo><msubsup><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">jk</mi></mrow><mrow><mn>2</mn></mrow></msubsup><msup><mrow><mstyle mathsize="1.19em"><mrow><mo fence="true" form="prefix"> )</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle></mrow><mrow><mn>1</mn><mo class="MathClass-bin" stretchy="false">∕</mo><mo class="MathClass-open" stretchy="false">(</mo><mi>m</mi><mo class="MathClass-bin" stretchy="false">−</mo><mn>1</mn><mo class="MathClass-close" stretchy="false">)</mo></mrow></msup></mrow></mfrac><mo class="MathClass-punc" stretchy="false">,</mo>
+</mrow></math></td><td class="eq-no">(11.1)</td></tr></table>
+<!-- l. 157 --><p class="indent">   each with its own squared distance
+<!-- l. 157 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msubsup><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup></math>. We
+treat incomplete data first (section <a href="#x13-21500011.2.1">11.2.1</a>), then weighted fuzzy c-means and the
+three schemes for very large data (sections 11.2.2 to 11.2.5), and finally the six
+image segmentation methods (section <a href="#x13-22400011.2.6">11.2.6</a>).
+</p><!-- l. 159 --><p class="noindent">
+</p>
+<h4 class="subsectionHead"><span class="titlemark">11.2.1   </span> <a id="x13-21500011.2.1"></a>Fuzzy c-means with missing values</h4>
+<!-- l. 161 --><p class="noindent">Let <!-- l. 161 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>I</mi></mrow><mrow><mi mathvariant="italic">kj</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>1</mn></mrow></math> when
+<!-- l. 161 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>x</mi></mrow><mrow><mi mathvariant="italic">kj</mi></mrow></msub></math> is observed and
+<!-- l. 161 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mn>0</mn></math> when it is missing,
+<!-- l. 161 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>I</mi></mrow><mrow><mi>k</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo><msub><mrow> <mi class="MathClass-op">∑</mi><mo> ⁡<!-- FUNCTION APPLICATION --></mo>
+<!-- nolimits --></mrow><mrow><mi>j</mi></mrow></msub><msub><mrow><mi>I</mi></mrow><mrow><mi mathvariant="italic">kj</mi></mrow></msub></mrow></math> the number of observed
+features of sample <!-- l. 161 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math>,
+<!-- l. 161 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>X</mi></mrow><mrow><mi>P</mi> </mrow></msub></math> the set of
+observed and <!-- l. 161 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>X</mi></mrow><mrow><mi>M</mi></mrow></msub></math>
+the set of missing values. Every sample must have at least one observed feature,
+and every feature must be observed in at least one sample.
+</p>
+<!-- l. 163 --><p class="noindent"><span class="paragraphHead"><a id="x13-216000"></a><span class="ec-lmbx-10x-x-109">Whole-data strategy (WDS).</span></span>
+   Fuzzy c-means runs on the complete samples only; the
+incomplete ones are classified afterwards with partial distances. With
+<!-- l. 163 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>n</mi></math>
+features and values missing independently with probability
+<!-- l. 163 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>p</mi></math>, a sample is complete
+with probability <!-- l. 163 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msup><mrow><mo class="MathClass-open" stretchy="false">(</mo><mn>1</mn> <mo class="MathClass-bin" stretchy="false">−</mo><mi>p</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow><mrow><mi>n</mi></mrow></msup></math>;
+with four features and <!-- l. 163 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>30</mn><mspace class="thinspace" width="0.17em"></mspace><mi>%</mi></mrow></math>
+of the values missing, three quarters of the samples are lost.
+</p>
+<!-- l. 165 --><p class="noindent"><span class="paragraphHead"><a id="x13-217000"></a><span class="ec-lmbx-10x-x-109">Partial-distance strategy (PDS).</span></span>
+   The squared distance is computed over the observed features and rescaled to
+the full dimension, </p><table class="equation"><tr><td>
+<!-- l. 166 --><p class="indent">
+</p><!-- l. 166 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x13-217001r2"></mstyle><!-- endlabel --><msubsup><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><mi>n</mi></mrow>
+<mrow><msub><mrow><mi>I</mi></mrow><mrow><mi>k</mi></mrow></msub></mrow></mfrac><munderover accent="false" accentunder="false"><mrow><mo> ∑</mo>
+</mrow><mrow><mi>j</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>n</mi></mrow></munderover><msub><mrow><mi>I</mi></mrow><mrow>
+<mi mathvariant="italic">kj</mi></mrow></msub><mspace class="thinspace" width="0.17em"></mspace><msup><mrow><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mi>x</mi></mrow><mrow><mi mathvariant="italic">kj</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mi>v</mi></mrow><mrow><mi mathvariant="italic">ij</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow><mrow><mn>2</mn></mrow></msup><mo class="MathClass-punc" stretchy="false">,</mo>
+</mrow></math></td><td class="eq-no">(11.2)</td></tr></table>
+<!-- l. 170 --><p class="indent">   which is the ordinary squared Euclidean distance for a complete sample and
+an unbiased estimate of it for an incomplete one when the coordinates contribute
+equally on average [<a id="x13-217002"></a><a href="bibliography.html#cite.0@dixon:1979:missing">152</a>]. The memberships follow from (<a href="#x13-214002r1">11.1<!-- tex4ht:ref: eq:data:mu  --></a>), and every
+prototype coordinate is the membership-weighted mean of the samples that
+observe it, </p><table class="equation"><tr><td>
+<!-- l. 171 --><p class="indent">
+</p><!-- l. 171 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x13-217003r3"></mstyle><!-- endlabel --><msub><mrow><mi>v</mi></mrow><mrow><mi mathvariant="italic">ij</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><munderover accent="false" accentunder="false"><mrow><mo>∑</mo>
+</mrow><mrow><mi>k</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>N</mi></mrow></munderover><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup><msub><mrow><mi>I</mi></mrow><mrow><mi mathvariant="italic">kj</mi></mrow></msub><mspace class="thinspace" width="0.17em"></mspace><msub><mrow><mi>x</mi></mrow><mrow><mi mathvariant="italic">kj</mi></mrow></msub></mrow>
+<mrow><munderover accent="false" accentunder="false"><mrow><mo> ∑</mo>
+</mrow><mrow><mi>k</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>N</mi></mrow></munderover><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup><msub><mrow><mi>I</mi></mrow><mrow><mi mathvariant="italic">kj</mi></mrow></msub></mrow></mfrac> <mo class="MathClass-punc" stretchy="false">.</mo>
+</mrow></math></td><td class="eq-no">(11.3)</td></tr></table>
+<!-- l. 176 --><p class="noindent"><span class="paragraphHead"><a id="x13-218000"></a><span class="ec-lmbx-10x-x-109">Optimal-completion strategy (OCS).</span></span>
+   The c-means functional on the completed data is minimized over the
+partition, the prototypes, <span class="ec-lmri-10x-x-109">and </span>the missing values, </p><table class="equation"><tr><td>
+<!-- l. 177 --><p class="indent">
+</p><!-- l. 177 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x13-218001r4"></mstyle><!-- endlabel --><msub><mrow><mtext class="qopname">min</mtext><mo> ⁡<!-- FUNCTION APPLICATION --> </mo> </mrow><mrow><mstyle mathvariant="bold"><mi>U</mi></mstyle><mo class="MathClass-punc" stretchy="false">,</mo><mstyle mathvariant="bold"><mi>V</mi></mstyle><mo class="MathClass-punc" stretchy="false">,</mo><msub><mrow><mi>X</mi></mrow><mrow><mi>M</mi></mrow></msub></mrow></msub><mspace class="thickpace" width="0.28em"></mspace><mi>J</mi> <mo class="MathClass-rel" stretchy="false">=</mo><munderover accent="false" accentunder="false"><mrow><mo> ∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><munderover accent="false" accentunder="false"><mrow><mtext> ∑</mtext></mrow><mrow>
+<mi>k</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>N</mi></mrow></munderover><msubsup><mrow><mi>μ</mi></mrow><mrow>
+<mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup><msup><mrow> <mrow><mo fence="true" form="prefix"> ‖</mo><mrow><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow>
+<mi>k</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></mrow><mo fence="true" form="postfix">‖</mo></mrow> </mrow><mrow><mn>2</mn></mrow></msup><mo class="MathClass-punc" stretchy="false">.</mo>
+</mrow></math></td><td class="eq-no">(11.4)</td></tr></table>
+<!-- l. 181 --><p class="indent">   For fixed <!-- l. 181 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mstyle mathvariant="bold"><mi>U</mi></mstyle></math>
+and <!-- l. 181 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mstyle mathvariant="bold"><mi>V</mi></mstyle></math>
+the functional is a sum of independent quadratics in the missing values, and
+setting the derivative to zero gives </p><table class="equation"><tr><td>
+<!-- l. 182 --><p class="indent">
+</p><!-- l. 182 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x13-218002r5"></mstyle><!-- endlabel --><msub><mrow><mi>x</mi></mrow><mrow><mi mathvariant="italic">kj</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><munderover accent="false" accentunder="false"><mrow><mo>∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup><msub><mrow><mi>v</mi></mrow><mrow><mi mathvariant="italic">ij</mi></mrow></msub></mrow>
+<mrow><munderover accent="false" accentunder="false"><mrow><mo> ∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup></mrow></mfrac> <mo class="MathClass-punc" stretchy="false">,</mo><mspace class="qquad" width="2em"></mspace><msub><mrow><mi>x</mi></mrow><mrow><mi mathvariant="italic">kj</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">∈</mo><msub><mrow><mi>X</mi></mrow><mrow><mi>M</mi></mrow></msub><mo class="MathClass-punc" stretchy="false">,</mo>
+</mrow></math></td><td class="eq-no">(11.5)</td></tr></table>
+<!-- l. 186 --><p class="indent">   the membership-weighted mean of the prototype coordinates (fig. <a href="#x13-211004r1">11.1</a>). For
+fixed <!-- l. 186 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>X</mi></mrow><mrow><mi>M</mi></mrow></msub></math> the
+conditions are those of fuzzy c-means on the completed data. Alternating the three blocks
+decreases <!-- l. 186 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>J</mi></math>
+monotonically, and the clustering yields an imputation of the data as
+a by-product. The price is a functional with more local optima. The
+imputed values take part in the distances, so an imputed value that leans
+toward one prototype makes the sample look closer to it, which raises its
+membership and pulls the value further toward that prototype in the next step.
+From a poor start, samples can be captured by the wrong cluster in this
+way, which is why OCS is best started from the prototypes of a PDS fit
+(<code class="lstinline"><span style="color:#000000">init=pds.cluster_centers_</span></code>).
+</p>
+<!-- l. 188 --><p class="noindent"><span class="paragraphHead"><a id="x13-219000"></a><span class="ec-lmbx-10x-x-109">Nearest-prototype strategy (NPS).</span></span>
+                                                                     
+
+                                                                     
+   NPS is the crisp version of (<a href="#x13-218002r5">11.5<!-- tex4ht:ref: eq:data:ocs  --></a>): the missing value
+is the coordinate of the prototype nearest to the sample,
+<!-- l. 188 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>x</mi></mrow><mrow><mi mathvariant="italic">kj</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <msub><mrow><mi>v</mi></mrow><mrow><msup><mrow><mi>i</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msup><mi>j</mi></mrow></msub></mrow></math> with
+<!-- l. 188 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msup><mrow><mi>i</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msup> <mo class="MathClass-rel" stretchy="false">=</mo><msub><mrow><mstyle class="qopname"> arg<mspace class="thinspace" width="0.17em"></mspace>min</mstyle><mo> ⁡<!-- FUNCTION APPLICATION --> </mo><!-- nolimits --></mrow><mrow><mi>i</mi></mrow></msub><msubsup><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup></mrow></math>, the
+nearest prototype being judged by the partial distance (<a href="#x13-217001r2">11.2<!-- tex4ht:ref: eq:data:pds  --></a>). It is cheaper than
+OCS and a little coarser.
+</p><!-- l. 190 --><p class="indent">   For every strategy <span class="ec-lmtt-10x-x-109">fuzzyclust </span>returns a completed data matrix: the
+optimized values for OCS and NPS, and a post hoc estimate by (<a href="#x13-218002r5">11.5<!-- tex4ht:ref: eq:data:ocs  --></a>) from the
+final partition for PDS and WDS. New samples, complete or not, are
+classified by their partial distances. The initial prototypes are seeded on
+the data with the holes provisionally filled by column means, but the
+initial partition is computed from partial distances, and OCS and NPS
+start from the imputation of that partition rather than from the column
+means.
+</p>
+<p><img alt="Algorithm" class="algobox" src="main_web76x.svg"/><a id="x13-219001r1"></a><a id="x13-219002r44"></a><a id="x13-219003r1"></a><a id="x13-219004r2"></a><a id="x13-219005r3"></a><a id="x13-219006r4"></a><a id="x13-219007r5"></a><a id="x13-219008r6"></a><a id="x13-219009r7"></a><a id="x13-219010r8"></a><a id="x13-219011r9"></a><a id="x13-219012r10"></a> </p><div class="box summarybox">
+<!-- l. 206 --><p class="noindent"><span class="ec-lmbx-10x-x-109">In a nutshell: Fuzzy c-means for incomplete data</span>
+</p>
+<ul class="itemize1">
+<li class="itemize">Four strategies for data with values missing completely at random:
+     drop  incomplete  samples  (WDS),  partial  distances  (PDS),  missing
+     values   as   optimization   variables   (OCS),   and   nearest-prototype
+     completion (NPS).
+     </li>
+<li class="itemize">PDS keeps every observed value at no extra cost and is the most
+     reliable; it is the default. OCS and NPS impute while they cluster; OCS
+     has more local optima and should be started from the PDS prototypes.
+     </li>
+<li class="itemize">Every  fit  comes  with  a  completed  data  matrix,  which  is  a  good
+     imputation when the data have cluster structure.
+     </li>
+<li class="itemize">Parameters: <code class="lstinline"><span style="color:#000000">strategy</span></code>; <!-- l. 211 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>c</mi></math>,
+     <!-- l. 211 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>m</mi></math>,
+     <code class="lstinline"><span style="color:#000000">init</span></code>, and <code class="lstinline"><span style="color:#000000">n_init</span></code> as for FCM.</li></ul>
+</div>
+<!-- l. 215 --><p class="noindent">
+</p>
+<h4 class="subsectionHead"><span class="titlemark">11.2.2   </span> <a id="x13-22000011.2.2"></a>Weighted fuzzy c-means and the extension step</h4>
+<!-- l. 217 --><p class="noindent">Let every sample carry a non-negative weight
+<!-- l. 217 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>w</mi></mrow><mrow><mi>k</mi></mrow></msub></math>, the
+number of observations it stands for. Weighted fuzzy c-means (wFCM) minimizes
+</p><table class="equation"><tr><td>
+<!-- l. 218 --><p class="indent">
+</p><!-- l. 218 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x13-220001r6"></mstyle><!-- endlabel --><msub><mrow><mi>J</mi></mrow><mrow><mi>w</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo><munderover accent="false" accentunder="false"><mrow><mo> ∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><munderover accent="false" accentunder="false"><mrow><mtext> ∑</mtext></mrow><mrow>
+<mi>k</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>N</mi></mrow></munderover><msub><mrow><mi>w</mi></mrow><mrow>
+<mi>k</mi></mrow></msub><mspace class="thinspace" width="0.17em"></mspace><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup><msup><mrow> <mrow><mo fence="true" form="prefix"> ‖</mo><mrow><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow>
+<mi>k</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></mrow><mo fence="true" form="postfix">‖</mo></mrow> </mrow><mrow><mn>2</mn></mrow></msup><mo class="MathClass-punc" stretchy="false">.</mo>
+</mrow></math></td><td class="eq-no">(11.6)</td></tr></table>
+<!-- l. 222 --><p class="indent">   The weight multiplies all terms of sample
+<!-- l. 222 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math> and
+cancels in its membership condition, so the memberships follow (<a href="#x13-214002r1">11.1<!-- tex4ht:ref: eq:data:mu  --></a>) with the
+Euclidean distance unchanged; the prototypes become weighted means,
+</p><table class="equation"><tr><td>
+<!-- l. 223 --><p class="indent">
+</p><!-- l. 223 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x13-220002r7"></mstyle><!-- endlabel --><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><munderover accent="false" accentunder="false"><mrow><mo>∑</mo>
+</mrow><mrow><mi>k</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>N</mi></mrow></munderover><msub><mrow><mi>w</mi></mrow><mrow><mi>k</mi></mrow></msub><mspace class="thinspace" width="0.17em"></mspace><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup><mspace class="thinspace" width="0.17em"></mspace><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub></mrow>
+<mrow><munderover accent="false" accentunder="false"><mrow><mo> ∑</mo>
+</mrow><mrow><mi>k</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>N</mi></mrow></munderover><msub><mrow><mi>w</mi></mrow><mrow><mi>k</mi></mrow></msub><mspace class="thinspace" width="0.17em"></mspace><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup></mrow></mfrac> <mo class="MathClass-punc" stretchy="false">.</mo>
+</mrow></math></td><td class="eq-no">(11.7)</td></tr></table>
+<!-- l. 227 --><p class="indent">   With integer weights, wFCM is fuzzy c-means on the data set in which sample
+<!-- l. 227 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math> is
+repeated <!-- l. 227 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>w</mi></mrow><mrow><mi>k</mi></mrow></msub></math>
+times; with all weights equal to one, it is fuzzy c-means. The weight of a
+prototype after a weighted clustering is the membership mass it collected,
+<!-- l. 227 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>w</mi><msub><mrow><mi>′</mi></mrow><mrow><mi>i</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo><msub><mrow> <mi class="MathClass-op">∑</mi><mo> ⁡<!-- FUNCTION APPLICATION --></mo>
+<!-- nolimits --></mrow><mrow><mi>k</mi></mrow></msub><msub><mrow><mi>w</mi></mrow><mrow><mi>k</mi></mrow></msub><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub></mrow></math>.
+These weights add up to the total weight of the data, so a set of weighted
+prototypes is a lossy but mass-preserving summary. The second building
+block is the <span class="ec-lmri-10x-x-109">extension</span>: for fixed prototypes, one evaluation of (<a href="#x13-214002r1">11.1<!-- tex4ht:ref: eq:data:mu  --></a>) gives
+the memberships of any number of samples, chunk by chunk with
+<!-- l. 227 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>O</mi><mo class="MathClass-open" stretchy="false">(</mo><mstyle class="text"><mtext>chunk</mtext></mstyle> <mo class="MathClass-bin" stretchy="false">⋅</mo><mi>c</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>
+memory. The histogram-based image methods of section <a href="#x13-22400011.2.6">11.2.6</a> use wFCM with
+the gray-level counts as weights.
+                                                                     
+
+                                                                     
+</p>
+<p><img alt="Algorithm" class="algobox" src="main_web77x.svg"/><a id="x13-220003r2"></a><a id="x13-220004r1"></a><a id="x13-220005r2"></a><a id="x13-220006r3"></a> </p><div class="box summarybox">
+<!-- l. 236 --><p class="noindent"><span class="ec-lmbx-10x-x-109">In a nutshell: Weighted fuzzy c-means</span>
+</p>
+<ul class="itemize1">
+<li class="itemize">Fuzzy c-means in which sample <!-- l. 238 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math>
+     counts <!-- l. 238 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>w</mi></mrow><mrow><mi>k</mi></mrow></msub></math>
+     times; the membership formula is unchanged and the prototypes are
+     weighted means.
+     </li>
+<li class="itemize">Lets weighted summaries (prototypes, histogram bins) be clustered
+     together with raw data; the building block of spFCM, oFCM, EnFCM,
+     and FGFCM.
+     </li>
+<li class="itemize">Parameters:  those  of  FCM;  the  weights  are  passed  to  <span class="ec-lmtt-10x-x-109">fit </span>as
+     <code class="lstinline"><span style="color:#000000">sample_weight</span></code>.</li></ul>
+</div>
+<!-- l. 244 --><p class="noindent">
+</p>
+<h4 class="subsectionHead"><span class="titlemark">11.2.3   </span> <a id="x13-22100011.2.3"></a>Random sample and extend (rseFCM)</h4>
+<!-- l. 246 --><p class="noindent">The simplest scheme draws <!-- l. 246 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>n</mi></mrow><mrow><mi>s</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">«</mo><mi>N</mi></mrow></math>
+samples at random, runs fuzzy c-means on them, and
+extends the result to all samples. Its cost is one FCM run on
+<!-- l. 246 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>n</mi></mrow><mrow><mi>s</mi></mrow></msub></math> samples plus one
+                                                                     
+
+                                                                     
+pass over the data, <!-- l. 246 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>O</mi><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mi>n</mi></mrow><mrow><mi>s</mi></mrow></msub><mspace class="thinspace" width="0.17em"></mspace><mi>c</mi><mspace class="thinspace" width="0.17em"></mspace><mi>l</mi> <mo class="MathClass-bin" stretchy="false">+</mo> <mi>N</mi><mspace class="thinspace" width="0.17em"></mspace><mi>c</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>
+for <!-- l. 246 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>l</mi></math>
+iterations, and Havens et al. [<a id="x13-221001"></a><a href="bibliography.html#cite.0@havens:2012:large">156</a>], who measure every scheme against literal
+fuzzy c-means (LFCM), recommend it for very large image data in more than one
+dimension. The scheme has no approximation guarantee. If FCM on the sample
+finds a different local optimum than FCM on the whole data, for instance
+because a small cluster is underrepresented in the sample, the extension carries
+the error to all samples.
+</p>
+<p><img alt="Algorithm" class="algobox" src="main_web78x.svg"/><a id="x13-221002r3"></a><a id="x13-221003r1"></a><a id="x13-221004r2"></a><a id="x13-221005r3"></a> </p><div class="box summarybox">
+<!-- l. 255 --><p class="noindent"><span class="ec-lmbx-10x-x-109">In a nutshell: Random sample and extend FCM</span>
+</p>
+<ul class="itemize1">
+<li class="itemize">FCM on a random sample, one membership step for the rest; the fastest
+     scheme.
+     </li>
+<li class="itemize">Adequate when the sample is large enough for FCM to find the right
+     solution on it; small clusters are at risk.
+     </li>
+<li class="itemize">Parameters: <code class="lstinline"><span style="color:#000000">sample_size</span></code> (count or fraction), <code class="lstinline"><span style="color:#000000">chunk_size</span></code> of the extension,
+     and those of FCM.</li></ul>
+</div>
+<!-- l. 263 --><p class="noindent">
+</p>
+<h4 class="subsectionHead"><span class="titlemark">11.2.4   </span> <a id="x13-22200011.2.4"></a>Single-pass FCM (spFCM)</h4>
+<!-- l. 265 --><p class="noindent">The data are split into chunks <!-- l. 265 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mstyle mathvariant="bold"><mi>X</mi></mstyle></mrow><mrow><mn>1</mn></mrow></msub><mo class="MathClass-punc" stretchy="false">,</mo><mi>…</mi><mo class="MathClass-punc" stretchy="false">,</mo><msub><mrow><mstyle mathvariant="bold"><mi>X</mi></mstyle></mrow><mrow><mi>s</mi></mrow></msub></mrow></math>
+of <!-- l. 265 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>n</mi></mrow><mrow><mi>l</mi></mrow></msub></math>
+samples each. The first chunk is clustered with fuzzy c-means; its prototypes
+<!-- l. 265 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>V</mi></mstyle></mrow><mrow><mn>1</mn></mrow></msub></math> with the weights
+<!-- l. 265 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>w</mi><msub><mrow><mi>′</mi></mrow><mrow><mn>1</mn><mi>i</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo><msub><mrow> <mi class="MathClass-op">∑</mi><mo> ⁡<!-- FUNCTION APPLICATION --></mo>
+<!-- nolimits --></mrow><mrow><mi>k</mi></mrow></msub><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub></mrow></math> are appended to
+the second chunk as <!-- l. 265 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>c</mi></math>
+weighted samples, and the augmented chunk is clustered with wFCM, initialized
+at <!-- l. 265 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>V</mi></mstyle></mrow><mrow><mn>1</mn></mrow></msub></math>:
+</p><table class="equation"><tr><td>
+<!-- l. 266 --><p class="indent">
+</p><!-- l. 266 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x13-222001r8"></mstyle><!-- endlabel --><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mstyle mathvariant="bold"><mi>U</mi></mstyle></mrow><mrow><mi>l</mi></mrow></msub><mo class="MathClass-punc" stretchy="false">,</mo><msub><mrow><mstyle mathvariant="bold"><mi>V</mi></mstyle></mrow><mrow><mi>l</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo> <mo class="MathClass-rel" stretchy="false">=</mo> <mstyle class="text"><mtext>wFCM</mtext></mstyle><mstyle mathsize="1.19em"><mrow><mo fence="true" form="prefix"> (</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle><mo class="MathClass-open" stretchy="false">[</mo><msub><mrow><mstyle mathvariant="bold"><mi>X</mi></mstyle></mrow><mrow><mi>l</mi></mrow></msub><mo class="MathClass-punc" stretchy="false">;</mo><msub><mrow><mstyle mathvariant="bold"><mi>V</mi></mstyle></mrow><mrow><mi>l</mi><mo class="MathClass-bin" stretchy="false">−</mo><mn>1</mn></mrow></msub><mo class="MathClass-close" stretchy="false">]</mo><mo class="MathClass-punc" stretchy="false">,</mo><mspace class="thinspace" width="0.17em"></mspace><mo class="MathClass-open" stretchy="false">[</mo><mstyle mathvariant="bold"><mn>1</mn></mstyle><mo class="MathClass-punc" stretchy="false">;</mo><mi>λ</mi><mspace class="thinspace" width="0.17em"></mspace><mstyle mathvariant="bold"><mi>w</mi></mstyle><msub><mrow><mi>′</mi></mrow><mrow>
+<mi>l</mi><mo class="MathClass-bin" stretchy="false">−</mo><mn>1</mn></mrow></msub><mo class="MathClass-close" stretchy="false">]</mo><mstyle mathsize="1.19em"><mrow><mo fence="true" form="prefix"> )</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle><mo class="MathClass-punc" stretchy="false">,</mo><mspace class="qquad" width="2em"></mspace><mi>w</mi><msub><mrow><mi>′</mi></mrow><mrow>
+<mi mathvariant="italic">li</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo><msub><mrow><mo> ∑</mo>
+</mrow><mrow><mi>k</mi></mrow></msub><msub><mrow><mi>w</mi></mrow><mrow><mi>k</mi></mrow></msub><mspace class="thinspace" width="0.17em"></mspace><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><mo class="MathClass-punc" stretchy="false">,</mo>
+</mrow></math></td><td class="eq-no">(11.8)</td></tr></table>
+<!-- l. 271 --><p class="indent">   for <!-- l. 271 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>l</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>2</mn><mo class="MathClass-punc" stretchy="false">,</mo><mi>…</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>s</mi></mrow></math>,
+where the sum runs over the augmented chunk. The prototypes of the last chunk
+summarize the data set, and the memberships of all samples follow by extension.
+Because a carried prototype weighs as much as the observations it represents, the
+final prototypes approximate those of fuzzy c-means on the whole data; the
+approximation is good when every chunk contains all clusters. The weights also
+explain the weakness of the scheme: after a few chunks the carried prototypes
+outweigh any new chunk, so the result is anchored at the solution of
+the first chunk, and a poor local optimum there, such as two merged
+clusters, is never left. Restarts on the first chunk (<code class="lstinline"><span style="color:#000000">n_init</span></code>) are a cheap
+safeguard.
+</p><!-- l. 273 --><p class="indent">   The published algorithm uses <!-- l. 273 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>λ</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>1</mn></mrow></math>;
+<span class="ec-lmtt-10x-x-109">fuzzyclust </span>adds a <span class="ec-lmri-10x-x-109">forgetting factor </span><!-- l. 273 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>λ</mi> <mo class="MathClass-rel" stretchy="false">∈</mo><mo class="MathClass-open" stretchy="false">[</mo><mn>0</mn><mo class="MathClass-punc" stretchy="false">,</mo><mn>1</mn><mo class="MathClass-close" stretchy="false">]</mo></mrow></math>
+that multiplies the carried weights before every chunk. The weight of chunk
+<!-- l. 273 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>l</mi></math> in the summary
+after chunk <!-- l. 273 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>L</mi></math> is
+then <!-- l. 273 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msup><mrow><mi>λ</mi></mrow><mrow><mi>L</mi><mo class="MathClass-bin" stretchy="false">−</mo><mi>l</mi></mrow></msup></math>, an effective
+                                                                     
+
+                                                                     
+memory of about <!-- l. 273 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1</mn><mo class="MathClass-bin" stretchy="false">∕</mo><mo class="MathClass-open" stretchy="false">(</mo><mn>1</mn> <mo class="MathClass-bin" stretchy="false">−</mo><mi>λ</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>
+chunks, which lets the prototypes follow clusters that drift in a stream;
+<!-- l. 273 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>λ</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>0</mn></mrow></math>
+clusters every chunk on its own, started from the previous prototypes.
+</p>
+<p><img alt="Algorithm" class="algobox" src="main_web79x.svg"/><a id="x13-222002r4"></a><a id="x13-222003r45"></a><a id="x13-222004r1"></a><a id="x13-222005r2"></a><a id="x13-222006r3"></a><a id="x13-222007r4"></a><a id="x13-222008r5"></a><a id="x13-222009r6"></a> </p><div class="box summarybox">
+<!-- l. 288 --><p class="noindent"><span class="ec-lmbx-10x-x-109">In a nutshell: Single-pass FCM</span>
+</p>
+<ul class="itemize1">
+<li class="itemize">Each  chunk  is  clustered  together  with  the  weighted  prototypes  of
+     the  previous  one;  one  pass  over  the  data,  memory  of  one  chunk,
+     <span class="ec-lmtt-10x-x-109">partial_fit </span>for streams.
+     </li>
+<li class="itemize">Close to FCM when every chunk contains all clusters; inherits the
+     solution of the first chunk, so give that chunk restarts.
+     </li>
+<li class="itemize">The forgetting factor <!-- l. 292 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>λ</mi> <mo class="MathClass-rel" stretchy="false">&lt;</mo> <mn>1</mn></mrow></math>
+     (an extension of the published algorithm) lets the prototypes follow
+     drifting clusters.
+     </li>
+<li class="itemize">Parameters: <code class="lstinline"><span style="color:#000000">chunk_size</span></code>, <code class="lstinline"><span style="color:#000000">forgetting_factor</span></code>, <code class="lstinline"><span style="color:#000000">shuffle</span></code>, and those of FCM.</li></ul>
+</div>
+<!-- l. 297 --><p class="noindent">
+</p>
+<h4 class="subsectionHead"><span class="titlemark">11.2.5   </span> <a id="x13-22300011.2.5"></a>Online FCM (oFCM)</h4>
+<!-- l. 299 --><p class="noindent">Online FCM clusters the chunks independently and merges the results:
+</p><table class="equation"><tr><td>
+<!-- l. 300 --><p class="indent">
+</p><!-- l. 300 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x13-223001r9"></mstyle><!-- endlabel --><mtable class="aligned"><mtr><mtd columnalign="right"><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mstyle mathvariant="bold"><mi>U</mi></mstyle></mrow><mrow><mi>l</mi></mrow></msub><mo class="MathClass-punc" stretchy="false">,</mo><msub><mrow><mstyle mathvariant="bold"><mi>V</mi></mstyle></mrow><mrow><mi>l</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mtd><mtd columnalign="left"> <mo class="MathClass-rel" stretchy="false">=</mo> <mstyle class="text"><mtext>FCM</mtext></mstyle><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mstyle mathvariant="bold"><mi>X</mi></mstyle></mrow><mrow><mi>l</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo><mo class="MathClass-punc" stretchy="false">,</mo><mspace class="qquad" width="2em"></mspace><msub><mrow><mi>w</mi></mrow><mrow><mi mathvariant="italic">li</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo><msub><mrow><mo> ∑</mo>
+</mrow><mrow><mi>k</mi></mrow></msub><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><mo class="MathClass-punc" stretchy="false">,</mo><mspace class="qquad" width="2em"></mspace><mi>l</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>1</mn><mo class="MathClass-punc" stretchy="false">,</mo><mo>…</mo><mo class="MathClass-punc" stretchy="false">,</mo><mi>s</mi><mo class="MathClass-punc" stretchy="false">,</mo></mtd><mtd columnalign="right"></mtd>
+</mtr><mtr><mtd columnalign="right"><mstyle mathvariant="bold"><mi>V</mi></mstyle></mtd> <mtd columnalign="left"> <mo class="MathClass-rel" stretchy="false">=</mo> <mstyle class="text"><mtext>wFCM</mtext></mstyle><mstyle mathsize="1.19em"><mrow><mo fence="true" form="prefix"> (</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle><mo class="MathClass-open" stretchy="false">[</mo><msub><mrow><mstyle mathvariant="bold"><mi>V</mi></mstyle></mrow><mrow><mn>1</mn></mrow></msub><mo class="MathClass-punc" stretchy="false">;</mo><mi>…</mi><mo class="MathClass-punc" stretchy="false">;</mo><msub><mrow><mstyle mathvariant="bold"><mi>V</mi></mstyle></mrow><mrow><mi>s</mi></mrow></msub><mo class="MathClass-close" stretchy="false">]</mo><mo class="MathClass-punc" stretchy="false">,</mo><mspace class="thinspace" width="0.17em"></mspace><mo class="MathClass-open" stretchy="false">[</mo><msub><mrow><mstyle mathvariant="bold"><mi>w</mi></mstyle></mrow><mrow><mn>1</mn></mrow></msub><mo class="MathClass-punc" stretchy="false">;</mo><mi>…</mi><mo class="MathClass-punc" stretchy="false">;</mo><msub><mrow><mstyle mathvariant="bold"><mi>w</mi></mstyle></mrow><mrow><mi>s</mi></mrow></msub><mo class="MathClass-close" stretchy="false">]</mo><mstyle mathsize="1.19em"><mrow><mo fence="true" form="prefix"> )</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle><mo class="MathClass-punc" stretchy="false">,</mo></mtd>
+</mtr> </mtable>
+</mrow></math></td><td class="eq-no">(11.9)</td></tr></table>
+<!-- l. 307 --><p class="indent">   followed by the extension <!-- l. 307 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mstyle mathvariant="bold"><mi>U</mi></mstyle> <mo class="MathClass-rel" stretchy="false">=</mo> <mstyle class="text"><mtext>extend</mtext></mstyle><mo class="MathClass-open" stretchy="false">(</mo><mstyle mathvariant="bold"><mi>X</mi></mstyle><mo class="MathClass-punc" stretchy="false">,</mo><mstyle mathvariant="bold"><mi>V</mi></mstyle><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>.
+In the original formulation the chunk clusterings do not influence
+each other, so they can run in parallel, on different machines, or
+in any order as the chunks arrive; the final weighted clustering of
+<!-- l. 307 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>s</mi> <mo class="MathClass-bin" stretchy="false">⋅</mo><mi>c</mi></mrow></math>
+prototypes is cheap and can be repeated after every chunk, which is what
+<span class="ec-lmtt-10x-x-109">partial_fit </span>does. A poor local optimum on one chunk contributes only
+<!-- l. 307 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>c</mi></math> of the
+<!-- l. 307 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>s</mi> <mo class="MathClass-bin" stretchy="false">⋅</mo><mi>c</mi></mrow></math> merged
+points and is outvoted. The price is the storage of all chunk prototypes and a full
+FCM run to convergence on every chunk, which makes oFCM the slowest of the
+three schemes. By default, <span class="ec-lmtt-10x-x-109">fuzzyclust </span>starts each chunk run from the prototypes of
+the previous chunk, which saves iterations and keeps the cluster order aligned;
+<code class="lstinline"><span style="color:#000000">chunk_init=</span><span style="color:#008662">"independent"</span></code> restores fully independent starts. Like spFCM with
+<!-- l. 307 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>λ</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>1</mn></mrow></math>, oFCM
+                                                                     
+
+                                                                     
+summarizes the whole past and lags behind drifting clusters; its chunk prototypes
+<!-- l. 307 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>V</mi></mstyle></mrow><mrow><mi>l</mi></mrow></msub></math>, on
+the other hand, are memoryless estimates of the current clusters.
+</p>
+<p><img alt="Algorithm" class="algobox" src="main_web80x.svg"/><a id="x13-223002r5"></a><a id="x13-223003r1"></a><a id="x13-223004r2"></a><a id="x13-223005r3"></a> </p><div class="box summarybox">
+<!-- l. 316 --><p class="noindent"><span class="ec-lmbx-10x-x-109">In a nutshell: Online FCM</span>
+</p>
+<ul class="itemize1">
+<li class="itemize">Independent  FCM  runs  on  the  chunks,  a  weighted  FCM  of  their
+     prototypes at the end; chunks can be processed in parallel or in any
+     order.
+     </li>
+<li class="itemize">The least sensitive of the three schemes to poor chunk solutions, and
+     the slowest.
+     </li>
+<li class="itemize">Parameters:   <code class="lstinline"><span style="color:#000000">chunk_size</span></code>,   <code class="lstinline"><span style="color:#000000">chunk_init</span></code>  (<code class="lstinline"><span style="color:#008662">"previous"</span></code>  or   <code class="lstinline"><span style="color:#008662">"independent"</span></code>),
+     <code class="lstinline"><span style="color:#000000">shuffle</span></code>, and those of FCM.</li></ul>
+</div>
+<!-- l. 324 --><p class="noindent">
+</p>
+<h4 class="subsectionHead"><span class="titlemark">11.2.6   </span> <a id="x13-22400011.2.6"></a>Spatially constrained fuzzy c-means for images</h4>
+<!-- l. 326 --><p class="noindent">Let <!-- l. 326 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>x</mi></mrow><mrow><mi>k</mi></mrow></msub></math> be the
+value of pixel <!-- l. 326 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math>
+                                                                     
+
+                                                                     
+(a gray level, or a vector of channels for the pixel-based methods),
+<!-- l. 326 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>p</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub></math> its position (row
+and column index), <!-- l. 326 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>N</mi></mrow><mrow><mi>k</mi></mrow></msub></math>
+the set of its neighbors in a square window of side
+<!-- l. 326 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>a</mi></math> with the center
+excluded, <!-- l. 326 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>N</mi></mrow><mrow><mi>R</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <msup><mrow><mi>a</mi></mrow><mrow><mn>2</mn></mrow></msup> <mo class="MathClass-bin" stretchy="false">−</mo><mn>1</mn></mrow></math>
+their number, <!-- l. 326 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">kr</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mrow><mo fence="true" form="prefix"> ‖</mo><mrow><msub><mrow><mstyle mathvariant="bold"><mi>p</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mstyle mathvariant="bold"><mi>p</mi></mstyle></mrow><mrow><mi>r</mi></mrow></msub></mrow><mo fence="true" form="postfix">‖</mo></mrow></mrow></math>
+the Euclidean distance between the positions of
+<!-- l. 326 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math> and
+<!-- l. 326 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>r</mi></math>, and
+<!-- l. 326 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></math> the prototype
+of region <!-- l. 326 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>i</mi></math>.
+All methods iterate the membership formula (<a href="#x13-214002r1">11.1<!-- tex4ht:ref: eq:data:mu  --></a>) with an <span class="ec-lmri-10x-x-109">effective </span>squared
+distance <!-- l. 326 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msubsup><mrow><mover accent="true"><mrow><mi>D</mi></mrow><mo accent="true">~</mo></mover></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup></math>
+(fig. <a href="#x13-213006r3">11.3</a>) and an adapted prototype update. Windows that extend beyond the
+image border are filled by reflection.
+</p>
+<!-- l. 328 --><p class="noindent"><span class="paragraphHead"><a id="x13-225000"></a><span class="ec-lmbx-10x-x-109">FCM_S.</span></span>
+   Ahmed et al. [<a id="x13-225001"></a><a href="bibliography.html#cite.0@ahmed:2002:fcms">159</a>] add a term to the functional that penalizes neighbors of a
+pixel that lie far from the prototype of the pixel’s cluster, </p><table class="equation"><tr><td>
+<!-- l. 329 --><p class="indent">
+</p><!-- l. 329 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x13-225002r10"></mstyle><!-- endlabel --><msub><mrow><mi>J</mi></mrow><mrow><mi>S</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo><munderover accent="false" accentunder="false"><mrow><mo> ∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><munderover accent="false" accentunder="false"><mrow><mtext> ∑</mtext></mrow><mrow>
+<mi>k</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>N</mi></mrow></munderover><msubsup><mrow><mi>μ</mi></mrow><mrow>
+<mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup><msup><mrow> <mrow><mo fence="true" form="prefix"> ‖</mo><mrow><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow>
+<mi>k</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></mrow><mo fence="true" form="postfix">‖</mo></mrow> </mrow><mrow><mn>2</mn></mrow></msup><mo class="MathClass-bin" stretchy="false">+</mo> <mfrac><mrow><mi>α</mi></mrow>
+<mrow><msub><mrow><mi>N</mi></mrow><mrow><mi>R</mi></mrow></msub></mrow></mfrac><munderover accent="false" accentunder="false"><mrow><mo> ∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><munderover accent="false" accentunder="false"><mrow><mtext> ∑</mtext></mrow><mrow>
+<mi>k</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>N</mi></mrow></munderover><msubsup><mrow><mi>μ</mi></mrow><mrow>
+<mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup><msub><mrow><mtext> ∑</mtext></mrow><mrow>
+<mi>r</mi><mo class="MathClass-rel" stretchy="false">∈</mo><msub><mrow><mi>N</mi></mrow><mrow><mi>k</mi></mrow></msub></mrow></msub><msup><mrow> <mrow><mo fence="true" form="prefix"> ‖</mo><mrow><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>r</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></mrow><mo fence="true" form="postfix">‖</mo></mrow> </mrow><mrow><mn>2</mn></mrow></msup><mo class="MathClass-punc" stretchy="false">,</mo>
+</mrow></math></td><td class="eq-no">(11.10)</td></tr></table>
+<!-- l. 333 --><p class="indent">   which gives the effective distance and the prototype update </p><table class="equation"><tr><td>
+<!-- l. 334 --><p class="indent">
+</p><!-- l. 334 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x13-225003r11"></mstyle><!-- endlabel --><mtable class="aligned"><mtr><mtd columnalign="right"><msubsup><mrow><mover accent="true"><mrow><mi>D</mi></mrow><mo accent="true">~</mo></mover></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup></mtd><mtd columnalign="left"> <mo class="MathClass-rel" stretchy="false">=</mo><msup><mrow> <mrow><mo fence="true" form="prefix"> ‖</mo><mrow><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow>
+<mi>k</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></mrow><mo fence="true" form="postfix">‖</mo></mrow> </mrow><mrow><mn>2</mn></mrow></msup> <mo class="MathClass-bin" stretchy="false">+</mo> <mfrac><mrow><mi>α</mi></mrow>
+<mrow><msub><mrow><mi>N</mi></mrow><mrow><mi>R</mi></mrow></msub></mrow></mfrac><msub><mrow><mo> ∑</mo>
+</mrow><mrow><mi>r</mi><mo class="MathClass-rel" stretchy="false">∈</mo><msub><mrow><mi>N</mi></mrow><mrow><mi>k</mi></mrow></msub></mrow></msub><msup><mrow> <mrow><mo fence="true" form="prefix"> ‖</mo><mrow><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>r</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></mrow><mo fence="true" form="postfix">‖</mo></mrow> </mrow><mrow><mn>2</mn></mrow></msup><mo class="MathClass-punc" stretchy="false">,</mo></mtd><mtd columnalign="right"></mtd>
+</mtr><mtr><mtd columnalign="right"><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></mtd> <mtd columnalign="left"> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><msub><mrow><mo>∑</mo>
+</mrow><mrow><mi>k</mi></mrow></msub><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup><mstyle mathsize="1.19em"><mrow><mo fence="true" form="prefix"> (</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">+</mo> <mfrac><mrow><mi>α</mi></mrow>
+<mrow><msub><mrow><mi>N</mi></mrow><mrow><mi>R</mi></mrow></msub></mrow></mfrac><msub><mrow><mo> ∑</mo>
+</mrow><mrow><mi>r</mi><mo class="MathClass-rel" stretchy="false">∈</mo><msub><mrow><mi>N</mi></mrow><mrow><mi>k</mi></mrow></msub></mrow></msub><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>r</mi></mrow></msub><mstyle mathsize="1.19em"><mrow><mo fence="true" form="prefix"> )</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle></mrow>
+<mrow><mo class="MathClass-open" stretchy="false">(</mo><mn>1</mn> <mo class="MathClass-bin" stretchy="false">+</mo> <mi>α</mi><mo class="MathClass-close" stretchy="false">)</mo><msub><mrow><mo>∑</mo>
+</mrow><mrow><mi>k</mi></mrow></msub><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup></mrow></mfrac> <mo class="MathClass-punc" stretchy="false">.</mo></mtd>
+</mtr> </mtable>
+</mrow></math></td><td class="eq-no">(11.11)</td></tr></table>
+<!-- l. 341 --><p class="indent">   A pixel whose value is corrupted but whose neighbors
+are clean is pulled into the neighbors’ cluster; the weight
+<!-- l. 341 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>α</mi></math>
+sets how strongly. The paper’s second component, the estimation of the
+intensity bias field of MR images, is not implemented. The neighborhood
+sums of the distances to every prototype must be recomputed in every
+iteration.
+</p>
+<p><img alt="Algorithm" class="algobox" src="main_web81x.svg"/><a id="x13-225004r6"></a><a id="x13-225005r1"></a><a id="x13-225006r2"></a> </p><div class="box summarybox">
+<!-- l. 349 --><p class="noindent"><span class="ec-lmbx-10x-x-109">In a nutshell: FCM_S</span>
+</p>
+<ul class="itemize1">
+<li class="itemize">Adds  the  distances  of  the  neighbors  to  the  prototype;  suppresses
+     Gaussian noise but smooths with fixed weights.
+     </li>
+<li class="itemize">Cost <!-- l. 352 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>O</mi><mo class="MathClass-open" stretchy="false">(</mo><mi>N</mi><mspace class="thinspace" width="0.17em"></mspace><mi>c</mi><mspace class="thinspace" width="0.17em"></mspace><msub><mrow><mi>N</mi></mrow><mrow><mi>R</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>
+     per iteration; mean-type smoothing spreads impulse noise instead of
+                                                                     
+
+                                                                     
+     removing it.
+     </li>
+<li class="itemize">Parameters: <code class="lstinline"><span style="color:#000000">alpha</span></code> (<!-- l. 353 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>α</mi></math>),
+     <code class="lstinline"><span style="color:#000000">window_size</span></code>.</li></ul>
+</div>
+<!-- l. 357 --><p class="noindent"><span class="paragraphHead"><a id="x13-226000"></a><span class="ec-lmbx-10x-x-109">FCM_S1 and FCM_S2.</span></span>
+   Chen and Zhang [<a id="x13-226001"></a><a href="bibliography.html#cite.0@chen:2004:fcms12">160</a>] replace the neighbors with a single filtered value
+<!-- l. 357 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mover accent="true"><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mo accent="true">¯</mo></mover></mrow><mrow><mi>k</mi></mrow></msub></math>, the
+mean (S1) or the median (S2) of the window, computed once in advance:
+</p><table class="equation"><tr><td>
+<!-- l. 358 --><p class="indent">
+</p><!-- l. 358 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x13-226002r12"></mstyle><!-- endlabel --><msub><mrow><mi>J</mi></mrow><mrow><mi>S</mi><mn>1</mn><mo class="MathClass-punc" stretchy="false">,</mo><mn>2</mn></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo><munderover accent="false" accentunder="false"><mrow><mo> ∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><munderover accent="false" accentunder="false"><mrow><mtext> ∑</mtext></mrow><mrow>
+<mi>k</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>N</mi></mrow></munderover><msubsup><mrow><mi>μ</mi></mrow><mrow>
+<mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup><mstyle mathsize="1.19em"><mrow><mo fence="true" form="prefix"> (</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle><msup><mrow> <mrow><mo fence="true" form="prefix"> ‖</mo><mrow><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow>
+<mi>k</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></mrow><mo fence="true" form="postfix">‖</mo></mrow> </mrow><mrow><mn>2</mn></mrow></msup><mo class="MathClass-bin" stretchy="false">+</mo><mi>α</mi><msup><mrow> <mrow><mo fence="true" form="prefix"> ‖</mo><mrow><msub><mrow><mover accent="true"><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mo accent="true">¯</mo></mover></mrow><mrow>
+<mi>k</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></mrow><mo fence="true" form="postfix">‖</mo></mrow> </mrow><mrow><mn>2</mn></mrow></msup><mstyle mathsize="1.19em"><mrow><mo fence="true" form="prefix"> )</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle><mo class="MathClass-punc" stretchy="false">,</mo><mspace class="qquad" width="2em"></mspace><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow>
+<mi>i</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><msub><mrow><mo>∑</mo>
+</mrow><mrow><mi>k</mi></mrow></msub><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">+</mo> <mi>α</mi><msub><mrow><mover accent="true"><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mo accent="true">¯</mo></mover></mrow><mrow><mi>k</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow>
+<mrow><mo class="MathClass-open" stretchy="false">(</mo><mn>1</mn> <mo class="MathClass-bin" stretchy="false">+</mo> <mi>α</mi><mo class="MathClass-close" stretchy="false">)</mo><msub><mrow><mo>∑</mo>
+</mrow><mrow><mi>k</mi></mrow></msub><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup></mrow></mfrac> <mo class="MathClass-punc" stretchy="false">.</mo>
+</mrow></math></td><td class="eq-no">(11.12)</td></tr></table>
+<!-- l. 363 --><p class="indent">   The cost per iteration is that of fuzzy c-means. The median
+makes FCM_S2 robust to impulse noise, but only when the median
+outweighs the pixel: for a white impulse in a gray region the pixel term
+favors the white cluster and the median term the gray one, and with
+<!-- l. 363 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>1</mn></mrow></math> the two balance
+exactly, so <!-- l. 363 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">&gt;</mo> <mn>1</mn></mrow></math>
+is needed. The paper’s main contribution, a kernel-induced distance, is not
+implemented.
+</p>
+<p><img alt="Algorithm" class="algobox" src="main_web82x.svg"/><a id="x13-226003r7"></a><a id="x13-226004r1"></a><a id="x13-226005r2"></a> </p><div class="box summarybox">
+<!-- l. 371 --><p class="noindent"><span class="ec-lmbx-10x-x-109">In a nutshell: FCM_S1 and FCM_S2</span>
+</p>
+<ul class="itemize1">
+<li class="itemize">The filtered pixel is a second observation weighted by <!-- l. 373 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>α</mi></math>;
+     the cost per iteration is that of FCM.
+     </li>
+<li class="itemize">S1 (mean) suits Gaussian noise; S2 (median) removes impulses and
+     keeps edges, but needs <!-- l. 374 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">&gt;</mo> <mn>1</mn></mrow></math>
+     against salt-and-pepper noise.
+     </li>
+<li class="itemize">Parameters: <code class="lstinline"><span style="color:#000000">alpha</span></code>, <code class="lstinline"><span style="color:#000000">window_size</span></code>.</li></ul>
+</div>
+<!-- l. 379 --><p class="noindent"><span class="paragraphHead"><a id="x13-227000"></a><span class="ec-lmbx-10x-x-109">EnFCM.</span></span>
+   Szilágyi et al. [<a id="x13-227001"></a><a href="bibliography.html#cite.0@szilagyi:2003:enfcm">161</a>] form the linearly weighted sum image once,
+</p><table class="equation"><tr><td>
+<!-- l. 380 --><p class="indent">
+</p><!-- l. 380 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x13-227002r13"></mstyle><!-- endlabel --><msub><mrow><mi>ξ</mi></mrow><mrow><mi>k</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><mn>1</mn></mrow>
+<mrow><mn>1</mn> <mo class="MathClass-bin" stretchy="false">+</mo> <mi>α</mi></mrow></mfrac><mstyle mathsize="1.61em"><mrow><mo fence="true" form="prefix"> (</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle><msub><mrow><mi>x</mi></mrow><mrow><mi>k</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">+</mo> <mfrac><mrow><mi>α</mi></mrow>
+<mrow><msub><mrow><mi>N</mi></mrow><mrow><mi>R</mi></mrow></msub></mrow></mfrac><msub><mrow><mo> ∑</mo>
+</mrow><mrow><mi>r</mi><mo class="MathClass-rel" stretchy="false">∈</mo><msub><mrow><mi>N</mi></mrow><mrow><mi>k</mi></mrow></msub></mrow></msub><msub><mrow><mi>x</mi></mrow><mrow><mi>r</mi></mrow></msub><mstyle mathsize="1.61em"><mrow><mo fence="true" form="prefix"> )</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle><mo class="MathClass-punc" stretchy="false">,</mo>
+</mrow></math></td><td class="eq-no">(11.13)</td></tr></table>
+<!-- l. 384 --><p class="indent">   quantize it into <!-- l. 384 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>q</mi></math>
+gray levels <!-- l. 384 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>ξ</mi></mrow><mrow><mi>l</mi></mrow></msub></math> with
+pixel counts <!-- l. 384 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>γ</mi></mrow><mrow><mi>l</mi></mrow></msub></math>,
+and cluster the levels with the counts as weights, </p><table class="equation"><tr><td>
+<!-- l. 385 --><p class="indent">
+</p><!-- l. 385 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x13-227003r14"></mstyle><!-- endlabel --><msub><mrow><mi>J</mi></mrow><mrow><mi mathvariant="italic">En</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo><munderover accent="false" accentunder="false"><mrow><mo> ∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><munderover accent="false" accentunder="false"><mrow><mtext> ∑</mtext></mrow><mrow>
+<mi>l</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>q</mi></mrow></munderover><msub><mrow><mi>γ</mi></mrow><mrow>
+<mi>l</mi></mrow></msub><mspace class="thinspace" width="0.17em"></mspace><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">il</mi></mrow><mrow><mi>m</mi></mrow></msubsup><msup><mrow><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mi>ξ</mi></mrow><mrow>
+<mi>l</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mi>v</mi></mrow><mrow><mi>i</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow><mrow><mn>2</mn></mrow></msup><mo class="MathClass-punc" stretchy="false">,</mo><mspace class="qquad" width="2em"></mspace><msub><mrow><mi>v</mi></mrow><mrow>
+<mi>i</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><msub><mrow><mo>∑</mo>
+</mrow><mrow><mi>l</mi></mrow></msub><msub><mrow><mi>γ</mi></mrow><mrow><mi>l</mi></mrow></msub><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">il</mi></mrow><mrow><mi>m</mi></mrow></msubsup><msub><mrow><mi>ξ</mi></mrow><mrow><mi>l</mi></mrow></msub></mrow>
+<mrow><msub><mrow><mo> ∑</mo>
+</mrow><mrow><mi>l</mi></mrow></msub><msub><mrow><mi>γ</mi></mrow><mrow><mi>l</mi></mrow></msub><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">il</mi></mrow><mrow><mi>m</mi></mrow></msubsup></mrow></mfrac> <mo class="MathClass-punc" stretchy="false">,</mo>
+</mrow></math></td><td class="eq-no">(11.14)</td></tr></table>
+<!-- l. 390 --><p class="indent">   which is wFCM (<a href="#x13-220001r6">11.6<!-- tex4ht:ref: eq:data:wJ  --></a>) on the <!-- l. 390 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>q</mi></math>
+levels. A pixel inherits the memberships of its level. After one pass over the image, the iterations
+cost <!-- l. 390 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>O</mi><mo class="MathClass-open" stretchy="false">(</mo><mi>q</mi><mspace class="thinspace" width="0.17em"></mspace><mi>c</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></math> instead of
+<!-- l. 390 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>O</mi><mo class="MathClass-open" stretchy="false">(</mo><mi>N</mi><mspace class="thinspace" width="0.17em"></mspace><mi>c</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>, about a thousand
+times less for a <!-- l. 390 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>512</mn> <mo class="MathClass-bin" stretchy="false">×</mo><mn>512</mn></mrow></math>
+image and <!-- l. 390 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>q</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>256</mn></mrow></math>.
+The method needs a single-channel image.
+</p>
+<p><img alt="Algorithm" class="algobox" src="main_web83x.svg"/><a id="x13-227004r8"></a><a id="x13-227005r1"></a><a id="x13-227006r2"></a><a id="x13-227007r3"></a> </p><div class="box summarybox">
+<!-- l. 399 --><p class="noindent"><span class="ec-lmbx-10x-x-109">In a nutshell: EnFCM</span>
+</p>
+<ul class="itemize1">
+<li class="itemize">Linear  smoothing  once,  then  fuzzy  c-means  on  the  gray-level
+     histogram;  the  fastest  method,  with  iterations  independent  of  the
+     image size.
+     </li>
+<li class="itemize">Same noise behavior as FCM_S1 (good for Gaussian, poor for impulse
+     noise); gray-level images only.
+     </li>
+<li class="itemize">Parameters: <code class="lstinline"><span style="color:#000000">alpha</span></code>, <code class="lstinline"><span style="color:#000000">window_size</span></code>, <code class="lstinline"><span style="color:#000000">n_levels</span></code> (<!-- l. 403 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>q</mi></math>).</li></ul>
+</div>
+<!-- l. 407 --><p class="noindent"><span class="paragraphHead"><a id="x13-228000"></a><span class="ec-lmbx-10x-x-109">FGFCM.</span></span>
+   Cai, Chen, and Zhang [<a id="x13-228001"></a><a href="bibliography.html#cite.0@cai:2007:fgfcm">162</a>] keep the histogram route but form the summed
+image with locally adaptive weights, </p><table class="equation"><tr><td>
+<!-- l. 408 --><p class="indent">
+</p><!-- l. 408 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x13-228002r15"></mstyle><!-- endlabel --><mtable class="aligned"><mtr><mtd columnalign="right"><msub><mrow><mi>ξ</mi></mrow><mrow><mi>k</mi></mrow></msub></mtd> <mtd columnalign="left"> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><msub><mrow><mo>∑</mo>
+</mrow><mrow><mi>r</mi><mo class="MathClass-rel" stretchy="false">∈</mo><msub><mrow><mi>N</mi></mrow><mrow><mi>k</mi></mrow></msub></mrow></msub><msub><mrow><mi>S</mi></mrow><mrow><mi mathvariant="italic">kr</mi></mrow></msub><mspace class="thinspace" width="0.17em"></mspace><msub><mrow><mi>x</mi></mrow><mrow><mi>r</mi></mrow></msub></mrow>
+<mrow><msub><mrow><mo> ∑</mo>
+</mrow><mrow><mi>r</mi><mo class="MathClass-rel" stretchy="false">∈</mo><msub><mrow><mi>N</mi></mrow><mrow><mi>k</mi></mrow></msub></mrow></msub><msub><mrow><mi>S</mi></mrow><mrow><mi mathvariant="italic">kr</mi></mrow></msub></mrow></mfrac> <mo class="MathClass-punc" stretchy="false">,</mo></mtd> <mtd columnalign="right"></mtd>
+</mtr><mtr><mtd columnalign="right"><msub><mrow><mi>S</mi></mrow><mrow><mi mathvariant="italic">kr</mi></mrow></msub></mtd><mtd columnalign="left"> <mo class="MathClass-rel" stretchy="false">=</mo><mtext class="qopname"> exp</mtext><mo> ⁡<!-- FUNCTION APPLICATION --> </mo><!-- nolimits --><mstyle mathsize="1.61em"><mrow><mo fence="true" form="prefix"> (</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle> <mo class="MathClass-bin" stretchy="false">−</mo> <mfrac><mrow><msub><mrow><mrow><mo fence="true" form="prefix"> ‖</mo><mrow><msub><mrow><mstyle mathvariant="bold"><mi>p</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mstyle mathvariant="bold"><mi>p</mi></mstyle></mrow><mrow><mi>r</mi></mrow></msub></mrow><mo fence="true" form="postfix">‖</mo></mrow> </mrow><mrow><mi>∞</mi></mrow></msub></mrow>
+<mrow><msub><mrow><mi>λ</mi></mrow><mrow><mi>s</mi></mrow></msub></mrow></mfrac> <mstyle mathsize="1.61em"><mrow><mo fence="true" form="prefix"> )</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle><mtext class="qopname"> exp</mtext><mo> ⁡<!-- FUNCTION APPLICATION --> </mo><!-- nolimits --><mstyle mathsize="1.61em"><mrow><mo fence="true" form="prefix"> (</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle> <mo class="MathClass-bin" stretchy="false">−</mo> <mfrac><mrow><msup><mrow><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mi>x</mi></mrow><mrow><mi>k</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mi>x</mi></mrow><mrow><mi>r</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow><mrow><mn>2</mn></mrow></msup></mrow>
+<mrow><msub><mrow><mi>λ</mi></mrow><mrow><mi>g</mi></mrow></msub><mspace class="thinspace" width="0.17em"></mspace><msubsup><mrow><mi>σ</mi></mrow><mrow><mi>k</mi></mrow><mrow><mn>2</mn></mrow></msubsup></mrow></mfrac> <mstyle mathsize="1.61em"><mrow><mo fence="true" form="prefix"> )</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle><mo class="MathClass-punc" stretchy="false">,</mo></mtd>
+</mtr> </mtable>
+</mrow></math></td><td class="eq-no">(11.15)</td></tr></table>
+<!-- l. 415 --><p class="indent">   where <!-- l. 415 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow> <mrow><mo fence="true" form="prefix"> ‖</mo><mrow><mo class="MathClass-bin" stretchy="false">⋅</mo></mrow><mo fence="true" form="postfix">‖</mo></mrow></mrow><mrow><mi>∞</mi></mrow></msub></math> is
+the maximum norm, so that the spatial factor depends on the larger of the row and column
+offsets, and <!-- l. 415 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msubsup><mrow><mi>σ</mi></mrow><mrow><mi>k</mi></mrow><mrow><mn>2</mn></mrow></msubsup> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><mn>1</mn></mrow>
+<mrow><msub><mrow><mi>N</mi></mrow><mrow><mi>R</mi></mrow></msub></mrow></mfrac><msub><mrow> <mi class="MathClass-op">∑</mi><mo> ⁡<!-- FUNCTION APPLICATION --></mo>
+<!-- nolimits --></mrow><mrow><mi>r</mi><mo class="MathClass-rel" stretchy="false">∈</mo><msub><mrow><mi>N</mi></mrow><mrow><mi>k</mi></mrow></msub></mrow></msub><msup><mrow><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mi>x</mi></mrow><mrow><mi>r</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mi>x</mi></mrow><mrow><mi>k</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow><mrow><mn>2</mn></mrow></msup></mrow></math>
+is the local mean squared difference. The gray-level factor compares a neighbor’s
+difference with the typical difference in the window: in a flat region all neighbors
+                                                                     
+
+                                                                     
+count, whereas an outlier among them or a neighbor on the far side of an edge
+hardly counts at all. Noise is smoothed without blurring edges, and an impulse
+does not leak into its neighbors. The clustering is then (<a href="#x13-227003r14">11.14<!-- tex4ht:ref: eq:data:enfcm  --></a>) on the histogram
+of <!-- l. 415 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>ξ</mi></math>.
+</p>
+<p><img alt="Algorithm" class="algobox" src="main_web84x.svg"/><a id="x13-228003r9"></a><a id="x13-228004r1"></a><a id="x13-228005r2"></a> </p><div class="box summarybox">
+<!-- l. 423 --><p class="noindent"><span class="ec-lmbx-10x-x-109">In a nutshell: FGFCM</span>
+</p>
+<ul class="itemize1">
+<li class="itemize">EnFCM  with  edge-preserving,  outlier-rejecting  weights;  as  fast  as
+     EnFCM.
+     </li>
+<li class="itemize">Handled both Gaussian and impulse noise well in our experiments;
+     gray-level images only.
+     </li>
+<li class="itemize">Parameters:  <code class="lstinline"><span style="color:#000000">lambda_s</span></code>,  <code class="lstinline"><span style="color:#000000">lambda_g</span></code> (scales  of  the  spatial  and  gray-level
+     factors), <code class="lstinline"><span style="color:#000000">window_size</span></code>, <code class="lstinline"><span style="color:#000000">n_levels</span></code>.</li></ul>
+</div>
+<!-- l. 431 --><p class="noindent"><span class="paragraphHead"><a id="x13-229000"></a><span class="ec-lmbx-10x-x-109">FLICM.</span></span>
+   Krinidis and Chatzis [<a id="x13-229001"></a><a href="bibliography.html#cite.0@krinidis:2010:flicm">163</a>] add a <span class="ec-lmri-10x-x-109">fuzzy factor </span>to the distance, </p><table class="equation"><tr><td>
+<!-- l. 432 --><p class="indent">
+</p><!-- l. 432 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x13-229002r16"></mstyle><!-- endlabel --><msub><mrow><mi>G</mi></mrow><mrow><mi mathvariant="italic">ki</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo><msub><mrow><mo> ∑</mo>
+</mrow><mrow><mi>r</mi><mo class="MathClass-rel" stretchy="false">∈</mo><msub><mrow><mi>N</mi></mrow><mrow><mi>k</mi></mrow></msub></mrow></msub> <mfrac><mrow><mn>1</mn></mrow>
+<mrow><msub><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">kr</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">+</mo> <mn>1</mn></mrow></mfrac><mspace class="thinspace" width="0.17em"></mspace><msup><mrow><mo class="MathClass-open" stretchy="false">(</mo><mn>1</mn> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ir</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow><mrow><mi>m</mi></mrow></msup><mspace class="thinspace" width="0.17em"></mspace><msup><mrow> <mrow><mo fence="true" form="prefix"> ‖</mo><mrow><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow>
+<mi>r</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></mrow><mo fence="true" form="postfix">‖</mo></mrow> </mrow><mrow><mn>2</mn></mrow></msup><mo class="MathClass-punc" stretchy="false">,</mo><mspace class="qquad" width="2em"></mspace><msubsup><mrow><mover accent="true"><mrow><mi>D</mi></mrow><mo accent="true">~</mo></mover></mrow><mrow>
+<mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup> <mo class="MathClass-rel" stretchy="false">=</mo><msup><mrow> <mrow><mo fence="true" form="prefix"> ‖</mo><mrow><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow>
+<mi>k</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></mrow><mo fence="true" form="postfix">‖</mo></mrow> </mrow><mrow><mn>2</mn></mrow></msup> <mo class="MathClass-bin" stretchy="false">+</mo> <msub><mrow><mi>G</mi></mrow><mrow>
+<mi mathvariant="italic">ki</mi></mrow></msub><mo class="MathClass-punc" stretchy="false">,</mo>
+</mrow></math></td><td class="eq-no">(11.16)</td></tr></table>
+<!-- l. 437 --><p class="indent">   with the prototypes updated as in fuzzy c-means,
+<!-- l. 437 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo><msub><mrow> <mi class="MathClass-op">∑</mi><mo> ⁡<!-- FUNCTION APPLICATION --></mo>
+<!-- nolimits --></mrow><mrow><mi>k</mi></mrow></msub><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub><mo class="MathClass-bin" stretchy="false">∕</mo><msub><mrow><mo>∑</mo>
+<!-- nolimits --></mrow><mrow><mi>k</mi></mrow></msub><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup></mrow></math>. A neighbor that
+belongs firmly to cluster <!-- l. 437 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>i</mi></math>
+(<!-- l. 437 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ir</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">≈</mo><mn>1</mn></mrow></math>) adds nothing to
+the distance of pixel <!-- l. 437 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math>
+to <!-- l. 437 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></math>;
+a neighbor that does not belong to it adds its own distance, damped
+by the spatial distance. A pixel surrounded by members of cluster
+<!-- l. 437 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>i</mi></math>
+is thus drawn into it even when its own value is far from
+<!-- l. 437 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></math>,
+and the factor needs no weight parameter. Because
+<!-- l. 437 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>G</mi></mrow><mrow><mi mathvariant="italic">ki</mi></mrow></msub></math> depends
+on the memberships, it is evaluated with the memberships of the previous iteration.
+The iteration is therefore a fixed-point scheme rather than an exact minimization of the
+functional <!-- l. 437 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi class="MathClass-op">∑</mi><mo> ⁡<!-- FUNCTION APPLICATION --></mo>
+<!-- nolimits --></mrow><mrow><mi>i</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>k</mi></mrow></msub><mo class="MathClass-open" stretchy="false">(</mo><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup><msup><mrow> <mrow><mo fence="true" form="prefix"> ‖</mo><mrow><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></mrow><mo fence="true" form="postfix">‖</mo></mrow> </mrow><mrow><mn>2</mn></mrow></msup> <mo class="MathClass-bin" stretchy="false">+</mo> <msub><mrow><mi>G</mi></mrow><mrow><mi mathvariant="italic">ki</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>,
+and in our experiments its result depended more on the initialization than that of
+the other methods; the examples use k-means++ seeding.
+</p>
+<p><img alt="Algorithm" class="algobox" src="main_web85x.svg"/><a id="x13-229003r10"></a><a id="x13-229004r1"></a><a id="x13-229005r2"></a> </p><div class="box summarybox">
+<!-- l. 445 --><p class="noindent"><span class="ec-lmbx-10x-x-109">In a nutshell: FLICM</span>
+</p>
+<ul class="itemize1">
+<li class="itemize">A fuzzy factor built from the neighbors’ distances and their lack of
+     membership; no smoothing weight to tune.
+                                                                     
+
+                                                                     
+     </li>
+<li class="itemize">Among the best under Gaussian noise; moves strong impulses only
+     halfway when the extreme gray levels are classes of their own.
+     </li>
+<li class="itemize">Cost <!-- l. 449 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>O</mi><mo class="MathClass-open" stretchy="false">(</mo><mi>N</mi><mspace class="thinspace" width="0.17em"></mspace><mi>c</mi><mspace class="thinspace" width="0.17em"></mspace><msub><mrow><mi>N</mi></mrow><mrow><mi>R</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>
+     per iteration; sensitive to the initialization. Parameters: <code class="lstinline"><span style="color:#000000">window_size</span></code>,
+     <code class="lstinline"><span style="color:#000000">m</span></code>.</li></ul>
+</div>
+<!-- l. 453 --><p class="noindent">
+</p>
+<h3 class="sectionHead"><span class="titlemark">11.3   </span> <a id="x13-23000011.3"></a>Using it in fuzzyclust</h3>
+<!-- l. 455 --><p class="noindent">The incomplete-data estimator and the very-large-data schemes
+derive from <span class="ec-lmtt-10x-x-109">BaseFuzzyClusterer </span>and have the usual methods <span class="ec-lmtt-10x-x-109">fit</span>,
+<span class="ec-lmtt-10x-x-109">predict</span>, <span class="ec-lmtt-10x-x-109">predict_proba</span>, <span class="ec-lmtt-10x-x-109">transform</span>, and <span class="ec-lmtt-10x-x-109">score</span>; the chunked
+schemes add <span class="ec-lmtt-10x-x-109">partial_fit</span>. <span class="ec-lmtt-10x-x-109">SpatialFCM </span>takes an image of shape
+<!-- l. 455 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo class="MathClass-open" stretchy="false">(</mo><mi>H</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>W</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></math> or
+<!-- l. 455 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo class="MathClass-open" stretchy="false">(</mo><mi>H</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>W</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>C</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>
+instead of a data matrix and produces label and membership images.
+</p>
+<div class="box apibox">
+<!-- l. 457 --><p class="noindent"><span class="ec-lmtk-10x-x-109">fuzzyclust.incomplete.IncompleteFCM</span>
+</p><!-- l. 458 --><p class="indent"> <span class="ec-lmtt-10x-x-109">n_clusters=3</span>, <span class="ec-lmtt-10x-x-109">m=2.0</span>, <span class="ec-lmtt-10x-x-109">strategy="pds"|"wds"|"ocs"|"nps"</span>, <span class="ec-lmtt-10x-x-109">tol</span>, <span class="ec-lmtt-10x-x-109">max_iter</span>,
+<span class="ec-lmtt-10x-x-109">init </span>(string or prototypes, e.g. those of a PDS fit), <span class="ec-lmtt-10x-x-109">n_init</span>, <span class="ec-lmtt-10x-x-109">random_state</span>,
+<span class="ec-lmtt-10x-x-109">verbose</span>. Missing values are <span class="ec-lmtt-10x-x-109">NaN</span>.<br class="newline"/>Attributes <span class="ec-lmtt-10x-x-109">cluster_centers_</span>, <span class="ec-lmtt-10x-x-109">membership_</span>, <span class="ec-lmtt-10x-x-109">labels_ </span>(all samples),
+<span class="ec-lmtt-10x-x-109">distances_</span>, <span class="ec-lmtt-10x-x-109">missing_mask_</span>, <span class="ec-lmtt-10x-x-109">n_missing_</span>, <span class="ec-lmtt-10x-x-109">X_completed_ </span>(optimized
+for OCS/NPS, post hoc for PDS/WDS), <span class="ec-lmtt-10x-x-109">covariances_</span>, <span class="ec-lmtt-10x-x-109">objective_</span>,
+<span class="ec-lmtt-10x-x-109">n_iter_</span>. <span class="ec-lmtt-10x-x-109">predict_proba </span>and <span class="ec-lmtt-10x-x-109">transform </span>accept incomplete samples (partial
+distances).
+</p>
+</div>
+<div class="box apibox">
+<!-- l. 462 --><p class="noindent"><span class="ec-lmtk-10x-x-109">fuzzyclust.large.WeightedFCM</span>
+</p><!-- l. 463 --><p class="indent">   Parameters of FCM; <span class="ec-lmtt-10x-x-109">fit(X, sample_weight=None)</span>. Attributes as for FCM,
+plus <span class="ec-lmtt-10x-x-109">sample_weight_</span>. The function <span class="ec-lmtt-10x-x-109">extend_partition(X, V, m=2.0,
+ chunk_size=None) </span>returns memberships and squared distances for fixed
+prototypes.
+</p>
+</div>
+<div class="box apibox">
+<!-- l. 466 --><p class="noindent"><span class="ec-lmtk-10x-x-109">fuzzyclust.large.RandomSampleFCM</span>
+</p><!-- l. 467 --><p class="indent"> <span class="ec-lmtt-10x-x-109">n_clusters=3</span>, <span class="ec-lmtt-10x-x-109">sample_size=0.1 </span>(count or fraction), <span class="ec-lmtt-10x-x-109">m</span>, <span class="ec-lmtt-10x-x-109">tol</span>, <span class="ec-lmtt-10x-x-109">max_iter</span>,
+<span class="ec-lmtt-10x-x-109">init</span>, <span class="ec-lmtt-10x-x-109">n_init</span>, <span class="ec-lmtt-10x-x-109">chunk_size=None </span>(extension), <span class="ec-lmtt-10x-x-109">random_state</span>, <span class="ec-lmtt-10x-x-109">verbose</span>.<br class="newline"/>Attributes <span class="ec-lmtt-10x-x-109">sample_indices_</span>, <span class="ec-lmtt-10x-x-109">fcm_ </span>(the FCM fitted on the sample),
+<span class="ec-lmtt-10x-x-109">cluster_centers_</span>, <span class="ec-lmtt-10x-x-109">membership_</span>, <span class="ec-lmtt-10x-x-109">labels_</span>, <span class="ec-lmtt-10x-x-109">objective_ </span>(on all data).
+</p>
+</div>
+<div class="box apibox">
+<!-- l. 471 --><p class="noindent"><span class="ec-lmtk-10x-x-109">fuzzyclust.large.SinglePassFCM, fuzzyclust.large.OnlineFCM</span>
+</p><!-- l. 472 --><p class="indent"> <span class="ec-lmtt-10x-x-109">n_clusters=3</span>, <span class="ec-lmtt-10x-x-109">chunk_size=10000</span>, <span class="ec-lmtt-10x-x-109">m</span>, <span class="ec-lmtt-10x-x-109">tol</span>, <span class="ec-lmtt-10x-x-109">max_iter</span>, <span class="ec-lmtt-10x-x-109">init</span>, <span class="ec-lmtt-10x-x-109">n_init </span>(first chunk;
+every chunk of <span class="ec-lmtt-10x-x-109">OnlineFCM </span>with <span class="ec-lmtt-10x-x-109">chunk_init="independent"</span>), <span class="ec-lmtt-10x-x-109">shuffle=True</span>,
+<span class="ec-lmtt-10x-x-109">random_state</span>, <span class="ec-lmtt-10x-x-109">verbose</span>; <span class="ec-lmtt-10x-x-109">SinglePassFCM </span>also <span class="ec-lmtt-10x-x-109">forgetting_factor=1.0</span>,
+<span class="ec-lmtt-10x-x-109">OnlineFCM </span>also <span class="ec-lmtt-10x-x-109">chunk_init="previous"|"independent"</span>.<br class="newline"/>Methods <span class="ec-lmtt-10x-x-109">fit(X) </span>and <span class="ec-lmtt-10x-x-109">partial_fit(chunk)</span>. Attributes <span class="ec-lmtt-10x-x-109">cluster_centers_</span>,
+<span class="ec-lmtt-10x-x-109">center_weights_</span>, <span class="ec-lmtt-10x-x-109">chunk_centers_</span>, <span class="ec-lmtt-10x-x-109">chunk_weights_</span>, <span class="ec-lmtt-10x-x-109">chunk_objective_</span>,
+<span class="ec-lmtt-10x-x-109">chunk_n_iter_</span>, <span class="ec-lmtt-10x-x-109">n_chunks_</span>, <span class="ec-lmtt-10x-x-109">membership_</span>, <span class="ec-lmtt-10x-x-109">labels_ </span>(of the data passed last);
+<span class="ec-lmtt-10x-x-109">OnlineFCM.centers_model_ </span>is the final weighted clusterer.
+</p>
+</div>
+<div class="box apibox">
+<!-- l. 476 --><p class="noindent"><span class="ec-lmtk-10x-x-109">fuzzyclust.image.SpatialFCM</span>
+</p><!-- l. 477 --><p class="indent"> <span class="ec-lmtt-10x-x-109">n_clusters=3</span>, <span class="ec-lmtt-10x-x-109">method="flicm"|"fcm"|"fcm_s"|"fcm_s1"|"fcm_s2"|
+"enfcm"|"fgfcm"</span>, <span class="ec-lmtt-10x-x-109">m=2.0</span>, <span class="ec-lmtt-10x-x-109">alpha=1.0</span>, <span class="ec-lmtt-10x-x-109">window_size=3</span>, <span class="ec-lmtt-10x-x-109">lambda_s=3.0</span>,
+<span class="ec-lmtt-10x-x-109">lambda_g=6.0</span>, <span class="ec-lmtt-10x-x-109">n_levels=256</span>, <span class="ec-lmtt-10x-x-109">tol</span>, <span class="ec-lmtt-10x-x-109">max_iter=100</span>, <span class="ec-lmtt-10x-x-109">init</span>, <span class="ec-lmtt-10x-x-109">n_init</span>, <span class="ec-lmtt-10x-x-109">random_state</span>,
+<span class="ec-lmtt-10x-x-109">verbose</span>.<br class="newline"/>Attributes <span class="ec-lmtt-10x-x-109">cluster_centers_</span>, <span class="ec-lmtt-10x-x-109">membership_</span>
+<!-- l. 478 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo class="MathClass-open" stretchy="false">(</mo><mi>H</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>W</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>c</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>, <span class="ec-lmtt-10x-x-109">labels_</span>
+<!-- l. 478 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo class="MathClass-open" stretchy="false">(</mo><mi>H</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>W</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>,
+<span class="ec-lmtt-10x-x-109">filtered_image_</span>, <span class="ec-lmtt-10x-x-109">histogram_</span>, <span class="ec-lmtt-10x-x-109">level_values_</span>, <span class="ec-lmtt-10x-x-109">level_membership_ </span>(histogram
+methods), <span class="ec-lmtt-10x-x-109">objective_</span>, <span class="ec-lmtt-10x-x-109">n_iter_</span>. <span class="ec-lmtt-10x-x-109">predict(image) </span>segments a new image with
+                                                                     
+
+                                                                     
+the fitted prototypes.
+</p>
+</div>
+<div class="box apibox">
+<!-- l. 481 --><p class="noindent"><span class="ec-lmtk-10x-x-109">helpers, data generators, and plots</span>
+</p><!-- l. 482 --><p class="indent"> <span class="ec-lmtt-10x-x-109">partial_distances(X, V)</span>; <span class="ec-lmtt-10x-x-109">make_mcar(X, missing_rate)</span>,
+<span class="ec-lmtt-10x-x-109">make_incomplete_blobs</span>; <span class="ec-lmtt-10x-x-109">plot_incomplete_clusters</span>, <span class="ec-lmtt-10x-x-109">plot_imputation</span>.
+<span class="ec-lmtt-10x-x-109">make_large_blobs</span>, <span class="ec-lmtt-10x-x-109">make_drifting_stream </span>(a generator of chunks);
+<span class="ec-lmtt-10x-x-109">plot_chunk_timeline</span>, <span class="ec-lmtt-10x-x-109">plot_center_trajectories</span>. <span class="ec-lmtt-10x-x-109">neighborhood_sum</span>,
+<span class="ec-lmtt-10x-x-109">weighted_sum_image</span>, <span class="ec-lmtt-10x-x-109">local_similarity_image</span>; <span class="ec-lmtt-10x-x-109">make_synthetic_image</span>,
+<span class="ec-lmtt-10x-x-109">add_image_noise</span>; <span class="ec-lmtt-10x-x-109">segmentation_accuracy</span>, <span class="ec-lmtt-10x-x-109">match_labels</span>; <span class="ec-lmtt-10x-x-109">plot_image</span>,
+<span class="ec-lmtt-10x-x-109">plot_label_image</span>, <span class="ec-lmtt-10x-x-109">plot_membership_maps</span>, <span class="ec-lmtt-10x-x-109">plot_segmentation</span>.
+</p>
+</div>
+<!-- l. 485 --><p class="indent">   All four strategies run on the same incomplete matrix, and OCS is best
+started from the PDS prototypes:  </p><!-- l. 486 --><pre class="lstinputlisting" id="listing-138"><span class="label"><a id="x13-230002r57"></a></span><span style="color:#000000"><span class="ec-lmtt-9">Xm</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= make_mcar(X, missing_rate=0.25, random_state=0)</span> 
+</span><span class="label"><a id="x13-230003r58"></a></span><span style="color:#000000"><span class="ec-lmtt-9">fits</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= {s: IncompleteFCM(n_clusters=3, strategy=s, random_state=0).fit(Xm)</span> </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">for</span></span><span style="color:#000000"> <span class="ec-lmtt-9">s</span> </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">in</span></span><span style="color:#000000"> <span class="ec-lmtt-9">STRATEGIES}</span> 
+</span><span class="label"><a id="x13-230004r59"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">for</span></span><span style="color:#000000"> <span class="ec-lmtt-9">s, model</span> </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">in</span></span><span style="color:#000000"> <span class="ec-lmtt-9">fits.items():</span> 
+</span><span class="label"><a id="x13-230005r60"></a></span><span style="color:#000000">    </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">print</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">f</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">{</span></span><span style="color:#008662"><span class="ec-lmtt-9">s</span></span><span style="color:#008662"><span class="ec-lmtt-9">.</span></span><span style="color:#008662"><span class="ec-lmtt-9">upper</span></span><span style="color:#008662"><span class="ec-lmtt-9">()</span></span><span style="color:#008662"><span class="ec-lmtt-9">}:</span></span><span style="color:#008662"> <span class="ec-lmtt-9">{model.n_iter_:3d} iterations, ARI = {adjusted_rand_score(y, model.labels_):.3f}, "</span> 
+</span><span class="label"><a id="x13-230006r61"></a></span><span style="color:#000000">          <span class="ec-lmtt-9">f</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">prototype</span></span><span style="color:#008662"> <span class="ec-lmtt-9">error = {center_error(model.cluster_centers_, reference.cluster_centers_):.3f}"</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span>
+   </pre>
+<!-- l. 487 --><pre class="lstinputlisting" id="listing-139"><span class="label"><a id="x13-230010r60"></a></span><span style="color:#000000"><span class="ec-lmtt-9">Xm</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">mask = make_mcar(X, missing_rate=0.2, random_state=0, return_mask=</span></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">True</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span> 
+<span class="label"><a id="x13-230011r61"></a></span><span style="color:#000000"><span class="ec-lmtt-9">pds</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= IncompleteFCM(n_clusters=4, strategy=</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">pds</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">random_state=0).fit(Xm)</span> 
+</span><span class="label"><a id="x13-230012r62"></a></span><span style="color:#000000"><span class="ec-lmtt-9">models</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= {</span> 
+</span><span class="label"><a id="x13-230013r63"></a></span><span style="color:#000000">    </span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">PDS</span></span><span style="color:#008662"> <span class="ec-lmtt-9">(post hoc)"</span></span><span style="color:#000000"><span class="ec-lmtt-9">:</span></span><span style="color:#000000"> <span class="ec-lmtt-9">pds,</span> 
+</span><span class="label"><a id="x13-230014r64"></a></span><span style="color:#000000">    </span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">NPS</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#000000"><span class="ec-lmtt-9">:</span></span><span style="color:#000000"> <span class="ec-lmtt-9">IncompleteFCM(n_clusters=4, strategy=</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">nps</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">random_state=0).fit(Xm),</span> 
+</span><span class="label"><a id="x13-230015r65"></a></span><span style="color:#000000">    </span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">OCS</span></span><span style="color:#008662"><span class="ec-lmtt-9">,</span></span><span style="color:#008662"> <span class="ec-lmtt-9">random start"</span></span><span style="color:#000000"><span class="ec-lmtt-9">:</span></span><span style="color:#000000"> <span class="ec-lmtt-9">IncompleteFCM(n_clusters=4, strategy=</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">ocs</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">random_state=0).fit(Xm),</span> 
+</span><span class="label"><a id="x13-230016r66"></a></span><span style="color:#000000">    </span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">OCS</span></span><span style="color:#008662"><span class="ec-lmtt-9">,</span></span><span style="color:#008662"> <span class="ec-lmtt-9">PDS start"</span></span><span style="color:#000000"><span class="ec-lmtt-9">:</span></span><span style="color:#000000"> <span class="ec-lmtt-9">IncompleteFCM(n_clusters=4, strategy=</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">ocs</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">init=pds.cluster_centers_).fit(Xm),</span> 
+</span><span class="label"><a id="x13-230017r67"></a></span><span style="color:#000000"><span class="ec-lmtt-9">}</span></span> 
+<span class="label"><a id="x13-230018r68"></a></span><span style="color:#000000"><span class="ec-lmtt-9">errors</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= {name: rmse(model.X_completed_, mask)</span> </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">for</span></span><span style="color:#000000"> <span class="ec-lmtt-9">name, model</span> </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">in</span></span><span style="color:#000000"> <span class="ec-lmtt-9">models.items()}</span></span>
+   </pre>
+<!-- l. 488 --><p class="noindent">The very-large-data schemes are drop-in replacements for FCM, and the chunked
+ones consume a stream with <span class="ec-lmtt-10x-x-109">partial_fit</span>:  </p><!-- l. 489 --><pre class="lstinputlisting" id="listing-140"><span class="label"><a id="x13-230022r63"></a></span><span style="color:#000000"><span class="ec-lmtt-9">literal</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">t_literal = timed_fit(WeightedFCM(n_clusters=5, random_state=0), X)</span> 
+</span><span class="label"><a id="x13-230023r64"></a></span><span style="color:#000000"><span class="ec-lmtt-9">schemes</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= {</span> 
+</span><span class="label"><a id="x13-230024r65"></a></span><span style="color:#000000">    </span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">rseFCM</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#000000"><span class="ec-lmtt-9">:</span></span><span style="color:#000000"> <span class="ec-lmtt-9">RandomSampleFCM(n_clusters=5, sample_size=0.01, random_state=0),</span> 
+</span><span class="label"><a id="x13-230025r66"></a></span><span style="color:#000000">    </span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">spFCM</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#000000"><span class="ec-lmtt-9">:</span></span><span style="color:#000000"> <span class="ec-lmtt-9">SinglePassFCM(n_clusters=5, chunk_size=2000, random_state=0),</span> 
+</span><span class="label"><a id="x13-230026r67"></a></span><span style="color:#000000">    </span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">oFCM</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#000000"><span class="ec-lmtt-9">:</span></span><span style="color:#000000"> <span class="ec-lmtt-9">OnlineFCM(n_clusters=5, chunk_size=2000, random_state=0),</span> 
+</span><span class="label"><a id="x13-230027r68"></a></span><span style="color:#000000"><span class="ec-lmtt-9">}</span></span> 
+<span class="label"><a id="x13-230028r69"></a></span><span style="color:#000000"><span class="ec-lmtt-9">results</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= {}</span> 
+</span><span class="label"><a id="x13-230029r70"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">for</span></span><span style="color:#000000"> <span class="ec-lmtt-9">name, model</span> </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">in</span></span><span style="color:#000000"> <span class="ec-lmtt-9">schemes.items():</span> 
+</span><span class="label"><a id="x13-230030r71"></a></span><span style="color:#000000">    <span class="ec-lmtt-9">model, seconds = timed_fit(model, X)</span> 
+</span><span class="label"><a id="x13-230031r72"></a></span><span style="color:#000000">    <span class="ec-lmtt-9">results[name] = (t_literal / seconds, adjusted_rand_score(literal.labels_, model.labels_))</span> 
+</span><span class="label"><a id="x13-230032r73"></a></span><span style="color:#000000">    </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">print</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">f</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">{</span></span><span style="color:#008662"><span class="ec-lmtt-9">name</span></span><span style="color:#008662"><span class="ec-lmtt-9">}:</span></span><span style="color:#008662"> <span class="ec-lmtt-9">speedup {results[name][0]:6.1f}, ARI with literal FCM {results[name][1]:.4f}"</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span>
+   </pre>
+<!-- l. 490 --><pre class="lstinputlisting" id="listing-141"><span class="label"><a id="x13-230036r51"></a></span><span style="color:#000000"><span class="ec-lmtt-9">models</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= {</span> 
+</span><span class="label"><a id="x13-230037r52"></a></span><span style="color:#000000">    </span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">spFCM</span></span><span style="color:#008662"><span class="ec-lmtt-9">,</span></span><span style="color:#008662"> <span class="ec-lmtt-9">$\\lambda=1$ (paper)"</span></span><span style="color:#000000"><span class="ec-lmtt-9">:</span></span><span style="color:#000000"> <span class="ec-lmtt-9">SinglePassFCM(n_clusters=3, chunk_size=500, random_state=0),</span> 
+</span><span class="label"><a id="x13-230038r53"></a></span><span style="color:#000000">    </span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">spFCM</span></span><span style="color:#008662"><span class="ec-lmtt-9">,</span></span><span style="color:#008662"> <span class="ec-lmtt-9">$\\lambda=0.5$"</span></span><span style="color:#000000"><span class="ec-lmtt-9">:</span></span><span style="color:#000000"> <span class="ec-lmtt-9">SinglePassFCM(n_clusters=3, chunk_size=500, forgetting_factor=0.5, random_state=0),</span> 
+</span><span class="label"><a id="x13-230039r54"></a></span><span style="color:#000000">    </span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">oFCM</span></span><span style="color:#008662"> <span class="ec-lmtt-9">(merged)"</span></span><span style="color:#000000"><span class="ec-lmtt-9">:</span></span><span style="color:#000000"> <span class="ec-lmtt-9">OnlineFCM(n_clusters=3, chunk_size=500, random_state=0),</span> 
+</span><span class="label"><a id="x13-230040r55"></a></span><span style="color:#000000"><span class="ec-lmtt-9">}</span></span> 
+<span class="label"><a id="x13-230041r56"></a></span><span style="color:#000000"><span class="ec-lmtt-9">errors</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= {name: []</span> </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">for</span></span><span style="color:#000000"> <span class="ec-lmtt-9">name</span> </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">in</span></span><span style="color:#000000"> <span class="ec-lmtt-9">models}</span> 
+</span><span class="label"><a id="x13-230042r57"></a></span><span style="color:#000000"><span class="ec-lmtt-9">errors</span></span><span style="color:#000000"><span class="ec-lmtt-9">[</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">oFCM</span></span><span style="color:#008662"><span class="ec-lmtt-9">,</span></span><span style="color:#008662"> <span class="ec-lmtt-9">last chunk only"</span></span><span style="color:#000000"><span class="ec-lmtt-9">]</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= []</span> 
+</span><span class="label"><a id="x13-230043r58"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">for</span></span><span style="color:#000000"> <span class="ec-lmtt-9">Xc, _, C</span> </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">in</span></span><span style="color:#000000"> <span class="ec-lmtt-9">stream:</span> 
+</span><span class="label"><a id="x13-230044r59"></a></span><span style="color:#000000">    </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">for</span></span><span style="color:#000000"> <span class="ec-lmtt-9">name, model</span> </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">in</span></span><span style="color:#000000"> <span class="ec-lmtt-9">models.items():</span> 
+</span><span class="label"><a id="x13-230045r60"></a></span><span style="color:#000000">        <span class="ec-lmtt-9">model.partial_fit(Xc)</span> 
+</span><span class="label"><a id="x13-230046r61"></a></span><span style="color:#000000">        <span class="ec-lmtt-9">errors[name].append(tracking_error(model.cluster_centers_, C))</span> 
+</span><span class="label"><a id="x13-230047r62"></a></span><span style="color:#000000">    <span class="ec-lmtt-9">errors[</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">oFCM</span></span><span style="color:#008662"><span class="ec-lmtt-9">,</span></span><span style="color:#008662"> <span class="ec-lmtt-9">last chunk only"</span></span><span style="color:#000000"><span class="ec-lmtt-9">].</span></span><span style="color:#000000"><span class="ec-lmtt-9">append</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">tracking_error</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">models</span></span><span style="color:#000000"><span class="ec-lmtt-9">[</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">oFCM</span></span><span style="color:#008662"> <span class="ec-lmtt-9">(merged)"</span></span><span style="color:#000000"><span class="ec-lmtt-9">].</span></span><span style="color:#000000"><span class="ec-lmtt-9">chunk_centers_</span></span><span style="color:#000000"><span class="ec-lmtt-9">[-1],</span></span><span style="color:#000000"> <span class="ec-lmtt-9">C))</span></span>
+   </pre>
+<!-- l. 491 --><p class="noindent">An image is segmented with a single call:  </p><!-- l. 492 --><pre class="lstinputlisting" id="listing-142"><span class="label"><a id="x13-230051r76"></a></span><span style="color:#000000"><span class="ec-lmtt-9">noisy</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= add_image_noise(base.clean, noise=</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">gaussian</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">noise_level=0.2, random_state=0)</span> 
+</span><span class="label"><a id="x13-230052r77"></a></span><span style="color:#000000"><span class="ec-lmtt-9">model</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= SpatialFCM(n_clusters=4, method=</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">flicm</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">init=</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">kmeans</span></span><span style="color:#008662"><span class="ec-lmtt-9">++</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">random_state=0).fit(noisy)</span> 
+</span><span class="label"><a id="x13-230053r78"></a></span><span style="color:#000000"><span class="ec-lmtt-9">accuracy</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= segmentation_accuracy(base.truth, model.labels_)</span></span>
+   </pre>
+<!-- l. 493 --><pre class="lstinputlisting" id="listing-143"><span class="label"><a id="x13-230057r66"></a></span><span style="color:#000000"><span class="ec-lmtt-9">model</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= SpatialFCM(n_clusters=4, method=</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">enfcm</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">alpha=4.0, window_size=5, init=</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">kmeans</span></span><span style="color:#008662"><span class="ec-lmtt-9">++</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">random_state=0)</span> 
+</span><span class="label"><a id="x13-230058r67"></a></span><span style="color:#000000"><span class="ec-lmtt-9">labels</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= model.fit(gauss).labels_</span> 
+</span><span class="label"><a id="x13-230059r68"></a></span><span style="color:#000000"><span class="ec-lmtt-9">interior_acc</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">detail_acc = scores(labels)</span></span>
+   </pre>
+<!-- l. 495 --><p class="noindent">
+</p>
+<h3 class="sectionHead"><span class="titlemark">11.4   </span> <a id="x13-23100011.4"></a>Examples</h3>
+<!-- l. 497 --><p class="noindent">
+</p>
+<h4 class="subsectionHead"><span class="titlemark">11.4.1   </span> <a id="x13-23200011.4.1"></a>Four strategies for missing values</h4>
+<!-- l. 499 --><p class="noindent">Three well-separated Gaussian clusters of 150 points each in the plane lose
+<!-- l. 499 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>25</mn><mspace class="thinspace" width="0.17em"></mspace><mi>%</mi></mrow></math> of
+their values (fig. <a href="#x13-232001r4">11.4</a>). WDS, PDS, and NPS recover the groups (ARI
+<!-- l. 499 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.99</mn></mrow></math>),
+with prototype errors against complete-data FCM of
+<!-- l. 499 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.11</mn></mrow></math>,
+<!-- l. 499 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.05</mn></mrow></math>, and
+<!-- l. 499 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.04</mn></mrow></math>. The
+completed coordinates show the character of each strategy: NPS snaps the
+imputed coordinates onto the prototypes, whereas PDS and WDS impute
+only afterwards. OCS from a random start ends in a poor solution (ARI
+<!-- l. 499 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.82</mn></mrow></math>, prototype
+                                                                     
+
+                                                                     
+error <!-- l. 499 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.47</mn></mrow></math>):
+samples of the lower-left cluster that lost their first coordinate were imputed with
+the first coordinate of the right cluster early on and remain captured there,
+forming the vertical streak of hollow markers in the figure. The memberships of
+incomplete samples (fig. <a href="#x13-232002r5">11.5</a>) are lower when the observed coordinate is
+ambiguous. The parameter study in four dimensions (fig. <a href="#x13-232003r6">11.6</a>) follows the
+experiment of Hathaway and Bezdek: WDS loses samples quickly, since only
+<!-- l. 499 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msup><mrow><mo class="MathClass-open" stretchy="false">(</mo><mn>1</mn> <mo class="MathClass-bin" stretchy="false">−</mo><mi>p</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow><mrow><mn>4</mn></mrow></msup></math>
+of them remain complete, and its prototypes wander off beyond
+<!-- l. 499 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>40</mn><mspace class="thinspace" width="0.17em"></mspace><mi>%</mi></mrow></math>;
+PDS degrades most gracefully (prototype error
+<!-- l. 499 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.13</mn></mrow></math> at
+<!-- l. 499 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>40</mn><mspace class="thinspace" width="0.17em"></mspace><mi>%</mi></mrow></math>), NPS is close to it
+(<!-- l. 499 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.14</mn></mrow></math>), and the randomly
+started OCS falls behind (<!-- l. 499 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.28</mn></mrow></math>).
+</p>
+<figure class="figure">
+<!-- l. 501 --><p class="noindent"><img alt="Figure 11.4" class="exfig" src="figures/08_data_realities/plot_01_missing_strategies_1.png"/> <a id="x13-232001r4"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 11.4. </span></span><span class="content"><span class="ec-lmr-10">The four strategies on data with 25 % missing values; hollow markers
+are incomplete samples at their completed coordinates, crosses are the prototypes
+of each strategy, and plus signs those of FCM on the complete data. The randomly
+started OCS captures samples in the wrong cluster.</span> </span></figcaption><!-- tex4ht:label?: x13-232001r4  -->
+<p class="runbox"><a class="colab" href="https://colab.research.google.com/github/ComplexSystemsIntelligence/fuzzyclust/blob/gh-pages/notebooks/auto_examples/08_data_realities/plot_01_missing_strategies.ipynb">Open in Colab</a><a href="../auto_examples/08_data_realities/plot_01_missing_strategies.html">Example <code>plot_01_missing_strategies.py</code> in the gallery</a></p></figure>
+<figure class="figure">
+<!-- l. 502 --><p class="noindent"><img alt="Figure 11.5" class="exfig" src="figures/08_data_realities/plot_01_missing_strategies_2.png"/> <a id="x13-232002r5"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 11.5. </span></span><span class="content"><span class="ec-lmr-10">The PDS partition at the true coordinates (left) and the maximal
+membership of the incomplete samples (right): an ambiguous observed coordinate
+gives a low membership.</span> </span></figcaption><!-- tex4ht:label?: x13-232002r5  -->
+</figure>
+<figure class="figure">
+<!-- l. 503 --><p class="noindent"><img alt="Figure 11.6" class="exfig" src="figures/08_data_realities/plot_01_missing_strategies_3.png"/> <a id="x13-232003r6"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 11.6. </span></span><span class="content"><span class="ec-lmr-10">Prototype error against complete-data FCM and agreement with the
+true groups for missing rates up to 60 % (four-dimensional blobs), and the share of
+complete samples.</span> </span></figcaption><!-- tex4ht:label?: x13-232003r6  -->
+</figure>
+<h4 class="subsectionHead"><span class="titlemark">11.4.2   </span> <a id="x13-23300011.4.2"></a>Imputation by clustering</h4>
+<!-- l. 507 --><p class="noindent">The second data set has four clusters in four dimensions with
+<!-- l. 507 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>20</mn><mspace class="thinspace" width="0.17em"></mspace><mi>%</mi></mrow></math> of
+the values missing (fig. <a href="#x13-233001r7">11.7</a>). Imputation by the column mean has an RMSE of
+<!-- l. 507 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>2.56</mn></mrow></math>;
+an oracle that knows every sample’s cluster mean reaches
+<!-- l. 507 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.64</mn></mrow></math>.
+The clustering-based imputations lie close to the oracle: PDS post hoc
+<!-- l. 507 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.81</mn></mrow></math>, NPS
+<!-- l. 507 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.83</mn></mrow></math>, and OCS started from
+the PDS prototypes <!-- l. 507 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.90</mn></mrow></math>,
+while OCS from a random start reaches only
+<!-- l. 507 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1.29</mn></mrow></math>; the
+horizontal bands in its panel are samples imputed with the coordinates
+of a wrong prototype. Figure <a href="#x13-233002r8">11.8</a> shows why: the randomly started
+OCS is far more confident about the incomplete samples than PDS,
+which computes the memberships from the observed features only, and
+its large errors sit on samples that PDS considers ambiguous. The
+scans (fig. <a href="#x13-233003r9">11.9</a>) show that the ranking holds at every missing rate (at
+<!-- l. 507 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>30</mn><mspace class="thinspace" width="0.17em"></mspace><mi>%</mi></mrow></math>: PDS
+<!-- l. 507 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.94</mn></mrow></math>, NPS and OCS from
+the PDS start <!-- l. 507 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1.03</mn></mrow></math>, OCS
+from a random start <!-- l. 507 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1.54</mn></mrow></math>)
+and that the exponent matters little for PDS, with a shallow optimum near
+<!-- l. 507 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>m</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>2</mn></mrow></math>; the randomly started
+OCS improves with <!-- l. 507 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>m</mi></math>
+because softer memberships weaken the self-reinforcement of the imputed
+values.
+</p>
+<figure class="figure">
+<!-- l. 509 --><p class="noindent"><img alt="Figure 11.7" class="exfig" src="figures/08_data_realities/plot_02_ocs_imputation_1.png"/> <a id="x13-233001r7"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 11.7. </span></span><span class="content"><span class="ec-lmr-10">Imputed against true values with 20 % of the values missing, for
+PDS (post hoc), NPS, and OCS from a random and from the PDS start.</span> </span></figcaption><!-- tex4ht:label?: x13-233001r7  -->
+<p class="runbox"><a class="colab" href="https://colab.research.google.com/github/ComplexSystemsIntelligence/fuzzyclust/blob/gh-pages/notebooks/auto_examples/08_data_realities/plot_02_ocs_imputation.ipynb">Open in Colab</a><a href="../auto_examples/08_data_realities/plot_02_ocs_imputation.html">Example <code>plot_02_ocs_imputation.py</code> in the gallery</a></p></figure>
+<figure class="figure">
+<!-- l. 510 --><p class="noindent"><img alt="Figure 11.8" class="exfig" src="figures/08_data_realities/plot_02_ocs_imputation_2.png"/> <a id="x13-233002r8"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 11.8. </span></span><span class="content"><span class="ec-lmr-10">Memberships of the incomplete samples under OCS and PDS (left),
+and the largest imputation error of a sample against its PDS membership (right).</span> </span></figcaption><!-- tex4ht:label?: x13-233002r8  -->
+</figure>
+<figure class="figure">
+<!-- l. 511 --><p class="noindent"><img alt="Figure 11.9" class="exfig" src="figures/08_data_realities/plot_02_ocs_imputation_3.png"/> <a id="x13-233003r9"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 11.9. </span></span><span class="content"><span class="ec-lmr-10">Imputation error against the missing rate (left) and against the
+exponent</span>
+<!-- l. 511 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>m</mi></math>
+<span class="ec-lmr-10">at 30 % missing (right), with the column mean and the oracle as references.</span> </span></figcaption><!-- tex4ht:label?: x13-233003r9  -->
+</figure>
+<h4 class="subsectionHead"><span class="titlemark">11.4.3   </span> <a id="x13-23400011.4.3"></a>200 000 samples</h4>
+<!-- l. 515 --><p class="noindent">The third data set has 200 000 points in five clusters of very different sizes, from
+<!-- l. 515 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>35</mn><mspace class="thinspace" width="0.17em"></mspace><mi>%</mi></mrow></math> down
+to <!-- l. 515 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>5</mn><mspace class="thinspace" width="0.17em"></mspace><mi>%</mi></mrow></math>
+of the data (fig. <a href="#x13-234001r10">11.10</a>). Literal fuzzy c-means needs 32 iterations over
+all samples. With 1 % of the data at a time, rseFCM is more than ten
+times, spFCM about six times, and oFCM about twice as fast as literal
+FCM, and all three agree with the literal partition with an ARI of
+<!-- l. 515 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.998</mn></mrow></math> or
+better; the measured speedups vary from run to run with the machine and its
+load. The chunk timeline of spFCM (fig. <a href="#x13-234002r11">11.11</a>, left) is flat after the first chunks:
+the carried prototypes soon outweigh any new chunk. The chunk prototypes
+of oFCM scatter around the merged ones by the sampling error of a
+chunk, most for the small cluster, of which a chunk holds only about a
+hundred members. The chunk-size study (fig. <a href="#x13-234003r12">11.12</a>) exposes the weakness of
+the first two schemes: with 600 samples or fewer, FCM on the sample
+(or on the first chunk) merges two clusters and splits the largest (ARI
+<!-- l. 515 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.87</mn></mrow></math>
+with the literal partition), and spFCM carries this solution through all
+later chunks. oFCM outvotes the poor chunk solutions and stays above
+<!-- l. 515 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.99</mn></mrow></math> at
+every size, and five restarts on the first chunk repair spFCM at a small
+cost.
+</p>
+<figure class="figure">
+<!-- l. 517 --><p class="noindent"><img alt="Figure 11.10" class="exfig" src="figures/08_data_realities/plot_03_large_data_1.png"/> <a id="x13-234001r10"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 11.10. </span></span><span class="content"><span class="ec-lmr-10">Literal FCM and the three schemes with 1 % chunks on 200 000
+samples (5000 of them plotted); the white crosses are the prototypes of each scheme
+and cover the plus signs of the literal FCM prototypes, and the panel titles give
+speedup and agreement.</span> </span></figcaption><!-- tex4ht:label?: x13-234001r10  -->
+<p class="runbox"><a class="colab" href="https://colab.research.google.com/github/ComplexSystemsIntelligence/fuzzyclust/blob/gh-pages/notebooks/auto_examples/08_data_realities/plot_03_large_data.ipynb">Open in Colab</a><a href="../auto_examples/08_data_realities/plot_03_large_data.html">Example <code>plot_03_large_data.py</code> in the gallery</a></p></figure>
+<figure class="figure">
+<!-- l. 518 --><p class="noindent"><img alt="Figure 11.11" class="exfig" src="figures/08_data_realities/plot_03_large_data_2.png"/> <a id="x13-234002r11"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 11.11. </span></span><span class="content"><span class="ec-lmr-10">The spFCM prototypes after every chunk, marker area proportional
+to the carried weight (left), and the oFCM chunk prototypes relative to the merged
+ones (right).</span> </span></figcaption><!-- tex4ht:label?: x13-234002r11  -->
+</figure>
+<figure class="figure">
+<!-- l. 519 --><p class="noindent"><img alt="Figure 11.12" class="exfig" src="figures/08_data_realities/plot_03_large_data_3.png"/> <a id="x13-234003r12"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 11.12. </span></span><span class="content"><span class="ec-lmr-10">Speedup over literal FCM (left) and agreement with its partition
+(right) against the sample or chunk size.</span> </span></figcaption><!-- tex4ht:label?: x13-234003r12  -->
+</figure>
+<h4 class="subsectionHead"><span class="titlemark">11.4.4   </span> <a id="x13-23500011.4.4"></a>A drifting stream</h4>
+<!-- l. 523 --><p class="noindent">Three clusters move along straight lines while 40 chunks of 500 samples are fed to
+<span class="ec-lmtt-10x-x-109">partial_fit </span>(fig. <a href="#x13-235001r13">11.13</a>). The published spFCM and oFCM summarize the whole past,
+so their prototypes sit near the time average of the centers, halfway along the path;
+with <!-- l. 523 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>λ</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>0.5</mn></mrow></math>
+spFCM follows the clusters. The tracking error (fig. <a href="#x13-235002r14">11.14</a>) grows linearly
+for the two published schemes and settles at a small constant for
+<!-- l. 523 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>λ</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>0.5</mn></mrow></math>,
+close to that of a memoryless FCM on the last chunk. The parameter
+study with chunks of 200 samples (fig. <a href="#x13-235003r15">11.15</a>) shows the trade-off
+between lag and noise: without drift, a long memory is best
+(<!-- l. 523 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>λ</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>0.95</mn></mrow></math>, error
+<!-- l. 523 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.014</mn></mrow></math> against
+<!-- l. 523 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.097</mn></mrow></math> for
+<!-- l. 523 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>λ</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>0</mn></mrow></math>); with a drift of
+<!-- l. 523 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.02</mn></mrow></math> per chunk, the
+best factor is <!-- l. 523 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.5</mn></mrow></math>;
+and with <!-- l. 523 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.05</mn></mrow></math> or
+more, it is <!-- l. 523 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.25</mn></mrow></math>.
+</p>
+<figure class="figure">
+<!-- l. 525 --><p class="noindent"><img alt="Figure 11.13" class="exfig" src="figures/08_data_realities/plot_04_stream_drift_1.png"/> <a id="x13-235001r13"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 11.13.  </span></span><span class="content"><span class="ec-lmr-10">The  first  and  the  last  chunk  of  a  drifting  stream  with
+the   true   center   paths   (dotted),   the   prototype   paths   of   spFCM   with</span>
+<!-- l. 525 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>λ</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>1</mn></mrow></math>
+<span class="ec-lmr-10">and </span><!-- l. 525 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>λ</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>0.5</mn></mrow></math><span class="ec-lmr-10">,
+and the final prototypes of the three models.</span> </span></figcaption><!-- tex4ht:label?: x13-235001r13  -->
+<p class="runbox"><a class="colab" href="https://colab.research.google.com/github/ComplexSystemsIntelligence/fuzzyclust/blob/gh-pages/notebooks/auto_examples/08_data_realities/plot_04_stream_drift.ipynb">Open in Colab</a><a href="../auto_examples/08_data_realities/plot_04_stream_drift.html">Example <code>plot_04_stream_drift.py</code> in the gallery</a></p></figure>
+<figure class="figure">
+<!-- l. 526 --><p class="noindent"><img alt="Figure 11.14" class="exfig" src="figures/08_data_realities/plot_04_stream_drift_2.png"/> <a id="x13-235002r14"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 11.14. </span></span><span class="content"><span class="ec-lmr-10">Distance of the prototypes from the current true centers along the
+stream.</span> </span></figcaption><!-- tex4ht:label?: x13-235002r14  -->
+</figure>
+<figure class="figure">
+<!-- l. 527 --><p class="noindent"><img alt="Figure 11.15" class="exfig" src="figures/08_data_realities/plot_04_stream_drift_3.png"/> <a id="x13-235003r15"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 11.15. </span></span><span class="content"><span class="ec-lmr-10">Mean tracking error over the second half of the stream against the
+forgetting factor for four drift speeds; circles mark the best factor.</span> </span></figcaption><!-- tex4ht:label?: x13-235003r15  -->
+</figure>
+<h4 class="subsectionHead"><span class="titlemark">11.4.5   </span> <a id="x13-23600011.4.5"></a>Segmentation under noise</h4>
+<!-- l. 531 --><p class="noindent">A <!-- l. 531 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>128</mn> <mo class="MathClass-bin" stretchy="false">×</mo><mn>128</mn></mrow></math> image with four
+regions at gray levels <!-- l. 531 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mn>0</mn></math>,
+<!-- l. 531 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1</mn><mo class="MathClass-bin" stretchy="false">∕</mo><mn>3</mn></mrow></math>,
+<!-- l. 531 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>2</mn><mo class="MathClass-bin" stretchy="false">∕</mo><mn>3</mn></mrow></math>, and
+<!-- l. 531 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mn>1</mn></math>, and
+one disc of every class inside another region, is segmented by all seven methods
+with <!-- l. 531 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>4</mn></mrow></math>,
+a <!-- l. 531 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>3</mn> <mo class="MathClass-bin" stretchy="false">×</mo><mn>3</mn></mrow></math>
+window, and k-means++ seeding. Under Gaussian noise with
+<!-- l. 531 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>σ</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>0.2</mn></mrow></math> (fig. <a href="#x13-236001r16">11.16</a>),
+pixel-wise FCM labels <!-- l. 531 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>62</mn><mspace class="thinspace" width="0.17em"></mspace><mi>%</mi></mrow></math>
+of the pixels correctly; FCM_S leaves clumps
+(<!-- l. 531 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.91</mn></mrow></math>),
+FCM_S1 and FCM_S2 leave isolated specks
+(<!-- l. 531 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.95</mn></mrow></math>,
+<!-- l. 531 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.94</mn></mrow></math>),
+and EnFCM, FGFCM, and FLICM give clean regions
+(<!-- l. 531 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.96</mn></mrow></math>–<!-- l. 531 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.97</mn></mrow></math>).
+All smoothing methods share one artifact: where the black and
+the white regions meet, the smoothed values are intermediate and a
+one-pixel band is assigned to a gray class. Salt-and-pepper noise on
+<!-- l. 531 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>20</mn><mspace class="thinspace" width="0.17em"></mspace><mi>%</mi></mrow></math>
+of the pixels (fig. <a href="#x13-236002r17">11.17</a>) reverses the picture. The impulses coincide
+with the darkest and the brightest class, so FCM still labels
+<!-- l. 531 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>85</mn><mspace class="thinspace" width="0.17em"></mspace><mi>%</mi></mrow></math> of the
+pixels correctly. The mean-based methods spread the impulses and <span class="ec-lmri-10x-x-109">lose </span>accuracy
+(FCM_S <!-- l. 531 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.68</mn></mrow></math>,
+EnFCM <!-- l. 531 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.80</mn></mrow></math>),
+whereas the median of FCM_S2 removes them
+(<!-- l. 531 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.93</mn></mrow></math>)
+and the adaptive weights of FGFCM ignore them
+(<!-- l. 531 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.92</mn></mrow></math>). FLICM
+(<!-- l. 531 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.72</mn></mrow></math>) moves
+many impulses only halfway: a white pixel in the black region ends up in the
+dark-gray class, because its distance to the black prototype plus the small fuzzy
+                                                                     
+
+                                                                     
+factor of the black class exceeds its smaller distance to the dark-gray prototype
+plus the moderate fuzzy factor of that class. Across the noise levels (fig. <a href="#x13-236003r18">11.18</a>),
+the adaptive methods keep their accuracy longest under Gaussian noise (at
+<!-- l. 531 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>σ</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>0.3</mn></mrow></math>: FLICM
+<!-- l. 531 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.90</mn></mrow></math>, FGFCM
+<!-- l. 531 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.88</mn></mrow></math>, FCM
+<!-- l. 531 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.51</mn></mrow></math>),
+and only FCM_S2 and FGFCM beat FCM consistently under impulse
+noise.
+</p>
+<figure class="figure">
+<!-- l. 533 --><p class="noindent"><img alt="Figure 11.16" class="exfig" src="figures/08_data_realities/plot_05_image_noise_1.png"/> <a id="x13-236001r16"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 11.16.   </span></span><span class="content"><span class="ec-lmr-10">Seven   segmentations   of   an   image   with   Gaussian   noise
+(</span><!-- l. 533 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>σ</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>0.2</mn></mrow></math><span class="ec-lmr-10">);
+the titles give the share of correctly labeled pixels.</span> </span></figcaption><!-- tex4ht:label?: x13-236001r16  -->
+<p class="runbox"><a class="colab" href="https://colab.research.google.com/github/ComplexSystemsIntelligence/fuzzyclust/blob/gh-pages/notebooks/auto_examples/08_data_realities/plot_05_image_noise.ipynb">Open in Colab</a><a href="../auto_examples/08_data_realities/plot_05_image_noise.html">Example <code>plot_05_image_noise.py</code> in the gallery</a></p></figure>
+<figure class="figure">
+<!-- l. 534 --><p class="noindent"><img alt="Figure 11.17" class="exfig" src="figures/08_data_realities/plot_05_image_noise_2.png"/> <a id="x13-236002r17"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 11.17. </span></span><span class="content"><span class="ec-lmr-10">The same image with 20 % salt-and-pepper noise: averaging spreads
+the impulses, whereas the median and the adaptive weights remove them.</span> </span></figcaption><!-- tex4ht:label?: x13-236002r17  -->
+</figure>
+<figure class="figure">
+<!-- l. 535 --><p class="noindent"><img alt="Figure 11.18" class="exfig" src="figures/08_data_realities/plot_05_image_noise_3.png"/> <a id="x13-236003r18"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 11.18. </span></span><span class="content"><span class="ec-lmr-10">Segmentation accuracy against the level of Gaussian (left) and
+salt-and-pepper noise (right).</span> </span></figcaption><!-- tex4ht:label?: x13-236003r18  -->
+</figure>
+<h4 class="subsectionHead"><span class="titlemark">11.4.6   </span> <a id="x13-23700011.4.6"></a>How much neighborhood?</h4>
+<!-- l. 539 --><p class="noindent">Two thin bars, one and two pixels wide, are added to the test image, and the
+accuracy is measured separately on the interior of the regions and on the
+<!-- l. 539 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>11</mn><mspace class="thinspace" width="0.17em"></mspace><mi>%</mi></mrow></math>
+of the pixels next to a region boundary, labeled “detail” in the
+figures (fig. <a href="#x13-237001r19">11.19</a>). For EnFCM under Gaussian noise, increasing
+<!-- l. 539 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>α</mi></math> from
+<!-- l. 539 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mn>0</mn></math> to
+<!-- l. 539 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mn>4</mn></math> raises the interior
+accuracy from <!-- l. 539 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.63</mn></mrow></math> to
+<!-- l. 539 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.99</mn></mrow></math> but lowers the
+boundary accuracy from <!-- l. 539 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.65</mn></mrow></math>
+to <!-- l. 539 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.54</mn></mrow></math>, and the
+one-pixel bar breaks up; larger windows round the corners, shrink the discs, and dissolve
+both bars. The <!-- l. 539 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>α</mi></math>
+scan (fig. <a href="#x13-237002r20">11.20</a>) shows the same trade-off for all three methods
+under Gaussian noise: the boundary accuracy peaks at
+<!-- l. 539 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">≈</mo><mn>0.25</mn></mrow></math>–<!-- l. 539 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mn>1</mn></math>
+for FCM_S and EnFCM and at <!-- l. 539 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">≈</mo><mn>2</mn></mrow></math>
+for the edge-preserving median of FCM_S2. Under salt-and-pepper noise, FCM_S
+and EnFCM gain at most a few points on the interior over pixel-wise FCM
+(<!-- l. 539 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.89</mn></mrow></math>; at best
+<!-- l. 539 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.92</mn></mrow></math> for FCM_S
+at <!-- l. 539 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>16</mn></mrow></math>)
+and lose half of the boundary accuracy (from
+<!-- l. 539 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.90</mn></mrow></math> to below
+<!-- l. 539 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.50</mn></mrow></math>), and FCM_S2
+helps only for <!-- l. 539 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">&gt;</mo> <mn>1</mn></mrow></math>
+(<!-- l. 539 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.92</mn></mrow></math> at
+<!-- l. 539 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>2</mn></mrow></math>,
+<!-- l. 539 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.95</mn></mrow></math> at
+<!-- l. 539 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mn>4</mn></math>, and
+<!-- l. 539 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.999</mn></mrow></math> at
+<!-- l. 539 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mn>8</mn></math>), as
+predicted by the balance of the pixel and median terms. Enlarging the window with
+<!-- l. 539 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>4</mn></mrow></math> (fig. <a href="#x13-237003r21">11.21</a>)
+                                                                     
+
+                                                                     
+costs boundary accuracy for all methods and, for FCM_S, interior accuracy as
+well (<!-- l. 539 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.97</mn></mrow></math>
+at <!-- l. 539 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>5</mn> <mo class="MathClass-bin" stretchy="false">×</mo><mn>5</mn></mrow></math>,
+<!-- l. 539 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.84</mn></mrow></math> at
+<!-- l. 539 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>11</mn> <mo class="MathClass-bin" stretchy="false">×</mo><mn>11</mn></mrow></math>),
+while the median keeps the interior of FCM_S2 at
+<!-- l. 539 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.995</mn></mrow></math>.
+</p>
+<figure class="figure">
+<!-- l. 541 --><p class="noindent"><img alt="Figure 11.19" class="exfig" src="figures/08_data_realities/plot_06_spatial_alpha_window_1.png"/> <a id="x13-237001r19"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 11.19.            </span></span><span class="content"><span class="ec-lmr-10">EnFCM            with            increasing            weight</span>
+<!-- l. 541 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>α</mi></math>
+<span class="ec-lmr-10">in                                                                                                        a</span>
+<!-- l. 541 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>3</mn> <mo class="MathClass-bin" stretchy="false">×</mo><mn>3</mn></mrow></math>
+<span class="ec-lmr-10">window  (top  row  and  bottom  left)  and  with  increasing  window  size  at</span>
+<!-- l. 541 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>4</mn></mrow></math>
+<span class="ec-lmr-10">(rest of the bottom row); the titles give the accuracy on the interior and on the
+boundary (detail) pixels.</span> </span></figcaption><!-- tex4ht:label?: x13-237001r19  -->
+<p class="runbox"><a class="colab" href="https://colab.research.google.com/github/ComplexSystemsIntelligence/fuzzyclust/blob/gh-pages/notebooks/auto_examples/08_data_realities/plot_06_spatial_alpha_window.ipynb">Open in Colab</a><a href="../auto_examples/08_data_realities/plot_06_spatial_alpha_window.html">Example <code>plot_06_spatial_alpha_window.py</code> in the gallery</a></p></figure>
+<figure class="figure">
+<!-- l. 542 --><p class="noindent"><img alt="Figure 11.20" class="exfig" src="figures/08_data_realities/plot_06_spatial_alpha_window_2.png"/> <a id="x13-237002r20"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 11.20.   </span></span><span class="content"><span class="ec-lmr-10">Interior   (solid)   and   boundary   (dashed)   accuracy   against</span>
+<!-- l. 542 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>α</mi></math>
+<span class="ec-lmr-10">for FCM_S, EnFCM, and FCM_S2 under Gaussian (left) and salt-and-pepper
+noise (right).</span> </span></figcaption><!-- tex4ht:label?: x13-237002r20  -->
+</figure>
+<figure class="figure">
+<!-- l. 543 --><p class="noindent"><img alt="Figure 11.21" class="exfig" src="figures/08_data_realities/plot_06_spatial_alpha_window_3.png"/> <a id="x13-237003r21"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 11.21.  </span></span><span class="content"><span class="ec-lmr-10">Interior  and  boundary  accuracy  against  the  window  size  with</span>
+<!-- l. 543 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>4</mn></mrow></math>
+<span class="ec-lmr-10">under Gaussian noise.</span> </span></figcaption><!-- tex4ht:label?: x13-237003r21  -->
+</figure>
+<h3 class="sectionHead"><span class="titlemark">11.5   </span> <a id="x13-23800011.5"></a>Further reading</h3>
+<!-- l. 547 --><p class="noindent">The four strategies for incomplete data are compared in [<a id="x13-238001"></a><a href="bibliography.html#cite.0@hathaway:2001:incomplete">151</a>]; the partial
+distance goes back to Dixon [<a id="x13-238002"></a><a href="bibliography.html#cite.0@dixon:1979:missing">152</a>], and the statistical framework of missing data,
+including the distinction between values missing completely at random and other
+mechanisms, is given in [<a id="x13-238003"></a><a href="bibliography.html#cite.0@little:2002:missing">153</a>]. Havens et al. [<a id="x13-238004"></a><a href="bibliography.html#cite.0@havens:2012:large">156</a>] compare fuzzy c-means
+algorithms for very large data, covering rseFCM, spFCM, oFCM, and their kernel
+versions. Single-pass FCM is introduced in [<a id="x13-238005"></a><a href="bibliography.html#cite.0@hore:2007:spfcm">157</a>], and online FCM and its use for
+large magnetic resonance volumes in [<a id="x13-238006"></a><a href="bibliography.html#cite.0@hore:2009:scalable">158</a>]; earlier work on making each FCM
+iteration cheaper includes [<a id="x13-238007"></a><a href="bibliography.html#cite.0@cannon:1986:efficient">154</a>, <a id="x13-238008"></a><a href="bibliography.html#cite.0@kolen:2002:complexity">155</a>]. The spatially constrained segmentation
+methods are FCM_S [<a id="x13-238009"></a><a href="bibliography.html#cite.0@ahmed:2002:fcms">159</a>], FCM_S1 and FCM_S2 with their kernel versions
+[<a id="x13-238010"></a><a href="bibliography.html#cite.0@chen:2004:fcms12">160</a>], EnFCM [<a id="x13-238011"></a><a href="bibliography.html#cite.0@szilagyi:2003:enfcm">161</a>], FGFCM [<a id="x13-238012"></a><a href="bibliography.html#cite.0@cai:2007:fgfcm">162</a>], and FLICM [<a id="x13-238013"></a><a href="bibliography.html#cite.0@krinidis:2010:flicm">163</a>]. A related approach for
+MR images, which estimates the bias field together with the partition and adds
+a smoothness penalty on that field, is the adaptive fuzzy c-means of
+Pham and Prince [<a id="x13-238014"></a><a href="bibliography.html#cite.0@pham:1999:afcm">164</a>]. All rest on the c-means functional of Bezdek
+[<a id="x13-238015"></a><a href="bibliography.html#cite.0@bezdek:1981">3</a>].
+                                                                     
+
+                                                                     
+</p>
+<!-- l. 1 -->
+<!-- l. 1 --><p class="indent"> <a id="tailmain_webch11.html"></a> </p>
+<nav class='pager'><a class='prev' href='10-clustering-relational-categorical-and-mixed.html'><small>Previous</small>Clustering relational, categorical, and mixed data</a><a class='next' href='12-beyond-a-single-unsupervised-run.html'><small>Next</small>Beyond a single unsupervised run: partial supervision,
+co-clustering, collaboration, and ensembles</a></nav>
+</main>
+<aside class="right"><nav class='onpage' aria-label='On this page'><p class='toc-title'>On this page</p><ul><li><a href='#x13-21000011.1'>11.1 Problem and idea</a></li><li><a href='#x13-21400011.2'>11.2 Theory</a></li><li><a href='#x13-23000011.3'>11.3 Using it in fuzzyclust</a></li><li><a href='#x13-23100011.4'>11.4 Examples</a></li><li><a href='#x13-23800011.5'>11.5 Further reading</a></li></ul></nav></aside>
+</div>
+<footer class='foot'>© 2026 János Abonyi, University of Pannonia · licensed under <a href='https://creativecommons.org/licenses/by/4.0/'>CC BY 4.0</a> · web edition of the book, generated from the same LaTeX source as the <a href='../fuzzyclust-book.pdf'>PDF</a> · software: <a href='https://github.com/ComplexSystemsIntelligence/fuzzyclust'>fuzzyclust</a> (MIT) · <code>pip install fuzzyclust</code></footer>
+</body>
+</html>

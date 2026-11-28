@@ -1,0 +1,12 @@
+﻿fuzzyclust.datasets.make\_curved\_manifold
+==========================================
+
+.. currentmodule:: fuzzyclust.datasets
+
+.. autofunction:: make_curved_manifold
+
+.. include:: fuzzyclust.datasets.make_curved_manifold.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

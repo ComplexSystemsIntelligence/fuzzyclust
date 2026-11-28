@@ -1,0 +1,12 @@
+﻿fuzzyclust.extensions.plot\_shells
+==================================
+
+.. currentmodule:: fuzzyclust.extensions
+
+.. autofunction:: plot_shells
+
+.. include:: fuzzyclust.extensions.plot_shells.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

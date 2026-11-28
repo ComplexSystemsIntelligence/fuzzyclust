@@ -1,0 +1,12 @@
+﻿fuzzyclust.datasets.make\_different\_densities
+==============================================
+
+.. currentmodule:: fuzzyclust.datasets
+
+.. autofunction:: make_different_densities
+
+.. include:: fuzzyclust.datasets.make_different_densities.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

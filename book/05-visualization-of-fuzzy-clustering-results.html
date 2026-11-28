@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>5 Visualization of fuzzy clustering results · Fuzzy Clustering and Data Analysis in Python</title>
+<meta name="description" content="Open-access book on fuzzy clustering and data analysis in Python with the fuzzyclust toolbox: fuzzy c-means, Gustafson-Kessel, Gath-Geva, cluster validity, visualisation, Takagi-Sugeno models, time-series segmentation and more, with runnable Colab examples." />
+<meta name="author" content="János Abonyi" />
+<link rel="canonical" href="https://complexsystemsintelligence.github.io/fuzzyclust/book/05-visualization-of-fuzzy-clustering-results.html" />
+<meta property="og:title" content="5 Visualization of fuzzy clustering results · Fuzzy Clustering and Data Analysis in Python" />
+<meta property="og:type" content="book" />
+<meta property="og:url" content="https://complexsystemsintelligence.github.io/fuzzyclust/book/05-visualization-of-fuzzy-clustering-results.html" />
+<meta property="og:image" content="https://complexsystemsintelligence.github.io/fuzzyclust/book/cover.png" />
+<meta property="og:description" content="Open-access book on fuzzy clustering and data analysis in Python with the fuzzyclust toolbox: fuzzy c-means, Gustafson-Kessel, Gath-Geva, cluster validity, visualisation, Takagi-Sugeno models, time-series segmentation and more, with runnable Colab examples." />
+<link rel="icon" href="../_static/favicon.png" />
+<link rel="stylesheet" href="main_web.css" />
+<link rel="stylesheet" href="web.css" />
+</head>
+<body class="">
+<header class='topbar'><a class='brand' href='index.html'><img src='logo.svg' alt='' width='34' height='34' /><span><b>Fuzzy Clustering and Data Analysis in Python</b><small>The fuzzyclust toolbox</small></span></a><nav class='toplinks'><a href='../'>Documentation</a><a href='../auto_examples/index.html'>Examples</a><a href='../fuzzyclust-book.pdf'>PDF</a><a href='../fuzzyclust-book.epub'>EPUB</a><a href='https://github.com/ComplexSystemsIntelligence/fuzzyclust'>GitHub</a><a class='hub' href='https://complexsystemsintelligence.github.io/#textbooks'>All textbooks</a></nav></header>
+<div class="layout">
+<aside class="left"><nav class='toc' aria-label='Contents'><p class='toc-title'>Contents</p><ol><li><a href='preface.html'><span class='num'></span>Preface</a></li><li><a href='01-introduction.html'><span class='num'>1</span>Introduction</a></li><li><a href='02-foundations-of-prototype-based-clustering.html'><span class='num'>2</span>Foundations of prototype-based clustering</a></li><li><a href='03-hard-and-fuzzy-partitioning-algorithms.html'><span class='num'>3</span>Hard and fuzzy partitioning algorithms</a></li><li><a href='04-cluster-validity-and-the-number.html'><span class='num'>4</span>Cluster validity and the number of clusters</a></li><li class='current'><a href='05-visualization-of-fuzzy-clustering-results.html'><span class='num'>5</span>Visualization of fuzzy clustering results</a></li><li><a href='06-robust-and-shape-oriented-variants.html'><span class='num'>6</span>Robust and shape-oriented variants of fuzzy c-means</a></li><li><a href='07-graph-based-fuzzy-clustering.html'><span class='num'>7</span>Graph-based fuzzy clustering</a></li><li><a href='08-clustering-for-model-identification.html'><span class='num'>8</span>Clustering for model identification</a></li><li><a href='09-clustering-of-time-series.html'><span class='num'>9</span>Clustering of time series</a></li><li><a href='10-clustering-relational-categorical-and-mixed.html'><span class='num'>10</span>Clustering relational, categorical, and mixed data</a></li><li><a href='11-incomplete-very-large-and-image.html'><span class='num'>11</span>Incomplete, very large, and image data</a></li><li><a href='12-beyond-a-single-unsupervised-run.html'><span class='num'>12</span>Beyond a single unsupervised run: partial supervision,
+co-clustering, collaboration, and ensembles</a></li><li><a href='a-api-reference.html'><span class='num'>A</span>API reference</a></li><li><a href='b-migrating-from-the-matlab-toolbox.html'><span class='num'>B</span>Migrating from the MATLAB toolbox</a></li><li><a href='c-the-example-gallery.html'><span class='num'>C</span>The example gallery</a></li><li><a href='bibliography.html'><span class='num'></span>Bibliography</a></li></ol></nav></aside>
+<main class="content">
+
+<!-- l. 1 -->
+<h2 class="chapterHead"><span class="titlemark">Chapter 5</span><br/><a id="x7-870005"></a>Visualization of fuzzy clustering results</h2>
+<div class="box roadmap">
+<!-- l. 3 --><p class="indent">   The previous chapter judged a fuzzy partition by validity indices, that is, by
+single numbers. This chapter projects the data <span class="ec-lmri-10x-x-109">and </span>the cluster prototypes to the
+plane, so that the analyst can see whether the clusters are compact, whether
+two of them overlap, or whether a prototype of the wrong shape was
+fitted. We start with the two classical projections, PCA and Sammon
+mapping, explain why neither shows a fuzzy clustering faithfully, and
+derive the fuzzy Sammon mapping (FUZZSAM), which preserves the
+<!-- l. 3 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>N</mi> <mo class="MathClass-bin" stretchy="false">×</mo><mi>c</mi></mrow></math>
+sample–prototype distances the clustering algorithm worked with rather than the
+distances between samples; measures of the quality of a projection follow. The
+fuzzy self-organizing map takes the opposite route: it arranges the prototypes on
+a grid during clustering, so that the result is a map by construction. All methods
+are in <span class="ec-lmtt-10x-x-109">fuzzyclust.viz</span>.
+</p>
+</div>
+<h3 class="sectionHead"><span class="titlemark">5.1   </span> <a id="x7-880005.1"></a>Problem and idea</h3>
+<!-- l. 8 --><p class="noindent">Clustering algorithms always fit their prototypes to the data, whether or not the
+assumed cluster structure is adequate. In two dimensions the analyst sees at once
+whether a spherical prototype was forced onto an elongated group or two groups
+were merged. In a typical data mining problem the data have tens of attributes,
+the clusters are high-dimensional geometric objects, and this inspection
+is impossible. Validity indices (chapter <a href="04-cluster-validity-and-the-number.html#x6-680004">4</a>) compress the partition into
+a scalar; they are indispensable for ranking candidate partitions, but
+the compression loses the information on <span class="ec-lmri-10x-x-109">where </span>and <span class="ec-lmri-10x-x-109">why </span>a partition is
+poor.
+</p><!-- l. 10 --><p class="indent">   A low-dimensional picture of the clustering is therefore a tool
+in its own right [<a id="x7-88001"></a><a href="bibliography.html#cite.0@kovacs:2002:fuzzsam">49</a>, <a id="x7-88002"></a><a href="bibliography.html#cite.0@abonyi:2004:fuzzsam">50</a>, <a id="x7-88003"></a><a href="bibliography.html#cite.0@feil:2007:fuzzsam">51</a>]. Two classical projection methods are at
+hand. Principal component analysis (PCA) is a linear projection onto
+the plane of largest variance; Sammon’s nonlinear mapping [<a id="x7-88004"></a><a href="bibliography.html#cite.0@sammon:1969">52</a>] places
+<!-- l. 10 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>N</mi></math>
+points in the plane so that their mutual Euclidean distances reproduce the
+<!-- l. 10 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>N</mi><mo class="MathClass-open" stretchy="false">(</mo><mi>N</mi> <mo class="MathClass-bin" stretchy="false">−</mo><mn>1</mn><mo class="MathClass-close" stretchy="false">)</mo><mo class="MathClass-bin" stretchy="false">∕</mo><mn>2</mn></mrow></math>
+                                                                     
+
+                                                                     
+distances of the original samples. Both methods project the <span class="ec-lmri-10x-x-109">data</span>. A fuzzy clustering,
+however, is not defined by the distances between samples: it is defined by the
+<!-- l. 10 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>N</mi> <mo class="MathClass-bin" stretchy="false">×</mo><mi>c</mi></mrow></math> distances
+<!-- l. 10 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mi>d</mi><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub><mo class="MathClass-punc" stretchy="false">,</mo><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>
+between the samples and the prototypes, measured with the
+norm of the algorithm (Euclidean for FCM, the adaptive norm
+<!-- l. 10 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>A</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></math> of
+Gustafson–Kessel, the exponential distance of Gath–Geva, the distance to a line
+or a shell for the variants of chapter <a href="06-robust-and-shape-oriented-variants.html#x8-1020006">6</a>), and by the memberships derived from
+them. Two consequences follow: </p>
+<ul class="itemize1">
+<li class="itemize">a  projection  of  the  data  cannot  represent  a  clustering  that  uses  a
+     non-Euclidean distance; a Gustafson–Kessel ellipsoid appears as an
+     ellipsoid in the PCA plane, although the algorithm “sees” it as a sphere
+     in its own norm, and the prototype of a line or shell cluster has no
+     natural position in the picture at all;
+     </li>
+<li class="itemize">the <!-- l. 13 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>N</mi><mo class="MathClass-open" stretchy="false">(</mo><mi>N</mi> <mo class="MathClass-bin" stretchy="false">−</mo><mn>1</mn><mo class="MathClass-close" stretchy="false">)</mo><mo class="MathClass-bin" stretchy="false">∕</mo><mn>2</mn></mrow></math>
+     pairwise distances of Sammon mapping make every iteration quadratic
+     in <!-- l. 13 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>N</mi></math>,
+     while the clustering itself needs only <!-- l. 13 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi mathvariant="italic">Nc</mi></mrow></math>
+     distances per iteration.</li></ul>
+<!-- l. 16 --><p class="indent">   The fuzzy Sammon mapping resolves both problems with one idea (fig. <a href="#x7-88005r1">5.1</a>): it looks
+for <!-- l. 16 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>N</mi></math> projected
+samples <!-- l. 16 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mstyle mathvariant="bold"><mi>y</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">∈</mo> <msup><mrow><mi>ℝ</mi></mrow><mrow><mi>q</mi></mrow></msup></mrow></math>
+(<!-- l. 16 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>q</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>2</mn></mrow></math>) and
+<!-- l. 16 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>c</mi></math> projected centers
+<!-- l. 16 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mstyle mathvariant="bold"><mi>z</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">∈</mo> <msup><mrow><mi>ℝ</mi></mrow><mrow><mi>q</mi></mrow></msup></mrow></math> such that the Euclidean
+distances <!-- l. 16 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msubsup><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msubsup> <mo class="MathClass-rel" stretchy="false">=</mo> <mrow><mo fence="true" form="prefix"> ‖</mo><mrow><msub><mrow><mstyle mathvariant="bold"><mi>y</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mstyle mathvariant="bold"><mi>z</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></mrow><mo fence="true" form="postfix">‖</mo></mrow></mrow></math> in the plane
+reproduce the distances <!-- l. 16 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub></math>
+of the clustering algorithm, each pair weighted by
+<!-- l. 16 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup></math>.
+Every cluster becomes a single point in the plane regardless of the shape of its
+prototype, the memberships can be recomputed from the picture with the FCM
+formula, and the agreement between recomputed and fitted memberships tells
+how faithful the picture is. The fuzzy self-organizing map, finally, does not
+project an existing partition but constrains the prototypes to a grid while
+                                                                     
+
+                                                                     
+clustering; the grid <span class="ec-lmri-10x-x-109">is </span>the picture.
+</p>
+<figure class="figure">
+<!-- l. 19 --><p class="noindent"><img alt="Figure 5.1" src="main_web24x.svg"/>
+<a id="x7-88005r1"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 5.1.  </span></span><span class="content"><span class="ec-lmr-10">The  idea  of  the  fuzzy  Sammon  mapping.  Left:  in  the  original
+space   the   clustering   algorithm   measures   the   distance   of   every   sample</span>
+<!-- l. 80 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub></math>
+<span class="ec-lmr-10">to every prototype </span><!-- l. 80 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></math>
+<span class="ec-lmr-10">in       its       own       norm       (dashed       lines;       for       Gustafson–Kessel
+the      clusters      are      ellipsoids).      Right:      the      projected      samples</span>
+<!-- l. 80 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>y</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub></math>
+<span class="ec-lmr-10">and centers </span><!-- l. 80 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>z</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></math>
+<span class="ec-lmr-10">are          placed          so          that          the          Euclidean          distances</span>
+<!-- l. 80 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msubsup><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msubsup></math>
+<span class="ec-lmr-10">in the plane reproduce the </span><!-- l. 80 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub></math><span class="ec-lmr-10">,
+weighted by the memberships. Only </span><!-- l. 80 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>N</mi> <mo class="MathClass-bin" stretchy="false">×</mo><mi>c</mi></mrow></math>
+<span class="ec-lmr-10">distances are involved, and in the plane every cluster is a point surrounded by
+nearly circular membership contours (exact circles for two clusters).</span>
+</span></figcaption><!-- tex4ht:label?: x7-88005r1  -->
+</figure>
+<h3 class="sectionHead"><span class="titlemark">5.2   </span> <a id="x7-890005.2"></a>Theory</h3>
+<!-- l. 86 --><p class="noindent">Throughout the chapter <!-- l. 86 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mstyle mathvariant="bold"><mi>X</mi></mstyle> <mo class="MathClass-rel" stretchy="false">=</mo> <msup><mrow><mo class="MathClass-open" stretchy="false">[</mo><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mn>1</mn></mrow></msub><mo class="MathClass-punc" stretchy="false">,</mo><mi>…</mi><mo class="MathClass-punc" stretchy="false">,</mo><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>N</mi></mrow></msub><mo class="MathClass-close" stretchy="false">]</mo></mrow><mrow><mstyle mathvariant="sans-serif"><mi>T</mi></mstyle></mrow></msup> <mo class="MathClass-rel" stretchy="false">∈</mo> <msup><mrow><mi>ℝ</mi></mrow><mrow><mi>N</mi><mo class="MathClass-bin" stretchy="false">×</mo><mi>n</mi></mrow></msup></mrow></math>
+is the data matrix, <!-- l. 86 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mstyle mathvariant="bold"><mi>V</mi></mstyle> <mo class="MathClass-rel" stretchy="false">=</mo> <msup><mrow><mo class="MathClass-open" stretchy="false">[</mo><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mn>1</mn></mrow></msub><mo class="MathClass-punc" stretchy="false">,</mo><mi>…</mi><mo class="MathClass-punc" stretchy="false">,</mo><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>c</mi></mrow></msub><mo class="MathClass-close" stretchy="false">]</mo></mrow><mrow><mstyle mathvariant="sans-serif"><mi>T</mi></mstyle></mrow></msup></mrow></math>
+the prototypes, <!-- l. 86 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mstyle mathvariant="bold"><mi>U</mi></mstyle> <mo class="MathClass-rel" stretchy="false">=</mo> <mo class="MathClass-open" stretchy="false">[</mo><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><mo class="MathClass-close" stretchy="false">]</mo> <mo class="MathClass-rel" stretchy="false">∈</mo> <msup><mrow><mi>ℝ</mi></mrow><mrow><mi>c</mi><mo class="MathClass-bin" stretchy="false">×</mo><mi>N</mi></mrow></msup></mrow></math> the
+fuzzy partition, and <!-- l. 86 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mi>d</mi><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub><mo class="MathClass-punc" stretchy="false">,</mo><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>
+the (not squared) distance of the clustering algorithm; in the code
+<!-- l. 86 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mstyle mathvariant="bold"><mi>U</mi></mstyle></math> is
+stored transposed as <span class="ec-lmtt-10x-x-109">membership_ </span>of shape <span class="ec-lmtt-10x-x-109">(n_samples, n_clusters) </span>and
+<!-- l. 86 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub></math>
+is returned by <span class="ec-lmtt-10x-x-109">transform</span>. The projection has dimension
+<!-- l. 86 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>q</mi></math> (two in all pictures);
+<!-- l. 86 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mstyle mathvariant="bold"><mi>y</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">∈</mo> <msup><mrow><mi>ℝ</mi></mrow><mrow><mi>q</mi></mrow></msup></mrow></math> denotes the
+projected sample and <!-- l. 86 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mstyle mathvariant="bold"><mi>z</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">∈</mo> <msup><mrow><mi>ℝ</mi></mrow><mrow><mi>q</mi></mrow></msup></mrow></math>
+the projected prototype. We first review the two classical data projections
+(sections <a href="#x7-900005.2.1">5.2.1</a> and <a href="#x7-910005.2.2">5.2.2</a>), then derive FUZZSAM (section <a href="#x7-920005.2.3">5.2.3</a>) and the
+measures of projection quality (section <a href="#x7-930005.2.4">5.2.4</a>), and finally present the fuzzy
+self-organizing map (section <a href="#x7-940005.2.5">5.2.5</a>).
+</p><!-- l. 88 --><p class="noindent">
+</p>
+<h4 class="subsectionHead"><span class="titlemark">5.2.1   </span> <a id="x7-900005.2.1"></a>Principal component projection</h4>
+<!-- l. 90 --><p class="noindent">PCA [<a id="x7-90001"></a><a href="bibliography.html#cite.0@jolliffe:2002">53</a>] projects the centered data onto the
+<!-- l. 90 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>q</mi></math> eigenvectors
+<!-- l. 90 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mstyle mathvariant="bold"><mi>w</mi></mstyle></mrow><mrow><mn>1</mn></mrow></msub><mo class="MathClass-punc" stretchy="false">,</mo><mi>…</mi><mo class="MathClass-punc" stretchy="false">,</mo><msub><mrow><mstyle mathvariant="bold"><mi>w</mi></mstyle></mrow><mrow><mi>q</mi></mrow></msub></mrow></math> of
+the covariance matrix </p><table class="equation"><tr><td>
+<!-- l. 91 --><p class="indent">
+</p><!-- l. 91 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x7-90002r1"></mstyle><!-- endlabel --><mstyle mathvariant="bold"><mi>F</mi></mstyle> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><mn>1</mn></mrow>
+<mrow><mi>N</mi></mrow></mfrac><munderover accent="false" accentunder="false"><mrow><mo>∑</mo>
+</mrow><mrow><mi>k</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>N</mi></mrow></munderover><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow>
+<mi>k</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><mover accent="true"><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mo accent="true">¯</mo></mover><mo class="MathClass-close" stretchy="false">)</mo><msup><mrow><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><mover accent="true"><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mo accent="true">¯</mo></mover><mo class="MathClass-close" stretchy="false">)</mo></mrow><mrow><mstyle mathvariant="sans-serif"><mi>T</mi></mstyle></mrow></msup><mo class="MathClass-punc" stretchy="false">,</mo><mspace class="qquad" width="2em"></mspace><msub><mrow><mstyle mathvariant="bold"><mi>y</mi></mstyle></mrow><mrow>
+<mi>k</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo><msup><mrow> <mstyle mathvariant="bold"><mi>W</mi></mstyle></mrow><mrow><mstyle mathvariant="sans-serif"><mi>T</mi></mstyle></mrow></msup><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow>
+<mi>k</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><mover accent="true"><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mo accent="true">¯</mo></mover><mo class="MathClass-close" stretchy="false">)</mo><mo class="MathClass-punc" stretchy="false">,</mo><mspace class="quad" width="1em"></mspace><mstyle mathvariant="bold"><mi>W</mi></mstyle> <mo class="MathClass-rel" stretchy="false">=</mo> <mo class="MathClass-open" stretchy="false">[</mo><msub><mrow><mstyle mathvariant="bold"><mi>w</mi></mstyle></mrow><mrow><mn>1</mn></mrow></msub><mo class="MathClass-punc" stretchy="false">,</mo><mo>…</mo><mo class="MathClass-punc" stretchy="false">,</mo><msub><mrow><mstyle mathvariant="bold"><mi>w</mi></mstyle></mrow><mrow><mi>q</mi></mrow></msub><mo class="MathClass-close" stretchy="false">]</mo><mo class="MathClass-punc" stretchy="false">,</mo>
+</mrow></math></td><td class="eq-no">(5.1)</td></tr></table>
+<!-- l. 96 --><p class="indent">   belonging to the <!-- l. 96 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>q</mi></math>
+largest eigenvalues. The plane captures the largest possible share of the total variance,
+and the ratio of the retained eigenvalues to their sum tells how large this share is.
+Because the map is affine, the prototypes are projected with the same formula,
+<!-- l. 96 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mstyle mathvariant="bold"><mi>z</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo><msup><mrow> <mstyle mathvariant="bold"><mi>W</mi></mstyle></mrow><mrow><mstyle mathvariant="sans-serif"><mi>T</mi></mstyle></mrow></msup><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><mover accent="true"><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mo accent="true">¯</mo></mover><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>; for Euclidean
+prototypes (FCM) the <!-- l. 96 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>z</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></math>
+coincide with the membership-weighted means of the projected data. PCA is fast,
+deterministic, and applicable to new samples, but it preserves variance, not
+distances: clusters that differ in low-variance directions fall on top of each
+other, and nothing in the picture refers to the norm of the clustering
+algorithm.
+</p>
+<p><img alt="Algorithm" class="algobox" src="main_web25x.svg"/><a id="x7-90003r1"></a><a id="x7-90004r14"></a><a id="x7-90005r1"></a><a id="x7-90006r2"></a><a id="x7-90007r3"></a><a id="x7-90008r4"></a> </p><div class="box summarybox">
+<!-- l. 108 --><p class="noindent"><span class="ec-lmbx-10x-x-109">In a nutshell: PCA projection</span>
+</p>
+<ul class="itemize1">
+<li class="itemize">Linear, variance-preserving projection onto the plane of the first two
+     principal components.
+     </li>
+<li class="itemize">Prototypes are mapped with the same affine transform, so data and
+     centers stay consistent.
+     </li>
+<li class="itemize">Deterministic, cheap, extendable to new data; the natural starting
+     point of the nonlinear methods.
+     </li>
+<li class="itemize">Ignores distances and the algorithm’s norm; compact high-dimensional
+     clusters may overlap in the plane.</li></ul>
+</div>
+<!-- l. 117 --><p class="noindent">
+</p>
+<h4 class="subsectionHead"><span class="titlemark">5.2.2   </span> <a id="x7-910005.2.2"></a>Sammon mapping</h4>
+<!-- l. 119 --><p class="noindent">Sammon’s mapping [<a id="x7-91001"></a><a href="bibliography.html#cite.0@sammon:1969">52</a>] is a multidimensional scaling method. It looks for
+<!-- l. 119 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>N</mi></math> points
+<!-- l. 119 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mstyle mathvariant="bold"><mi>y</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">∈</mo> <msup><mrow><mi>ℝ</mi></mrow><mrow><mi>q</mi></mrow></msup></mrow></math> whose pairwise
+distances <!-- l. 119 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msubsup><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">kl</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msubsup> <mo class="MathClass-rel" stretchy="false">=</mo> <mrow><mo fence="true" form="prefix"> ‖</mo><mrow><msub><mrow><mstyle mathvariant="bold"><mi>y</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mstyle mathvariant="bold"><mi>y</mi></mstyle></mrow><mrow><mi>l</mi></mrow></msub></mrow><mo fence="true" form="postfix">‖</mo></mrow></mrow></math> approximate
+the pairwise distances <!-- l. 119 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">kl</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mrow><mo fence="true" form="prefix"> ‖</mo><mrow><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>l</mi></mrow></msub></mrow><mo fence="true" form="postfix">‖</mo></mrow></mrow></math>
+of the original data by minimizing the <span class="ec-lmri-10x-x-109">stress</span> </p><table class="equation"><tr><td>
+<!-- l. 120 --><p class="indent">
+</p><!-- l. 120 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x7-91002r2"></mstyle><!-- endlabel --><mi>E</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><mn>1</mn></mrow>
+<mrow><mi>λ</mi></mrow></mfrac><msub><mrow><mo>∑</mo>
+</mrow><mrow><mi>k</mi><mo class="MathClass-rel" stretchy="false">&lt;</mo><mi>l</mi></mrow></msub><mfrac><mrow><msup><mrow><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">kl</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msubsup><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">kl</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msubsup><mo class="MathClass-close" stretchy="false">)</mo></mrow><mrow><mn>2</mn></mrow></msup></mrow>
+<mrow><msub><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">kl</mi></mrow></msub></mrow></mfrac> <mo class="MathClass-punc" stretchy="false">,</mo><mspace class="qquad" width="2em"></mspace><mi>λ</mi> <mo class="MathClass-rel" stretchy="false">=</mo><msub><mrow><mo> ∑</mo>
+</mrow><mrow><mi>k</mi><mo class="MathClass-rel" stretchy="false">&lt;</mo><mi>l</mi></mrow></msub><msub><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">kl</mi></mrow></msub><mo class="MathClass-punc" stretchy="false">.</mo>
+</mrow></math></td><td class="eq-no">(5.2)</td></tr></table>
+<!-- l. 124 --><p class="indent">   The division by <!-- l. 124 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">kl</mi></mrow></msub></math>
+gives small distances a larger weight than a plain least-squares
+fit would, so that the local structure is preserved; the constant
+                                                                     
+
+                                                                     
+<!-- l. 124 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>λ</mi></math> only normalizes
+<!-- l. 124 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>E</mi></math> and does not change
+the optimum. <!-- l. 124 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>E</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>0</mn></mrow></math>
+means that every distance is reproduced exactly. The minimization in the
+<!-- l. 124 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi mathvariant="italic">Nq</mi></mrow></math> coordinates
+<!-- l. 124 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>y</mi></mrow><mrow><mi mathvariant="italic">kl</mi></mrow></msub></math> is
+carried out by Sammon’s diagonal Newton step with step size (“magic factor”)
+<!-- l. 124 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>α</mi></math>,
+</p><table class="equation"><tr><td>
+<!-- l. 125 --><p class="indent">
+</p><!-- l. 125 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x7-91003r3"></mstyle><!-- endlabel --><msub><mrow><mi>y</mi></mrow><mrow><mi mathvariant="italic">kl</mi></mrow></msub><mo class="MathClass-open" stretchy="false">(</mo><mi>t</mi> <mo class="MathClass-bin" stretchy="false">+</mo> <mn>1</mn><mo class="MathClass-close" stretchy="false">)</mo> <mo class="MathClass-rel" stretchy="false">=</mo> <msub><mrow><mi>y</mi></mrow><mrow><mi mathvariant="italic">kl</mi></mrow></msub><mo class="MathClass-open" stretchy="false">(</mo><mi>t</mi><mo class="MathClass-close" stretchy="false">)</mo> <mo class="MathClass-bin" stretchy="false">−</mo><mi>α</mi><mspace class="thinspace" width="0.17em"></mspace> <mfrac><mrow><mi mathvariant="italic">∂E</mi><mo class="MathClass-bin" stretchy="false">∕</mo><mi>∂</mi><msub><mrow><mi>y</mi></mrow><mrow><mi mathvariant="italic">kl</mi></mrow></msub></mrow>
+<mrow> <mrow><mo fence="true" form="prefix"> |</mo><mrow><msup><mrow><mi>∂</mi></mrow><mrow><mn>2</mn></mrow></msup><mi>E</mi><mo class="MathClass-bin" stretchy="false">∕</mo><mi>∂</mi><msubsup><mrow><mi>y</mi></mrow><mrow><mi mathvariant="italic">kl</mi></mrow><mrow><mn>2</mn></mrow></msubsup></mrow><mo fence="true" form="postfix">|</mo></mrow> </mrow></mfrac><mo class="MathClass-punc" stretchy="false">,</mo>
+</mrow></math></td><td class="eq-no">(5.3)</td></tr></table>
+<!-- l. 129 --><p class="indent">   with
+</p><!-- tex4ht:inline --><!-- l. 133 --><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mtable class="align" columnalign="left" displaystyle="true">
+<mtr><mtd class="align-odd" columnalign="right"> <mfrac><mrow><mi mathvariant="italic">∂E</mi></mrow>
+<mrow><mi>∂</mi><msub><mrow><mi>y</mi></mrow><mrow><mi mathvariant="italic">kl</mi></mrow></msub></mrow></mfrac></mtd> <mtd class="align-even"> <mo class="MathClass-rel" stretchy="false">=</mo> <mo class="MathClass-bin" stretchy="false">−</mo><mfrac><mrow><mn>2</mn></mrow>
+<mrow><mi>λ</mi></mrow></mfrac><msub><mrow><mo>∑</mo>
+</mrow><mrow><mi>j</mi><mo class="MathClass-rel" stretchy="false">≠</mo><mi>k</mi></mrow></msub><mfrac><mrow><msub><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">kj</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msubsup><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">kj</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msubsup></mrow>
+<mrow><msub><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">kj</mi></mrow></msub><msubsup><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">kj</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msubsup></mrow></mfrac> <mspace class="thinspace" width="0.17em"></mspace><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mi>y</mi></mrow><mrow><mi mathvariant="italic">kl</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mi>y</mi></mrow><mrow><mi mathvariant="italic">jl</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo><mo class="MathClass-punc" stretchy="false">,</mo><mspace width="2em"></mspace></mtd> <mtd class="align-label" columnalign="right"><mstyle class="label" id="x7-91004r4"></mstyle><!-- endlabel --><mstyle class="maketag"><mtext>(5.4)</mtext></mstyle><mspace class="nbsp" width="0.33em"></mspace>
+</mtd></mtr><mtr><mtd class="align-odd" columnalign="right"> <mfrac><mrow><msup><mrow><mi>∂</mi></mrow><mrow><mn>2</mn></mrow></msup><mi>E</mi></mrow>
+<mrow><mi>∂</mi><msubsup><mrow><mi>y</mi></mrow><mrow><mi mathvariant="italic">kl</mi></mrow><mrow><mn>2</mn></mrow></msubsup></mrow></mfrac></mtd> <mtd class="align-even"> <mo class="MathClass-rel" stretchy="false">=</mo> <mo class="MathClass-bin" stretchy="false">−</mo><mfrac><mrow><mn>2</mn></mrow>
+<mrow><mi>λ</mi></mrow></mfrac><msub><mrow><mo>∑</mo>
+</mrow><mrow><mi>j</mi><mo class="MathClass-rel" stretchy="false">≠</mo><mi>k</mi></mrow></msub> <mfrac><mrow><mn>1</mn></mrow>
+<mrow><msub><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">kj</mi></mrow></msub><msubsup><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">kj</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msubsup></mrow></mfrac> <mrow><mo fence="true" form="prefix"> [</mo><mrow><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">kj</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msubsup><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">kj</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msubsup><mo class="MathClass-close" stretchy="false">)</mo> <mo class="MathClass-bin" stretchy="false">−</mo> <mfrac><mrow><msup><mrow><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mi>y</mi></mrow><mrow><mi mathvariant="italic">kl</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mi>y</mi></mrow><mrow><mi mathvariant="italic">jl</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow><mrow><mn>2</mn></mrow></msup></mrow>
+<mrow><msubsup><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">kj</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msubsup></mrow></mfrac> <mrow><mo fence="true" form="prefix"> (</mo><mrow><mn>1</mn> <mo class="MathClass-bin" stretchy="false">+</mo> <mfrac><mrow><msub><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">kj</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msubsup><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">kj</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msubsup></mrow>
+<mrow><msubsup><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">kj</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msubsup></mrow></mfrac> </mrow><mo fence="true" form="postfix">)</mo></mrow></mrow><mo fence="true" form="postfix">]</mo></mrow><mo class="MathClass-punc" stretchy="false">.</mo><mspace width="2em"></mspace></mtd> <mtd class="align-label" columnalign="right"><mstyle class="label" id="x7-91005r5"></mstyle><!-- endlabel --><mstyle class="maketag"><mtext>(5.5)</mtext></mstyle><mspace class="nbsp" width="0.33em"></mspace>
+</mtd></mtr></mtable></math>
+<!-- l. 134 --><p class="noindent">Sammon  recommended
+<!-- l. 134 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">≈</mo><mn>0.3</mn></mrow></math>–<!-- l. 134 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.4</mn></mrow></math>.
+                                                                     
+
+                                                                     
+The denominator in (<a href="#x7-91003r3">5.3<!-- tex4ht:ref: eq:viz:newton  --></a>) is a curvature along one coordinate and can be
+arbitrarily small for single points, in which case the step throws them far away;
+<span class="ec-lmtt-10x-x-109">fuzzyclust </span>therefore clips outlying displacements and halves the step when the
+stress would increase, which in practice keeps the stress history monotone (the
+raw update is available with <span class="ec-lmtt-10x-x-109">backtracking=False</span>). The stress surface has local
+minima, so the initial configuration matters: random starts give different maps,
+whereas the principal component scores give a deterministic and usually good
+start [<a id="x7-91006"></a><a href="bibliography.html#cite.0@mao:1995">54</a>]. Two properties limit the method for clustering: every iteration needs
+all <!-- l. 134 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>N</mi><mo class="MathClass-open" stretchy="false">(</mo><mi>N</mi> <mo class="MathClass-bin" stretchy="false">−</mo><mn>1</mn><mo class="MathClass-close" stretchy="false">)</mo><mo class="MathClass-bin" stretchy="false">∕</mo><mn>2</mn></mrow></math>
+distances, which becomes impractical for large
+<!-- l. 134 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>N</mi></math> [<a id="x7-91007"></a><a href="bibliography.html#cite.0@deridder:1997">55</a>],
+and there is no out-of-sample extension—a new point requires a new
+optimization [<a id="x7-91008"></a><a href="bibliography.html#cite.0@pal:1998">56</a>]. Prototypes are not part of the mapping; for Euclidean
+clusterings they can be placed at the weighted means of the projected data
+afterward.
+</p>
+<p><img alt="Algorithm" class="algobox" src="main_web26x.svg"/><a id="x7-91009r2"></a><a id="x7-91010r15"></a><a id="x7-91011r1"></a><a id="x7-91012r2"></a><a id="x7-91013r3"></a><a id="x7-91014r4"></a><a id="x7-91015r5"></a><a id="x7-91016r6"></a><a id="x7-91017r7"></a><a id="x7-91018r8"></a><a id="x7-91019r9"></a> </p><div class="box summarybox">
+<!-- l. 152 --><p class="noindent"><span class="ec-lmbx-10x-x-109">In a nutshell: Sammon mapping</span>
+</p>
+<ul class="itemize1">
+<li class="itemize">Nonlinear projection that preserves the <!-- l. 154 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>N</mi><mo class="MathClass-open" stretchy="false">(</mo><mi>N</mi> <mo class="MathClass-bin" stretchy="false">−</mo><mn>1</mn><mo class="MathClass-close" stretchy="false">)</mo><mo class="MathClass-bin" stretchy="false">∕</mo><mn>2</mn></mrow></math>
+     pairwise Euclidean distances of the samples; small distances weigh
+     more.
+     </li>
+<li class="itemize">Iterative diagonal Newton descent of the stress <!-- l. 155 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>E</mi></math>;
+     step size <!-- l. 155 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">≈</mo><mn>0.3</mn></mrow></math>–<!-- l. 155 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.4</mn></mrow></math>,
+     initialize from PCA.
+     </li>
+<li class="itemize">Cost quadratic in <!-- l. 156 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>N</mi></math>
+     per iteration; local minima; no mapping of new samples.
+     </li>
+<li class="itemize">Shows the geometry of the <span class="ec-lmri-10x-x-109">data</span>; knows nothing about the prototypes
+     or the norm of the clustering algorithm.</li></ul>
+</div>
+<!-- l. 161 --><p class="noindent">
+</p>
+<h4 class="subsectionHead"><span class="titlemark">5.2.3   </span> <a id="x7-920005.2.3"></a>Fuzzy Sammon mapping (FUZZSAM)</h4>
+<!-- l. 163 --><p class="noindent">A fuzzy clustering algorithm minimizes
+<!-- l. 163 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>J</mi> <mo class="MathClass-rel" stretchy="false">=</mo><msub><mrow> <mi class="MathClass-op">∑</mi><mo> ⁡<!-- FUNCTION APPLICATION --></mo>
+<!-- nolimits --></mrow><mrow><mi>i</mi></mrow></msub><msub><mrow><mo> ∑</mo>
+<!-- nolimits --></mrow><mrow><mi>k</mi></mrow></msub><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup><msubsup><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup></mrow></math>: only
+the distances between samples and prototypes matter, and each of them matters
+in proportion to the membership. The fuzzy Sammon mapping [<a id="x7-92001"></a><a href="bibliography.html#cite.0@kovacs:2002:fuzzsam">49</a>, <a id="x7-92002"></a><a href="bibliography.html#cite.0@abonyi:2004:fuzzsam">50</a>, <a id="x7-92003"></a><a href="bibliography.html#cite.0@feil:2007:fuzzsam">51</a>]
+carries this structure over to the projection. It looks for projected samples
+<!-- l. 163 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>y</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub></math> and projected
+centers <!-- l. 163 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>z</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></math>
+such that </p><table class="equation"><tr><td>
+<!-- l. 164 --><p class="indent">
+</p><!-- l. 164 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x7-92004r6"></mstyle><!-- endlabel --><msub><mrow><mi>E</mi></mrow><mrow><mstyle class="text"><mtext>fuzz</mtext></mstyle></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo><munderover accent="false" accentunder="false"><mrow><mo> ∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><munderover accent="false" accentunder="false"><mrow><mtext> ∑</mtext></mrow><mrow>
+<mi>k</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>N</mi></mrow></munderover><msubsup><mrow><mi>μ</mi></mrow><mrow>
+<mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup><msup><mrow><mrow><mo class="MathClass-open" fence="true" mathsize="1.19em">(</mo><mrow><msub><mrow><mi>D</mi></mrow><mrow>
+<mi mathvariant="italic">ik</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msubsup><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msubsup></mrow><mo class="MathClass-close" fence="true" mathsize="1.19em">)</mo></mrow></mrow><mrow><mn>2</mn></mrow></msup><mo class="MathClass-punc" stretchy="false">,</mo><mspace class="qquad" width="2em"></mspace><msubsup><mrow><mi>d</mi></mrow><mrow>
+<mi mathvariant="italic">ik</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msubsup> <mo class="MathClass-rel" stretchy="false">=</mo> <mrow><mo fence="true" form="prefix"> ‖</mo><mrow><msub><mrow><mstyle mathvariant="bold"><mi>y</mi></mstyle></mrow><mrow>
+<mi>k</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mstyle mathvariant="bold"><mi>z</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></mrow><mo fence="true" form="postfix">‖</mo></mrow> <mo class="MathClass-punc" stretchy="false">,</mo>
+</mrow></math></td><td class="eq-no">(5.6)</td></tr></table>
+<!-- l. 168 --><p class="indent">   is minimal, where <!-- l. 168 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mi>d</mi><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub><mo class="MathClass-punc" stretchy="false">,</mo><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>
+is the distance <span class="ec-lmri-10x-x-109">of the clustering algorithm</span>. Three things change with respect to (<a href="#x7-91002r2">5.2<!-- tex4ht:ref: eq:viz:stress  --></a>). First, only
+<!-- l. 168 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi mathvariant="italic">Nc</mi></mrow></math> distances enter, so
+an iteration costs <!-- l. 168 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mstyle mathvariant="script"><mi>O</mi></mstyle><mo class="MathClass-open" stretchy="false">(</mo><mi mathvariant="italic">Nc</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>
+instead of <!-- l. 168 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mstyle mathvariant="script"><mi>O</mi></mstyle><mo class="MathClass-open" stretchy="false">(</mo><msup><mrow><mi>N</mi></mrow><mrow><mn>2</mn></mrow></msup><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>.
+Second, the norm of the algorithm is built in: a Gustafson–Kessel
+cluster, whose points are all at a small Mahalanobis-type distance
+from the prototype, is mapped to a compact round group around
+<!-- l. 168 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>z</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></math>, whatever its orientation
+and elongation in <!-- l. 168 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msup><mrow><mi>ℝ</mi></mrow><mrow><mi>n</mi></mrow></msup></math>;
+a line or shell prototype becomes an ordinary point. Third, the weights
+<!-- l. 168 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup></math> make the
+map accurate where it matters: the distance of a sample to a cluster it hardly belongs
+to need not be reproduced. The derivatives of (<a href="#x7-92004r6">5.6<!-- tex4ht:ref: eq:viz:efuzz  --></a>) with respect to the coordinates
+of <!-- l. 168 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>y</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub></math>, with
+the <!-- l. 168 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>z</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></math>
+held fixed, are the analogs of (<a href="#x7-91004r4">5.4<!-- tex4ht:ref: eq:viz:grad  --></a>)–(<a href="#x7-91005r5">5.5<!-- tex4ht:ref: eq:viz:hess  --></a>):
+</p><!-- tex4ht:inline --><!-- l. 172 --><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mtable class="align" columnalign="left" displaystyle="true">
+<mtr><mtd class="align-odd" columnalign="right"><mfrac><mrow><mi>∂</mi><msub><mrow><mi>E</mi></mrow><mrow><mstyle class="text"><mtext>fuzz</mtext></mstyle></mrow></msub></mrow>
+<mrow><mi>∂</mi><msub><mrow><mi>y</mi></mrow><mrow><mi mathvariant="italic">kl</mi></mrow></msub></mrow></mfrac> </mtd> <mtd class="align-even"> <mo class="MathClass-rel" stretchy="false">=</mo> <mo class="MathClass-bin" stretchy="false">−</mo><mn>2</mn><munderover accent="false" accentunder="false"><mrow><mo>∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><msubsup><mrow><mi>μ</mi></mrow><mrow>
+<mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup><mfrac><mrow><msub><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msubsup><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msubsup></mrow>
+<mrow><msubsup><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msubsup></mrow></mfrac> <mspace class="thinspace" width="0.17em"></mspace><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mi>y</mi></mrow><mrow><mi mathvariant="italic">kl</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mi>z</mi></mrow><mrow><mi mathvariant="italic">il</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo><mo class="MathClass-punc" stretchy="false">,</mo><mspace width="2em"></mspace></mtd> <mtd class="align-label" columnalign="right"><mstyle class="label" id="x7-92005r7"></mstyle><!-- endlabel --><mstyle class="maketag"><mtext>(5.7)</mtext></mstyle><mspace class="nbsp" width="0.33em"></mspace>
+</mtd></mtr><mtr><mtd class="align-odd" columnalign="right"><mfrac><mrow><msup><mrow><mi>∂</mi></mrow><mrow><mn>2</mn></mrow></msup><msub><mrow><mi>E</mi></mrow><mrow><mstyle class="text"><mtext>fuzz</mtext></mstyle></mrow></msub></mrow>
+<mrow><mi>∂</mi><msubsup><mrow><mi>y</mi></mrow><mrow><mi mathvariant="italic">kl</mi></mrow><mrow><mn>2</mn></mrow></msubsup></mrow></mfrac> </mtd> <mtd class="align-even"> <mo class="MathClass-rel" stretchy="false">=</mo> <mo class="MathClass-bin" stretchy="false">−</mo><mn>2</mn><munderover accent="false" accentunder="false"><mrow><mo>∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><mfrac><mrow><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup></mrow>
+<mrow><msubsup><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msubsup></mrow></mfrac> <mrow><mo fence="true" form="prefix"> [</mo><mrow><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msubsup><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msubsup><mo class="MathClass-close" stretchy="false">)</mo> <mo class="MathClass-bin" stretchy="false">−</mo> <mfrac><mrow><msup><mrow><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mi>y</mi></mrow><mrow><mi mathvariant="italic">kl</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mi>z</mi></mrow><mrow><mi mathvariant="italic">il</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow><mrow><mn>2</mn></mrow></msup></mrow>
+<mrow><msubsup><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msubsup></mrow></mfrac> <mrow><mo fence="true" form="prefix"> (</mo><mrow><mn>1</mn> <mo class="MathClass-bin" stretchy="false">+</mo> <mfrac><mrow><msub><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msubsup><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msubsup></mrow>
+<mrow><msubsup><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msubsup></mrow></mfrac> </mrow><mo fence="true" form="postfix">)</mo></mrow></mrow><mo fence="true" form="postfix">]</mo></mrow><mo class="MathClass-punc" stretchy="false">,</mo><mspace width="2em"></mspace></mtd> <mtd class="align-label" columnalign="right"><mstyle class="label" id="x7-92006r8"></mstyle><!-- endlabel --><mstyle class="maketag"><mtext>(5.8)</mtext></mstyle><mspace class="nbsp" width="0.33em"></mspace>
+</mtd></mtr></mtable></math>
+<!-- l. 173 --><p class="noindent">and the points are moved by the same diagonal Newton step (<a href="#x7-91003r3">5.3<!-- tex4ht:ref: eq:viz:newton  --></a>). After every
+sweep the projected centers are recomputed as the weighted means of the
+                                                                     
+
+                                                                     
+projected data, in analogy with the prototype update of the clustering
+algorithms, </p><table class="equation"><tr><td>
+<!-- l. 174 --><p class="indent">
+</p><!-- l. 174 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x7-92007r9"></mstyle><!-- endlabel --><msub><mrow><mstyle mathvariant="bold"><mi>z</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><munderover accent="false" accentunder="false"><mrow><mo>∑</mo>
+</mrow><mrow><mi>k</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>N</mi></mrow></munderover><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup><mspace class="thinspace" width="0.17em"></mspace><msub><mrow><mstyle mathvariant="bold"><mi>y</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub></mrow>
+<mrow><munderover accent="false" accentunder="false"><mrow><mo> ∑</mo>
+</mrow><mrow><mi>k</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>N</mi></mrow></munderover><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup></mrow></mfrac> <mo class="MathClass-punc" stretchy="false">.</mo>
+</mrow></math></td><td class="eq-no">(5.9)</td></tr></table>
+<!-- l. 178 --><p class="indent">   The first version of the method [<a id="x7-92008"></a><a href="bibliography.html#cite.0@kovacs:2002:fuzzsam">49</a>] weighted with
+<!-- l. 178 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub></math> instead
+of <!-- l. 178 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup></math>
+in (<a href="#x7-92004r6">5.6<!-- tex4ht:ref: eq:viz:efuzz  --></a>) and (<a href="#x7-92007r9">5.9<!-- tex4ht:ref: eq:viz:zi  --></a>); the later papers and <span class="ec-lmtt-10x-x-109">fuzzyclust </span>use
+<!-- l. 178 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup></math> (parameter
+<span class="ec-lmtt-10x-x-109">weight_exponent </span>selects either). The initial configuration is the PCA projection
+of the data, or, as in the original case studies, a classical Sammon map; from it
+the <!-- l. 178 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>z</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></math>
+follow by (<a href="#x7-92007r9">5.9<!-- tex4ht:ref: eq:viz:zi  --></a>).
+</p><!-- l. 180 --><p class="indent">   In the plane every cluster is represented by a point and the distances are
+Euclidean, so the picture can be read with the FCM membership formula: the
+memberships implied by the picture are </p><table class="equation"><tr><td>
+<!-- l. 181 --><p class="indent">
+</p><!-- l. 181 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x7-92009r10"></mstyle><!-- endlabel --><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msubsup> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><mn>1</mn></mrow>
+<mrow><munderover accent="false" accentunder="false"><mrow><mo>∑</mo>
+</mrow><mrow><mi>j</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><msup><mrow> <mrow><mo fence="true" form="prefix"> (</mo><mrow><msubsup><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msubsup><mo class="MathClass-bin" stretchy="false">∕</mo><msubsup><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">jk</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msubsup></mrow><mo fence="true" form="postfix">)</mo></mrow></mrow><mrow><mn>2</mn><mo class="MathClass-bin" stretchy="false">∕</mo><mo class="MathClass-open" stretchy="false">(</mo><mi>m</mi><mo class="MathClass-bin" stretchy="false">−</mo><mn>1</mn><mo class="MathClass-close" stretchy="false">)</mo></mrow></msup></mrow></mfrac><mo class="MathClass-punc" stretchy="false">,</mo>
+</mrow></math></td><td class="eq-no">(5.10)</td></tr></table>
+<!-- l. 185 --><p class="indent">   and their level curves <!-- l. 185 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mtext class="qopname">max</mtext><mo> ⁡<!-- FUNCTION APPLICATION --> </mo> </mrow><mrow><mi>i</mi></mrow></msub><msubsup><mrow><mi>μ</mi></mrow><mrow><mi>i</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msubsup><mo class="MathClass-open" stretchy="false">(</mo><mstyle mathvariant="bold"><mi>y</mi></mstyle><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>,
+drawn over the plane, are the contours of fig. <a href="#x7-88005r1">5.1</a>. For two clusters they are exact circles
+(each level set of <!-- l. 185 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msubsup><mrow><mi>d</mi></mrow><mrow><mn>1</mn><mi>k</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msubsup><mo class="MathClass-bin" stretchy="false">∕</mo><msubsup><mrow><mi>d</mi></mrow><mrow><mn>2</mn><mi>k</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msubsup></mrow></math>
+is an Apollonius circle); for more clusters they are close to circles near a
+projected center and deform where the regions of neighboring clusters
+meet. If the prototype suits the data, the projected cluster is a compact
+group inside its contours; a cluster that spills across the contours, or
+two clusters whose contours interpenetrate, point to an inadequate
+prototype or a wrong number of clusters. A smaller fuzziness exponent
+<!-- l. 185 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>m</mi></math> is
+visible too: the partition is crisper and the contours of high membership enclose
+more points.
+</p>
+<p><img alt="Algorithm" class="algobox" src="main_web27x.svg"/><a id="x7-92010r3"></a><a id="x7-92011r16"></a><a id="x7-92012r1"></a><a id="x7-92013r2"></a><a id="x7-92014r3"></a><a id="x7-92015r4"></a><a id="x7-92016r5"></a><a id="x7-92017r6"></a><a id="x7-92018r7"></a><a id="x7-92019r8"></a><a id="x7-92020r9"></a><a id="x7-92021r10"></a> </p><div class="box summarybox">
+<!-- l. 204 --><p class="noindent"><span class="ec-lmbx-10x-x-109">In a nutshell: Fuzzy Sammon mapping</span>
+</p>
+<ul class="itemize1">
+<li class="itemize">Projects a <span class="ec-lmri-10x-x-109">fitted fuzzy clustering</span>: preserves the <!-- l. 206 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>N</mi> <mo class="MathClass-bin" stretchy="false">×</mo><mi>c</mi></mrow></math>
+     sample–prototype distances of the algorithm, weighted by <!-- l. 206 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup></math>.
+     </li>
+<li class="itemize">Works with any prototype and norm (FCM, GK, GG, lines, shells);
+     every  cluster  becomes  a  point  with  nearly  circular  membership
+     contours.
+     </li>
+<li class="itemize"><!-- l. 208 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mstyle mathvariant="script"><mi>O</mi></mstyle><mo class="MathClass-open" stretchy="false">(</mo><mi mathvariant="italic">Nc</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>
+     per iteration; same Newton step as Sammon (<!-- l. 208 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">≈</mo><mn>0.4</mn></mrow></math>);
+     centers recomputed as weighted means after every sweep.
+     </li>
+<li class="itemize">Distorted  or  overlapping  groups  in  the  plane  indicate  a  wrong
+     prototype or a wrong number of clusters; the recomputed memberships
+     <!-- l. 209 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msup><mrow><mstyle mathvariant="bold"><mi>U</mi></mstyle></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msup></math>
+     quantify the fidelity.</li></ul>
+</div>
+<!-- l. 213 --><p class="noindent">
+</p>
+<h4 class="subsectionHead"><span class="titlemark">5.2.4   </span> <a id="x7-930005.2.4"></a>Quality of a projection</h4>
+<!-- l. 215 --><p class="noindent">Any two-dimensional picture is an approximation. For a projection of a fuzzy
+clustering the natural question is whether the memberships a viewer reads off
+the picture agree with the fitted ones. With the recomputed partition
+<!-- l. 215 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msup><mrow><mstyle mathvariant="bold"><mi>U</mi></mstyle></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msup> <mo class="MathClass-rel" stretchy="false">=</mo> <mo class="MathClass-open" stretchy="false">[</mo><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msubsup><mo class="MathClass-close" stretchy="false">]</mo></mrow></math> of
+(<a href="#x7-92009r10">5.10<!-- tex4ht:ref: eq:viz:mustar  --></a>), evaluated for the projected data and centers of whatever method
+produced them, the FUZZSAM papers use three numbers:
+                                                                     
+
+                                                                     
+</p><!-- tex4ht:inline --><!-- l. 219 --><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mtable class="align" columnalign="left" displaystyle="true">
+<mtr><mtd class="align-odd" columnalign="right"><mi>P</mi></mtd> <mtd class="align-even"> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><mn>1</mn></mrow>
+<mrow><mi mathvariant="italic">Nc</mi></mrow></mfrac><munderover accent="false" accentunder="false"><mrow><mo>∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><munderover accent="false" accentunder="false"><mrow><mtext> ∑</mtext></mrow><mrow>
+<mi>k</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>N</mi></mrow></munderover> <mrow><mo fence="true" form="prefix"> |</mo><mrow><msub><mrow><mi>μ</mi></mrow><mrow>
+<mi mathvariant="italic">ik</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msubsup></mrow><mo fence="true" form="postfix">|</mo></mrow><mo class="MathClass-punc" stretchy="false">,</mo><mspace width="2em"></mspace></mtd> <mtd class="align-label" columnalign="right"><mstyle class="label" id="x7-93001r11"></mstyle><!-- endlabel --><mstyle class="maketag"><mtext>(5.11)</mtext></mstyle><mspace class="nbsp" width="0.33em"></mspace>
+</mtd></mtr><mtr><mtd class="align-odd" columnalign="right"><mi>F</mi></mtd> <mtd class="align-even"> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><mn>1</mn></mrow>
+<mrow><mi>N</mi></mrow></mfrac><munderover accent="false" accentunder="false"><mrow><mo>∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><munderover accent="false" accentunder="false"><mrow><mtext> ∑</mtext></mrow><mrow>
+<mi>k</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>N</mi></mrow></munderover><msubsup><mrow><mi>μ</mi></mrow><mrow>
+<mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup><mo class="MathClass-punc" stretchy="false">,</mo><mspace class="qquad" width="2em"></mspace><msup><mrow><mi>F</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msup> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><mn>1</mn></mrow>
+<mrow><mi>N</mi></mrow></mfrac><munderover accent="false" accentunder="false"><mrow><mo>∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><munderover accent="false" accentunder="false"><mrow><mtext> ∑</mtext></mrow><mrow>
+<mi>k</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>N</mi></mrow></munderover><msup><mrow><mo class="MathClass-open" stretchy="false">(</mo><msubsup><mrow><mi>μ</mi></mrow><mrow>
+<mi mathvariant="italic">ik</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msubsup><mo class="MathClass-close" stretchy="false">)</mo></mrow><mrow><mn>2</mn></mrow></msup><mo class="MathClass-punc" stretchy="false">,</mo><mspace width="2em"></mspace></mtd> <mtd class="align-label" columnalign="right"><mstyle class="label" id="x7-93002r12"></mstyle><!-- endlabel --><mstyle class="maketag"><mtext>(5.12)</mtext></mstyle><mspace class="nbsp" width="0.33em"></mspace>
+</mtd></mtr></mtable></math>
+<!-- l. 220 --><p class="noindent">the mean absolute membership error and the partition
+coefficients [<a id="x7-93003"></a><a href="bibliography.html#cite.0@bezdek:1981">3</a>] of the fitted and of the recomputed partition.
+<!-- l. 220 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>P</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>0</mn></mrow></math>
+means that the picture shows exactly the fitted partition;
+<!-- l. 220 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msup><mrow><mi>F</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msup> <mo class="MathClass-rel" stretchy="false">»</mo><mi>F</mi></mrow></math> means
+that the picture looks much crisper than the clustering really is (the typical failure
+of PCA, which pushes the samples apart from the wrong centers). The Sammon
+stress <!-- l. 220 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>E</mi></math>
+of (<a href="#x7-91002r2">5.2<!-- tex4ht:ref: eq:viz:stress  --></a>), evaluated for the embedding against the Euclidean distances of the data,
+completes the set; it measures how well the geometry of the <span class="ec-lmri-10x-x-109">data </span>is kept, which is
+a different goal. In the published case studies FUZZSAM has by far the smallest
+<!-- l. 220 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>P</mi></math> and an
+<!-- l. 220 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msup><mrow><mi>F</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msup></math> closest
+to <!-- l. 220 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>F</mi></math>,
+while classical Sammon mapping has the smallest
+<!-- l. 220 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>E</mi></math>—each
+method is best at what it optimizes. Other validity indices computed from
+<!-- l. 220 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mstyle mathvariant="bold"><mi>U</mi></mstyle></math> and
+<!-- l. 220 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msup><mrow><mstyle mathvariant="bold"><mi>U</mi></mstyle></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msup></math> can
+be compared in the same way.
+</p><!-- l. 222 --><p class="noindent">
+</p>
+<h4 class="subsectionHead"><span class="titlemark">5.2.5   </span> <a id="x7-940005.2.5"></a>Fuzzy self-organizing map</h4>
+<!-- l. 224 --><p class="noindent">The methods so far project a finished clustering. Kohonen’s self-organizing map
+[<a id="x7-94001"></a><a href="bibliography.html#cite.0@kohonen:1990">57</a>] takes the opposite route: the prototypes (code vectors) sit on the nodes of a
+regular low-dimensional grid and are trained so that neighboring nodes hold
+similar prototypes; the grid thus becomes a topology-preserving map of the
+data. The classical SOM is a heuristic competitive-learning rule with a
+shrinking neighborhood and no objective function; several authors have
+                                                                     
+
+                                                                     
+therefore reformulated it as a modification of fuzzy c-means [<a id="x7-94002"></a><a href="bibliography.html#cite.0@tsao:1994:fkcn">58</a>, <a id="x7-94003"></a><a href="bibliography.html#cite.0@pascualmarqui:2001">59</a>].
+Abonyi, Migály, and Szeifert [<a id="x7-94004"></a><a href="bibliography.html#cite.0@migaly:2003:fsom">60</a>] add a smoothness penalty to the FCM
+functional:
+</p><!-- tex4ht:inline --><!-- l. 229 --><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mtable class="align" columnalign="left" displaystyle="true">
+<mtr><mtd class="align-odd" columnalign="right"><mi>J</mi><mo class="MathClass-open" stretchy="false">(</mo><mstyle mathvariant="bold"><mi>X</mi></mstyle><mo class="MathClass-punc" stretchy="false">;</mo><mstyle mathvariant="bold"><mi>U</mi></mstyle><mo class="MathClass-punc" stretchy="false">,</mo><mstyle mathvariant="bold"><mi>V</mi></mstyle><mo class="MathClass-close" stretchy="false">)</mo></mtd> <mtd class="align-even"> <mo class="MathClass-rel" stretchy="false">=</mo><munderover accent="false" accentunder="false"><mrow><mo> ∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><munderover accent="false" accentunder="false"><mrow><mtext> ∑</mtext></mrow><mrow>
+<mi>k</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>N</mi></mrow></munderover><msubsup><mrow><mi>μ</mi></mrow><mrow>
+<mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup><msup><mrow> <mrow><mo fence="true" form="prefix"> ‖</mo><mrow><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow>
+<mi>k</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></mrow><mo fence="true" form="postfix">‖</mo></mrow> </mrow><mrow><mn>2</mn></mrow></msup> <mo class="MathClass-bin" stretchy="false">+</mo> <mi>𝜗</mi><munderover accent="false" accentunder="false"><mrow><mtext>∑</mtext></mrow><mrow>
+<mi>i</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><msup><mrow> <mrow><mo fence="true" form="prefix"> ‖</mo><mrow><mfrac><mrow><msup><mrow><mi>∂</mi></mrow><mrow><mn>2</mn></mrow></msup><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></mrow>
+<mrow><mi>∂</mi><msup><mrow><mstyle mathvariant="bold"><mi>r</mi></mstyle></mrow><mrow><mn>2</mn></mrow></msup></mrow></mfrac> </mrow><mo fence="true" form="postfix">‖</mo></mrow> </mrow><mrow><mn>2</mn></mrow></msup><mspace width="2em"></mspace></mtd> <mtd class="align-label" columnalign="right"></mtd> <mtd class="align-label">
+<mspace width="2em"></mspace></mtd></mtr><mtr><mtd class="align-odd" columnalign="right"></mtd> <mtd class="align-even"> <mo class="MathClass-rel" stretchy="false">≈</mo><munderover accent="false" accentunder="false"><mrow><mo>∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><munderover accent="false" accentunder="false"><mrow><mtext> ∑</mtext></mrow><mrow>
+<mi>k</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>N</mi></mrow></munderover><msubsup><mrow><mi>μ</mi></mrow><mrow>
+<mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup><msup><mrow> <mrow><mo fence="true" form="prefix"> ‖</mo><mrow><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow>
+<mi>k</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></mrow><mo fence="true" form="postfix">‖</mo></mrow> </mrow><mrow><mn>2</mn></mrow></msup> <mo class="MathClass-bin" stretchy="false">+</mo> <mi>𝜗</mi><mspace class="thinspace" width="0.17em"></mspace><mtext class="qopname">tr</mtext><mo> ⁡<!-- FUNCTION APPLICATION --> </mo><!-- nolimits --><mrow><mo class="MathClass-open" fence="true" mathsize="1.19em">(</mo><mrow><msup><mrow><mstyle mathvariant="bold"><mi>V</mi></mstyle></mrow><mrow><mstyle mathvariant="sans-serif"><mi>T</mi></mstyle></mrow></msup><mstyle mathvariant="bold"><mi>L</mi></mstyle><mstyle mathvariant="bold"><mi>V</mi></mstyle></mrow><mo class="MathClass-close" fence="true" mathsize="1.19em">)</mo></mrow><mo class="MathClass-punc" stretchy="false">,</mo><mspace width="2em"></mspace></mtd> <mtd class="align-label" columnalign="right"><mstyle class="label" id="x7-94005r13"></mstyle><!-- endlabel --><mstyle class="maketag"><mtext>(5.13)</mtext></mstyle><mspace class="nbsp" width="0.33em"></mspace>
+</mtd></mtr></mtable></math>
+<!-- l. 230 --><p class="noindent">with <!-- l. 230 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>𝜗</mi> <mo class="MathClass-rel" stretchy="false">≥</mo><mn>0</mn></mrow></math>, where
+<!-- l. 230 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mstyle mathvariant="bold"><mi>r</mi></mstyle> <mo class="MathClass-rel" stretchy="false">∈</mo> <msup><mrow><mi>ℝ</mi></mrow><mrow><mi>s</mi></mrow></msup></mrow></math> is the position of a node
+on the <!-- l. 230 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>s</mi></math>-dimensional
+grid (<!-- l. 230 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>s</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>1</mn></mrow></math>: a
+chain, <!-- l. 230 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>s</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>2</mn></mrow></math>: a
+sheet) and <!-- l. 230 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mstyle mathvariant="bold"><mi>L</mi></mstyle> <mo class="MathClass-rel" stretchy="false">=</mo><msup><mrow> <mstyle mathvariant="bold"><mi>G</mi></mstyle></mrow><mrow><mstyle mathvariant="sans-serif"><mi>T</mi></mstyle></mrow></msup><mstyle mathvariant="bold"><mi>G</mi></mstyle></mrow></math>
+with <!-- l. 230 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mstyle mathvariant="bold"><mi>G</mi></mstyle> <mo class="MathClass-rel" stretchy="false">=</mo> <mo class="MathClass-open" stretchy="false">[</mo><msub><mrow><mstyle mathvariant="bold"><mi>G</mi></mstyle></mrow><mrow><mn>1</mn></mrow></msub><mo class="MathClass-punc" stretchy="false">;</mo><mi>…</mi><mo class="MathClass-punc" stretchy="false">;</mo><msub><mrow><mstyle mathvariant="bold"><mi>G</mi></mstyle></mrow><mrow><mi>s</mi></mrow></msub><mo class="MathClass-close" stretchy="false">]</mo></mrow></math> stacks
+the second-order finite difference operators along the grid axes: for every interior
+node <!-- l. 230 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>i</mi></math> of
+axis <!-- l. 230 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>a</mi></math> the
+row of <!-- l. 230 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>G</mi></mstyle></mrow><mrow><mi>a</mi></mrow></msub></math>
+reads <!-- l. 230 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi><mo class="MathClass-bin" stretchy="false">−</mo><mn>1</mn></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><mn>2</mn><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">+</mo><msub><mrow> <mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi><mo class="MathClass-bin" stretchy="false">+</mo><mn>1</mn></mrow></msub></mrow></math>
+(fig. <a href="#x7-94009r2">5.2</a>). The penalty is thus the sum of the squared discrete curvatures of
+the map; an affine (planar, regularly spaced) grid is not penalized at
+all, so the penalty orders the prototypes without pulling them together.
+Replacing the second-order by first-order differences gives the “smoothly
+distributed FCM” of [<a id="x7-94006"></a><a href="bibliography.html#cite.0@pascualmarqui:2001">59</a>], which penalizes the edge lengths and therefore
+contracts the map toward the data center; the fuzzy curve-tracing algorithm
+of [<a id="x7-94007"></a><a href="bibliography.html#cite.0@yan:2001:curvetrace">61</a>] is the special case of a chain with second-order differences. For
+<!-- l. 230 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>𝜗</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>0</mn></mrow></math> plain
+FCM with <!-- l. 230 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>c</mi></math>
+unordered prototypes is recovered.
+                                                                     
+
+                                                                     
+</p><!-- l. 232 --><p class="indent">   The membership update is that of FCM, since the penalty does not involve
+<!-- l. 232 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mstyle mathvariant="bold"><mi>U</mi></mstyle></math>. For fixed
+<!-- l. 232 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mstyle mathvariant="bold"><mi>U</mi></mstyle></math> the prototypes are
+coupled through <!-- l. 232 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mstyle mathvariant="bold"><mi>L</mi></mstyle></math>;
+setting the gradient of (<a href="#x7-94005r13">5.13<!-- tex4ht:ref: eq:viz:fsomJ  --></a>) to zero gives the linear system
+</p><!-- tex4ht:inline --><!-- l. 237 --><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mtable class="align" columnalign="left" displaystyle="true">
+<mtr><mtd class="align-odd" columnalign="right"><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub><munderover accent="false" accentunder="false"><mrow><mo> ∑</mo>
+</mrow><mrow><mi>k</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>N</mi></mrow></munderover><msubsup><mrow><mi>μ</mi></mrow><mrow>
+<mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup> <mo class="MathClass-bin" stretchy="false">+</mo> <mi>𝜗</mi><munderover accent="false" accentunder="false"><mrow><mtext>∑</mtext></mrow><mrow>
+<mi>j</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><msub><mrow><mi>L</mi></mrow><mrow>
+<mi mathvariant="italic">ij</mi></mrow></msub><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>j</mi></mrow></msub></mtd> <mtd class="align-even"> <mo class="MathClass-rel" stretchy="false">=</mo><munderover accent="false" accentunder="false"><mrow><mo> ∑</mo>
+</mrow><mrow><mi>k</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>N</mi></mrow></munderover><msubsup><mrow><mi>μ</mi></mrow><mrow>
+<mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow>
+<mi>k</mi></mrow></msub><mo class="MathClass-punc" stretchy="false">,</mo><mspace class="qquad" width="2em"></mspace><mi>i</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>1</mn><mo class="MathClass-punc" stretchy="false">,</mo><mo>…</mo><mo class="MathClass-punc" stretchy="false">,</mo><mi>c</mi><mo class="MathClass-punc" stretchy="false">,</mo><mspace width="2em"></mspace></mtd> <mtd class="align-label" columnalign="right"></mtd> <mtd class="align-label">
+<mspace width="2em"></mspace></mtd></mtr><mtr><mtd class="align-odd" columnalign="right"><mstyle class="text"><mtext>i.e.</mtext></mstyle><mspace class="qquad" width="2em"></mspace><mrow><mo class="MathClass-open" fence="true" mathsize="1.61em">(</mo><mrow><mtext class="qopname">diag</mtext><mo> ⁡<!-- FUNCTION APPLICATION --> </mo><!-- nolimits --><mrow><mo class="MathClass-open" fence="true" mathsize="1.19em">(</mo><mrow><msub><mrow><mo>∑</mo>
+</mrow><mrow><mi>k</mi></mrow></msub><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup></mrow><mo class="MathClass-close" fence="true" mathsize="1.19em">)</mo></mrow> <mo class="MathClass-bin" stretchy="false">+</mo> <mi>𝜗</mi><mstyle mathvariant="bold"><mi>L</mi></mstyle></mrow><mo class="MathClass-close" fence="true" mathsize="1.61em">)</mo></mrow><mstyle mathvariant="bold"><mi>V</mi></mstyle></mtd> <mtd class="align-even"> <mo class="MathClass-rel" stretchy="false">=</mo> <mo class="MathClass-open" stretchy="false">(</mo><msup><mrow><mstyle mathvariant="bold"><mi>U</mi></mstyle></mrow><mrow><mi>m</mi></mrow></msup><mo class="MathClass-close" stretchy="false">)</mo><mstyle mathvariant="bold"><mi>X</mi></mstyle><mo class="MathClass-punc" stretchy="false">,</mo><mspace width="2em"></mspace></mtd> <mtd class="align-label" columnalign="right"><mstyle class="label" id="x7-94008r14"></mstyle><!-- endlabel --><mstyle class="maketag"><mtext>(5.14)</mtext></mstyle><mspace class="nbsp" width="0.33em"></mspace>
+</mtd></mtr></mtable></math>
+<!-- l. 238 --><p class="noindent">where <!-- l. 238 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msup><mrow><mstyle mathvariant="bold"><mi>U</mi></mstyle></mrow><mrow><mi>m</mi></mrow></msup></math> denotes the
+element-wise power of the <!-- l. 238 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>c</mi> <mo class="MathClass-bin" stretchy="false">×</mo><mi>N</mi></mrow></math>
+partition matrix. The system has a unique solution because the left matrix is the
+sum of a positive diagonal and a positive semidefinite matrix. <span class="ec-lmtt-10x-x-109">fuzzyclust </span>solves
+it exactly in every iteration; the original paper iterates its row-wise form
+<!-- l. 238 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo><mrow><mo class="MathClass-open" fence="true" mathsize="1.19em">(</mo><mrow><msub><mrow><mi class="MathClass-op">∑</mi><mo> ⁡<!-- FUNCTION APPLICATION --></mo>
+<!-- nolimits --></mrow><mrow><mi>k</mi></mrow></msub><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><mi>𝜗</mi><msub><mrow><mo>∑</mo>
+<!-- nolimits --></mrow><mrow><mi>j</mi><mo class="MathClass-rel" stretchy="false">≠</mo><mi>i</mi></mrow></msub><msub><mrow><mi>L</mi></mrow><mrow><mi mathvariant="italic">ij</mi></mrow></msub><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>j</mi></mrow></msub></mrow><mo class="MathClass-close" fence="true" mathsize="1.19em">)</mo></mrow><mo class="MathClass-bin" stretchy="false">∕</mo><mrow><mo class="MathClass-open" fence="true" mathsize="1.19em">(</mo><mrow><msub><mrow><mo>∑</mo>
+<!-- nolimits --></mrow><mrow><mi>k</mi></mrow></msub><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup> <mo class="MathClass-bin" stretchy="false">+</mo> <mi>𝜗</mi><msub><mrow><mi>L</mi></mrow><mrow><mi mathvariant="italic">ii</mi></mrow></msub></mrow><mo class="MathClass-close" fence="true" mathsize="1.19em">)</mo></mrow></mrow></math>,
+whose fixed point is the same. The alternating optimization of the base class
+(chapter <a href="02-foundations-of-prototype-based-clustering.html#x4-140002">2</a>) therefore applies unchanged with a modified prototype step. The
+prototypes are initialized on a regular grid in the subspace of the first
+<!-- l. 238 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>s</mi></math>
+principal components, which already gives an ordered start; the regularization
+then keeps the order while the map folds into the data.
+</p><!-- l. 240 --><p class="indent">   Once fitted, the map is read like a SOM. The <span class="ec-lmri-10x-x-109">U-matrix </span>shows for every node
+the mean distance of its prototype to the prototypes of its grid neighbors: ridges
+of large distance separate groups of similar prototypes, i.e. clusters of the data.
+A <span class="ec-lmri-10x-x-109">component plane </span>shows one coordinate of the prototypes over the grid and
+reveals which variables drive the organization. The <span class="ec-lmri-10x-x-109">fuzzy hit histogram</span>
+<!-- l. 240 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>h</mi></mrow><mrow><mi>i</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo><msub><mrow> <mi class="MathClass-op">∑</mi><mo> ⁡<!-- FUNCTION APPLICATION --></mo>
+<!-- nolimits --></mrow><mrow><mi>k</mi></mrow></msub><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub></mrow></math> shows
+where the data (or a subset, e.g. one class) fall on the map. A smaller exponent
+<!-- l. 240 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>m</mi></math> sharpens these
+                                                                     
+
+                                                                     
+views when many prototypes are fitted in high dimension, where the FCM memberships
+for <!-- l. 240 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>m</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>2</mn></mrow></math>
+tend to become uniform.
+</p>
+<figure class="figure">
+<!-- l. 243 --><p class="noindent"><img alt="Figure 5.2" src="main_web28x.svg"/>
+<a id="x7-94009r2"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 5.2.   </span></span><span class="content"><span class="ec-lmr-10">The   regularization   of   the   fuzzy   self-organizing   map.   The
+prototypes  are  indexed  by  the  nodes  of  a  grid;  at  every  interior  node  the
+second-order differences along the two grid axes (red stencil) form the rows of</span>
+<!-- l. 271 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mstyle mathvariant="bold"><mi>G</mi></mstyle></math><span class="ec-lmr-10">,
+and </span><!-- l. 271 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>𝜗</mi><mspace class="thinspace" width="0.17em"></mspace><mtext class="qopname">tr</mtext><mo> ⁡<!-- FUNCTION APPLICATION --> </mo><!-- nolimits --><mo class="MathClass-open" stretchy="false">(</mo><msup><mrow><mstyle mathvariant="bold"><mi>V</mi></mstyle></mrow><mrow><mstyle mathvariant="sans-serif"><mi>T</mi></mstyle></mrow></msup><mstyle mathvariant="bold"><mi>L</mi></mstyle><mstyle mathvariant="bold"><mi>V</mi></mstyle><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>
+<span class="ec-lmr-10">with </span><!-- l. 271 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mstyle mathvariant="bold"><mi>L</mi></mstyle> <mo class="MathClass-rel" stretchy="false">=</mo><msup><mrow> <mstyle mathvariant="bold"><mi>G</mi></mstyle></mrow><mrow><mstyle mathvariant="sans-serif"><mi>T</mi></mstyle></mrow></msup><mstyle mathvariant="bold"><mi>G</mi></mstyle></mrow></math>
+<span class="ec-lmr-10">penalizes the curvature of the map. The membership update of FCM is unchanged;
+the prototype update becomes the linear system (</span><a href="#x7-94008r14"><span class="ec-lmr-10">5.14</span><!-- tex4ht:ref: eq:viz:fsomV  --></a><span class="ec-lmr-10">).</span>
+</span></figcaption><!-- tex4ht:label?: x7-94009r2  -->
+</figure>
+<p><img alt="Algorithm" class="algobox" src="main_web29x.svg"/><a id="x7-94010r4"></a><a id="x7-94011r17"></a><a id="x7-94012r1"></a><a id="x7-94013r2"></a><a id="x7-94014r3"></a><a id="x7-94015r4"></a><a id="x7-94016r5"></a><a id="x7-94017r6"></a><a id="x7-94018r7"></a> </p><div class="box summarybox">
+<!-- l. 288 --><p class="noindent"><span class="ec-lmbx-10x-x-109">In a nutshell: Fuzzy self-organizing map</span>
+</p>
+<ul class="itemize1">
+<li class="itemize">FCM whose prototypes live on a grid and are coupled by a curvature
+     penalty <!-- l. 290 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>𝜗</mi><mspace class="thinspace" width="0.17em"></mspace><mtext class="qopname">tr</mtext><mo> ⁡<!-- FUNCTION APPLICATION --> </mo><!-- nolimits --><mo class="MathClass-open" stretchy="false">(</mo><msup><mrow><mstyle mathvariant="bold"><mi>V</mi></mstyle></mrow><mrow><mstyle mathvariant="sans-serif"><mi>T</mi></mstyle></mrow></msup><mstyle mathvariant="bold"><mi>L</mi></mstyle><mstyle mathvariant="bold"><mi>V</mi></mstyle><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>;
+     an exact objective is minimized by alternating optimization.
+     </li>
+<li class="itemize"><!-- l. 291 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>𝜗</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>0</mn></mrow></math>:
+     plain FCM, unordered; moderate <!-- l. 291 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>𝜗</mi></math>:
+     ordered, topology-preserving map; very large <!-- l. 291 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>𝜗</mi></math>:
+     flat grid that ignores the curvature of the data.
+     </li>
+<li class="itemize">Second-order              differences              (default)              order
+     without contracting; first-order differences shrink the map toward the
+     data center.
+     </li>
+<li class="itemize">Read  the  result  like  a  SOM:  U-matrix,  component  planes,  hit
+                                                                     
+
+                                                                     
+     histograms; use a smaller <!-- l. 293 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>m</mi></math>
+     for many nodes in high dimension.</li></ul>
+</div>
+<h3 class="sectionHead"><span class="titlemark">5.3   </span> <a id="x7-950005.3"></a>Using it in fuzzyclust</h3>
+<!-- l. 299 --><p class="noindent">All methods live in <span class="ec-lmtt-10x-x-109">fuzzyclust.viz</span>. FUZZSAM accepts any fitted <span class="ec-lmtt-10x-x-109">fuzzyclust</span>
+clusterer and obtains the distances in the norm of the algorithm from the
+<span class="ec-lmtt-10x-x-109">transform </span>method of the clusterer.
+</p>
+<div class="box apibox">
+<!-- l. 301 --><p class="noindent"><span class="ec-lmtk-10x-x-109">fuzzyclust.viz.pca_projection(X, n_components=2, centers=None)</span>
+</p><!-- l. 302 --><p class="indent">   Returns <span class="ec-lmtt-10x-x-109">(Y, Z, pca)</span>: the projected data, the projected prototypes (or <span class="ec-lmtt-10x-x-109">None</span>)
+and the fitted <span class="ec-lmtt-10x-x-109">sklearn.decomposition.PCA </span>object (<span class="ec-lmtt-10x-x-109">explained_variance_ratio_</span>,
+<span class="ec-lmtt-10x-x-109">transform </span>for further data).
+</p>
+</div>
+<div class="box apibox">
+<!-- l. 305 --><p class="noindent"><span class="ec-lmtk-10x-x-109">fuzzyclust.viz.Sammon</span>
+</p><!-- l. 306 --><p class="indent"> <span class="ec-lmtt-10x-x-109">n_components=2</span>, <span class="ec-lmtt-10x-x-109">max_iter=100</span>, <span class="ec-lmtt-10x-x-109">alpha=0.3</span>, <span class="ec-lmtt-10x-x-109">init="pca"</span>, <span class="ec-lmtt-10x-x-109">tol=1e-6</span>,
+<span class="ec-lmtt-10x-x-109">backtracking=True</span>, <span class="ec-lmtt-10x-x-109">max_backtracks=10</span>, <span class="ec-lmtt-10x-x-109">random_state=None</span>. <br class="newline"/><span class="ec-lmtt-10x-x-109">fit(X)</span>, <span class="ec-lmtt-10x-x-109">fit_transform(X)</span>; attributes <span class="ec-lmtt-10x-x-109">embedding_</span>, <span class="ec-lmtt-10x-x-109">stress_</span>, <span class="ec-lmtt-10x-x-109">stress_history_</span>,
+<span class="ec-lmtt-10x-x-109">n_iter_</span>. <span class="ec-lmtt-10x-x-109">init </span>may also be an array (e.g. a previous embedding). <span class="ec-lmtt-10x-x-109">transform</span>
+raises <span class="ec-lmtt-10x-x-109">NotImplementedError</span>: Sammon mapping has no out-of-sample
+extension. The function <span class="ec-lmtt-10x-x-109">sammon_stress(X, Y) </span>evaluates (<a href="#x7-91002r2">5.2<!-- tex4ht:ref: eq:viz:stress  --></a>) for any
+embedding.
+</p>
+</div>
+<div class="box apibox">
+<!-- l. 310 --><p class="noindent"><span class="ec-lmtk-10x-x-109">fuzzyclust.viz.FuzzySammon</span>
+</p><!-- l. 311 --><p class="indent"> <span class="ec-lmtt-10x-x-109">n_components=2</span>, <span class="ec-lmtt-10x-x-109">max_iter=100</span>, <span class="ec-lmtt-10x-x-109">alpha=0.4</span>, <span class="ec-lmtt-10x-x-109">init="pca"</span>, <span class="ec-lmtt-10x-x-109">tol=1e-6</span>,
+<span class="ec-lmtt-10x-x-109">backtracking=True</span>, <span class="ec-lmtt-10x-x-109">max_backtracks=10</span>, <span class="ec-lmtt-10x-x-109">m=None</span>, <span class="ec-lmtt-10x-x-109">weight_exponent=None</span>,
+<span class="ec-lmtt-10x-x-109">random_state=None</span>. <br class="newline"/><span class="ec-lmtt-10x-x-109">fit(estimator, X) </span>takes a fitted clusterer and the data (memberships
+and distances are re-evaluated on <span class="ec-lmtt-10x-x-109">X</span>, so any data the estimator can score
+may be mapped); alternatively <span class="ec-lmtt-10x-x-109">fit(membership=U, distances=D) </span>with
+                                                                     
+
+                                                                     
+explicit arrays. Attributes <span class="ec-lmtt-10x-x-109">embedding_</span>, <span class="ec-lmtt-10x-x-109">embedded_centers_</span>, <span class="ec-lmtt-10x-x-109">stress_</span>,
+<span class="ec-lmtt-10x-x-109">stress_history_</span>, <span class="ec-lmtt-10x-x-109">n_iter_</span>, <span class="ec-lmtt-10x-x-109">membership_</span>, <span class="ec-lmtt-10x-x-109">distances_</span>, <span class="ec-lmtt-10x-x-109">m_ </span>(the exponent used);
+methods <span class="ec-lmtt-10x-x-109">recomputed_membership() </span>and <span class="ec-lmtt-10x-x-109">quality(X=None) </span>returning
+<!-- l. 312 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>P</mi></math>,
+<!-- l. 312 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>F</mi></math>,
+<!-- l. 312 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msup><mrow><mi>F</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msup></math> (and
+<!-- l. 312 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>E</mi></math>). <span class="ec-lmtt-10x-x-109">m=None</span>
+takes the exponent of the estimator (2.0 if it has none); <span class="ec-lmtt-10x-x-109">weight_exponent=1.0 </span>selects
+the <!-- l. 312 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub></math>-weighted
+first variant.
+</p>
+</div>
+<div class="box apibox">
+<!-- l. 315 --><p class="noindent"><span class="ec-lmtk-10x-x-109">fuzzyclust.viz.recomputed_membership(Y, Z, m=2.0) / projection_quality(
+U, Y, Z, m=2.0, X=None)</span>
+</p><!-- l. 316 --><p class="indent">   (<a href="#x7-92009r10">5.10<!-- tex4ht:ref: eq:viz:mustar  --></a>) and the dictionary <span class="ec-lmtt-10x-x-109">{"P"</span>, <span class="ec-lmtt-10x-x-109">"F"</span>, <span class="ec-lmtt-10x-x-109">"F_star"</span>, <span class="ec-lmtt-10x-x-109">"E"} </span>of (<a href="#x7-93001r11">5.11<!-- tex4ht:ref: eq:viz:P  --></a>)–(<a href="#x7-93002r12">5.12<!-- tex4ht:ref: eq:viz:F  --></a>); <span class="ec-lmtt-10x-x-109">E </span>is
+included when <span class="ec-lmtt-10x-x-109">X </span>is given. Works for any projection, so PCA, Sammon, and
+FUZZSAM maps are compared on the same footing.
+</p>
+</div>
+<div class="box apibox">
+<!-- l. 319 --><p class="noindent"><span class="ec-lmtk-10x-x-109">fuzzyclust.viz.FuzzySOM</span>
+</p><!-- l. 320 --><p class="indent"> <span class="ec-lmtt-10x-x-109">grid_shape=(5, 5), m=2.0, regularization=1.0, difference_order=2,
+ tol=1e-4, max_iter=300, init="pca", n_init=1, random_state=None,
+ verbose=0</span>. <br class="newline"/>A <span class="ec-lmtt-10x-x-109">BaseFuzzyClusterer</span>: <span class="ec-lmtt-10x-x-109">fit</span>, <span class="ec-lmtt-10x-x-109">predict</span>, <span class="ec-lmtt-10x-x-109">predict_proba</span>, <span class="ec-lmtt-10x-x-109">transform</span>,
+<span class="ec-lmtt-10x-x-109">cluster_centers_</span>, <span class="ec-lmtt-10x-x-109">membership_</span>, <span class="ec-lmtt-10x-x-109">labels_</span>, <span class="ec-lmtt-10x-x-109">objective_history_</span>; the number
+of nodes is <span class="ec-lmtt-10x-x-109">n_clusters_ = prod(grid_shape)</span>. Map views: <span class="ec-lmtt-10x-x-109">grid_positions_</span>,
+<span class="ec-lmtt-10x-x-109">regularization_matrix_</span>, <span class="ec-lmtt-10x-x-109">u_matrix()</span>, <span class="ec-lmtt-10x-x-109">component_planes()</span>, <span class="ec-lmtt-10x-x-109">hits(X=None)</span>,
+<span class="ec-lmtt-10x-x-109">neighbor_distance()</span>. <span class="ec-lmtt-10x-x-109">grid_laplacian(grid_shape, order=2) </span>returns
+<!-- l. 321 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mstyle mathvariant="bold"><mi>L</mi></mstyle></math> and
+the node positions without fitting a map.
+</p>
+</div>
+<div class="box apibox">
+<!-- l. 324 --><p class="noindent"><span class="ec-lmtk-10x-x-109">plot helpers: plot_projection, plot_stress, plot_map, plot_som_lattice</span>
+</p><!-- l. 325 --><p class="indent"> <span class="ec-lmtt-10x-x-109">plot_projection(Y, Z, labels, U, contours=True, m, levels, misclassified,
+                                                                     
+
+                                                                     
+ label_prefix) </span>draws the embedding with the projected centers and the level curves
+of <!-- l. 325 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mtext class="qopname">max</mtext><mo> ⁡<!-- FUNCTION APPLICATION --> </mo> </mrow><mrow><mi>i</mi></mrow></msub><msubsup><mrow><mi>μ</mi></mrow><mrow><mi>i</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msubsup></mrow></math>;
+<span class="ec-lmtt-10x-x-109">plot_stress </span>the stress histories; <span class="ec-lmtt-10x-x-109">plot_map(som, kind="umatrix"|
+"component"|"hits", feature, X) </span>a fuzzy SOM as a colored grid;
+<span class="ec-lmtt-10x-x-109">plot_som_lattice(som, X, dims) </span>the prototypes in the data space
+with grid neighbors connected. All four take <span class="ec-lmtt-10x-x-109">ax=None </span>and return the
+<span class="ec-lmtt-10x-x-109">Axes</span>.
+</p>
+</div>
+<!-- l. 328 --><p class="indent">   A typical session projects a Gustafson–Kessel result with PCA and
+FUZZSAM and compares the two pictures by their quality measures:
+</p><!-- l. 329 --><pre class="lstinputlisting" id="listing-20"><span class="label"><a id="x7-95002r56"></a></span><span style="color:#000000"><span class="ec-lmtt-9">Y_pca</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">Z_pca, _ = pca_projection(X, 2, centers=gk.cluster_centers_)</span> 
+</span><span class="label"><a id="x7-95003r57"></a></span><span style="color:#000000"><span class="ec-lmtt-9">fsam_fcm</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= FuzzySammon(n_components=2, max_iter=100, alpha=0.4, init=</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">pca</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span><span style="color:#000000"><span class="ec-lmtt-9">.</span></span><span style="color:#000000"><span class="ec-lmtt-9">fit</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">fcm</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">X)</span> 
+</span><span class="label"><a id="x7-95004r58"></a></span><span style="color:#000000"><span class="ec-lmtt-9">fsam_gk</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= FuzzySammon(n_components=2, max_iter=100, alpha=0.4, init=</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">pca</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span><span style="color:#000000"><span class="ec-lmtt-9">.</span></span><span style="color:#000000"><span class="ec-lmtt-9">fit</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">gk</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">X)</span> 
+</span><span class="label"><a id="x7-95005r59"></a></span><span style="color:#000000"><span class="ec-lmtt-9">quality_pca</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= projection_quality(gk.membership_, Y_pca, Z_pca, m=gk.m, X=X)</span> 
+</span><span class="label"><a id="x7-95006r60"></a></span><span style="color:#000000"><span class="ec-lmtt-9">quality_gk</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= fsam_gk.quality(X)</span></span>
+   </pre>
+<!-- l. 330 --><p class="noindent">and reproduces the three-way comparison of the papers on the wine data:
+</p><!-- l. 331 --><pre class="lstinputlisting" id="listing-21"><span class="label"><a id="x7-95010r98"></a></span><span style="color:#000000"><span class="ec-lmtt-9">Y_pca</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">Z_pca, _ = pca_projection(Xw, 2, centers=fcm_w.cluster_centers_)</span> 
+</span><span class="label"><a id="x7-95011r99"></a></span><span style="color:#000000"><span class="ec-lmtt-9">sammon</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= Sammon(max_iter=100, alpha=0.4, init=Y_pca).fit(Xw)</span> 
+</span><span class="label"><a id="x7-95012r100"></a></span><span style="color:#000000"><span class="ec-lmtt-9">Um</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= fcm_w.membership_**2</span> 
+</span><span class="label"><a id="x7-95013r101"></a></span><span style="color:#000000"><span class="ec-lmtt-9">Z_sam</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= (Um.T @ sammon.embedding_) / Um.</span></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">sum</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">axis</span></span><span style="color:#000000"><span class="ec-lmtt-9">=0)</span></span><span style="color:#000000"><span class="ec-lmtt-9">[:,</span></span><span style="color:#000000"> </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">None</span></span><span style="color:#000000"><span class="ec-lmtt-9">]</span></span> 
+<span class="label"><a id="x7-95014r102"></a></span><span style="color:#000000"><span class="ec-lmtt-9">fsam_w</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= FuzzySammon(max_iter=100, alpha=0.4, init=sammon.embedding_).fit(fcm_w, Xw)</span> 
+</span><span class="label"><a id="x7-95015r103"></a></span> 
+<span class="label"><a id="x7-95016r104"></a></span><span style="color:#000000"><span class="ec-lmtt-9">rows</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= {</span> 
+</span><span class="label"><a id="x7-95017r105"></a></span><span style="color:#000000">    </span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">PCA</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#000000"><span class="ec-lmtt-9">:</span></span><span style="color:#000000"> <span class="ec-lmtt-9">projection_quality(fcm_w.membership_, Y_pca, Z_pca, m=2.0, X=Xw),</span> 
+</span><span class="label"><a id="x7-95018r106"></a></span><span style="color:#000000">    </span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">Sammon</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#000000"><span class="ec-lmtt-9">:</span></span><span style="color:#000000"> <span class="ec-lmtt-9">projection_quality(fcm_w.membership_, sammon.embedding_, Z_sam, m=2.0, X=Xw),</span> 
+</span><span class="label"><a id="x7-95019r107"></a></span><span style="color:#000000">    </span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">FUZZSAM</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#000000"><span class="ec-lmtt-9">:</span></span><span style="color:#000000"> <span class="ec-lmtt-9">fsam_w.quality(Xw),</span> 
+</span><span class="label"><a id="x7-95020r108"></a></span><span style="color:#000000"><span class="ec-lmtt-9">}</span></span> 
+<span class="label"><a id="x7-95021r109"></a></span><span style="color:#000000"><span class="ec-lmtt-9">table</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= pd.DataFrame(rows).T.rename(columns={</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">F_star</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#000000"><span class="ec-lmtt-9">:</span></span><span style="color:#000000"> </span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">F</span></span><span style="color:#008662"><span class="ec-lmtt-9">*</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#000000"><span class="ec-lmtt-9">})</span></span>
+   </pre>
+<!-- l. 332 --><p class="noindent">A fuzzy self-organizing map is fitted like any other clusterer:  </p><!-- l. 333 --><pre class="lstinputlisting" id="listing-22"><span class="label"><a id="x7-95025r69"></a></span><span style="color:#000000"><span class="ec-lmtt-9">maps</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= {th: FuzzySOM(grid_shape=(6, 6), regularization=th, random_state=0).fit(Xh)</span> </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">for</span></span><span style="color:#000000"> <span class="ec-lmtt-9">th</span> </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">in</span></span><span style="color:#000000"> <span class="ec-lmtt-9">(0.0, 0.5, 5.0)}</span></span>
+   </pre>
+<!-- l. 335 --><p class="noindent">
+</p>
+<h3 class="sectionHead"><span class="titlemark">5.4   </span> <a id="x7-960005.4"></a>Examples</h3>
+<!-- l. 337 --><p class="noindent">
+</p>
+<h4 class="subsectionHead"><span class="titlemark">5.4.1   </span> <a id="x7-970005.4.1"></a>PCA versus Sammon mapping</h4>
+<!-- l. 339 --><p class="noindent">Five Gaussian clusters in five dimensions are projected by PCA and by Sammon
+mapping started from the PCA scores (fig. <a href="#x7-97001r3">5.3</a>). The PCA plane keeps 76 % of
+the variance but its stress is twice that of the Sammon map; the groups
+that overlap in the PCA picture are separated once the distances rather
+than the variance are preserved. Figure <a href="#x7-97002r4">5.4</a> shows the convergence of the
+stress for several step sizes and for random initial configurations: a larger
+<!-- l. 339 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>α</mi></math>
+converges in fewer iterations, and random starts need many more iterations
+than the PCA start and end in different local minima of comparable
+stress.
+</p>
+<figure class="figure">
+<!-- l. 341 --><p class="noindent"><img alt="Figure 5.3" class="exfig" src="figures/02_visualization/plot_01_pca_vs_sammon_1.png"/> <a id="x7-97001r3"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 5.3. </span></span><span class="content"><span class="ec-lmr-10">PCA keeps the directions of largest spread and lets clusters that
+differ in the discarded directions overlap; the Sammon mapping started from the
+same configuration bends the picture until the inter-point distances match, which
+separates the five groups and halves the stress.</span> </span></figcaption><!-- tex4ht:label?: x7-97001r3  -->
+<p class="runbox"><a class="colab" href="https://colab.research.google.com/github/ComplexSystemsIntelligence/fuzzyclust/blob/gh-pages/notebooks/auto_examples/02_visualization/plot_01_pca_vs_sammon.ipynb">Open in Colab</a><a href="../auto_examples/02_visualization/plot_01_pca_vs_sammon.html">Example <code>plot_01_pca_vs_sammon.py</code> in the gallery</a></p></figure>
+<figure class="figure">
+<!-- l. 342 --><p class="noindent"><img alt="Figure 5.4" class="exfig" src="figures/02_visualization/plot_01_pca_vs_sammon_2.png"/> <a id="x7-97002r4"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 5.4.   </span></span><span class="content"><span class="ec-lmr-10">Convergence   of   Sammon’s   stress.   Left:   a   larger   step   size</span>
+<!-- l. 342 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>α</mi></math>
+<span class="ec-lmr-10">lowers the stress faster; with the safeguarded step none of the runs diverges. Right:
+the PCA start is already close to a minimum; random starts take longer and reach
+different, slightly worse minima.</span> </span></figcaption><!-- tex4ht:label?: x7-97002r4  -->
+</figure>
+<h4 class="subsectionHead"><span class="titlemark">5.4.2   </span> <a id="x7-980005.4.2"></a>Fuzzy Sammon mapping</h4>
+<!-- l. 346 --><p class="noindent">Figure <a href="#x7-98001r5">5.5</a> illustrates the central property of FUZZSAM on three elongated
+Gaussian clusters in four dimensions. In the PCA picture of the Gustafson–Kessel
+result the memberships recomputed in the plane disagree with the fitted ones
+(<!-- l. 346 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>P</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>0.078</mn></mrow></math>).
+FUZZSAM of the FCM result reproduces its memberships closely
+(<!-- l. 346 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>P</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>0.013</mn></mrow></math>), but
+the groups spill into each other’s contours, because the spherical prototype does not
+fit these data. FUZZSAM of the GK result shows three separated groups with round
+contours, since the GK norm already sees the ellipsoids as spheres and the picture
+inherits this view; the tails of the groups reach into the neighboring contours, so
+its <!-- l. 346 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>P</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>0.027</mn></mrow></math> is
+higher than that of FCM. The distortion of a FUZZSAM picture is thus a
+diagnostic of the prototype.
+</p>
+<figure class="figure">
+<!-- l. 348 --><p class="noindent"><img alt="Figure 5.5" class="exfig" src="figures/02_visualization/plot_02_fuzzy_sammon_1.png"/> <a id="x7-98001r5"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 5.5. </span></span><span class="content"><span class="ec-lmr-10">Three elongated clusters in four dimensions. Left: the GK partition
+projected by PCA, with the contours of the recomputed memberships. Middle:
+FUZZSAM  of  the  FCM  partition,  whose  spherical  prototypes  overlap.  Right:
+FUZZSAM of the GK partition; the groups are separated and their contours are
+round, with tails reaching into the neighboring contours.</span> </span></figcaption><!-- tex4ht:label?: x7-98001r5  -->
+<p class="runbox"><a class="colab" href="https://colab.research.google.com/github/ComplexSystemsIntelligence/fuzzyclust/blob/gh-pages/notebooks/auto_examples/02_visualization/plot_02_fuzzy_sammon.ipynb">Open in Colab</a><a href="../auto_examples/02_visualization/plot_02_fuzzy_sammon.html">Example <code>plot_02_fuzzy_sammon.py</code> in the gallery</a></p></figure>
+<!-- l. 350 --><p class="indent">   Figure <a href="#x7-98003r6">5.6</a> repeats the comparison of the papers on the
+wine data (178 wines, 13 range-scaled attributes, FCM with
+<!-- l. 350 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>c</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>3</mn></mrow></math>). Table <a href="#x7-98002r1">5.1</a> lists the
+quality measures: <!-- l. 350 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>P</mi></math>
+drops from <!-- l. 350 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.13</mn></mrow></math>
+(PCA) through <!-- l. 350 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.09</mn></mrow></math>
+(Sammon) to <!-- l. 350 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.04</mn></mrow></math>
+(FUZZSAM), and the partition coefficient read off the FUZZSAM picture
+(<!-- l. 350 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msup><mrow><mi>F</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msup> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>0.52</mn></mrow></math>) is close to the
+fitted one (<!-- l. 350 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>F</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>0.50</mn></mrow></math>),
+whereas PCA suggests a far crisper partition
+(<!-- l. 350 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msup><mrow><mi>F</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msup> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>0.74</mn></mrow></math>).
+The Sammon stress ranks the methods differently: classical Sammon mapping is
+best at preserving the data geometry, FUZZSAM at preserving the clustering.
+The circled samples are wines whose cluster does not match their cultivar (5 % of
+the data); they lie in the fuzzy region between the centers in every picture,
+but only the FUZZSAM picture places them where their memberships
+say.
+</p>
+<div class="table">
+<!-- l. 352 --><p class="indent"> </p><figure class="float">
+<a id="x7-98002r1"></a>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Table 5.1.    </span></span><span class="content"><span class="ec-lmr-10">Quality    of    three    projections    of    the    FCM    partition
+(</span><!-- l. 353 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>c</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>3</mn></mrow></math><span class="ec-lmr-10">,</span>
+<!-- l. 353 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>m</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>2</mn></mrow></math><span class="ec-lmr-10">)
+of      the      range-scaled      wine      data:      mean      membership      error</span>
+<!-- l. 353 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>P</mi></math><span class="ec-lmr-10">,
+partition coefficient of the fitted (</span><!-- l. 353 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>F</mi></math><span class="ec-lmr-10">)
+and of the recomputed (</span><!-- l. 353 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msup><mrow><mi>F</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msup></math><span class="ec-lmr-10">)
+partition, Sammon stress </span><!-- l. 353 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>E</mi></math><span class="ec-lmr-10">.</span></span></figcaption><!-- tex4ht:label?: x7-98002r1  -->
+<div class="tabular">
+<table class="tabular" id="TBL-12"><colgroup id="TBL-12-1g"><col id="TBL-12-1"/><col id="TBL-12-2"/><col id="TBL-12-3"/><col id="TBL-12-4"/><col id="TBL-12-5"/></colgroup><tr id="TBL-12-1-" style="vertical-align:baseline;"><td class="td11" id="TBL-12-1-1" style="text-align:left; white-space:nowrap;"> </td><td class="td11" id="TBL-12-1-2" style="text-align:center; white-space:nowrap;"> <!-- l. 356 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>P</mi></math> </td><td class="td11" id="TBL-12-1-3" style="text-align:center; white-space:nowrap;"> <!-- l. 356 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>F</mi></math> </td><td class="td11" id="TBL-12-1-4" style="text-align:center; white-space:nowrap;"> <!-- l. 356 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msup><mrow><mi>F</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msup></math> </td><td class="td11" id="TBL-12-1-5" style="text-align:center; white-space:nowrap;"> <!-- l. 356 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>E</mi></math> </td>
+</tr><tr id="TBL-12-2-" style="vertical-align:baseline;"><td class="td11" id="TBL-12-2-1" style="text-align:left; white-space:nowrap;"> <span class="ec-lmr-10">PCA          </span></td><td class="td11" id="TBL-12-2-2" style="text-align:center; white-space:nowrap;"> <span class="ec-lmr-10">0.130                                                    </span></td><td class="td11" id="TBL-12-2-3" style="text-align:center; white-space:nowrap;"> <span class="ec-lmr-10">0.503                                                    </span></td><td class="td11" id="TBL-12-2-4" style="text-align:center; white-space:nowrap;"> <span class="ec-lmr-10">0.742                                                    </span></td><td class="td11" id="TBL-12-2-5" style="text-align:center; white-space:nowrap;"> <span class="ec-lmr-10">0.130                                                    </span></td>
+</tr><tr id="TBL-12-3-" style="vertical-align:baseline;"><td class="td11" id="TBL-12-3-1" style="text-align:left; white-space:nowrap;"> <span class="ec-lmr-10">Sammon     </span></td><td class="td11" id="TBL-12-3-2" style="text-align:center; white-space:nowrap;"> <span class="ec-lmr-10">0.087                                                    </span></td><td class="td11" id="TBL-12-3-3" style="text-align:center; white-space:nowrap;"> <span class="ec-lmr-10">0.503                                                    </span></td><td class="td11" id="TBL-12-3-4" style="text-align:center; white-space:nowrap;"> <span class="ec-lmr-10">0.656                                                    </span></td><td class="td11" id="TBL-12-3-5" style="text-align:center; white-space:nowrap;"> <span class="ec-lmr-10">0.057                                                    </span></td>
+</tr><tr id="TBL-12-4-" style="vertical-align:baseline;"><td class="td11" id="TBL-12-4-1" style="text-align:left; white-space:nowrap;"> <span class="ec-lmr-10">FUZZSAM  </span></td><td class="td11" id="TBL-12-4-2" style="text-align:center; white-space:nowrap;"> <span class="ec-lmr-10">0.036                                                    </span></td><td class="td11" id="TBL-12-4-3" style="text-align:center; white-space:nowrap;"> <span class="ec-lmr-10">0.503                                                    </span></td><td class="td11" id="TBL-12-4-4" style="text-align:center; white-space:nowrap;"> <span class="ec-lmr-10">0.522                                                    </span></td><td class="td11" id="TBL-12-4-5" style="text-align:center; white-space:nowrap;"> <span class="ec-lmr-10">0.096                                                    </span></td>
+</tr></table> </div>
+</figure>
+</div>
+<figure class="figure">
+<!-- l. 363 --><p class="noindent"><img alt="Figure 5.6" class="exfig" src="figures/02_visualization/plot_02_fuzzy_sammon_2.png"/> <a id="x7-98003r6"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 5.6. </span></span><span class="content"><span class="ec-lmr-10">The FCM partition of the wine data projected by PCA, Sammon
+mapping,  and  FUZZSAM;  colors  are  the  cultivars,  contours  the  recomputed
+membership levels, circles the wines whose cluster disagrees with their cultivar.
+Only in the FUZZSAM picture do the contours agree with the point clouds.</span> </span></figcaption><!-- tex4ht:label?: x7-98003r6  -->
+</figure>
+<!-- l. 365 --><p class="indent">   The fuzziness of a partition is visible as well. Figure <a href="#x7-98004r7">5.7</a> shows the GK clustering of the
+iris data for <!-- l. 365 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>m</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>2</mn></mrow></math>
+and <!-- l. 365 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>m</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>1.4</mn></mrow></math>,
+drawn with the same membership levels: with the smaller exponent the partition is
+crisper (<!-- l. 365 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>F</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>0.94</mn></mrow></math>
+against <!-- l. 365 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.73</mn></mrow></math>),
+and the curves of high membership expand and enclose almost all points of each
+cluster.
+</p>
+<figure class="figure">
+<!-- l. 367 --><p class="noindent"><img alt="Figure 5.7" class="exfig" src="figures/02_visualization/plot_02_fuzzy_sammon_3.png"/> <a id="x7-98004r7"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 5.7.  </span></span><span class="content"><span class="ec-lmr-10">FUZZSAM  pictures  of  the  GK  clustering  of  the  iris  data  with</span>
+<!-- l. 367 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>m</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>2</mn></mrow></math>
+<span class="ec-lmr-10">(left)                                                                                                 and</span>
+<!-- l. 367 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>m</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>1.4</mn></mrow></math>
+<span class="ec-lmr-10">(right), drawn with the same membership levels. The crisper partition shows up as
+wide contours of high membership around compact groups.</span> </span></figcaption><!-- tex4ht:label?: x7-98004r7  -->
+</figure>
+<h4 class="subsectionHead"><span class="titlemark">5.4.3   </span> <a id="x7-990005.4.3"></a>Fuzzy self-organizing map</h4>
+<!-- l. 371 --><p class="noindent">The two geometric case studies of [<a id="x7-99001"></a><a href="bibliography.html#cite.0@migaly:2003:fsom">60</a>] are reproduced. In fig. <a href="#x7-99002r8">5.8</a> seven prototypes on a
+one-dimensional grid are fitted to 300 noisy points on one turn of a helix. Plain FCM
+(<!-- l. 371 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>𝜗</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>0</mn></mrow></math>) finds seven
+groups along the curve, but the chain connecting consecutive nodes is tangled; with
+<!-- l. 371 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>𝜗</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>2</mn></mrow></math> the chain follows the
+curve. Figure <a href="#x7-99003r9">5.9</a> fits a <!-- l. 371 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>6</mn> <mo class="MathClass-bin" stretchy="false">×</mo><mn>6</mn></mrow></math>
+grid to 900 points on a hemisphere: without regularization the lattice is a tangle of crossing
+edges; with <!-- l. 371 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>𝜗</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>0.5</mn></mrow></math>
+it is a regular net folded onto the surface, as the component
+plane of the third coordinate in fig. <a href="#x7-99004r10">5.10</a> confirms; and with
+<!-- l. 371 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>𝜗</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>5</mn></mrow></math> the net
+is nearly planar and no longer follows the curvature. The Spearman correlation
+between grid distances and prototype distances, printed in the panel titles, rises
+from <!-- l. 371 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.93</mn></mrow></math>
+for <!-- l. 371 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>𝜗</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>0</mn></mrow></math> to
+<!-- l. 371 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.98</mn></mrow></math> for
+<!-- l. 371 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>𝜗</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>0.5</mn></mrow></math> and
+<!-- l. 371 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.99</mn></mrow></math> for
+<!-- l. 371 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>𝜗</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>5</mn></mrow></math>, while the objective
+grows from <!-- l. 371 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>6.76</mn></mrow></math>
+to <!-- l. 371 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>7.43</mn></mrow></math>
+and <!-- l. 371 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>8.36</mn></mrow></math>.
+Figure <a href="#x7-99005r11">5.11</a> compares the two difference operators: with
+first-order differences the extent of the map shrinks with
+<!-- l. 371 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>𝜗</mi></math> and collapses
+to a point for <!-- l. 371 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>𝜗</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>2</mn></mrow></math>;
+with second-order differences it stays constant, which is the argument for the
+curvature penalty.
+</p>
+<figure class="figure">
+<!-- l. 373 --><p class="noindent"><img alt="Figure 5.8" class="exfig" src="figures/02_visualization/plot_03_fuzzy_som_1.png"/> <a id="x7-99002r8"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 5.8.   </span></span><span class="content"><span class="ec-lmr-10">A   chain   of   seven   prototypes   on   a   noisy   helix.   Left:
+fuzzy   c-means   places   the   prototypes   along   the   curve   but   connects
+consecutive  nodes  in  a  tangled  order.  Right:  with  the  curvature  penalty
+(</span><!-- l. 373 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>𝜗</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>2</mn></mrow></math><span class="ec-lmr-10">)
+the chain follows the curve.</span> </span></figcaption><!-- tex4ht:label?: x7-99002r8  -->
+<p class="runbox"><a class="colab" href="https://colab.research.google.com/github/ComplexSystemsIntelligence/fuzzyclust/blob/gh-pages/notebooks/auto_examples/02_visualization/plot_03_fuzzy_som.ipynb">Open in Colab</a><a href="../auto_examples/02_visualization/plot_03_fuzzy_som.html">Example <code>plot_03_fuzzy_som.py</code> in the gallery</a></p></figure>
+<figure class="figure">
+<!-- l. 374 --><p class="noindent"><img alt="Figure 5.9" class="exfig" src="figures/02_visualization/plot_03_fuzzy_som_2.png"/> <a id="x7-99003r9"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 5.9.                                                                             </span></span><span class="content"><span class="ec-lmr-10">A</span>
+<!-- l. 374 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>6</mn> <mo class="MathClass-bin" stretchy="false">×</mo><mn>6</mn></mrow></math>
+<span class="ec-lmr-10">fuzzy    SOM    of    points    on    a    hemisphere,    lattice    drawn    in    the</span>
+<!-- l. 374 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mi>x</mi></mrow><mrow><mn>1</mn></mrow></msub><mo class="MathClass-punc" stretchy="false">,</mo><msub><mrow><mi>x</mi></mrow><mrow><mn>2</mn></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>
+<span class="ec-lmr-10">plane.</span>
+<!-- l. 374 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>𝜗</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>0</mn></mrow></math>
+<span class="ec-lmr-10">is         plain         FCM         and         gives         a         tangled         lattice;</span>
+<!-- l. 374 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>𝜗</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>0.5</mn></mrow></math>
+<span class="ec-lmr-10">gives        an        ordered        net        that        follows        the        surface;</span>
+<!-- l. 374 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>𝜗</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>5</mn></mrow></math>
+<span class="ec-lmr-10">flattens the net.</span> </span></figcaption><!-- tex4ht:label?: x7-99003r9  -->
+</figure>
+<figure class="figure">
+<!-- l. 375 --><p class="noindent"><img alt="Figure 5.10" class="exfig" src="figures/02_visualization/plot_03_fuzzy_som_3.png"/> <a id="x7-99004r10"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 5.10.       </span></span><span class="content"><span class="ec-lmr-10">Component       planes       of       the       ordered       map
+(</span><!-- l. 375 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>𝜗</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>0.5</mn></mrow></math><span class="ec-lmr-10">):
+the first two coordinates change monotonically across the grid, each in its own
+direction; the third (height on the hemisphere) peaks in the middle of the grid, so
+the map has folded onto the surface.</span> </span></figcaption><!-- tex4ht:label?: x7-99004r10  -->
+</figure>
+<figure class="figure">
+<!-- l. 376 --><p class="noindent"><img alt="Figure 5.11" class="exfig" src="figures/02_visualization/plot_03_fuzzy_som_4.png"/> <a id="x7-99005r11"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 5.11.    </span></span><span class="content"><span class="ec-lmr-10">Largest    extent    of    the    prototypes    as    a    function    of</span>
+<!-- l. 376 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>𝜗</mi></math><span class="ec-lmr-10">.
+The      first-order      penalty      of      the      smoothly      distributed      FCM
+contracts    the    map    toward    the    data    center    and    collapses    it    for</span>
+<!-- l. 376 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>𝜗</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>2</mn></mrow></math><span class="ec-lmr-10">;
+the second-order (curvature) penalty leaves a regular grid unpenalized and keeps
+the extent of the map.</span> </span></figcaption><!-- tex4ht:label?: x7-99005r11  -->
+</figure>
+<!-- l. 378 --><p class="indent">   Figures <a href="#x7-99006r12">5.12</a> and <a href="#x7-99007r13">5.13</a> show a <!-- l. 378 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>6</mn> <mo class="MathClass-bin" stretchy="false">×</mo><mn>6</mn></mrow></math>
+map of the standardized wine data (<!-- l. 378 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>m</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>1.3</mn></mrow></math>,
+<!-- l. 378 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>𝜗</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>0.5</mn></mrow></math>). The
+U-matrix has dark ridges that divide the grid into three regions, the hit
+histograms of the three cultivars fall into exactly these regions, and the
+component planes of the flavanoid content and the color intensity show the
+chemistry behind the split.
+</p>
+<figure class="figure">
+<!-- l. 380 --><p class="noindent"><img alt="Figure 5.12" class="exfig" src="figures/02_visualization/plot_03_fuzzy_som_5.png"/> <a id="x7-99006r12"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 5.12.                                                                            </span></span><span class="content"><span class="ec-lmr-10">A</span>
+<!-- l. 380 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>6</mn> <mo class="MathClass-bin" stretchy="false">×</mo><mn>6</mn></mrow></math>
+<span class="ec-lmr-10">fuzzy SOM of the wine data: U-matrix (dark ridges separate groups of similar
+prototypes), fuzzy hit histogram, and the component planes of two attributes.</span> </span></figcaption><!-- tex4ht:label?: x7-99006r12  -->
+</figure>
+<figure class="figure">
+<!-- l. 381 --><p class="noindent"><img alt="Figure 5.13" class="exfig" src="figures/02_visualization/plot_03_fuzzy_som_6.png"/> <a id="x7-99007r13"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 5.13. </span></span><span class="content"><span class="ec-lmr-10">Hit histograms of the three cultivars on the same map: each occupies
+its own region, separated by the ridges of the U-matrix.</span> </span></figcaption><!-- tex4ht:label?: x7-99007r13  -->
+</figure>
+<h4 class="subsectionHead"><span class="titlemark">5.4.4   </span> <a id="x7-1000005.4.4"></a>Visual validation of the number of clusters</h4>
+<!-- l. 385 --><p class="noindent">Figure <a href="#x7-100001r14">5.14</a> applies FUZZSAM to the FCM partitions of the Wisconsin
+breast cancer data (569 samples, ten standardized features) for
+<!-- l. 385 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>c</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>2</mn><mo class="MathClass-punc" stretchy="false">,</mo><mn>3</mn><mo class="MathClass-punc" stretchy="false">,</mo><mn>4</mn></mrow></math>.
+With two clusters the groups are compact and the diagnosis coincides
+with the clusters up to a band of ambiguous cases between the centers;
+with three clusters the extra prototype splits the large benign group,
+and with four the malignant group is split as well; the new clusters
+overlap in the plane, and the recomputed memberships fit worse
+(<!-- l. 385 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>P</mi></math> grows
+from <!-- l. 385 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.004</mn></mrow></math>
+to <!-- l. 385 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.02</mn></mrow></math>).
+The validity indices PC, CE, and XB also favor two clusters (SC, which decreases
+with <!-- l. 385 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>c</mi></math>
+by design, does not), but only the picture shows <span class="ec-lmri-10x-x-109">which </span>clusters were split and
+where the ambiguous samples lie. Figure <a href="#x7-100002r15">5.15</a> shows the convergence of
+<!-- l. 385 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>E</mi></mrow><mrow><mstyle class="text"><mtext>fuzz</mtext></mstyle></mrow></msub></math> for several step
+sizes; because only <!-- l. 385 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi mathvariant="italic">Nc</mi></mrow></math>
+distances enter, sixty iterations on 569 samples take a fraction of a second.
+</p>
+<figure class="figure">
+<!-- l. 387 --><p class="noindent"><img alt="Figure 5.14" class="exfig" src="figures/02_visualization/plot_04_cluster_number_validation_1.png"/> <a id="x7-100001r14"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 5.14.   </span></span><span class="content"><span class="ec-lmr-10">FUZZSAM   pictures   of   FCM   partitions   of   the   breast
+cancer    data    with    two,    three,    and    four    clusters    (colors:    diagnosis;
+diagnosis 1   is   malignant,   diagnosis 2   benign).   Two   compact   groups   for</span>
+<!-- l. 387 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>c</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>2</mn></mrow></math><span class="ec-lmr-10">;
+for </span><!-- l. 387 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>c</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>3</mn></mrow></math>
+<span class="ec-lmr-10">the       additional       prototype       splits       the       benign       group,       for</span>
+<!-- l. 387 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>c</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>4</mn></mrow></math>
+<span class="ec-lmr-10">each diagnosis is split in two, and the clusters overlap.</span> </span></figcaption><!-- tex4ht:label?: x7-100001r14  -->
+<p class="runbox"><a class="colab" href="https://colab.research.google.com/github/ComplexSystemsIntelligence/fuzzyclust/blob/gh-pages/notebooks/auto_examples/02_visualization/plot_04_cluster_number_validation.ipynb">Open in Colab</a><a href="../auto_examples/02_visualization/plot_04_cluster_number_validation.html">Example <code>plot_04_cluster_number_validation.py</code> in the gallery</a></p></figure>
+<figure class="figure">
+<!-- l. 388 --><p class="noindent"><img alt="Figure 5.15" class="exfig" src="figures/02_visualization/plot_04_cluster_number_validation_2.png"/> <a id="x7-100002r15"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 5.15. </span></span><span class="content"><span class="ec-lmr-10">Convergence of the fuzzy Sammon stress for different step sizes; a
+larger</span>
+<!-- l. 388 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>α</mi></math>
+<span class="ec-lmr-10">speeds up the decrease, and the safeguarded step keeps every run monotone.</span> </span></figcaption><!-- tex4ht:label?: x7-100002r15  -->
+</figure>
+<h3 class="sectionHead"><span class="titlemark">5.5   </span> <a id="x7-1010005.5"></a>Further reading</h3>
+<!-- l. 392 --><p class="noindent">Sammon’s original paper [<a id="x7-101001"></a><a href="bibliography.html#cite.0@sammon:1969">52</a>] remains the clearest account of the stress and of the
+diagonal Newton step; Mao and Jain [<a id="x7-101002"></a><a href="bibliography.html#cite.0@mao:1995">54</a>] and de Ridder and Duin [<a id="x7-101003"></a><a href="bibliography.html#cite.0@deridder:1997">55</a>] discuss
+initialization, neural-network implementations, and the computational burden,
+Pal and Eluri [<a id="x7-101004"></a><a href="bibliography.html#cite.0@pal:1998">56</a>] the missing out-of-sample extension. The fuzzy Sammon
+mapping was introduced by Kovács and Abonyi [<a id="x7-101005"></a><a href="bibliography.html#cite.0@kovacs:2002:fuzzsam">49</a>], presented with
+the Gustafson–Kessel examples and the quality measures by Abonyi
+and Babuška [<a id="x7-101006"></a><a href="bibliography.html#cite.0@abonyi:2004:fuzzsam">50</a>], and applied to the visualization of reconstructed
+phase-space trajectories of chaotic systems by Feil, Balaskó, and Abonyi [<a id="x7-101007"></a><a href="bibliography.html#cite.0@feil:2007:fuzzsam">51</a>],
+where the prototypes are local linear models and no classical projection
+would apply. For PCA see Jolliffe [<a id="x7-101008"></a><a href="bibliography.html#cite.0@jolliffe:2002">53</a>]; the partition coefficient used in
+<!-- l. 392 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>F</mi></math> and
+<!-- l. 392 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msup><mrow><mi>F</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msup></math>
+is Bezdek’s [<a id="x7-101009"></a><a href="bibliography.html#cite.0@bezdek:1981">3</a>]. The self-organizing map is Kohonen’s [<a id="x7-101010"></a><a href="bibliography.html#cite.0@kohonen:1990">57</a>]; its fuzzy
+reformulations include the fuzzy Kohonen clustering network [<a id="x7-101011"></a><a href="bibliography.html#cite.0@tsao:1994:fkcn">58</a>], the
+smoothly distributed fuzzy c-means [<a id="x7-101012"></a><a href="bibliography.html#cite.0@pascualmarqui:2001">59</a>] and the fuzzy curve-tracing
+algorithm [<a id="x7-101013"></a><a href="bibliography.html#cite.0@yan:2001:curvetrace">61</a>]; the last two are special cases of the regularized FCM
+of Abonyi, Migály, and Szeifert [<a id="x7-101014"></a><a href="bibliography.html#cite.0@migaly:2003:fsom">60</a>], obtained by the choice of
+<!-- l. 392 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mstyle mathvariant="bold"><mi>L</mi></mstyle></math>. The
+SOM Toolbox [<a id="x7-101015"></a><a href="bibliography.html#cite.0@vesanto:2000:somtoolbox">62</a>] is the reference implementation of the U-matrix and
+component-plane views.
+                                                                     
+
+                                                                     
+</p>
+<!-- l. 1 -->
+<!-- l. 1 --><p class="indent"> <a id="tailmain_webch5.html"></a> </p>
+<nav class='pager'><a class='prev' href='04-cluster-validity-and-the-number.html'><small>Previous</small>Cluster validity and the number of clusters</a><a class='next' href='06-robust-and-shape-oriented-variants.html'><small>Next</small>Robust and shape-oriented variants of fuzzy c-means</a></nav>
+</main>
+<aside class="right"><nav class='onpage' aria-label='On this page'><p class='toc-title'>On this page</p><ul><li><a href='#x7-880005.1'>5.1 Problem and idea</a></li><li><a href='#x7-890005.2'>5.2 Theory</a></li><li><a href='#x7-950005.3'>5.3 Using it in fuzzyclust</a></li><li><a href='#x7-960005.4'>5.4 Examples</a></li><li><a href='#x7-1010005.5'>5.5 Further reading</a></li></ul></nav></aside>
+</div>
+<footer class='foot'>© 2026 János Abonyi, University of Pannonia · licensed under <a href='https://creativecommons.org/licenses/by/4.0/'>CC BY 4.0</a> · web edition of the book, generated from the same LaTeX source as the <a href='../fuzzyclust-book.pdf'>PDF</a> · software: <a href='https://github.com/ComplexSystemsIntelligence/fuzzyclust'>fuzzyclust</a> (MIT) · <code>pip install fuzzyclust</code></footer>
+</body>
+</html>

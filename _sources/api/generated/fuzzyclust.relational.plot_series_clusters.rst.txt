@@ -1,0 +1,12 @@
+﻿fuzzyclust.relational.plot\_series\_clusters
+============================================
+
+.. currentmodule:: fuzzyclust.relational
+
+.. autofunction:: plot_series_clusters
+
+.. include:: fuzzyclust.relational.plot_series_clusters.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

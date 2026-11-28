@@ -1,0 +1,12 @@
+﻿fuzzyclust.validity.classification\_entropy
+===========================================
+
+.. currentmodule:: fuzzyclust.validity
+
+.. autofunction:: classification_entropy
+
+.. include:: fuzzyclust.validity.classification_entropy.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

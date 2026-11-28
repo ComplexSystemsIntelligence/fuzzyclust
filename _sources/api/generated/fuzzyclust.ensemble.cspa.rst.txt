@@ -1,0 +1,12 @@
+﻿fuzzyclust.ensemble.cspa
+========================
+
+.. currentmodule:: fuzzyclust.ensemble
+
+.. autofunction:: cspa
+
+.. include:: fuzzyclust.ensemble.cspa.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

@@ -1,0 +1,12 @@
+﻿fuzzyclust.viz.plot\_stress
+===========================
+
+.. currentmodule:: fuzzyclust.viz
+
+.. autofunction:: plot_stress
+
+.. include:: fuzzyclust.viz.plot_stress.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

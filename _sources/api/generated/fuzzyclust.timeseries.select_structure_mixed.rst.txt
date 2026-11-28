@@ -1,0 +1,12 @@
+﻿fuzzyclust.timeseries.select\_structure\_mixed
+==============================================
+
+.. currentmodule:: fuzzyclust.timeseries
+
+.. autofunction:: select_structure_mixed
+
+.. include:: fuzzyclust.timeseries.select_structure_mixed.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

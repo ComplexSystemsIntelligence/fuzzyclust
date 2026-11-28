@@ -1,0 +1,12 @@
+﻿fuzzyclust.timeseries.make\_nonlinear\_io\_system
+=================================================
+
+.. currentmodule:: fuzzyclust.timeseries
+
+.. autofunction:: make_nonlinear_io_system
+
+.. include:: fuzzyclust.timeseries.make_nonlinear_io_system.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

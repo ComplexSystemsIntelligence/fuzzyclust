@@ -1,0 +1,12 @@
+﻿fuzzyclust.viz.make\_spiral\_3d
+===============================
+
+.. currentmodule:: fuzzyclust.viz
+
+.. autofunction:: make_spiral_3d
+
+.. include:: fuzzyclust.viz.make_spiral_3d.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

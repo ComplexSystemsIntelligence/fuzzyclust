@@ -1,0 +1,12 @@
+﻿fuzzyclust.large.plot\_center\_trajectories
+===========================================
+
+.. currentmodule:: fuzzyclust.large
+
+.. autofunction:: plot_center_trajectories
+
+.. include:: fuzzyclust.large.plot_center_trajectories.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

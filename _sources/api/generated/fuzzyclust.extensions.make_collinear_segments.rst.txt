@@ -1,0 +1,12 @@
+﻿fuzzyclust.extensions.make\_collinear\_segments
+===============================================
+
+.. currentmodule:: fuzzyclust.extensions
+
+.. autofunction:: make_collinear_segments
+
+.. include:: fuzzyclust.extensions.make_collinear_segments.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

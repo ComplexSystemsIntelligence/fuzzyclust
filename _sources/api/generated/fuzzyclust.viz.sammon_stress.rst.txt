@@ -1,0 +1,12 @@
+﻿fuzzyclust.viz.sammon\_stress
+=============================
+
+.. currentmodule:: fuzzyclust.viz
+
+.. autofunction:: sammon_stress
+
+.. include:: fuzzyclust.viz.sammon_stress.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

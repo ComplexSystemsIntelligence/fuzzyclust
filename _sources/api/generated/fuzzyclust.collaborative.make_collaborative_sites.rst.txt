@@ -1,0 +1,12 @@
+﻿fuzzyclust.collaborative.make\_collaborative\_sites
+===================================================
+
+.. currentmodule:: fuzzyclust.collaborative
+
+.. autofunction:: make_collaborative_sites
+
+.. include:: fuzzyclust.collaborative.make_collaborative_sites.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

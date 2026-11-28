@@ -1,0 +1,12 @@
+﻿fuzzyclust.timeseries.plot\_fnn\_table
+======================================
+
+.. currentmodule:: fuzzyclust.timeseries
+
+.. autofunction:: plot_fnn_table
+
+.. include:: fuzzyclust.timeseries.plot_fnn_table.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

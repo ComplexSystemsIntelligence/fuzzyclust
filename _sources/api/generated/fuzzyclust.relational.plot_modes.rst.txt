@@ -1,0 +1,12 @@
+﻿fuzzyclust.relational.plot\_modes
+=================================
+
+.. currentmodule:: fuzzyclust.relational
+
+.. autofunction:: plot_modes
+
+.. include:: fuzzyclust.relational.plot_modes.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

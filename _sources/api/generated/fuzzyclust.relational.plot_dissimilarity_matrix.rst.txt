@@ -1,0 +1,12 @@
+﻿fuzzyclust.relational.plot\_dissimilarity\_matrix
+=================================================
+
+.. currentmodule:: fuzzyclust.relational
+
+.. autofunction:: plot_dissimilarity_matrix
+
+.. include:: fuzzyclust.relational.plot_dissimilarity_matrix.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

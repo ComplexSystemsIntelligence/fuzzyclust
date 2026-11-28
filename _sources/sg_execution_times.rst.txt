@@ -1,0 +1,217 @@
+
+:orphan:
+
+.. _sphx_glr_sg_execution_times:
+
+
+Computation times
+=================
+**02:46.366** total execution time for 61 files **from all galleries**:
+
+.. container::
+
+  .. raw:: html
+
+    <style scoped>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+    </style>
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script type="text/javascript" class="init">
+    $(document).ready( function () {
+        $('table.sg-datatable').DataTable({order: [[1, 'desc']]});
+    } );
+    </script>
+
+  .. list-table::
+   :header-rows: 1
+   :class: table table-striped sg-datatable
+
+   * - Example
+     - Time
+     - Mem (MB)
+   * - :ref:`sphx_glr_auto_examples_01_clustering_plot_14_merging_stability.py` (``../examples/01_clustering/plot_14_merging_stability.py``)
+     - 00:15.198
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_04_timeseries_plot_01_fuzzy_segmentation.py` (``../examples/04_timeseries/plot_01_fuzzy_segmentation.py``)
+     - 00:08.749
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_04_timeseries_plot_03_fnn_model_order.py` (``../examples/04_timeseries/plot_03_fnn_model_order.py``)
+     - 00:08.305
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_08_data_realities_plot_03_large_data.py` (``../examples/08_data_realities/plot_03_large_data.py``)
+     - 00:08.052
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_06_extensions_plot_04_kernel_fcm.py` (``../examples/06_extensions/plot_04_kernel_fcm.py``)
+     - 00:07.902
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_04_timeseries_plot_04_chaotic_reconstruction.py` (``../examples/04_timeseries/plot_04_chaotic_reconstruction.py``)
+     - 00:07.857
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_06_extensions_plot_06_fuzzy_c_shells.py` (``../examples/06_extensions/plot_06_fuzzy_c_shells.py``)
+     - 00:06.831
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_03_models_plot_06_fuzzy_partition_tree.py` (``../examples/03_models/plot_06_fuzzy_partition_tree.py``)
+     - 00:06.644
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_01_clustering_plot_10_initialisation_restarts.py` (``../examples/01_clustering/plot_10_initialisation_restarts.py``)
+     - 00:06.481
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_09_beyond_unsupervised_plot_05_ensemble_consensus.py` (``../examples/09_beyond_unsupervised/plot_05_ensemble_consensus.py``)
+     - 00:06.443
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_09_beyond_unsupervised_plot_06_ensemble_lifetime.py` (``../examples/09_beyond_unsupervised/plot_06_ensemble_lifetime.py``)
+     - 00:06.022
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_07_relational_plot_02_fcmdd_dtw_series.py` (``../examples/07_relational/plot_02_fcmdd_dtw_series.py``)
+     - 00:05.241
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_03_models_plot_02_ts_dynamic_plant.py` (``../examples/03_models/plot_02_ts_dynamic_plant.py``)
+     - 00:03.999
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_08_data_realities_plot_05_image_noise.py` (``../examples/08_data_realities/plot_05_image_noise.py``)
+     - 00:03.979
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_03_models_plot_03_ts_mimo.py` (``../examples/03_models/plot_03_ts_mimo.py``)
+     - 00:03.622
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_01_clustering_plot_13_subtractive_clustering.py` (``../examples/01_clustering/plot_13_subtractive_clustering.py``)
+     - 00:03.524
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_08_data_realities_plot_06_spatial_alpha_window.py` (``../examples/08_data_realities/plot_06_spatial_alpha_window.py``)
+     - 00:03.360
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_03_models_plot_05_supervised_classifier.py` (``../examples/03_models/plot_05_supervised_classifier.py``)
+     - 00:02.720
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_02_visualization_plot_01_pca_vs_sammon.py` (``../examples/02_visualization/plot_01_pca_vs_sammon.py``)
+     - 00:02.541
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_07_relational_plot_05_gower_fcmdd_vs_onehot.py` (``../examples/07_relational/plot_05_gower_fcmdd_vs_onehot.py``)
+     - 00:02.500
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_05_graph_plot_05_geodesic_path_isomap.py` (``../examples/05_graph/plot_05_geodesic_path_isomap.py``)
+     - 00:02.488
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_02_visualization_plot_04_cluster_number_validation.py` (``../examples/02_visualization/plot_04_cluster_number_validation.py``)
+     - 00:02.307
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_02_visualization_plot_03_fuzzy_som.py` (``../examples/02_visualization/plot_03_fuzzy_som.py``)
+     - 00:02.230
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_06_extensions_plot_05_fuzzy_c_varieties.py` (``../examples/06_extensions/plot_05_fuzzy_c_varieties.py``)
+     - 00:01.771
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_03_models_plot_07_hinging_tree.py` (``../examples/03_models/plot_07_hinging_tree.py``)
+     - 00:01.749
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_05_graph_plot_02_mst_cut_criteria.py` (``../examples/05_graph/plot_02_mst_cut_criteria.py``)
+     - 00:01.742
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_05_graph_plot_04_geodesic_fcm.py` (``../examples/05_graph/plot_04_geodesic_fcm.py``)
+     - 00:01.701
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_06_extensions_plot_08_volume_prototypes.py` (``../examples/06_extensions/plot_08_volume_prototypes.py``)
+     - 00:01.694
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_05_graph_plot_03_mst_validation.py` (``../examples/05_graph/plot_03_mst_validation.py``)
+     - 00:01.493
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_01_clustering_plot_05_validity_scan.py` (``../examples/01_clustering/plot_05_validity_scan.py``)
+     - 00:01.483
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_06_extensions_plot_07_feature_weighting.py` (``../examples/06_extensions/plot_07_feature_weighting.py``)
+     - 00:01.435
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_02_visualization_plot_02_fuzzy_sammon.py` (``../examples/02_visualization/plot_02_fuzzy_sammon.py``)
+     - 00:01.399
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_08_data_realities_plot_02_ocs_imputation.py` (``../examples/08_data_realities/plot_02_ocs_imputation.py``)
+     - 00:01.327
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_05_graph_plot_01_mst_clustering.py` (``../examples/05_graph/plot_01_mst_clustering.py``)
+     - 00:01.318
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_01_clustering_plot_07_motorcycle_scaling.py` (``../examples/01_clustering/plot_07_motorcycle_scaling.py``)
+     - 00:01.288
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_03_models_plot_01_ts_sinc.py` (``../examples/03_models/plot_01_ts_sinc.py``)
+     - 00:01.195
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_07_relational_plot_06_autocorrelation_series.py` (``../examples/07_relational/plot_06_autocorrelation_series.py``)
+     - 00:01.185
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_04_timeseries_plot_05_mixed_input_structure.py` (``../examples/04_timeseries/plot_05_mixed_input_structure.py``)
+     - 00:01.051
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_01_clustering_plot_12_fuzzifiers_annealing.py` (``../examples/01_clustering/plot_12_fuzzifiers_annealing.py``)
+     - 00:01.015
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_01_clustering_plot_08_sklearn_pandas_workflow.py` (``../examples/01_clustering/plot_08_sklearn_pandas_workflow.py``)
+     - 00:00.997
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_09_beyond_unsupervised_plot_04_collaborative_sites.py` (``../examples/09_beyond_unsupervised/plot_04_collaborative_sites.py``)
+     - 00:00.991
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_08_data_realities_plot_04_stream_drift.py` (``../examples/08_data_realities/plot_04_stream_drift.py``)
+     - 00:00.982
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_08_data_realities_plot_01_missing_strategies.py` (``../examples/08_data_realities/plot_01_missing_strategies.py``)
+     - 00:00.960
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_09_beyond_unsupervised_plot_02_pcca_pairwise_constraints.py` (``../examples/09_beyond_unsupervised/plot_02_pcca_pairwise_constraints.py``)
+     - 00:00.894
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_01_clustering_plot_11_distance_norms.py` (``../examples/01_clustering/plot_11_distance_norms.py``)
+     - 00:00.875
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_06_extensions_plot_01_pcm_typicality.py` (``../examples/06_extensions/plot_01_pcm_typicality.py``)
+     - 00:00.862
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_04_timeseries_plot_02_bottom_up_vs_fuzzy.py` (``../examples/04_timeseries/plot_02_bottom_up_vs_fuzzy.py``)
+     - 00:00.830
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_09_beyond_unsupervised_plot_03_fccm_document_term.py` (``../examples/09_beyond_unsupervised/plot_03_fccm_document_term.py``)
+     - 00:00.811
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_06_extensions_plot_03_noise_clustering.py` (``../examples/06_extensions/plot_03_noise_clustering.py``)
+     - 00:00.791
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_01_clustering_plot_04_gg_densities.py` (``../examples/01_clustering/plot_04_gg_densities.py``)
+     - 00:00.782
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_07_relational_plot_01_rfcm_fcm_duality.py` (``../examples/07_relational/plot_01_rfcm_fcm_duality.py``)
+     - 00:00.744
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_01_clustering_plot_03_gk_ellipses.py` (``../examples/01_clustering/plot_03_gk_ellipses.py``)
+     - 00:00.707
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_06_extensions_plot_02_pfcm_trade_off.py` (``../examples/06_extensions/plot_02_pfcm_trade_off.py``)
+     - 00:00.682
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_03_models_plot_04_fcrm_switching.py` (``../examples/03_models/plot_04_fcrm_switching.py``)
+     - 00:00.673
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_01_clustering_plot_01_fcm_basics.py` (``../examples/01_clustering/plot_01_fcm_basics.py``)
+     - 00:00.673
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_01_clustering_plot_06_predict_new_data.py` (``../examples/01_clustering/plot_06_predict_new_data.py``)
+     - 00:00.657
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_07_relational_plot_04_kprototypes_mixed.py` (``../examples/07_relational/plot_04_kprototypes_mixed.py``)
+     - 00:00.612
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_01_clustering_plot_09_fuzziness_exponent.py` (``../examples/01_clustering/plot_09_fuzziness_exponent.py``)
+     - 00:00.567
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_07_relational_plot_03_kmodes_survey.py` (``../examples/07_relational/plot_03_kmodes_survey.py``)
+     - 00:00.548
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_09_beyond_unsupervised_plot_01_ssfcm_partial_labels.py` (``../examples/09_beyond_unsupervised/plot_01_ssfcm_partial_labels.py``)
+     - 00:00.445
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_01_clustering_plot_02_hard_vs_fuzzy.py` (``../examples/01_clustering/plot_02_hard_vs_fuzzy.py``)
+     - 00:00.441
+     - 0.0

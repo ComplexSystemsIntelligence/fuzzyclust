@@ -1,0 +1,12 @@
+﻿fuzzyclust.relational.make\_warped\_series
+==========================================
+
+.. currentmodule:: fuzzyclust.relational
+
+.. autofunction:: make_warped_series
+
+.. include:: fuzzyclust.relational.make_warped_series.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

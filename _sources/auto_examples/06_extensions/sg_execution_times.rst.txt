@@ -1,0 +1,58 @@
+
+:orphan:
+
+.. _sphx_glr_auto_examples_06_extensions_sg_execution_times:
+
+
+Computation times
+=================
+**00:21.968** total execution time for 8 files **from auto_examples/06_extensions**:
+
+.. container::
+
+  .. raw:: html
+
+    <style scoped>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+    </style>
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script type="text/javascript" class="init">
+    $(document).ready( function () {
+        $('table.sg-datatable').DataTable({order: [[1, 'desc']]});
+    } );
+    </script>
+
+  .. list-table::
+   :header-rows: 1
+   :class: table table-striped sg-datatable
+
+   * - Example
+     - Time
+     - Mem (MB)
+   * - :ref:`sphx_glr_auto_examples_06_extensions_plot_04_kernel_fcm.py` (``plot_04_kernel_fcm.py``)
+     - 00:07.902
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_06_extensions_plot_06_fuzzy_c_shells.py` (``plot_06_fuzzy_c_shells.py``)
+     - 00:06.831
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_06_extensions_plot_05_fuzzy_c_varieties.py` (``plot_05_fuzzy_c_varieties.py``)
+     - 00:01.771
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_06_extensions_plot_08_volume_prototypes.py` (``plot_08_volume_prototypes.py``)
+     - 00:01.694
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_06_extensions_plot_07_feature_weighting.py` (``plot_07_feature_weighting.py``)
+     - 00:01.435
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_06_extensions_plot_01_pcm_typicality.py` (``plot_01_pcm_typicality.py``)
+     - 00:00.862
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_06_extensions_plot_03_noise_clustering.py` (``plot_03_noise_clustering.py``)
+     - 00:00.791
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_06_extensions_plot_02_pfcm_trade_off.py` (``plot_02_pfcm_trade_off.py``)
+     - 00:00.682
+     - 0.0

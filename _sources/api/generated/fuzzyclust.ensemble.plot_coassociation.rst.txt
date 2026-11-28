@@ -1,0 +1,12 @@
+﻿fuzzyclust.ensemble.plot\_coassociation
+=======================================
+
+.. currentmodule:: fuzzyclust.ensemble
+
+.. autofunction:: plot_coassociation
+
+.. include:: fuzzyclust.ensemble.plot_coassociation.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

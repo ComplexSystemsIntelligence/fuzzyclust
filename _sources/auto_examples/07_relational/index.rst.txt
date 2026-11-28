@@ -1,0 +1,147 @@
+
+
+.. _sphx_glr_auto_examples_07_relational:
+
+Relational, categorical and mixed data
+--------------------------------------
+
+Fuzzy clustering when the objects are not feature vectors or the mean is
+meaningless: relational fuzzy c-means as the exact dual of FCM on a matrix
+of squared distances and its non-Euclidean extension with the adaptive
+β-spread (NERF), fuzzy c-medoids on dynamic-time-warping dissimilarities of
+time series with the linear-complexity candidate search, fuzzy k-modes on
+categorical survey data, fuzzy k-prototypes on mixed records with the
+weight γ, Gower's coefficient as a bridge between mixed data and the
+relational algorithms, and autocorrelation-based clustering of time series.
+
+
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Fuzzy c-means needs the data as vectors: a prototype is a weighted mean and the distance to it is Euclidean. Hathaway, Davenport and Bezdek showed that the same functional can be minimized when only the matrix \mathbf{R} of squared pairwise distances is known. The prototype becomes a weight vector over the objects, \mathbf{v}_i=\mathbf{U}_i^m/\sum_k\mu_{ik}^m, and the squared distance of object k to it is d^2_{ik}=(\mathbf{R}\mathbf{v}_i)_k-\tfrac12\mathbf{v}_i^T\mathbf{R}\mathbf{v}_i, an identity that holds for any weights summing to one as long as \mathbf{R} is Euclidean. Relational FCM (RFCM) therefore reproduces FCM exactly, iterate by iterate, when \mathbf{R} comes from Euclidean data. When it does not (squared city-block distances, cubed distances, dynamic-time-warping dissimilarities), some d^2_{ik} turn negative and RFCM breaks down. NERF c-means (Hathaway and Bezdek) adds a constant \beta to all off-diagonal entries, which shifts every relational distance by \tfrac{\beta}{2}\lVert\mathbf{e}_k-\mathbf{v}_i\rVert^2; it raises \beta adaptively, only when a negative distance appears and only as much as needed.">
+
+.. only:: html
+
+  .. image:: /auto_examples/07_relational/images/thumb/sphx_glr_plot_01_rfcm_fcm_duality_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/07_relational/plot_01_rfcm_fcm_duality`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Relational fuzzy c-means and NERF for non-Euclidean data</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Time series of the same shape rarely line up in time: a peak comes a little earlier or later, a ramp is stretched or compressed. The Euclidean distance between two such series compares values at equal time indices and is large even when the shapes agree, whereas dynamic time warping (Sakoe and Chiba) aligns the series by a monotone path through their cost matrix, within a band of width w, and compares what belongs together. DTW is a dissimilarity, not a metric, and its square is not Euclidean, so relational c-means would need the \beta-spread; fuzzy c-medoids (Krishnapuram, Joshi, Nasraoui and Yi) needs nothing of the kind. Its prototypes are objects (the medoid of a cluster is the series that minimizes the membership-weighted sum of dissimilarities to the others), so it works with any dissimilarity and returns representative series that can be plotted. The search for a medoid among all N objects costs O(N^2) per cluster and iteration; the linear variant of the paper searches only among the n_candidates objects with the highest memberships.">
+
+.. only:: html
+
+  .. image:: /auto_examples/07_relational/images/thumb/sphx_glr_plot_02_fcmdd_dtw_series_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/07_relational/plot_02_fcmdd_dtw_series`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fuzzy c-medoids on dynamic-time-warping dissimilarities of time series</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Categorical records such as survey answers, product attributes or diagnoses have no mean, and coding the categories as numbers imposes an order that does not exist. Huang&#x27;s k-modes replaces the mean by the mode (the most frequent category per attribute) and the Euclidean distance by the simple matching dissimilarity, the number of attributes in which two records differ. Fuzzy k-modes (Huang and Ng) keeps the FCM membership formula with this dissimilarity; its authors proved that the mode of a fuzzy cluster is, per attribute, the category that carries the largest membership mass \sum_k\mu_{ik}^m. The dissimilarity is integer-valued, so many records are equally far from several modes; the partition is therefore fuzzier than in FCM and the exponent m has to be chosen with care.">
+
+.. only:: html
+
+  .. image:: /auto_examples/07_relational/images/thumb/sphx_glr_plot_03_kmodes_survey_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/07_relational/plot_03_kmodes_survey`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fuzzy k-modes on categorical survey data</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Records that mix measurements and categories, such as age and income next to occupation and region, are the rule in applications. Huang&#x27;s k-prototypes measures the numeric part by the squared Euclidean distance, the categorical part by the number of mismatches, and adds the two with a weight \gamma: the prototype is the fuzzy mean of the numeric attributes together with the mode of every categorical one. With \gamma=0 the method is fuzzy c-means on the numeric columns, with a sufficiently large \gamma it is fuzzy k-modes on the categorical columns; in between, both kinds of information shape the partition. Huang suggests the average standard deviation of the numeric attributes as the scale of \gamma, and the implementation uses it as the default.">
+
+.. only:: html
+
+  .. image:: /auto_examples/07_relational/images/thumb/sphx_glr_plot_04_kprototypes_mixed_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/07_relational/plot_04_kprototypes_mixed`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fuzzy k-prototypes on mixed numeric and categorical data</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="There are two routes from mixed records to a fuzzy partition. The common shortcut encodes the categories as 0/1 indicator columns and runs fuzzy c-means on the result. The geometry is then arbitrary: a mismatch in a categorical attribute costs \sqrt2 whatever the attribute, the numeric columns count on their own scale, and the &quot;centers&quot; are fractional indicator vectors that correspond to no record. The relational route computes Gower&#x27;s general coefficient (Gower, 1971): every attribute contributes a score in [0,1], the range-scaled difference for a numeric one and a mismatch indicator for a categorical one, and the scores are averaged over the attributes observed in both records, so missing values need no special treatment. The resulting matrix feeds fuzzy c-medoids, whose prototypes are real records, or (since Gower showed that \sqrt{d_G} is Euclidean when nothing is missing) relational c-means.">
+
+.. only:: html
+
+  .. image:: /auto_examples/07_relational/images/thumb/sphx_glr_plot_05_gower_fcmdd_vs_onehot_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/07_relational/plot_05_gower_fcmdd_vs_onehot`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Gower's dissimilarity versus one-hot encoding for mixed data</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Some time series belong together not because their values agree but because they are generated by the same mechanism: two realizations of one stationary process have nothing in common point by point (their noise is independent), yet they share their dependence structure. D&#x27;Urso and Maharaj proposed representing every series by its estimated autocorrelation function up to lag L, (\hat\rho_k(1),\dots,\hat\rho_k(L)), and clustering these vectors with fuzzy c-means (A-FCM) or fuzzy c-medoids (A-FCMd) under the (optionally lag-weighted) squared Euclidean distance. The representation is independent of level, scale and phase and has the same length for series of any length; the fuzzy memberships express that a process can lie between two typical dependence patterns. The squared autocorrelation distance is Euclidean, so relational fuzzy c-means on it is exactly A-FCM.">
+
+.. only:: html
+
+  .. image:: /auto_examples/07_relational/images/thumb/sphx_glr_plot_06_autocorrelation_series_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/07_relational/plot_06_autocorrelation_series`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Autocorrelation-based fuzzy clustering of time series</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/07_relational/plot_01_rfcm_fcm_duality
+   /auto_examples/07_relational/plot_02_fcmdd_dtw_series
+   /auto_examples/07_relational/plot_03_kmodes_survey
+   /auto_examples/07_relational/plot_04_kprototypes_mixed
+   /auto_examples/07_relational/plot_05_gower_fcmdd_vs_onehot
+   /auto_examples/07_relational/plot_06_autocorrelation_series
+

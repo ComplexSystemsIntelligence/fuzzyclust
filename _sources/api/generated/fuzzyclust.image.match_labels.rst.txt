@@ -1,0 +1,12 @@
+﻿fuzzyclust.image.match\_labels
+==============================
+
+.. currentmodule:: fuzzyclust.image
+
+.. autofunction:: match_labels
+
+.. include:: fuzzyclust.image.match_labels.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

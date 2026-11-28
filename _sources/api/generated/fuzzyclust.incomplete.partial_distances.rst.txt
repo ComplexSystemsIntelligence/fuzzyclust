@@ -1,0 +1,12 @@
+﻿fuzzyclust.incomplete.partial\_distances
+========================================
+
+.. currentmodule:: fuzzyclust.incomplete
+
+.. autofunction:: partial_distances
+
+.. include:: fuzzyclust.incomplete.partial_distances.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

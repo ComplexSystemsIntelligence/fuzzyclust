@@ -1,0 +1,12 @@
+﻿fuzzyclust.semisupervised.check\_pairwise\_constraints
+======================================================
+
+.. currentmodule:: fuzzyclust.semisupervised
+
+.. autofunction:: check_pairwise_constraints
+
+.. include:: fuzzyclust.semisupervised.check_pairwise_constraints.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

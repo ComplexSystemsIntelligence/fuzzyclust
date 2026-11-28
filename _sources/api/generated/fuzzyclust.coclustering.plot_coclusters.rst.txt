@@ -1,0 +1,12 @@
+﻿fuzzyclust.coclustering.plot\_coclusters
+========================================
+
+.. currentmodule:: fuzzyclust.coclustering
+
+.. autofunction:: plot_coclusters
+
+.. include:: fuzzyclust.coclustering.plot_coclusters.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

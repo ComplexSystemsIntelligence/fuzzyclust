@@ -1,0 +1,12 @@
+﻿fuzzyclust.ensemble.make\_overlapping\_blobs
+============================================
+
+.. currentmodule:: fuzzyclust.ensemble
+
+.. autofunction:: make_overlapping_blobs
+
+.. include:: fuzzyclust.ensemble.make_overlapping_blobs.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

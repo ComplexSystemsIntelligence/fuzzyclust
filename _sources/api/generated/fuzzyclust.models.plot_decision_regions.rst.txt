@@ -1,0 +1,12 @@
+﻿fuzzyclust.models.plot\_decision\_regions
+=========================================
+
+.. currentmodule:: fuzzyclust.models
+
+.. autofunction:: plot_decision_regions
+
+.. include:: fuzzyclust.models.plot_decision_regions.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

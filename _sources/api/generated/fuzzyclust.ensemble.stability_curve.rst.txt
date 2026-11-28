@@ -1,0 +1,12 @@
+﻿fuzzyclust.ensemble.stability\_curve
+====================================
+
+.. currentmodule:: fuzzyclust.ensemble
+
+.. autofunction:: stability_curve
+
+.. include:: fuzzyclust.ensemble.stability_curve.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

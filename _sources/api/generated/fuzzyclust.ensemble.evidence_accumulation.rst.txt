@@ -1,0 +1,12 @@
+﻿fuzzyclust.ensemble.evidence\_accumulation
+==========================================
+
+.. currentmodule:: fuzzyclust.ensemble
+
+.. autofunction:: evidence_accumulation
+
+.. include:: fuzzyclust.ensemble.evidence_accumulation.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

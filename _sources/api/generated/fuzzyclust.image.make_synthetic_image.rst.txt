@@ -1,0 +1,12 @@
+﻿fuzzyclust.image.make\_synthetic\_image
+=======================================
+
+.. currentmodule:: fuzzyclust.image
+
+.. autofunction:: make_synthetic_image
+
+.. include:: fuzzyclust.image.make_synthetic_image.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

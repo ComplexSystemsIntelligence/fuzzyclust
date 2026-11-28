@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>fuzzyclust.ensemble.consensus &#8212; fuzzyclust</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=c83e6b79" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=6a604523" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=e6ebbe3b" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
+
+    <script src="../../../_static/documentation_options.js?v=f2a433a1"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/sg-tags.js?v=d80f6fa4"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../../_static/design-tabs.js?v=fcb327ea"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/fuzzyclust/ensemble/consensus';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="icon" href="../../../_static/favicon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="1.0" />
+  
+    
+    <script src="../../../_static/searchtools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/logo.svg" class="logo__image only-light" alt=""/>
+    <img src="../../../_static/logo.svg" class="logo__image only-dark pst-js-only" alt=""/>
+  
+  
+    <p class="title logo__title">fuzzyclust</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../auto_examples/index.html">
+    Example gallery
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../book.html">
+    The book
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../migration.html">
+    Migrating from the MATLAB toolbox
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../citing.html">
+    Citing
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://complexsystemsintelligence.github.io/#textbooks">
+    All textbooks
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ComplexSystemsIntelligence/fuzzyclust" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../auto_examples/index.html">
+    Example gallery
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../book.html">
+    The book
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../migration.html">
+    Migrating from the MATLAB toolbox
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../citing.html">
+    Citing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://complexsystemsintelligence.github.io/#textbooks">
+    All textbooks
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ComplexSystemsIntelligence/fuzzyclust" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">fuzzyclust.ensemble.consensus</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for fuzzyclust.ensemble.consensus</h1><div class="highlight"><pre>
+<span></span><span class="c1"># SPDX-License-Identifier: MIT</span>
+<span class="c1"># Copyright (c) 2026 János Abonyi</span>
+<span class="sa">r</span><span class="sd">"""Consensus of soft clusterings: library, co-association matrix and consensus functions."""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.cluster.hierarchy</span><span class="w"> </span><span class="kn">import</span> <span class="n">cut_tree</span><span class="p">,</span> <span class="n">linkage</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.spatial.distance</span><span class="w"> </span><span class="kn">import</span> <span class="n">squareform</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">ClusterMixin</span><span class="p">,</span> <span class="n">clone</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_random_state</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.utils.validation</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_is_fitted</span><span class="p">,</span> <span class="n">validate_data</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.._utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">EPS</span><span class="p">,</span> <span class="n">fuzzy_centers</span><span class="p">,</span> <span class="n">labels_to_membership</span><span class="p">,</span> <span class="n">memberships_from_distances</span><span class="p">,</span> <span class="n">sq_euclidean</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..cluster</span><span class="w"> </span><span class="kn">import</span> <span class="n">FCM</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..validity</span><span class="w"> </span><span class="kn">import</span> <span class="n">fuzzy_rand_index</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"FuzzyClusterEnsemble"</span><span class="p">,</span>
+    <span class="s2">"coassociation_matrix"</span><span class="p">,</span>
+    <span class="s2">"evidence_accumulation"</span><span class="p">,</span>
+    <span class="s2">"soft_mcla"</span><span class="p">,</span>
+    <span class="s2">"information_theoretic_kmeans"</span><span class="p">,</span>
+    <span class="s2">"cspa"</span><span class="p">,</span>
+    <span class="s2">"mcla"</span><span class="p">,</span>
+    <span class="s2">"stability_curve"</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<span class="c1"># --------------------------------------------------------------------------- building blocks</span>
+<div class="viewcode-block" id="coassociation_matrix">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.ensemble.coassociation_matrix.html#fuzzyclust.ensemble.coassociation_matrix">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">coassociation_matrix</span><span class="p">(</span><span class="n">memberships</span><span class="p">,</span> <span class="n">similarity</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"cosine"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Soft co-association (similarity) matrix of a library of fuzzy partitions.</span>
+
+<span class="sd">    For partition :math:`q` with membership vectors</span>
+<span class="sd">    :math:`\boldsymbol{\mu}^{(q)}_k=[\mu^{(q)}_{1k},\dots,\mu^{(q)}_{c_qk}]^T`</span>
+<span class="sd">    the similarity of two objects is the cosine of their membership</span>
+<span class="sd">    vectors (``similarity="cosine"``) or their plain inner product</span>
+<span class="sd">    (``"product"``), and the co-association is the average over the library,</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        s_{kl} = \frac{1}{Q}\sum_{q=1}^{Q}</span>
+<span class="sd">                 \frac{\langle\boldsymbol{\mu}^{(q)}_k,\boldsymbol{\mu}^{(q)}_l\rangle}</span>
+<span class="sd">                      {\|\boldsymbol{\mu}^{(q)}_k\|\,\|\boldsymbol{\mu}^{(q)}_l\|}</span>
+<span class="sd">        \quad\text{or}\quad</span>
+<span class="sd">        s_{kl} = \frac{1}{Q}\sum_{q=1}^{Q}\sum_{i=1}^{c_q}\mu^{(q)}_{ik}\mu^{(q)}_{il} .</span>
+
+<span class="sd">    For crisp partitions both are the fraction of partitions that put</span>
+<span class="sd">    :math:`k` and :math:`l` into the same cluster -- the evidence</span>
+<span class="sd">    accumulation matrix of Fred and Jain. For soft partitions the inner</span>
+<span class="sd">    product is the probability that two independent draws from the</span>
+<span class="sd">    membership vectors fall into the same cluster; it is below one even</span>
+<span class="sd">    on the diagonal (an object at the border of two clusters is only</span>
+<span class="sd">    "half" together with itself). The cosine normalizes every partition's</span>
+<span class="sd">    similarity so that an object is fully co-associated with itself and</span>
+<span class="sd">    with every object that has the same membership vector, which keeps the</span>
+<span class="sd">    scale of the matrix independent of the fuzziness and of the number of</span>
+<span class="sd">    clusters of the members.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    memberships : sequence of array-like of shape (n_samples, c_q)</span>
+<span class="sd">    similarity : {"cosine", "product"}, default="cosine"</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    S : ndarray of shape (n_samples, n_samples)</span>
+<span class="sd">        Symmetric, entries in :math:`[0,1]`; unit diagonal for ``"cosine"``.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.ensemble import coassociation_matrix</span>
+<span class="sd">    &gt;&gt;&gt; U1 = np.eye(2)[[0, 0, 1, 1]]</span>
+<span class="sd">    &gt;&gt;&gt; U2 = np.eye(2)[[0, 1, 1, 1]]</span>
+<span class="sd">    &gt;&gt;&gt; coassociation_matrix([U1, U2]).round(2)</span>
+<span class="sd">    array([[1. , 0.5, 0. , 0. ],</span>
+<span class="sd">           [0.5, 1. , 0.5, 0.5],</span>
+<span class="sd">           [0. , 0.5, 1. , 1. ],</span>
+<span class="sd">           [0. , 0.5, 1. , 1. ]])</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">similarity</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"cosine"</span><span class="p">,</span> <span class="s2">"product"</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"similarity must be 'cosine' or 'product'."</span><span class="p">)</span>
+    <span class="n">Us</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> <span class="k">for</span> <span class="n">U</span> <span class="ow">in</span> <span class="n">memberships</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">Us</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"The library is empty."</span><span class="p">)</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">Us</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">U</span> <span class="ow">in</span> <span class="n">Us</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">U</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">or</span> <span class="n">U</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">N</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"All partitions must be membership matrices of the same objects."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">U</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Memberships must be non-negative."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">similarity</span> <span class="o">==</span> <span class="s2">"cosine"</span><span class="p">:</span>
+            <span class="n">U</span> <span class="o">=</span> <span class="n">_row_normalize</span><span class="p">(</span><span class="n">U</span><span class="p">)</span>
+        <span class="n">S</span> <span class="o">+=</span> <span class="n">U</span> <span class="o">@</span> <span class="n">U</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">S</span> <span class="o">/=</span> <span class="nb">len</span><span class="p">(</span><span class="n">Us</span><span class="p">)</span>
+    <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">((</span><span class="n">S</span> <span class="o">+</span> <span class="n">S</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">similarity</span> <span class="o">==</span> <span class="s2">"cosine"</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">fill_diagonal</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">S</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_row_normalize</span><span class="p">(</span><span class="n">U</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Rows scaled to unit Euclidean length (zero rows stay zero)."""</span>
+    <span class="k">return</span> <span class="n">U</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">EPS</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_cross_coassociation</span><span class="p">(</span><span class="n">Us_new</span><span class="p">,</span> <span class="n">Us_fit</span><span class="p">,</span> <span class="n">similarity</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Co-association ``(n_new, n_fit)`` between new and training objects."""</span>
+    <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">Us_new</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Us_fit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="k">for</span> <span class="n">A</span><span class="p">,</span> <span class="n">B</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">Us_new</span><span class="p">,</span> <span class="n">Us_fit</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">similarity</span> <span class="o">==</span> <span class="s2">"cosine"</span><span class="p">:</span>
+            <span class="n">A</span><span class="p">,</span> <span class="n">B</span> <span class="o">=</span> <span class="n">_row_normalize</span><span class="p">(</span><span class="n">A</span><span class="p">),</span> <span class="n">_row_normalize</span><span class="p">(</span><span class="n">B</span><span class="p">)</span>
+        <span class="n">S</span> <span class="o">+=</span> <span class="n">A</span> <span class="o">@</span> <span class="n">B</span><span class="o">.</span><span class="n">T</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">S</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">Us_fit</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_soft_from_hard</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mf">2.0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Soft memberships for a hard consensus.</span>
+
+<span class="sd">    The mean co-association row of every consensus cluster serves as its</span>
+<span class="sd">    prototype in the co-association space, and every object receives the</span>
+<span class="sd">    fuzzy c-means memberships of its own row to these prototypes -- the</span>
+<span class="sd">    same rule as the ``"fcm"`` consensus, so all consensus functions</span>
+<span class="sd">    return memberships on one scale.</span>
+<span class="sd">    """</span>
+    <span class="n">H</span> <span class="o">=</span> <span class="n">labels_to_membership</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">labels</span><span class="p">))</span>
+    <span class="n">H</span> <span class="o">=</span> <span class="n">H</span><span class="p">[:,</span> <span class="n">H</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">V</span> <span class="o">=</span> <span class="n">fuzzy_centers</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">H</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">memberships_from_distances</span><span class="p">(</span><span class="n">sq_euclidean</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">V</span><span class="p">),</span> <span class="n">m</span><span class="p">),</span> <span class="n">V</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_fcm_rows</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">n_init</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">200</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Plain fuzzy c-means on the rows of the co-association matrix (Euclidean, fast).</span>
+
+<span class="sd">    The rows live in an :math:`N`-dimensional space, where fuzzy c-means</span>
+<span class="sd">    from a random partition tends to the trivial fixed point (all</span>
+<span class="sd">    prototypes at the grand mean, memberships :math:`1/c`). The prototypes</span>
+<span class="sd">    are therefore seeded with k-means++ on the rows, which places them in</span>
+<span class="sd">    different blocks of the matrix.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.cluster</span><span class="w"> </span><span class="kn">import</span> <span class="n">kmeans_plusplus</span>
+
+    <span class="n">best</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_init</span><span class="p">):</span>
+        <span class="n">V0</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">kmeans_plusplus</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">n_clusters</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+        <span class="n">U</span> <span class="o">=</span> <span class="n">memberships_from_distances</span><span class="p">(</span><span class="n">sq_euclidean</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">V0</span><span class="p">),</span> <span class="n">m</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_iter</span><span class="p">):</span>
+            <span class="n">V</span> <span class="o">=</span> <span class="n">fuzzy_centers</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">U</span><span class="o">**</span><span class="n">m</span><span class="p">)</span>
+            <span class="n">d2</span> <span class="o">=</span> <span class="n">sq_euclidean</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+            <span class="n">U_new</span> <span class="o">=</span> <span class="n">memberships_from_distances</span><span class="p">(</span><span class="n">d2</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
+            <span class="n">delta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">U_new</span> <span class="o">-</span> <span class="n">U</span><span class="p">))</span>
+            <span class="n">U</span> <span class="o">=</span> <span class="n">U_new</span>
+            <span class="k">if</span> <span class="n">delta</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="n">J</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">U</span><span class="o">**</span><span class="n">m</span> <span class="o">*</span> <span class="n">d2</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">best</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">J</span> <span class="o">&lt;</span> <span class="n">best</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">best</span> <span class="o">=</span> <span class="p">(</span><span class="n">J</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">best</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">best</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_lifetimes</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">max_clusters</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Lifetime of every number of clusters in a dendrogram (Fred and Jain, 2005)."""</span>
+    <span class="n">heights</span> <span class="o">=</span> <span class="n">Z</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+    <span class="n">kmax</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">max_clusters</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+    <span class="n">life</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">kmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">kmax</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">lo</span> <span class="o">=</span> <span class="n">heights</span><span class="p">[</span><span class="n">N</span> <span class="o">-</span> <span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">N</span> <span class="k">else</span> <span class="mf">0.0</span>  <span class="c1"># merge that creates the k-cluster partition</span>
+        <span class="n">hi</span> <span class="o">=</span> <span class="n">heights</span><span class="p">[</span><span class="n">N</span> <span class="o">-</span> <span class="n">k</span><span class="p">]</span> <span class="k">if</span> <span class="n">k</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="nb">max</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">heights</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>  <span class="c1"># merge that destroys it</span>
+        <span class="n">life</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">hi</span> <span class="o">-</span> <span class="n">lo</span>
+    <span class="k">return</span> <span class="n">life</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>  <span class="c1"># index 0 -&gt; one cluster</span>
+
+
+<div class="viewcode-block" id="evidence_accumulation">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.ensemble.evidence_accumulation.html#fuzzyclust.ensemble.evidence_accumulation">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">evidence_accumulation</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">n_clusters</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"average"</span><span class="p">,</span> <span class="n">max_clusters</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Evidence accumulation clustering of a co-association matrix (Fred and Jain, 2005).</span>
+
+<span class="sd">    The co-association :math:`s_{kl}` is turned into the distance</span>
+<span class="sd">    :math:`1-s_{kl}` and clustered hierarchically; the dendrogram is cut</span>
+<span class="sd">    into ``n_clusters`` groups, or -- when ``n_clusters`` is ``None`` -- at</span>
+<span class="sd">    the number of clusters with the longest *lifetime*, the range of</span>
+<span class="sd">    thresholds over which that number of clusters persists.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    S : array-like of shape (n_samples, n_samples)</span>
+<span class="sd">    n_clusters : int or None, default=None</span>
+<span class="sd">    method : {"average", "single", "complete", "ward"}, default="average"</span>
+<span class="sd">        Linkage of :func:`scipy.cluster.hierarchy.linkage` (the paper uses</span>
+<span class="sd">        single and average link).</span>
+<span class="sd">    max_clusters : int, default=20</span>
+<span class="sd">        Largest number of clusters considered by the lifetime criterion.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    labels : ndarray of shape (n_samples,)</span>
+<span class="sd">    Z : ndarray</span>
+<span class="sd">        The linkage matrix.</span>
+<span class="sd">    lifetimes : ndarray of shape (max_clusters,)</span>
+<span class="sd">        Lifetime of :math:`k=1,\dots` clusters (``lifetimes[k - 1]``).</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.ensemble import coassociation_matrix, evidence_accumulation</span>
+<span class="sd">    &gt;&gt;&gt; U = np.eye(2)[[0, 0, 0, 1, 1, 1]]</span>
+<span class="sd">    &gt;&gt;&gt; labels, Z, life = evidence_accumulation(coassociation_matrix([U]))</span>
+<span class="sd">    &gt;&gt;&gt; int(labels[0] != labels[-1]), int(np.argmax(life) + 1)</span>
+<span class="sd">    (1, 2)</span>
+<span class="sd">    """</span>
+    <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">S</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="p">(</span><span class="n">D</span> <span class="o">+</span> <span class="n">D</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">fill_diagonal</span><span class="p">(</span><span class="n">D</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="n">linkage</span><span class="p">(</span><span class="n">squareform</span><span class="p">(</span><span class="n">D</span><span class="p">,</span> <span class="n">checks</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+    <span class="n">life</span> <span class="o">=</span> <span class="n">_lifetimes</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">max_clusters</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">n_clusters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">n_clusters</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">life</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="c1"># cut_tree returns exactly n_clusters groups also when merge heights tie</span>
+    <span class="c1"># (fcluster's "maxclust" cannot split tied merges and may return fewer)</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">cut_tree</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">n_clusters</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">n_clusters</span><span class="p">,</span> <span class="n">N</span><span class="p">)))</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">labels</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">life</span></div>
+
+
+
+<div class="viewcode-block" id="soft_mcla">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.ensemble.soft_mcla.html#fuzzyclust.ensemble.soft_mcla">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">soft_mcla</span><span class="p">(</span><span class="n">memberships</span><span class="p">,</span> <span class="n">n_clusters</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Soft meta-clustering algorithm, sMCLA (Punera and Ghosh, 2008).</span>
+
+<span class="sd">    Every cluster of every partition in the library is a *hyperedge*: a</span>
+<span class="sd">    vector of :math:`N` memberships. The hyperedges are grouped into</span>
+<span class="sd">    ``n_clusters`` meta-clusters by their cosine similarity (the original</span>
+<span class="sd">    partitions the meta-graph with METIS; here spectral clustering of the</span>
+<span class="sd">    similarity matrix is used), each meta-cluster is collapsed into its</span>
+<span class="sd">    mean membership vector, and the consensus membership of an object is</span>
+<span class="sd">    its collapsed membership normalized over the meta-clusters.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    memberships : sequence of array-like of shape (n_samples, c_q)</span>
+<span class="sd">    n_clusters : int</span>
+<span class="sd">    random_state : int, RandomState instance or None</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    U : ndarray of shape (n_samples, n_clusters)</span>
+<span class="sd">        Consensus memberships.</span>
+<span class="sd">    meta_labels : ndarray of shape (sum of c_q,)</span>
+<span class="sd">        Meta-cluster of every hyperedge, in library order.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.cluster</span><span class="w"> </span><span class="kn">import</span> <span class="n">SpectralClustering</span>
+
+    <span class="n">H</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> <span class="k">for</span> <span class="n">U</span> <span class="ow">in</span> <span class="n">memberships</span><span class="p">])</span>  <span class="c1"># (N, R)</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">n_clusters</span> <span class="o">&gt;</span> <span class="n">R</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"More consensus clusters requested than clusters in the library."</span><span class="p">)</span>
+    <span class="n">norms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">Hn</span> <span class="o">=</span> <span class="n">H</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">norms</span><span class="p">,</span> <span class="n">EPS</span><span class="p">)</span>
+    <span class="n">sim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">Hn</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">Hn</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">n_clusters</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>  <span class="c1"># tiny meta-graphs make ARPACK fall back to a dense solver</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">"ignore"</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">)</span>
+            <span class="n">meta</span> <span class="o">=</span> <span class="n">SpectralClustering</span><span class="p">(</span>
+                <span class="n">n_clusters</span><span class="o">=</span><span class="n">n_clusters</span><span class="p">,</span> <span class="n">affinity</span><span class="o">=</span><span class="s2">"precomputed"</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
+                <span class="n">assign_labels</span><span class="o">=</span><span class="s2">"discretize"</span><span class="p">,</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span><span class="n">sim</span> <span class="o">+</span> <span class="mf">1e-6</span><span class="p">)</span>
+    <span class="n">U</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">H</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">n_clusters</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_clusters</span><span class="p">):</span>
+        <span class="n">members</span> <span class="o">=</span> <span class="n">meta</span> <span class="o">==</span> <span class="n">i</span>
+        <span class="k">if</span> <span class="n">members</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="n">U</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">H</span><span class="p">[:,</span> <span class="n">members</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">U</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">EPS</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">U</span> <span class="o">/</span> <span class="n">U</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">meta</span></div>
+
+
+
+<div class="viewcode-block" id="information_theoretic_kmeans">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.ensemble.information_theoretic_kmeans.html#fuzzyclust.ensemble.information_theoretic_kmeans">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">information_theoretic_kmeans</span><span class="p">(</span>
+    <span class="n">memberships</span><span class="p">,</span> <span class="n">n_clusters</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">max_iter</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="n">n_init</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Information-theoretic k-means consensus, ITK (Punera and Ghosh, 2008).</span>
+
+<span class="sd">    The concatenated membership vectors of an object, divided by the number</span>
+<span class="sd">    of partitions, form a probability distribution :math:`\mathbf{p}_k`</span>
+<span class="sd">    over all clusters of the library. ITK is k-means with the</span>
+<span class="sd">    Kullback--Leibler divergence :math:`\mathrm{KL}(\mathbf{p}_k\|\mathbf{m}_i)`</span>
+<span class="sd">    as distortion, whose centroids :math:`\mathbf{m}_i` are the arithmetic</span>
+<span class="sd">    means of the assigned distributions. Like k-means it finds local</span>
+<span class="sd">    optima; ``n_init`` k-means++ seedings (with the KL divergence) are run</span>
+<span class="sd">    and the one with the smallest total divergence is kept.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    memberships : sequence of array-like of shape (n_samples, c_q)</span>
+<span class="sd">    n_clusters : int</span>
+<span class="sd">    max_iter : int, default=100</span>
+<span class="sd">    n_init : int, default=10</span>
+<span class="sd">    random_state : int, RandomState instance or None</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    labels : ndarray of shape (n_samples,)</span>
+<span class="sd">    centroids : ndarray of shape (n_clusters, sum of c_q)</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.ensemble import information_theoretic_kmeans</span>
+<span class="sd">    &gt;&gt;&gt; U = np.eye(2)[[0, 0, 0, 1, 1, 1]]</span>
+<span class="sd">    &gt;&gt;&gt; labels, _ = information_theoretic_kmeans([U, U[:, ::-1]], 2, random_state=0)</span>
+<span class="sd">    &gt;&gt;&gt; int(labels[0] != labels[-1])</span>
+<span class="sd">    1</span>
+<span class="sd">    """</span>
+    <span class="n">rng</span> <span class="o">=</span> <span class="n">check_random_state</span><span class="p">(</span><span class="n">random_state</span><span class="p">)</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> <span class="k">for</span> <span class="n">U</span> <span class="ow">in</span> <span class="n">memberships</span><span class="p">])</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="n">P</span> <span class="o">/</span> <span class="n">P</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">P</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">n_clusters</span> <span class="o">&lt;=</span> <span class="n">N</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"n_clusters must lie in [1, n_samples]."</span><span class="p">)</span>
+    <span class="n">logP</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">P</span> <span class="o">+</span> <span class="n">EPS</span><span class="p">)</span>
+    <span class="n">ent</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">P</span> <span class="o">*</span> <span class="n">logP</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># sum p log p</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">kl</span><span class="p">(</span><span class="n">M</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ent</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">-</span> <span class="n">P</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">M</span> <span class="o">+</span> <span class="n">EPS</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>  <span class="c1"># KL(p_k || m_i)</span>
+
+    <span class="n">best</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_init</span><span class="p">))):</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">N</span><span class="p">))]</span>  <span class="c1"># k-means++ seeding with the KL divergence</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">n_clusters</span><span class="p">:</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">kl</span><span class="p">(</span><span class="n">P</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">)</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="n">probs</span> <span class="o">=</span> <span class="n">d</span> <span class="o">/</span> <span class="n">d</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">N</span><span class="p">)</span>
+            <span class="n">idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">probs</span><span class="p">)))</span>
+        <span class="n">M</span> <span class="o">=</span> <span class="n">P</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_iter</span><span class="p">):</span>
+            <span class="n">new</span> <span class="o">=</span> <span class="n">kl</span><span class="p">(</span><span class="n">M</span><span class="p">)</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
+                <span class="k">break</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="n">new</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_clusters</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">labels</span> <span class="o">==</span> <span class="n">i</span><span class="p">):</span>
+                    <span class="n">M</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">P</span><span class="p">[</span><span class="n">labels</span> <span class="o">==</span> <span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">cost</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">kl</span><span class="p">(</span><span class="n">M</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">N</span><span class="p">),</span> <span class="n">labels</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">best</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">cost</span> <span class="o">&lt;</span> <span class="n">best</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">best</span> <span class="o">=</span> <span class="p">(</span><span class="n">cost</span><span class="p">,</span> <span class="n">labels</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">M</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">best</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">best</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="cspa">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.ensemble.cspa.html#fuzzyclust.ensemble.cspa">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cspa</span><span class="p">(</span><span class="n">labels_list</span><span class="p">,</span> <span class="n">n_clusters</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Cluster-based similarity partitioning, CSPA (Strehl and Ghosh, 2002), for hard partitions.</span>
+
+<span class="sd">    The co-association matrix of the crisp partitions is partitioned into</span>
+<span class="sd">    ``n_clusters`` groups (spectral clustering stands in for METIS).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    labels_list : sequence of array-like of shape (n_samples,)</span>
+<span class="sd">    n_clusters : int</span>
+<span class="sd">    random_state : int, RandomState instance or None</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    labels : ndarray of shape (n_samples,)</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.cluster</span><span class="w"> </span><span class="kn">import</span> <span class="n">SpectralClustering</span>
+
+    <span class="n">S</span> <span class="o">=</span> <span class="n">coassociation_matrix</span><span class="p">([</span><span class="n">labels_to_membership</span><span class="p">(</span><span class="n">lab</span><span class="p">)</span> <span class="k">for</span> <span class="n">lab</span> <span class="ow">in</span> <span class="n">labels_list</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">SpectralClustering</span><span class="p">(</span>
+        <span class="n">n_clusters</span><span class="o">=</span><span class="n">n_clusters</span><span class="p">,</span> <span class="n">affinity</span><span class="o">=</span><span class="s2">"precomputed"</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span> <span class="n">assign_labels</span><span class="o">=</span><span class="s2">"discretize"</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span><span class="n">S</span> <span class="o">+</span> <span class="mf">1e-6</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="mcla">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.ensemble.mcla.html#fuzzyclust.ensemble.mcla">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mcla</span><span class="p">(</span><span class="n">labels_list</span><span class="p">,</span> <span class="n">n_clusters</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Meta-clustering algorithm, MCLA (Strehl and Ghosh, 2002), for hard partitions.</span>
+
+<span class="sd">    The crisp clusters are the hyperedges; :func:`soft_mcla` on their 0/1</span>
+<span class="sd">    indicator vectors followed by the arg-max gives the consensus labels.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    labels_list : sequence of array-like of shape (n_samples,)</span>
+<span class="sd">    n_clusters : int</span>
+<span class="sd">    random_state : int, RandomState instance or None</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    labels : ndarray of shape (n_samples,)</span>
+<span class="sd">    """</span>
+    <span class="n">U</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">soft_mcla</span><span class="p">([</span><span class="n">labels_to_membership</span><span class="p">(</span><span class="n">lab</span><span class="p">)</span> <span class="k">for</span> <span class="n">lab</span> <span class="ow">in</span> <span class="n">labels_list</span><span class="p">],</span> <span class="n">n_clusters</span><span class="p">,</span> <span class="n">random_state</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">U</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------- the estimator</span>
+<div class="viewcode-block" id="FuzzyClusterEnsemble">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.ensemble.FuzzyClusterEnsemble.html#fuzzyclust.ensemble.FuzzyClusterEnsemble">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FuzzyClusterEnsemble</span><span class="p">(</span><span class="n">ClusterMixin</span><span class="p">,</span> <span class="n">BaseEstimator</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Consensus of a library of soft clusterings (Punera and Ghosh, 2008).</span>
+
+<span class="sd">    A single run of an alternating-optimization clusterer depends on its</span>
+<span class="sd">    initialization, its number of clusters and the particular sample it</span>
+<span class="sd">    saw. An *ensemble* fits many such runs -- different random starts,</span>
+<span class="sd">    sub-samples, feature subsets or numbers of clusters -- and combines</span>
+<span class="sd">    their partitions into one consensus that is more stable and often</span>
+<span class="sd">    more accurate than any member. Soft partitions carry more information</span>
+<span class="sd">    than hard ones (how confidently an object was assigned), and the</span>
+<span class="sd">    consensus functions of this class use them directly instead of</span>
+<span class="sd">    hardening first.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    n_clusters : int or None, default=3</span>
+<span class="sd">        Number of consensus clusters. ``None`` picks it by the lifetime</span>
+<span class="sd">        criterion of the co-association dendrogram (Fred and Jain, 2005).</span>
+<span class="sd">    base_estimator : estimator with ``predict_proba``, default=None</span>
+<span class="sd">        Clusterer of the library; default :class:`~fuzzyclust.cluster.FCM`.</span>
+<span class="sd">        It is cloned for every member and receives its own ``random_state``.</span>
+<span class="sd">    n_estimators : int, default=10</span>
+<span class="sd">        Size :math:`Q` of the library.</span>
+<span class="sd">    base_n_clusters : int, sequence of int or None, default=None</span>
+<span class="sd">        Number of clusters of the members: one value, or a sequence from</span>
+<span class="sd">        which every member draws at random (a library over several</span>
+<span class="sd">        :math:`c` is the paper's recipe for robustness). ``None`` uses</span>
+<span class="sd">        ``n_clusters`` (which must then be given).</span>
+<span class="sd">    sample_fraction : float, default=1.0</span>
+<span class="sd">        Share of the samples every member is fitted on (drawn without</span>
+<span class="sd">        replacement); the member's partition of *all* samples is obtained</span>
+<span class="sd">        with its ``predict_proba``.</span>
+<span class="sd">    feature_fraction : float, default=1.0</span>
+<span class="sd">        Share of the features every member sees (at least one).</span>
+<span class="sd">    consensus : {"fcm", "spectral", "hierarchical", "smcla", "itk"}, default="fcm"</span>
+<span class="sd">        Consensus function: ``"fcm"`` clusters the rows of the</span>
+<span class="sd">        co-association matrix with fuzzy c-means (a soft cluster-based</span>
+<span class="sd">        similarity partitioning); ``"spectral"`` partitions the</span>
+<span class="sd">        co-association graph by spectral clustering (sCSPA with a graph</span>
+<span class="sd">        partitioner); ``"hierarchical"`` is evidence accumulation</span>
+<span class="sd">        (average or single link on :math:`1-s_{kl}`); ``"smcla"`` the soft</span>
+<span class="sd">        meta-clustering algorithm; ``"itk"`` information-theoretic</span>
+<span class="sd">        k-means on the concatenated memberships.</span>
+<span class="sd">    linkage : {"average", "single", "complete"}, default="average"</span>
+<span class="sd">        Linkage of the hierarchical consensus and of the lifetime criterion.</span>
+<span class="sd">    similarity : {"cosine", "product"}, default="cosine"</span>
+<span class="sd">        Similarity of two membership vectors in the co-association matrix</span>
+<span class="sd">        (:func:`coassociation_matrix`).</span>
+<span class="sd">    max_clusters : int, default=20</span>
+<span class="sd">        Largest number of clusters the lifetime criterion considers.</span>
+<span class="sd">    random_state : int, RandomState instance or None, default=None</span>
+<span class="sd">    verbose : int, default=0</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    base_estimators_ : list</span>
+<span class="sd">        The fitted members.</span>
+<span class="sd">    base_memberships_ : list of ndarray of shape (n_samples, c_q)</span>
+<span class="sd">        Partition of every member over all samples.</span>
+<span class="sd">    base_feature_subsets_ : list of ndarray</span>
+<span class="sd">        Feature indices every member used.</span>
+<span class="sd">    coassociation_ : ndarray of shape (n_samples, n_samples)</span>
+<span class="sd">        Soft co-association matrix :math:`s_{kl}`.</span>
+<span class="sd">    consensus_membership_ : ndarray of shape (n_samples, ``n_clusters_``)</span>
+<span class="sd">        Consensus partition (``membership_`` is an alias). For the hard</span>
+<span class="sd">        consensus functions (spectral, hierarchical, ITK) it is the fuzzy</span>
+<span class="sd">        c-means membership (:math:`m=2`) of every object's co-association</span>
+<span class="sd">        row to the mean rows of the consensus clusters.</span>
+<span class="sd">    labels_ : ndarray of shape (n_samples,)</span>
+<span class="sd">    n_clusters_ : int</span>
+<span class="sd">    lifetimes_ : ndarray of shape (max_clusters,)</span>
+<span class="sd">        Lifetime of :math:`k=1,\dots` clusters in the dendrogram (computed</span>
+<span class="sd">        when ``n_clusters`` is ``None`` or ``consensus="hierarchical"``).</span>
+<span class="sd">    linkage_ : ndarray</span>
+<span class="sd">        Linkage matrix of the co-association dendrogram (same condition).</span>
+<span class="sd">    meta_cluster_labels_ : ndarray</span>
+<span class="sd">        Meta-cluster of every library cluster (``consensus="smcla"``).</span>
+<span class="sd">    consensus_centers_ : ndarray of shape (``n_clusters_``, n_samples)</span>
+<span class="sd">        Prototypes of the consensus clusters in the co-association space:</span>
+<span class="sd">        the fuzzy c-means prototypes (``consensus="fcm"``) or the mean rows</span>
+<span class="sd">        of the clusters (hard consensus functions); not set for ``"smcla"``.</span>
+<span class="sd">    base_agreement_ : float</span>
+<span class="sd">        Mean fuzzy Rand index between the members and the consensus.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The co-association of two objects is the library average of the</span>
+<span class="sd">    cosines (or inner products) of their membership vectors,</span>
+<span class="sd">    :math:`s_{kl}=\frac1Q\sum_q\cos\big(\boldsymbol{\mu}^{(q)}_k,\boldsymbol{\mu}^{(q)}_l\big)`</span>
+<span class="sd">    (:func:`coassociation_matrix`). The members need not agree on the</span>
+<span class="sd">    number or the labels of the clusters: only co-memberships are</span>
+<span class="sd">    compared, which is why ensembles over several :math:`c` work.</span>
+<span class="sd">    New samples (:meth:`predict_proba`) receive memberships from every</span>
+<span class="sd">    member, their co-association with the training samples follows, and</span>
+<span class="sd">    the consensus function's own rule maps it to the consensus clusters.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] K. Punera, J. Ghosh, "Consensus-based ensembles of soft</span>
+<span class="sd">           clusterings", Applied Artificial Intelligence 22(7--8),</span>
+<span class="sd">           780--810, 2008.</span>
+<span class="sd">    .. [2] A. Strehl, J. Ghosh, "Cluster ensembles -- a knowledge reuse</span>
+<span class="sd">           framework for combining multiple partitions", Journal of</span>
+<span class="sd">           Machine Learning Research 3, 583--617, 2002.</span>
+<span class="sd">    .. [3] A. L. N. Fred, A. K. Jain, "Combining multiple clusterings</span>
+<span class="sd">           using evidence accumulation", IEEE Transactions on Pattern</span>
+<span class="sd">           Analysis and Machine Intelligence 27(6), 835--850, 2005.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.ensemble import FuzzyClusterEnsemble</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.datasets import make_fuzzy_blobs</span>
+<span class="sd">    &gt;&gt;&gt; X, y = make_fuzzy_blobs(random_state=0)</span>
+<span class="sd">    &gt;&gt;&gt; ens = FuzzyClusterEnsemble(n_clusters=3, n_estimators=5, random_state=0).fit(X)</span>
+<span class="sd">    &gt;&gt;&gt; ens.coassociation_.shape, ens.consensus_membership_.shape</span>
+<span class="sd">    ((300, 300), (300, 3))</span>
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">n_clusters</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="n">base_estimator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">n_estimators</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="n">base_n_clusters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">sample_fraction</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">feature_fraction</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">consensus</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"fcm"</span><span class="p">,</span>
+        <span class="n">linkage</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"average"</span><span class="p">,</span>
+        <span class="n">similarity</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"cosine"</span><span class="p">,</span>
+        <span class="n">max_clusters</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_clusters</span> <span class="o">=</span> <span class="n">n_clusters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_estimator</span> <span class="o">=</span> <span class="n">base_estimator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_estimators</span> <span class="o">=</span> <span class="n">n_estimators</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_n_clusters</span> <span class="o">=</span> <span class="n">base_n_clusters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_fraction</span> <span class="o">=</span> <span class="n">sample_fraction</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_fraction</span> <span class="o">=</span> <span class="n">feature_fraction</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">consensus</span> <span class="o">=</span> <span class="n">consensus</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">linkage</span> <span class="o">=</span> <span class="n">linkage</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">similarity</span> <span class="o">=</span> <span class="n">similarity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_clusters</span> <span class="o">=</span> <span class="n">max_clusters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+
+    <span class="c1"># ------------------------------------------------------------------ validation</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="n">N</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_clusters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span>
+            <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_clusters</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">))</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_clusters</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_clusters</span> <span class="o">&gt;</span> <span class="n">N</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"n_clusters must be None or an integer in [1, n_samples]."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_estimators</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">))</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_estimators</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"n_estimators must be a positive integer."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="mf">0.0</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_fraction</span> <span class="o">&lt;=</span> <span class="mf">1.0</span> <span class="ow">or</span> <span class="ow">not</span> <span class="mf">0.0</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_fraction</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"sample_fraction and feature_fraction must lie in (0, 1]."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">consensus</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"fcm"</span><span class="p">,</span> <span class="s2">"spectral"</span><span class="p">,</span> <span class="s2">"hierarchical"</span><span class="p">,</span> <span class="s2">"smcla"</span><span class="p">,</span> <span class="s2">"itk"</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"consensus must be 'fcm', 'spectral', 'hierarchical', 'smcla' or 'itk'."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">linkage</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"average"</span><span class="p">,</span> <span class="s2">"single"</span><span class="p">,</span> <span class="s2">"complete"</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"linkage must be 'average', 'single' or 'complete'."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">similarity</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"cosine"</span><span class="p">,</span> <span class="s2">"product"</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"similarity must be 'cosine' or 'product'."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_estimator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_estimator</span><span class="p">,</span> <span class="s2">"predict_proba"</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"base_estimator must implement predict_proba (soft memberships of all samples)."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_n_clusters</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_clusters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Give base_n_clusters when n_clusters is None."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_clusters</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"max_clusters must be &gt;= 1."</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_member_n_clusters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_n_clusters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_clusters</span><span class="p">)</span>
+        <span class="n">bc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_n_clusters</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">bc</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"base_n_clusters must be positive integers."</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">bc</span><span class="p">[</span><span class="n">rng</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">bc</span><span class="o">.</span><span class="n">size</span><span class="p">)])</span>
+
+    <span class="c1"># ------------------------------------------------------------------ fitting</span>
+<div class="viewcode-block" id="FuzzyClusterEnsemble.fit">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.ensemble.FuzzyClusterEnsemble.html#fuzzyclust.ensemble.FuzzyClusterEnsemble.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Fit the library and derive the consensus partition.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : array-like of shape (n_samples, n_features)</span>
+<span class="sd">        y : Ignored</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        self : object</span>
+<span class="sd">        """</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">validate_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">ensure_min_samples</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_params</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">rng</span> <span class="o">=</span> <span class="n">check_random_state</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
+        <span class="n">N</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">FCM</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_estimator</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_estimator</span>
+        <span class="n">n_rows</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_fraction</span> <span class="o">*</span> <span class="n">N</span><span class="p">)))</span>
+        <span class="n">n_cols</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_fraction</span> <span class="o">*</span> <span class="n">n</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_estimators_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_memberships_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_feature_subsets_</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_estimators</span><span class="p">):</span>
+            <span class="n">c_q</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_member_n_clusters</span><span class="p">(</span><span class="n">rng</span><span class="p">),</span> <span class="n">n_rows</span><span class="p">)</span>
+            <span class="n">rows</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n_rows</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">if</span> <span class="n">n_rows</span> <span class="o">&lt;</span> <span class="n">N</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+            <span class="n">cols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n_cols</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span> <span class="k">if</span> <span class="n">n_cols</span> <span class="o">&lt;</span> <span class="n">n</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+            <span class="n">est</span> <span class="o">=</span> <span class="n">clone</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="n">est</span><span class="o">.</span><span class="n">get_params</span><span class="p">()</span>
+            <span class="k">if</span> <span class="s2">"n_clusters"</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+                <span class="n">est</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="n">c_q</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s2">"random_state"</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+                <span class="n">est</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">)))</span>
+            <span class="n">est</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">rows</span><span class="p">][:,</span> <span class="n">cols</span><span class="p">])</span>
+            <span class="n">U</span> <span class="o">=</span> <span class="n">est</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="n">cols</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">base_estimators_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">est</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">base_memberships_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">base_feature_subsets_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cols</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"member </span><span class="si">{</span><span class="n">q</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_estimators</span><span class="si">}</span><span class="s2">: c = </span><span class="si">{</span><span class="n">c_q</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">n_rows</span><span class="si">}</span><span class="s2"> samples, </span><span class="si">{</span><span class="n">n_cols</span><span class="si">}</span><span class="s2"> features"</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coassociation_</span> <span class="o">=</span> <span class="n">coassociation_matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_memberships_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">similarity</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_consensus</span><span class="p">(</span><span class="n">rng</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_agreement_</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">fuzzy_rand_index</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">consensus_membership_</span><span class="p">)</span> <span class="k">for</span> <span class="n">U</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_memberships_</span><span class="p">])</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_consensus</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coassociation_</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_clusters</span>
+        <span class="k">if</span> <span class="n">c</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">consensus</span> <span class="o">==</span> <span class="s2">"hierarchical"</span><span class="p">:</span>
+            <span class="n">labels_h</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">life</span> <span class="o">=</span> <span class="n">evidence_accumulation</span><span class="p">(</span>
+                <span class="n">S</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">linkage</span><span class="p">,</span> <span class="n">max_clusters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_clusters</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">linkage_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lifetimes_</span> <span class="o">=</span> <span class="n">Z</span><span class="p">,</span> <span class="n">life</span>
+            <span class="k">if</span> <span class="n">c</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">c</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">life</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"lifetime criterion: </span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2"> clusters"</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_clusters_</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">consensus</span> <span class="o">==</span> <span class="s2">"fcm"</span><span class="p">:</span>
+            <span class="n">U</span><span class="p">,</span> <span class="n">V</span> <span class="o">=</span> <span class="n">_fcm_rows</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">consensus</span> <span class="o">==</span> <span class="s2">"spectral"</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.cluster</span><span class="w"> </span><span class="kn">import</span> <span class="n">SpectralClustering</span>
+
+            <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">labels</span> <span class="o">=</span> <span class="n">SpectralClustering</span><span class="p">(</span>
+                    <span class="n">n_clusters</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">affinity</span><span class="o">=</span><span class="s2">"precomputed"</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">rng</span><span class="p">,</span> <span class="n">assign_labels</span><span class="o">=</span><span class="s2">"discretize"</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span><span class="n">S</span> <span class="o">+</span> <span class="mf">1e-6</span><span class="p">)</span>
+            <span class="n">U</span><span class="p">,</span> <span class="n">V</span> <span class="o">=</span> <span class="n">_soft_from_hard</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">consensus</span> <span class="o">==</span> <span class="s2">"hierarchical"</span><span class="p">:</span>
+            <span class="n">U</span><span class="p">,</span> <span class="n">V</span> <span class="o">=</span> <span class="n">_soft_from_hard</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">labels_h</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">consensus</span> <span class="o">==</span> <span class="s2">"smcla"</span><span class="p">:</span>
+            <span class="n">U</span><span class="p">,</span> <span class="n">meta</span> <span class="o">=</span> <span class="n">soft_mcla</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_memberships_</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">meta_cluster_labels_</span> <span class="o">=</span> <span class="n">meta</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># itk</span>
+            <span class="n">labels</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">information_theoretic_kmeans</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_memberships_</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+            <span class="n">U</span><span class="p">,</span> <span class="n">V</span> <span class="o">=</span> <span class="n">_soft_from_hard</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">consensus</span> <span class="o">!=</span> <span class="s2">"smcla"</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">consensus_centers_</span> <span class="o">=</span> <span class="n">V</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_clusters_</span> <span class="o">=</span> <span class="n">U</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">consensus_membership_</span> <span class="o">=</span> <span class="n">U</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">membership_</span> <span class="o">=</span> <span class="n">U</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels_</span> <span class="o">=</span> <span class="n">U</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># ------------------------------------------------------------------ inference</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_new_coassociation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Co-association of new samples with the training samples."""</span>
+        <span class="n">Us_new</span> <span class="o">=</span> <span class="p">[</span><span class="n">est</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="n">cols</span><span class="p">])</span> <span class="k">for</span> <span class="n">est</span><span class="p">,</span> <span class="n">cols</span> <span class="ow">in</span>
+                  <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_estimators_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_feature_subsets_</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">_cross_coassociation</span><span class="p">(</span><span class="n">Us_new</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_memberships_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">similarity</span><span class="p">)</span>
+
+<div class="viewcode-block" id="FuzzyClusterEnsemble.predict_proba">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.ensemble.FuzzyClusterEnsemble.html#fuzzyclust.ensemble.FuzzyClusterEnsemble.predict_proba">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Consensus memberships of (new) samples.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        U : ndarray of shape (n_samples, ``n_clusters_``)</span>
+<span class="sd">        """</span>
+        <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"consensus_membership_"</span><span class="p">)</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">validate_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">consensus</span> <span class="o">==</span> <span class="s2">"smcla"</span><span class="p">:</span>
+            <span class="n">H</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">est</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="n">cols</span><span class="p">])</span> <span class="k">for</span> <span class="n">est</span><span class="p">,</span> <span class="n">cols</span> <span class="ow">in</span>
+                           <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_estimators_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_feature_subsets_</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)])</span>
+            <span class="n">U</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_clusters_</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_clusters_</span><span class="p">):</span>
+                <span class="n">members</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meta_cluster_labels_</span> <span class="o">==</span> <span class="n">i</span>
+                <span class="k">if</span> <span class="n">members</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+                    <span class="n">U</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">H</span><span class="p">[:,</span> <span class="n">members</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">U</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">EPS</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">U</span> <span class="o">/</span> <span class="n">U</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">S_new</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_new_coassociation</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">memberships_from_distances</span><span class="p">(</span><span class="n">sq_euclidean</span><span class="p">(</span><span class="n">S_new</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">consensus_centers_</span><span class="p">),</span> <span class="mf">2.0</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FuzzyClusterEnsemble.predict">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.ensemble.FuzzyClusterEnsemble.html#fuzzyclust.ensemble.FuzzyClusterEnsemble.predict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Hard consensus labels of (new) samples."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__sklearn_tags__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">tags</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__sklearn_tags__</span><span class="p">()</span>
+        <span class="n">tags</span><span class="o">.</span><span class="n">input_tags</span><span class="o">.</span><span class="n">allow_nan</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="n">tags</span></div>
+
+
+
+<div class="viewcode-block" id="stability_curve">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.ensemble.stability_curve.html#fuzzyclust.ensemble.stability_curve">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">stability_curve</span><span class="p">(</span>
+    <span class="n">X</span><span class="p">,</span>
+    <span class="n">n_estimators_grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
+    <span class="n">n_repeats</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">index</span><span class="o">=</span><span class="n">fuzzy_rand_index</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">ensemble_params</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Reproducibility of the consensus partition as the library grows.</span>
+
+<span class="sd">    For every library size, ``n_repeats`` independent ensembles are fitted</span>
+<span class="sd">    and all pairs of their consensus partitions are compared with the</span>
+<span class="sd">    fuzzy Rand index (or another ``index``); the mean and standard deviation of the agreement is</span>
+<span class="sd">    the *stability* of the consensus at that size. A single run</span>
+<span class="sd">    (``n_estimators=1``) gives the stability of the base clusterer itself.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    X : array-like of shape (n_samples, n_features)</span>
+<span class="sd">    n_estimators_grid : sequence of int, default=(1, 2, 5, 10, 20)</span>
+<span class="sd">    n_repeats : int, default=5</span>
+<span class="sd">    random_state : int, RandomState instance or None</span>
+<span class="sd">    index : callable, default=:func:`fuzzyclust.validity.fuzzy_rand_index`</span>
+<span class="sd">        Comparison of two membership matrices, e.g.</span>
+<span class="sd">        :func:`~fuzzyclust.validity.fuzzy_adjusted_rand_index`.</span>
+<span class="sd">    **ensemble_params</span>
+<span class="sd">        Passed to :class:`FuzzyClusterEnsemble`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pandas.DataFrame</span>
+<span class="sd">        Indexed by ``n_estimators`` with columns ``mean`` and ``std`` of the</span>
+<span class="sd">        pairwise agreement (``index``) between repeats.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.ensemble import stability_curve</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.datasets import make_fuzzy_blobs</span>
+<span class="sd">    &gt;&gt;&gt; X, _ = make_fuzzy_blobs(n_samples_per_cluster=30, random_state=0)</span>
+<span class="sd">    &gt;&gt;&gt; table = stability_curve(X, n_estimators_grid=(1, 3), n_repeats=2, n_clusters=3, random_state=0)</span>
+<span class="sd">    &gt;&gt;&gt; list(table.columns), list(table.index)</span>
+<span class="sd">    (['mean', 'std'], [1, 3])</span>
+<span class="sd">    """</span>
+    <span class="n">rng</span> <span class="o">=</span> <span class="n">check_random_state</span><span class="p">(</span><span class="n">random_state</span><span class="p">)</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">Q</span> <span class="ow">in</span> <span class="n">n_estimators_grid</span><span class="p">:</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">FuzzyClusterEnsemble</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">Q</span><span class="p">),</span> <span class="n">random_state</span><span class="o">=</span><span class="n">rng</span><span class="p">,</span> <span class="o">**</span><span class="n">ensemble_params</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">consensus_membership_</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_repeats</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">index</span><span class="p">(</span><span class="n">parts</span><span class="p">[</span><span class="n">a</span><span class="p">],</span> <span class="n">parts</span><span class="p">[</span><span class="n">b</span><span class="p">])</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_repeats</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_repeats</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="n">rows</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">Q</span><span class="p">)]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"mean"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">vals</span><span class="p">))</span> <span class="k">if</span> <span class="n">vals</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+            <span class="s2">"std"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">vals</span><span class="p">))</span> <span class="k">if</span> <span class="n">vals</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s2">"index"</span><span class="p">)</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">"n_estimators"</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, János Abonyi.
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.1.
+  </p>
+</div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

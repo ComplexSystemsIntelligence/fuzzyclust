@@ -1,0 +1,12 @@
+﻿fuzzyclust.coclustering.plot\_item\_memberships
+===============================================
+
+.. currentmodule:: fuzzyclust.coclustering
+
+.. autofunction:: plot_item_memberships
+
+.. include:: fuzzyclust.coclustering.plot_item_memberships.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

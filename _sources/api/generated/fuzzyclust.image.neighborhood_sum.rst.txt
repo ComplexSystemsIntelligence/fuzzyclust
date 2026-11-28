@@ -1,0 +1,12 @@
+﻿fuzzyclust.image.neighborhood\_sum
+==================================
+
+.. currentmodule:: fuzzyclust.image
+
+.. autofunction:: neighborhood_sum
+
+.. include:: fuzzyclust.image.neighborhood_sum.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

@@ -1,0 +1,12 @@
+﻿fuzzyclust.graph.fuzzy\_cluster\_similarity
+===========================================
+
+.. currentmodule:: fuzzyclust.graph
+
+.. autofunction:: fuzzy_cluster_similarity
+
+.. include:: fuzzyclust.graph.fuzzy_cluster_similarity.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

@@ -1,0 +1,12 @@
+﻿fuzzyclust.large.extend\_partition
+==================================
+
+.. currentmodule:: fuzzyclust.large
+
+.. autofunction:: extend_partition
+
+.. include:: fuzzyclust.large.extend_partition.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

@@ -1,0 +1,12 @@
+﻿fuzzyclust.relational.autocorrelation\_distance\_matrix
+=======================================================
+
+.. currentmodule:: fuzzyclust.relational
+
+.. autofunction:: autocorrelation_distance_matrix
+
+.. include:: fuzzyclust.relational.autocorrelation_distance_matrix.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

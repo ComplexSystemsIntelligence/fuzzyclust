@@ -1,0 +1,12 @@
+﻿fuzzyclust.validity.pbmf\_index
+===============================
+
+.. currentmodule:: fuzzyclust.validity
+
+.. autofunction:: pbmf_index
+
+.. include:: fuzzyclust.validity.pbmf_index.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

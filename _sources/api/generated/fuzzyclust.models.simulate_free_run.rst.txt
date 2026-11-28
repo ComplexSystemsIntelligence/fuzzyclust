@@ -1,0 +1,12 @@
+﻿fuzzyclust.models.simulate\_free\_run
+=====================================
+
+.. currentmodule:: fuzzyclust.models
+
+.. autofunction:: simulate_free_run
+
+.. include:: fuzzyclust.models.simulate_free_run.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

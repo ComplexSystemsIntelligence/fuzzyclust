@@ -1,0 +1,12 @@
+﻿fuzzyclust.graph.plot\_neighbors\_graph
+=======================================
+
+.. currentmodule:: fuzzyclust.graph
+
+.. autofunction:: plot_neighbors_graph
+
+.. include:: fuzzyclust.graph.plot_neighbors_graph.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

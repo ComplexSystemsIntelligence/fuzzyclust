@@ -1,0 +1,12 @@
+﻿fuzzyclust.models.weighted\_least\_squares
+==========================================
+
+.. currentmodule:: fuzzyclust.models
+
+.. autofunction:: weighted_least_squares
+
+.. include:: fuzzyclust.models.weighted_least_squares.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

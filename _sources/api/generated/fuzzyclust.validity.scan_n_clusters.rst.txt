@@ -1,0 +1,12 @@
+﻿fuzzyclust.validity.scan\_n\_clusters
+=====================================
+
+.. currentmodule:: fuzzyclust.validity
+
+.. autofunction:: scan_n_clusters
+
+.. include:: fuzzyclust.validity.scan_n_clusters.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

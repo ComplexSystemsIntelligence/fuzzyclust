@@ -1,0 +1,128 @@
+
+
+.. _sphx_glr_auto_examples_05_graph:
+
+Graph-based fuzzy clustering
+----------------------------
+
+Clusters of arbitrary shape found through a graph over the samples: the
+hybrid minimal spanning tree / Gath–Geva algorithm (inconsistent-edge
+cutting, volume-based splitting, GG refinement, validation of the number of
+clusters and similarity of the resulting fuzzy clusters) and fuzzy c-medoid
+clustering with geodesic distances on a k-nearest-neighbour graph, compared
+with fuzzy c-means and with clustering of the Isomap projection on rings,
+moons, spirals and the S-curve.
+
+
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Prototype-based algorithms describe a cluster by one geometric object and fail when the groups have arbitrary shapes. Graph-theoretic methods start instead from the minimal spanning tree (MST) of the data and obtain clusters by removing edges. Zahn&#x27;s classical criteria for choosing these edges compare an edge with the mean edge length of the whole tree (global threshold) or with the edges in its own neighborhood (local inconsistency). Both find well-separated groups, but a sparse chain of points between two groups keeps them together: the chaining effect of single linkage. The hybrid MST–GG algorithm of Vathy-Fogarassy, Feil, and Abonyi adds a third criterion. A subtree is split at the edge that minimizes the total fuzzy hypervolume \sum_j\sqrt{\det\mathbf{F}_j} of the resulting parts, which breaks chains and bends because a union of two compact groups has a far larger volume than its parts. Finally, the crisp tree partition initializes Gath–Geva clustering, which is too sensitive to its starting point to be run from a random partition on such data but refines a good start into a fuzzy, parametric description (centers, covariances, memberships).">
+
+.. only:: html
+
+  .. image:: /auto_examples/05_graph/images/thumb/sphx_glr_plot_01_mst_clustering_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/05_graph/plot_01_mst_clustering`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Minimal spanning tree clustering: cutting, splitting, and Gath–Geva refinement</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Removing the longest edges of the minimal spanning tree works as long as all clusters have the same density. When a diffuse group lies next to tight ones, the edges inside the diffuse group are as long as the edges that separate the tight groups, and a global length threshold (Criterion 1, w(e)&gt;\lambda\,\bar w) either leaves the tight groups merged or shatters the diffuse one. Zahn&#x27;s local criterion (Criterion 2) compares every edge with the edges in its own tree neighborhood. An edge is inconsistent when it is at least f times longer than the mean of the edges within k tree steps of its end points (ratio form), or when it exceeds that mean by more than a given number of standard deviations (deviation form). The factor f and the depth k (``inconsistency``, inconsistency_std, n_hops) are the parameters of the classical algorithm, and this example shows what they do. The splitting phase is switched off (``min_gain=1.0``) and no refinement is run, so only the length criteria act.">
+
+.. only:: html
+
+  .. image:: /auto_examples/05_graph/images/thumb/sphx_glr_plot_02_mst_cut_criteria_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/05_graph/plot_02_mst_cut_criteria`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Inconsistent edges: Zahn's criteria and the neighborhood depth</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The hybrid MST–GG algorithm uses the fuzzy hypervolume both as its splitting criterion and as a validity measure. This example looks at the number of clusters from two sides. First, the number is given (``n_clusters=c``), and the partitions obtained for a range of c are compared by the volume-based indices of Gath and Geva from fuzzyclust.validity (the fuzzy hypervolume FHV, the partition density PD, and the average partition density APD) and by the number the volume criterion picks on its own. Second, the clusters are not Gaussian: two concentric rings are split by the volume criterion into many small pieces, each well described by one Gaussian. The fuzzy similarity of the refined clusters, S_{ij}=\sum_k\min(\mu_{ik},\mu_{jk})/\sum_k\max(\mu_{ik},\mu_{jk}), drawn as a dendrogram, shows which pieces belong together; this is the analysis step the paper proposes for merging and for visualizing the result.">
+
+.. only:: html
+
+  .. image:: /auto_examples/05_graph/images/thumb/sphx_glr_plot_03_mst_validation_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/05_graph/plot_03_mst_validation`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Number of clusters: volume-based validity and fuzzy cluster similarity</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Fuzzy c-means measures the distance between a sample and a prototype with the Euclidean norm, so it can only find groups that are convex in the feature space. When the data lie on a curved manifold (a spiral, two interleaved moons, concentric rings), two points that are close in the Euclidean sense may be far apart along the manifold. Feil and Abonyi replace the Euclidean distance by the geodesic distance, the length of the shortest path in a k-nearest-neighbor graph whose edges are weighted by Euclidean lengths (the Isomap approximation of the manifold distance). Since the geodesic distance is only defined between samples, the prototypes are restricted to data points. The algorithm is thus a fuzzy c-medoid clustering with the FCM membership formula, each medoid being the sample that minimizes \sum_k\mu_{ik}^m d_g(\mathbf{x}_k,\cdot)^2. The number of neighbors k determines how the graph sees the manifold: if it is too small, the manifold falls apart into components; if it is too large, edges &quot;short-circuit&quot; neighboring arms.">
+
+.. only:: html
+
+  .. image:: /auto_examples/05_graph/images/thumb/sphx_glr_plot_04_geodesic_fcm_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/05_graph/plot_04_geodesic_fcm`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Geodesic-distance-based fuzzy clustering versus fuzzy c-means</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The geodesic distance between two samples is the length of the shortest path in the neighborhood graph. This example first draws such a path next to the Euclidean chord to make the difference tangible and then turns to the first benchmark of the paper, the three-dimensional S-curve, on which eight clusters are sought. Two routes are compared. Algorithm I projects the data with Isomap (classical MDS of the geodesic distance matrix), runs fuzzy c-means on the projection, and re-projects every center as the sample closest to it; Algorithm II (``GeodesicFCM``) clusters in the feature space with geodesic distances and medoids. Both place their prototypes on the manifold, which fuzzy c-means in the feature space does not, and the cost function evaluated with geodesic distances shows which partition follows the manifold better. Finally, the spiral illustrates the effect of the graph components on Algorithm I. Isomap can only embed a connected graph, so the components have to be bridged, and the penalty of the bridges determines whether the arms stay apart in the projection.">
+
+.. only:: html
+
+  .. image:: /auto_examples/05_graph/images/thumb/sphx_glr_plot_05_geodesic_path_isomap_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/05_graph/plot_05_geodesic_path_isomap`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Geodesic paths, the S-curve, and clustering of the Isomap projection</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/05_graph/plot_01_mst_clustering
+   /auto_examples/05_graph/plot_02_mst_cut_criteria
+   /auto_examples/05_graph/plot_03_mst_validation
+   /auto_examples/05_graph/plot_04_geodesic_fcm
+   /auto_examples/05_graph/plot_05_geodesic_path_isomap
+

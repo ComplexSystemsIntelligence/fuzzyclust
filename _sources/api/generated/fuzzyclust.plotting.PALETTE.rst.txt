@@ -1,0 +1,6 @@
+﻿fuzzyclust.plotting.PALETTE
+===========================
+
+.. currentmodule:: fuzzyclust.plotting
+
+.. autodata:: PALETTE

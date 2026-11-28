@@ -1,0 +1,49 @@
+
+:orphan:
+
+.. _sphx_glr_auto_examples_05_graph_sg_execution_times:
+
+
+Computation times
+=================
+**00:08.741** total execution time for 5 files **from auto_examples/05_graph**:
+
+.. container::
+
+  .. raw:: html
+
+    <style scoped>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+    </style>
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script type="text/javascript" class="init">
+    $(document).ready( function () {
+        $('table.sg-datatable').DataTable({order: [[1, 'desc']]});
+    } );
+    </script>
+
+  .. list-table::
+   :header-rows: 1
+   :class: table table-striped sg-datatable
+
+   * - Example
+     - Time
+     - Mem (MB)
+   * - :ref:`sphx_glr_auto_examples_05_graph_plot_05_geodesic_path_isomap.py` (``plot_05_geodesic_path_isomap.py``)
+     - 00:02.488
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_05_graph_plot_02_mst_cut_criteria.py` (``plot_02_mst_cut_criteria.py``)
+     - 00:01.742
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_05_graph_plot_04_geodesic_fcm.py` (``plot_04_geodesic_fcm.py``)
+     - 00:01.701
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_05_graph_plot_03_mst_validation.py` (``plot_03_mst_validation.py``)
+     - 00:01.493
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_05_graph_plot_01_mst_clustering.py` (``plot_01_mst_clustering.py``)
+     - 00:01.318
+     - 0.0

@@ -1,0 +1,150 @@
+r"""
+Applying a fitted model to new data
+===================================
+
+A fitted clustering model is more than a partition of the training data: its
+prototypes (and, for GK and GG, the cluster covariances and priors) define a
+membership function over the whole data space. The MATLAB toolbox provided
+this as ``clusteval``; in :mod:`fuzzyclust` it is the scikit-learn trio
+
+* ``predict_proba(X_new)``: membership degrees of new samples,
+* ``predict(X_new)``: hard labels,
+* ``transform(X_new)``: distances :math:`D_{ik}` to the prototypes.
+
+This enables train/test workflows, monitoring (is a new operating point close
+to a known cluster?), and the contour maps used throughout the documentation.
+"""
+
+# %%
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.model_selection import train_test_split
+
+from fuzzyclust import FCM, GG, GK, KMeans
+from fuzzyclust.datasets import make_ellipses
+from fuzzyclust.plotting import PALETTE, plot_membership_contours
+
+X, y = make_ellipses(n_clusters=3, n_samples_per_cluster=150, random_state=4)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=0)
+
+gk = GK(n_clusters=3, random_state=0).fit(X_train)
+U_test = gk.predict_proba(X_test)
+print("memberships of the first test samples:\n", U_test[:5].round(3))
+print("distances to prototypes:\n", gk.transform(X_test[:5]).round(2))
+
+# %%
+# Training points are drawn filled, test points as open markers colored by
+# their predicted label; the contour map is the membership function learned
+# from the training data only.
+fig, ax = plt.subplots(figsize=(6, 5))
+plot_membership_contours(gk, X_train, ax=ax, labels=False)
+pred = gk.predict(X_test)
+for i in range(3):
+    pts = X_test[pred == i]
+    ax.scatter(pts[:, 0], pts[:, 1], facecolors="none", edgecolors=PALETTE[i], s=40, linewidths=1.2)
+ax.set_title("GK fitted on 60% of the data; open markers: test samples")
+plt.tight_layout()
+
+# %%
+# The membership function differs from algorithm to algorithm, because every
+# algorithm defines its own distance. The classical comparison figure of the
+# toolbox manual, one contour map per algorithm on the same data, shows the
+# difference: crisp Voronoi cells (k-means), circles (FCM), ellipses (GK),
+# and density-shaped bumps (GG).
+models = {
+    "k-means": KMeans(n_clusters=3, random_state=0),
+    "FCM": FCM(n_clusters=3, random_state=0),
+    "GK": GK(n_clusters=3, random_state=0),
+}
+models["GG"] = GG(n_clusters=3, init=models["GK"].fit(X_train).membership_)
+fig, axes = plt.subplots(1, 4, figsize=(19, 4.3), sharex=True, sharey=True)
+for ax, (name, model) in zip(axes, models.items(), strict=False):
+    model.fit(X_train)
+    plot_membership_contours(model, X_train, ax=ax, labels=False, levels=10)
+    ax.set_title(name)
+plt.tight_layout()
+
+# %%
+# In monitoring, the question is how far a new observation lies from every
+# known cluster. For GK the maximal membership drops smoothly outside the
+# data, while the distance returned by ``transform`` grows; both can serve as
+# novelty scores.
+novel = np.array([[X[:, 0].max() + 6.0, X[:, 1].mean()]])
+print("novel point memberships:", gk.predict_proba(novel).round(3))
+print("novel point distances  :", gk.transform(novel).round(1))
+print(f"typical training distance to own prototype: {np.median(gk.distances_.min(axis=1)):.2f}")
+
+# %%
+# Parameter study: training size and the exponent behind the scores
+# -------------------------------------------------------------------
+# Two questions decide whether the fitted membership function can be used on
+# new data: how many training samples it needs, and how the fuzziness
+# exponent affects the novelty scores. The prototypes (and, for GK, the
+# covariances) are estimated from the training set only, so the hold-out
+# agreement is measured for training fractions from 5% to 80%. The maximal
+# membership of the far-away point depends strongly on :math:`m`: for a
+# nearly crisp partition (:math:`m\to1`) even a point more than twenty
+# typical distances away gets a membership near one, because the memberships
+# are *relative*. The distance to the nearest prototype does not have this
+# dependence.
+
+from sklearn.metrics import adjusted_rand_score
+
+# [snippet:size_m_scan]
+fractions = (0.05, 0.1, 0.2, 0.4, 0.6, 0.8)
+holdout = {"FCM": [], "GK": []}
+for frac in fractions:
+    Xa, Xb, _, yb = train_test_split(X, y, train_size=frac, random_state=0)
+    for name, cls in (("FCM", FCM), ("GK", GK)):
+        model = cls(n_clusters=3, random_state=0).fit(Xa)
+        holdout[name].append(adjusted_rand_score(yb, model.predict(Xb)))
+
+m_values = (1.2, 1.5, 2.0, 3.0, 4.0)
+novel_mu, train_mu, dist_ratio = [], [], []
+for m in m_values:
+    model = GK(n_clusters=3, m=m, random_state=0).fit(X_train)
+    novel_mu.append(model.predict_proba(novel).max())
+    train_mu.append(np.median(model.membership_.max(axis=1)))
+    dist_ratio.append(model.transform(novel).min() / np.median(model.distances_.min(axis=1)))
+# [/snippet:size_m_scan]
+
+fig, axes = plt.subplots(1, 2, figsize=(11, 4))
+n_train = [int(round(f * len(X))) for f in fractions]
+for j, (name, values) in enumerate(holdout.items()):
+    axes[0].plot(n_train, values, "o-", color=PALETTE[j], label=name)
+axes[0].set_xscale("log")
+axes[0].set_xticks(n_train, [str(n) for n in n_train])
+axes[0].minorticks_off()
+axes[0].set_xlabel("number of training samples")
+axes[0].set_ylabel("ARI of predict() on the held-out samples")
+axes[0].set_title("a few dozen samples suffice to fit a usable membership function")
+axes[0].legend(frameon=False)
+axes[0].grid(True, color="0.9")
+axes[1].plot(m_values, novel_mu, "o-", color=PALETTE[0], label=r"$\max_i\mu_{ik}$ of the novel point")
+axes[1].plot(m_values, train_mu, "s-", color=PALETTE[1], label=r"median $\max_i\mu_{ik}$ of the training data")
+axes[1].set_xlabel("fuzziness exponent $m$ (GK)")
+axes[1].set_ylabel("maximal membership")
+axes[1].set_title("relative memberships are a poor novelty score for small $m$")
+axes[1].legend(frameon=False, fontsize=8)
+axes[1].grid(True, color="0.9")
+plt.tight_layout()
+
+print("  m   max membership (novel)  median max membership (train)  distance ratio novel/typical")
+for m, a, b, r in zip(m_values, novel_mu, train_mu, dist_ratio, strict=True):
+    print(f"{m:4.1f}  {a:22.3f}  {b:29.3f}  {r:28.1f}")
+
+# %%
+# Take-away
+# ---------
+# A fitted clustering model is a membership function over the whole space,
+# and ``predict_proba``, ``predict``, and ``transform`` evaluate it for new
+# samples. This turns clustering into a train/test workflow and makes the
+# algorithm-specific shape of that function (Voronoi cells, circles,
+# ellipses, density bumps) visible. GK needs only a few dozen samples per
+# cluster to generalize on these ellipses; FCM generalizes worse, not
+# because of the sample size but because its circular membership function
+# does not fit the data. For monitoring, the distance returned by
+# ``transform`` is the more reliable novelty score: memberships sum to one,
+# so a far-away point still receives a large membership when :math:`m` is
+# small, while its distance to the nearest prototype is more than twenty
+# times the typical training distance for every exponent.

@@ -1,0 +1,46 @@
+
+:orphan:
+
+.. _sphx_glr_auto_examples_02_visualization_sg_execution_times:
+
+
+Computation times
+=================
+**00:08.477** total execution time for 4 files **from auto_examples/02_visualization**:
+
+.. container::
+
+  .. raw:: html
+
+    <style scoped>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+    </style>
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script type="text/javascript" class="init">
+    $(document).ready( function () {
+        $('table.sg-datatable').DataTable({order: [[1, 'desc']]});
+    } );
+    </script>
+
+  .. list-table::
+   :header-rows: 1
+   :class: table table-striped sg-datatable
+
+   * - Example
+     - Time
+     - Mem (MB)
+   * - :ref:`sphx_glr_auto_examples_02_visualization_plot_01_pca_vs_sammon.py` (``plot_01_pca_vs_sammon.py``)
+     - 00:02.541
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_02_visualization_plot_04_cluster_number_validation.py` (``plot_04_cluster_number_validation.py``)
+     - 00:02.307
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_02_visualization_plot_03_fuzzy_som.py` (``plot_03_fuzzy_som.py``)
+     - 00:02.230
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_02_visualization_plot_02_fuzzy_sammon.py` (``plot_02_fuzzy_sammon.py``)
+     - 00:01.399
+     - 0.0

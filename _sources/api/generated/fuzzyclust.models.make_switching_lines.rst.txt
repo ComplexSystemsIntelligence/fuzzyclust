@@ -1,0 +1,12 @@
+﻿fuzzyclust.models.make\_switching\_lines
+========================================
+
+.. currentmodule:: fuzzyclust.models
+
+.. autofunction:: make_switching_lines
+
+.. include:: fuzzyclust.models.make_switching_lines.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

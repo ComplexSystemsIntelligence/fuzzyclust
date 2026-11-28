@@ -1,0 +1,12 @@
+﻿fuzzyclust.timeseries.fuzzy\_variance
+=====================================
+
+.. currentmodule:: fuzzyclust.timeseries
+
+.. autofunction:: fuzzy_variance
+
+.. include:: fuzzyclust.timeseries.fuzzy_variance.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

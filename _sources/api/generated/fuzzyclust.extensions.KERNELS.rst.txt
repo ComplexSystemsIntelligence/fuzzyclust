@@ -1,0 +1,6 @@
+﻿fuzzyclust.extensions.KERNELS
+=============================
+
+.. currentmodule:: fuzzyclust.extensions
+
+.. autodata:: KERNELS

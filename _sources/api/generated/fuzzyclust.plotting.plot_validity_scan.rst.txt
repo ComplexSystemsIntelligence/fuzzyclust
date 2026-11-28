@@ -1,0 +1,12 @@
+﻿fuzzyclust.plotting.plot\_validity\_scan
+========================================
+
+.. currentmodule:: fuzzyclust.plotting
+
+.. autofunction:: plot_validity_scan
+
+.. include:: fuzzyclust.plotting.plot_validity_scan.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

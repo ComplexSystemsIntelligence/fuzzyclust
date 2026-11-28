@@ -1,0 +1,12 @@
+﻿fuzzyclust.collaborative.align\_partitions
+==========================================
+
+.. currentmodule:: fuzzyclust.collaborative
+
+.. autofunction:: align_partitions
+
+.. include:: fuzzyclust.collaborative.align_partitions.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

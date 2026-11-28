@@ -1,0 +1,12 @@
+﻿fuzzyclust.ensemble.information\_theoretic\_kmeans
+==================================================
+
+.. currentmodule:: fuzzyclust.ensemble
+
+.. autofunction:: information_theoretic_kmeans
+
+.. include:: fuzzyclust.ensemble.information_theoretic_kmeans.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

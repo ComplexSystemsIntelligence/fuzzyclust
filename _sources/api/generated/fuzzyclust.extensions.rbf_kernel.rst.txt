@@ -1,0 +1,12 @@
+﻿fuzzyclust.extensions.rbf\_kernel
+=================================
+
+.. currentmodule:: fuzzyclust.extensions
+
+.. autofunction:: rbf_kernel
+
+.. include:: fuzzyclust.extensions.rbf_kernel.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

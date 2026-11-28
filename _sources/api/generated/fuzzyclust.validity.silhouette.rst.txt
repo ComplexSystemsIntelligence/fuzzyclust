@@ -1,0 +1,12 @@
+﻿fuzzyclust.validity.silhouette
+==============================
+
+.. currentmodule:: fuzzyclust.validity
+
+.. autofunction:: silhouette
+
+.. include:: fuzzyclust.validity.silhouette.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

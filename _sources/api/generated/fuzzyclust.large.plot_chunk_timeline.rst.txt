@@ -1,0 +1,12 @@
+﻿fuzzyclust.large.plot\_chunk\_timeline
+======================================
+
+.. currentmodule:: fuzzyclust.large
+
+.. autofunction:: plot_chunk_timeline
+
+.. include:: fuzzyclust.large.plot_chunk_timeline.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

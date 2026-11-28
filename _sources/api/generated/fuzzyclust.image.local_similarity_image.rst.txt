@@ -1,0 +1,12 @@
+﻿fuzzyclust.image.local\_similarity\_image
+=========================================
+
+.. currentmodule:: fuzzyclust.image
+
+.. autofunction:: local_similarity_image
+
+.. include:: fuzzyclust.image.local_similarity_image.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

@@ -1,0 +1,12 @@
+﻿fuzzyclust.models.make\_banded\_classes
+=======================================
+
+.. currentmodule:: fuzzyclust.models
+
+.. autofunction:: make_banded_classes
+
+.. include:: fuzzyclust.models.make_banded_classes.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

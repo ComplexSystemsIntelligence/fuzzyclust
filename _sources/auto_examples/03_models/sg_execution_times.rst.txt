@@ -1,0 +1,55 @@
+
+:orphan:
+
+.. _sphx_glr_auto_examples_03_models_sg_execution_times:
+
+
+Computation times
+=================
+**00:20.602** total execution time for 7 files **from auto_examples/03_models**:
+
+.. container::
+
+  .. raw:: html
+
+    <style scoped>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+    </style>
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script type="text/javascript" class="init">
+    $(document).ready( function () {
+        $('table.sg-datatable').DataTable({order: [[1, 'desc']]});
+    } );
+    </script>
+
+  .. list-table::
+   :header-rows: 1
+   :class: table table-striped sg-datatable
+
+   * - Example
+     - Time
+     - Mem (MB)
+   * - :ref:`sphx_glr_auto_examples_03_models_plot_06_fuzzy_partition_tree.py` (``plot_06_fuzzy_partition_tree.py``)
+     - 00:06.644
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_03_models_plot_02_ts_dynamic_plant.py` (``plot_02_ts_dynamic_plant.py``)
+     - 00:03.999
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_03_models_plot_03_ts_mimo.py` (``plot_03_ts_mimo.py``)
+     - 00:03.622
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_03_models_plot_05_supervised_classifier.py` (``plot_05_supervised_classifier.py``)
+     - 00:02.720
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_03_models_plot_07_hinging_tree.py` (``plot_07_hinging_tree.py``)
+     - 00:01.749
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_03_models_plot_01_ts_sinc.py` (``plot_01_ts_sinc.py``)
+     - 00:01.195
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_03_models_plot_04_fcrm_switching.py` (``plot_04_fcrm_switching.py``)
+     - 00:00.673
+     - 0.0

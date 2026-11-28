@@ -1,0 +1,12 @@
+﻿fuzzyclust.collaborative.plot\_collaboration\_trajectory
+========================================================
+
+.. currentmodule:: fuzzyclust.collaborative
+
+.. autofunction:: plot_collaboration_trajectory
+
+.. include:: fuzzyclust.collaborative.plot_collaboration_trajectory.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

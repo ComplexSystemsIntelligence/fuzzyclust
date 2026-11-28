@@ -1,0 +1,12 @@
+﻿fuzzyclust.graph.make\_chained\_blobs
+=====================================
+
+.. currentmodule:: fuzzyclust.graph
+
+.. autofunction:: make_chained_blobs
+
+.. include:: fuzzyclust.graph.make_chained_blobs.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

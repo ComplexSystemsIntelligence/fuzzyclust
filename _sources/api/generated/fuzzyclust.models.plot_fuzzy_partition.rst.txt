@@ -1,0 +1,12 @@
+﻿fuzzyclust.models.plot\_fuzzy\_partition
+========================================
+
+.. currentmodule:: fuzzyclust.models
+
+.. autofunction:: plot_fuzzy_partition
+
+.. include:: fuzzyclust.models.plot_fuzzy_partition.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

@@ -1,0 +1,12 @@
+﻿fuzzyclust.relational.autocorrelation\_features
+===============================================
+
+.. currentmodule:: fuzzyclust.relational
+
+.. autofunction:: autocorrelation_features
+
+.. include:: fuzzyclust.relational.autocorrelation_features.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

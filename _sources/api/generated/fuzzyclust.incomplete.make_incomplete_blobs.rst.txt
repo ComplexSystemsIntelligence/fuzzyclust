@@ -1,0 +1,12 @@
+﻿fuzzyclust.incomplete.make\_incomplete\_blobs
+=============================================
+
+.. currentmodule:: fuzzyclust.incomplete
+
+.. autofunction:: make_incomplete_blobs
+
+.. include:: fuzzyclust.incomplete.make_incomplete_blobs.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

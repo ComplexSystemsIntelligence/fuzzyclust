@@ -1,0 +1,12 @@
+﻿fuzzyclust.validity.modified\_partition\_coefficient
+====================================================
+
+.. currentmodule:: fuzzyclust.validity
+
+.. autofunction:: modified_partition_coefficient
+
+.. include:: fuzzyclust.validity.modified_partition_coefficient.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

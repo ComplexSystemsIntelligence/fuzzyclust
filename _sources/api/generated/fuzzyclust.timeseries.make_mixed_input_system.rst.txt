@@ -1,0 +1,12 @@
+﻿fuzzyclust.timeseries.make\_mixed\_input\_system
+================================================
+
+.. currentmodule:: fuzzyclust.timeseries
+
+.. autofunction:: make_mixed_input_system
+
+.. include:: fuzzyclust.timeseries.make_mixed_input_system.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

@@ -1,0 +1,186 @@
+
+
+.. _sphx_glr_auto_examples_06_extensions:
+
+Robust and shape-oriented variants of fuzzy c-means
+---------------------------------------------------
+
+Fuzzy c-means assumes compact, roughly spherical clusters and is pulled
+away by outliers. These examples relax one assumption at a time: the
+possibilistic c-means (absolute typicalities, their scale parameters and the
+coincident-cluster failure), the possibilistic fuzzy c-means (memberships
+and typicalities with the a/b trade-off), noise clustering (a virtual noise
+cluster at constant distance δ), kernel fuzzy c-means (rings and moons with
+a kernel-width scan), fuzzy c-varieties and c-elliptotypes (lines as
+prototypes on crossing and collinear segments, compared with GK) and fuzzy
+c-shells (circles as prototypes on concentric and intersecting circles with
+radius recovery), volume prototypes with adaptive merging, and feature
+weighting (weighted FCM and SCAD) that learns which variables matter.
+
+
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Fuzzy c-means forces the memberships of every sample to sum to one, so an outlier far from all prototypes still receives a membership of about 1/c in every cluster and drags every prototype toward itself. The possibilistic c-means (PCM) of Krishnapuram and Keller drops this constraint: the typicality">
+
+.. only:: html
+
+  .. image:: /auto_examples/06_extensions/images/thumb/sphx_glr_plot_01_pcm_typicality_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/06_extensions/plot_01_pcm_typicality`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Possibilistic c-means: typicalities, scales and coincident clusters</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="FCM memberships are relative: they say to which cluster a sample belongs more than to the others, and they keep the prototypes apart because every sample has to be shared. PCM typicalities are absolute: they say how representative a sample is of a cluster and make the prototypes robust, but nothing keeps the prototypes apart. The possibilistic fuzzy c-means (PFCM) of Pal, Pal, Keller and Bezdek computes both and combines them in the prototype update,">
+
+.. only:: html
+
+  .. image:: /auto_examples/06_extensions/images/thumb/sphx_glr_plot_02_pfcm_trade_off_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/06_extensions/plot_02_pfcm_trade_off`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Possibilistic fuzzy c-means: memberships and typicalities together</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Davé&#x27;s noise clustering keeps the probabilistic constraint of FCM but adds a (c+1)-th noise prototype that is, by definition, at the same distance \delta from every sample. A sample farther than \delta from all real prototypes is closer to the noise prototype and gives most of its membership to the noise cluster; the real clusters only see the remainder,">
+
+.. only:: html
+
+  .. image:: /auto_examples/06_extensions/images/thumb/sphx_glr_plot_03_noise_clustering_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/06_extensions/plot_03_noise_clustering`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Noise clustering: a virtual cluster at constant distance δ</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="FCM finds clusters that are convex in the input space because its distance is Euclidean. Kernel FCM maps the data with an implicit nonlinear map \Phi into the feature space of a Mercer kernel K(\mathbf{x},\mathbf{y})=\langle\Phi(\mathbf{x}),\Phi(\mathbf{y})\rangle and runs FCM there: the prototypes are weighted means of the mapped samples, and the squared distance of a sample to a prototype is evaluated with kernel values only,">
+
+.. only:: html
+
+  .. image:: /auto_examples/06_extensions/images/thumb/sphx_glr_plot_04_kernel_fcm_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/06_extensions/plot_04_kernel_fcm`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Kernel fuzzy c-means: rings and moons through the kernel trick</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Data that lie along lines (or planes) are grouped not by their position but by the line they belong to. The fuzzy c-varieties (FCV) algorithm of Bezdek, Coray, Gunderson and Watson replaces the point prototype of FCM by an r-dimensional linear variety through a center \mathbf{v}_i spanned by orthonormal directions \mathbf{s}_{ij}, and measures the squared orthogonal distance">
+
+.. only:: html
+
+  .. image:: /auto_examples/06_extensions/images/thumb/sphx_glr_plot_05_fuzzy_c_varieties_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/06_extensions/plot_05_fuzzy_c_varieties`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fuzzy c-varieties: lines as prototypes, and the elliptotype compromise</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A ring has no interior points, so a point prototype placed at its center is far from every member, and FCM cannot tell concentric rings apart at all. Shell clustering describes cluster i by a center \mathbf{v}_i and a radius r_i and measures the distance of a sample as its deviation from the circle. The fuzzy c-spherical shells algorithm (FCSS) of Krishnapuram, Nasraoui and Frigui uses the algebraic distance (\|\mathbf{x}_k-\mathbf{v}_i\|^2-r_i^2)^2, which is quadratic in a reparametrized prototype and therefore has a closed-form weighted least-squares update; Davé&#x27;s original fuzzy c-shells (FCS) uses the radial distance (\|\mathbf{x}_k-\mathbf{v}_i\|-r_i)^2 and needs a Newton iteration per cluster. The example recovers the radii of concentric and of intersecting circles, compares the two algorithms, and shows why the initialization matters.">
+
+.. only:: html
+
+  .. image:: /auto_examples/06_extensions/images/thumb/sphx_glr_plot_06_fuzzy_c_shells_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/06_extensions/plot_06_fuzzy_c_shells`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fuzzy c-shells: circles as prototypes</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Fuzzy c-means treats every feature alike: after standardization a feature of pure noise contributes as much to the distance as a feature that separates the clusters, and enough such features drown the structure. Two extensions learn feature weights together with the partition. The weighted FCM of Keller and Klawonn uses one weight vector \boldsymbol\alpha for all clusters, D^2_{ik}=\sum_j\alpha_j^t(x_{kj}-v_{ij})^2, and SCAD (simultaneous clustering and attribute discrimination) of Frigui and Nasraoui gives every cluster its own weights w_{ij}. In both methods a feature receives a large weight when the members of the clusters scatter little along it: a noise feature, along which every cluster is as wide as the data, is down-weighted. This example adds noise features to three groups, compares the learned weights, and shows SCAD on clusters that live in different subspaces.">
+
+.. only:: html
+
+  .. image:: /auto_examples/06_extensions/images/thumb/sphx_glr_plot_07_feature_weighting_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/06_extensions/plot_07_feature_weighting`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Learning which features matter: SCAD and the weighted FCM</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A point prototype measures the distance to the center of a cluster, so a sample in the outer part of a large cluster is farther from its own prototype than a sample at the edge of a small neighboring cluster. This is why FCM and Gustafson--Kessel tend to equalize the clusters: a large, diffuse group is split and its pieces are handed to smaller groups. Kaymak and Setnes replace the point by a volume prototype, a hypersphere (or hyperellipsoid) of radius r_i inside which the distance is zero,">
+
+.. only:: html
+
+  .. image:: /auto_examples/06_extensions/images/thumb/sphx_glr_plot_08_volume_prototypes_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/06_extensions/plot_08_volume_prototypes`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Volume prototypes and adaptive cluster merging</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/06_extensions/plot_01_pcm_typicality
+   /auto_examples/06_extensions/plot_02_pfcm_trade_off
+   /auto_examples/06_extensions/plot_03_noise_clustering
+   /auto_examples/06_extensions/plot_04_kernel_fcm
+   /auto_examples/06_extensions/plot_05_fuzzy_c_varieties
+   /auto_examples/06_extensions/plot_06_fuzzy_c_shells
+   /auto_examples/06_extensions/plot_07_feature_weighting
+   /auto_examples/06_extensions/plot_08_volume_prototypes
+

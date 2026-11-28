@@ -1,0 +1,12 @@
+﻿fuzzyclust.graph.minimum\_spanning\_tree
+========================================
+
+.. currentmodule:: fuzzyclust.graph
+
+.. autofunction:: minimum_spanning_tree
+
+.. include:: fuzzyclust.graph.minimum_spanning_tree.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

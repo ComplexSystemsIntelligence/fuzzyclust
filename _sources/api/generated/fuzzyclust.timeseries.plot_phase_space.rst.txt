@@ -1,0 +1,12 @@
+﻿fuzzyclust.timeseries.plot\_phase\_space
+========================================
+
+.. currentmodule:: fuzzyclust.timeseries
+
+.. autofunction:: plot_phase_space
+
+.. include:: fuzzyclust.timeseries.plot_phase_space.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

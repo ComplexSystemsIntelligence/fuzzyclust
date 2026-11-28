@@ -1,0 +1,12 @@
+﻿fuzzyclust.datasets.load\_breast\_cancer
+========================================
+
+.. currentmodule:: fuzzyclust.datasets
+
+.. autofunction:: load_breast_cancer
+
+.. include:: fuzzyclust.datasets.load_breast_cancer.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

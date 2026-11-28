@@ -1,0 +1,12 @@
+﻿fuzzyclust.models.supervised\_fuzzy\_partition
+==============================================
+
+.. currentmodule:: fuzzyclust.models
+
+.. autofunction:: supervised_fuzzy_partition
+
+.. include:: fuzzyclust.models.supervised_fuzzy_partition.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

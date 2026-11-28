@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>fuzzyclust.graph.geodesic &#8212; fuzzyclust</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=c83e6b79" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=6a604523" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=e6ebbe3b" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
+
+    <script src="../../../_static/documentation_options.js?v=f2a433a1"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/sg-tags.js?v=d80f6fa4"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../../_static/design-tabs.js?v=fcb327ea"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/fuzzyclust/graph/geodesic';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="icon" href="../../../_static/favicon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="1.0" />
+  
+    
+    <script src="../../../_static/searchtools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/logo.svg" class="logo__image only-light" alt=""/>
+    <img src="../../../_static/logo.svg" class="logo__image only-dark pst-js-only" alt=""/>
+  
+  
+    <p class="title logo__title">fuzzyclust</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../auto_examples/index.html">
+    Example gallery
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../book.html">
+    The book
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../migration.html">
+    Migrating from the MATLAB toolbox
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../citing.html">
+    Citing
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://complexsystemsintelligence.github.io/#textbooks">
+    All textbooks
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ComplexSystemsIntelligence/fuzzyclust" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../auto_examples/index.html">
+    Example gallery
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../book.html">
+    The book
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../migration.html">
+    Migrating from the MATLAB toolbox
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../citing.html">
+    Citing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://complexsystemsintelligence.github.io/#textbooks">
+    All textbooks
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ComplexSystemsIntelligence/fuzzyclust" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">fuzzyclust.graph.geodesic</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for fuzzyclust.graph.geodesic</h1><div class="highlight"><pre>
+<span></span><span class="c1"># SPDX-License-Identifier: MIT</span>
+<span class="c1"># Copyright (c) 2026 János Abonyi</span>
+<span class="sa">r</span><span class="sd">"""Geodesic-distance-based fuzzy clustering (Feil and Abonyi).</span>
+
+<span class="sd">Two algorithms of the paper are implemented:</span>
+
+<span class="sd">* :class:`GeodesicFCM` -- *Algorithm II*: fuzzy c-medoid clustering in the</span>
+<span class="sd">  original feature space with geodesic (shortest-path) distances;</span>
+<span class="sd">* :class:`IsomapFCM` -- *Algorithm I*: fuzzy c-means on the Isomap projection</span>
+<span class="sd">  of the data, the centers being re-projected onto the closest samples.</span>
+
+<span class="sd">Both rest on the same graph utilities, :func:`neighbors_graph` and</span>
+<span class="sd">:func:`geodesic_distances`.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.sparse.csgraph</span><span class="w"> </span><span class="kn">import</span> <span class="n">connected_components</span><span class="p">,</span> <span class="n">shortest_path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.spatial.distance</span><span class="w"> </span><span class="kn">import</span> <span class="n">cdist</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.neighbors</span><span class="w"> </span><span class="kn">import</span> <span class="n">NearestNeighbors</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">Bunch</span><span class="p">,</span> <span class="n">check_random_state</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.utils.validation</span><span class="w"> </span><span class="kn">import</span> <span class="n">validate_data</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.._utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">EPS</span><span class="p">,</span> <span class="n">memberships_from_distances</span><span class="p">,</span> <span class="n">sq_euclidean</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseFuzzyClusterer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..cluster</span><span class="w"> </span><span class="kn">import</span> <span class="n">FCM</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"GeodesicFCM"</span><span class="p">,</span> <span class="s2">"IsomapFCM"</span><span class="p">,</span> <span class="s2">"geodesic_distances"</span><span class="p">,</span> <span class="s2">"isomap_embedding"</span><span class="p">,</span> <span class="s2">"neighbors_graph"</span><span class="p">]</span>
+
+
+<span class="c1"># --------------------------------------------------------------------------- graph helpers</span>
+<div class="viewcode-block" id="neighbors_graph">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.graph.neighbors_graph.html#fuzzyclust.graph.neighbors_graph">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">neighbors_graph</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">radius</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Symmetric :math:`k`-nearest-neighbor (or :math:`\varepsilon`-radius) graph with Euclidean weights.</span>
+
+<span class="sd">    Two samples are linked when either one is among the :math:`k` nearest</span>
+<span class="sd">    neighbors of the other (:math:`k`-Isomap) or when they are closer than</span>
+<span class="sd">    ``radius`` (:math:`\varepsilon`-Isomap). A sample is never its own</span>
+<span class="sd">    neighbor; coincident samples are linked by an edge of length ``EPS``</span>
+<span class="sd">    so that a zero weight never means "no edge".</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    X : array-like of shape (n_samples, n_features)</span>
+<span class="sd">    n_neighbors : int or None, default=10</span>
+<span class="sd">        Number of neighbors :math:`k`. Ignored when ``radius`` is given.</span>
+<span class="sd">    radius : float or None, default=None</span>
+<span class="sd">        Connect all pairs closer than ``radius``.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    G : scipy.sparse.csr_matrix of shape (n_samples, n_samples)</span>
+<span class="sd">        Symmetric adjacency with the Euclidean distances as weights (a</span>
+<span class="sd">        structurally missing entry means "no edge").</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.graph import neighbors_graph</span>
+<span class="sd">    &gt;&gt;&gt; X = np.c_[np.arange(5.0), np.zeros(5)]</span>
+<span class="sd">    &gt;&gt;&gt; G = neighbors_graph(X, n_neighbors=1)</span>
+<span class="sd">    &gt;&gt;&gt; G.nnz, float(G.max())</span>
+<span class="sd">    (8, 1.0)</span>
+<span class="sd">    """</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">radius</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">radius</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"radius must be positive."</span><span class="p">)</span>
+        <span class="n">nn</span> <span class="o">=</span> <span class="n">NearestNeighbors</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">G</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">radius_neighbors_graph</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"distance"</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">n_neighbors</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_neighbors</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"n_neighbors must be a positive integer (or give radius)."</span><span class="p">)</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">n_neighbors</span><span class="p">),</span> <span class="n">N</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"At least two samples are needed for a neighborhood graph."</span><span class="p">)</span>
+        <span class="n">nn</span> <span class="o">=</span> <span class="n">NearestNeighbors</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="n">k</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">G</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">kneighbors_graph</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"distance"</span><span class="p">)</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">tocsr</span><span class="p">()</span>
+    <span class="n">G</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">G</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">EPS</span><span class="p">)</span>  <span class="c1"># coincident points stay connected</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">G</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">tocsr</span><span class="p">()</span>  <span class="c1"># an edge exists if either point lists the other</span>
+    <span class="n">G</span><span class="o">.</span><span class="n">setdiag</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+    <span class="n">G</span><span class="o">.</span><span class="n">eliminate_zeros</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">G</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_connect_components</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">G</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">penalty</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Join graph components through their closest pairs of points (greedy, by Euclidean distance).</span>
+
+<span class="sd">    Every bridge gets the Euclidean length of the closest pair plus ``penalty``.</span>
+<span class="sd">    Returns the connected graph and the array of bridge edges ``(n_bridges, 2)``.</span>
+<span class="sd">    """</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">tolil</span><span class="p">()</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sq_euclidean</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">X</span><span class="p">))</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">labels</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">bridges</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">best</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">ia_</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ids</span><span class="p">):</span>
+            <span class="n">ia</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flatnonzero</span><span class="p">(</span><span class="n">labels</span> <span class="o">==</span> <span class="n">a</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">[</span><span class="n">ia_</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]:</span>
+                <span class="n">ib</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flatnonzero</span><span class="p">(</span><span class="n">labels</span> <span class="o">==</span> <span class="n">b</span><span class="p">)</span>
+                <span class="n">sub</span> <span class="o">=</span> <span class="n">D</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ix_</span><span class="p">(</span><span class="n">ia</span><span class="p">,</span> <span class="n">ib</span><span class="p">)]</span>
+                <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="n">sub</span><span class="o">.</span><span class="n">argmin</span><span class="p">(),</span> <span class="n">sub</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">best</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">sub</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">best</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="n">best</span> <span class="o">=</span> <span class="p">(</span><span class="n">sub</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">ia</span><span class="p">[</span><span class="n">idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">ib</span><span class="p">[</span><span class="n">idx</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+        <span class="n">d</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">best</span>
+        <span class="n">G</span><span class="p">[</span><span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span> <span class="o">+</span> <span class="n">penalty</span>
+        <span class="n">G</span><span class="p">[</span><span class="n">q</span><span class="p">,</span> <span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span> <span class="o">+</span> <span class="n">penalty</span>
+        <span class="n">bridges</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">))</span>
+        <span class="n">labels</span><span class="p">[</span><span class="n">labels</span> <span class="o">==</span> <span class="n">b</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span>
+    <span class="k">return</span> <span class="n">G</span><span class="o">.</span><span class="n">tocsr</span><span class="p">(),</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">bridges</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="geodesic_distances">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.graph.geodesic_distances.html#fuzzyclust.graph.geodesic_distances">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">geodesic_distances</span><span class="p">(</span>
+    <span class="n">X</span><span class="p">,</span>
+    <span class="n">n_neighbors</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="n">radius</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">connect_components</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">bridge_penalty</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"auto"</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Graph (geodesic) distances between all pairs of samples, Isomap style.</span>
+
+<span class="sd">    The geodesic distance along the manifold the data lie on is</span>
+<span class="sd">    approximated by the length of the shortest path in a neighborhood graph</span>
+<span class="sd">    whose edges are weighted by Euclidean distances (Tenenbaum, de Silva and</span>
+<span class="sd">    Langford, 2000); the approximation converges to the true geodesic as the</span>
+<span class="sd">    sampling density grows (Bernstein et al., 2000).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    X : array-like of shape (n_samples, n_features)</span>
+<span class="sd">    n_neighbors : int or None, default=10</span>
+<span class="sd">    radius : float or None, default=None</span>
+<span class="sd">        See :func:`neighbors_graph`.</span>
+<span class="sd">    connect_components : bool, default=True</span>
+<span class="sd">        If the graph falls apart into several components, link them through</span>
+<span class="sd">        their closest pairs of points so that all distances are finite. With</span>
+<span class="sd">        ``False`` the distances between components are ``inf``.</span>
+<span class="sd">    bridge_penalty : float, default=1.0</span>
+<span class="sd">        Length added to every bridge, as a multiple of the largest finite</span>
+<span class="sd">        geodesic distance of the unconnected graph. With the default a path</span>
+<span class="sd">        that crosses a bridge is always longer than any path inside a</span>
+<span class="sd">        component, so that the components keep their identity in the</span>
+<span class="sd">        clustering although all distances are finite; ``0`` gives the plain</span>
+<span class="sd">        Euclidean bridge.</span>
+<span class="sd">    method : str, default="auto"</span>
+<span class="sd">        Shortest-path algorithm of :func:`scipy.sparse.csgraph.shortest_path`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    result : :class:`sklearn.utils.Bunch`</span>
+<span class="sd">        ``distances`` -- geodesic distance matrix ``(n_samples, n_samples)``;</span>
+<span class="sd">        ``graph`` -- the (possibly connected) neighborhood graph (CSR);</span>
+<span class="sd">        ``n_components`` -- number of connected components of the raw graph;</span>
+<span class="sd">        ``component_labels`` -- component of every sample in the raw graph;</span>
+<span class="sd">        ``bridges`` -- the added bridge edges ``(n_bridges, 2)``.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.datasets import make_rings</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.graph import geodesic_distances</span>
+<span class="sd">    &gt;&gt;&gt; X, _ = make_rings(random_state=0)</span>
+<span class="sd">    &gt;&gt;&gt; geo = geodesic_distances(X, n_neighbors=6)</span>
+<span class="sd">    &gt;&gt;&gt; geo.n_components, geo.distances.shape, bool(np.isfinite(geo.distances).all())</span>
+<span class="sd">    (2, (300, 300), True)</span>
+<span class="sd">    """</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">bridge_penalty</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"bridge_penalty must be non-negative."</span><span class="p">)</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">neighbors_graph</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="n">n_neighbors</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">)</span>
+    <span class="n">n_comp</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">connected_components</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">directed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="n">shortest_path</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">directed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">bridges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">connect_components</span> <span class="ow">and</span> <span class="n">n_comp</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">finite</span> <span class="o">=</span> <span class="n">D</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">D</span><span class="p">)]</span>
+        <span class="n">penalty</span> <span class="o">=</span> <span class="n">bridge_penalty</span> <span class="o">*</span> <span class="p">(</span><span class="n">finite</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="k">if</span> <span class="n">finite</span><span class="o">.</span><span class="n">size</span> <span class="k">else</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">G</span><span class="p">,</span> <span class="n">bridges</span> <span class="o">=</span> <span class="n">_connect_components</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">G</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">penalty</span><span class="p">)</span>
+        <span class="n">D</span> <span class="o">=</span> <span class="n">shortest_path</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">directed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Bunch</span><span class="p">(</span><span class="n">distances</span><span class="o">=</span><span class="n">D</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">G</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">n_comp</span><span class="p">),</span> <span class="n">component_labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">bridges</span><span class="o">=</span><span class="n">bridges</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="isomap_embedding">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.graph.isomap_embedding.html#fuzzyclust.graph.isomap_embedding">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">isomap_embedding</span><span class="p">(</span><span class="n">D</span><span class="p">,</span> <span class="n">n_components</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Classical multidimensional scaling of a (geodesic) distance matrix (the Isomap projection).</span>
+
+<span class="sd">    The doubly centered matrix of squared distances</span>
+<span class="sd">    :math:`\mathbf{B}=-\tfrac12\mathbf{H}\mathbf{D}^{(2)}\mathbf{H}`,</span>
+<span class="sd">    :math:`\mathbf{H}=\mathbf{I}-\tfrac1N\mathbf{1}\mathbf{1}^T`, is</span>
+<span class="sd">    decomposed and the coordinates are</span>
+<span class="sd">    :math:`\mathbf{Y}=\mathbf{Q}_q\boldsymbol\Lambda_q^{1/2}` from its</span>
+<span class="sd">    :math:`q` largest eigenpairs.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    D : ndarray of shape (n_samples, n_samples)</span>
+<span class="sd">        Finite, symmetric distance matrix (e.g. ``geodesic_distances(X).distances``).</span>
+<span class="sd">    n_components : int, default=2</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Y : ndarray of shape (n_samples, n_components)</span>
+<span class="sd">    eigenvalues : ndarray of shape (n_samples,)</span>
+<span class="sd">        All eigenvalues of :math:`\mathbf{B}` in decreasing order; the</span>
+<span class="sd">        residual variance of the embedding is the share of the discarded ones.</span>
+<span class="sd">    """</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">D</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">D</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"isomap_embedding needs finite distances; connect the graph components first."</span><span class="p">)</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">D2</span> <span class="o">=</span> <span class="n">D</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">B</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">D2</span> <span class="o">-</span> <span class="n">D2</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">D2</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="n">D2</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+    <span class="n">w</span><span class="p">,</span> <span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigh</span><span class="p">((</span><span class="n">B</span> <span class="o">+</span> <span class="n">B</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span>
+    <span class="n">order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">w</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">w</span><span class="p">,</span> <span class="n">Q</span> <span class="o">=</span> <span class="n">w</span><span class="p">[</span><span class="n">order</span><span class="p">],</span> <span class="n">Q</span><span class="p">[:,</span> <span class="n">order</span><span class="p">]</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">n_components</span><span class="p">),</span> <span class="n">N</span><span class="p">)</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="n">Q</span><span class="p">[:,</span> <span class="p">:</span><span class="n">q</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">w</span><span class="p">[:</span><span class="n">q</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">Y</span><span class="p">,</span> <span class="n">w</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------- Algorithm II</span>
+<div class="viewcode-block" id="GeodesicFCM">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.graph.GeodesicFCM.html#fuzzyclust.graph.GeodesicFCM">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">GeodesicFCM</span><span class="p">(</span><span class="n">BaseFuzzyClusterer</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Geodesic-distance-based fuzzy c-medoid clustering (Feil and Abonyi, Algorithm II).</span>
+
+<span class="sd">    Point prototypes with the Euclidean distance assume convex, roughly</span>
+<span class="sd">    spherical groups. When the data lie on a curved low-dimensional</span>
+<span class="sd">    manifold (spiral arms, moons, rings), two points that are close in</span>
+<span class="sd">    Euclidean distance may be far apart *along the manifold*. This</span>
+<span class="sd">    algorithm measures the distance between samples and prototypes with the</span>
+<span class="sd">    *geodesic* distance -- the shortest path in a :math:`k`-nearest-neighbor</span>
+<span class="sd">    graph -- and restricts the prototypes to be data points (medoids), so that</span>
+<span class="sd">    they lie on the manifold and the geodesic distance to them is defined.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    n_clusters : int, default=3</span>
+<span class="sd">        Number of clusters :math:`c`.</span>
+<span class="sd">    n_neighbors : int, default=10</span>
+<span class="sd">        Number of neighbors :math:`k` of the graph. Too small a value</span>
+<span class="sd">        disconnects the manifold, too large a value "short-circuits" it</span>
+<span class="sd">        (edges jump between arms). The paper's spiral needs :math:`k\le4`</span>
+<span class="sd">        to keep the two arms apart.</span>
+<span class="sd">    radius : float or None, default=None</span>
+<span class="sd">        Use an :math:`\varepsilon`-neighborhood graph instead of</span>
+<span class="sd">        :math:`k` neighbors.</span>
+<span class="sd">    connect_components : bool, default=True</span>
+<span class="sd">        Join disconnected components through their closest points, so that</span>
+<span class="sd">        every geodesic distance is finite (see :func:`geodesic_distances`).</span>
+<span class="sd">        With ``False`` the samples of a component without medoid share</span>
+<span class="sd">        their membership uniformly, and clusters never span components.</span>
+<span class="sd">    bridge_penalty : float, default=1.0</span>
+<span class="sd">        Extra length of the bridges, as a multiple of the largest finite</span>
+<span class="sd">        geodesic distance; ``0`` gives plain Euclidean bridges. The penalty</span>
+<span class="sd">        is right when the components *are* the clusters (rings, moons):</span>
+<span class="sd">        it keeps them apart although all distances are finite. When</span>
+<span class="sd">        ``n_neighbors`` is too small and the components are fragments of</span>
+<span class="sd">        one manifold (``n_components_`` far above ``n_clusters``), a plain</span>
+<span class="sd">        bridge re-joins the fragments at their natural junctions and works</span>
+<span class="sd">        better.</span>
+<span class="sd">    m : float, default=2.0</span>
+<span class="sd">        Fuzziness exponent :math:`m&gt;1`.</span>
+<span class="sd">    tol : float, default=1e-4</span>
+<span class="sd">    max_iter : int, default=100</span>
+<span class="sd">    init : {"kmeans++", "random"} or array-like of int, default="kmeans++"</span>
+<span class="sd">        ``"kmeans++"`` is the D\ :sup:`2`-weighted seeding on geodesic</span>
+<span class="sd">        distances, ``"random"`` picks :math:`c` random samples as initial</span>
+<span class="sd">        medoids (the paper's "arbitrary" start); an integer array gives the</span>
+<span class="sd">        initial medoid indices. The seeding is the default because a medoid</span>
+<span class="sd">        can hardly migrate across a penalized bridge during the iterations:</span>
+<span class="sd">        a random start that puts every medoid into one graph component</span>
+<span class="sd">        leaves the other components without a prototype.</span>
+<span class="sd">    n_init : int, default=1</span>
+<span class="sd">        Random restarts; the run with the lowest :math:`J` is kept.</span>
+<span class="sd">    random_state : int, RandomState instance or None, default=None</span>
+<span class="sd">    verbose : int, default=0</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    medoid_indices_ : ndarray of shape (n_clusters,)</span>
+<span class="sd">        Row indices of the medoids in the training data.</span>
+<span class="sd">    cluster_centers_ : ndarray of shape (n_clusters, n_features)</span>
+<span class="sd">        The medoids ``X[medoid_indices_]``.</span>
+<span class="sd">    membership_ : ndarray of shape (n_samples, n_clusters)</span>
+<span class="sd">    labels_ : ndarray of shape (n_samples,)</span>
+<span class="sd">    geodesic_distances_ : ndarray of shape (n_samples, n_samples)</span>
+<span class="sd">        Geodesic distance matrix of the training data (``inf`` between</span>
+<span class="sd">        components when ``connect_components=False``).</span>
+<span class="sd">    neighbors_graph_ : scipy.sparse.csr_matrix</span>
+<span class="sd">        The neighborhood graph used (after connecting components).</span>
+<span class="sd">    n_components_ : int</span>
+<span class="sd">        Number of connected components of the raw neighborhood graph.</span>
+<span class="sd">    component_labels_ : ndarray of shape (n_samples,)</span>
+<span class="sd">    bridge_edges_ : ndarray of shape (n_bridges, 2)</span>
+<span class="sd">        Edges added to connect the components.</span>
+<span class="sd">    distances_, objective_, objective_history_, n_iter_</span>
+<span class="sd">        See :class:`~fuzzyclust.base.BaseFuzzyClusterer`.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The objective is the c-means functional with geodesic distances</span>
+<span class="sd">    :math:`d_g`,</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        J = \sum_{i=1}^{c}\sum_{k=1}^{N}\mu_{ik}^m\, d_g(\mathbf{x}_k,\mathbf{v}_i)^2,</span>
+<span class="sd">        \qquad \mathbf{v}_i\in\{\mathbf{x}_1,\dots,\mathbf{x}_N\},</span>
+
+<span class="sd">    alternating the FCM membership formula (with :math:`d_g`)</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        \mu_{ik} = \frac{1}{\sum_{j=1}^{c}\big(d_g(\mathbf{x}_k,\mathbf{v}_i)/</span>
+<span class="sd">        d_g(\mathbf{x}_k,\mathbf{v}_j)\big)^{2/(m-1)}}</span>
+
+<span class="sd">    and the medoid update</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        \mathbf{v}_i = \mathbf{x}_j,\qquad</span>
+<span class="sd">        j = \argmin_{l}\sum_{k=1}^{N}\mu_{ik}^m\, d_g(\mathbf{x}_k,\mathbf{x}_l)^2 ,</span>
+
+<span class="sd">    i.e. every sample is tried as a medoid, which costs :math:`O(cN^2)` per</span>
+<span class="sd">    iteration (the paper mentions sampling schemes such as CLARA for large</span>
+<span class="sd">    :math:`N`). The geodesic distance matrix is dense, :math:`O(N^2)`</span>
+<span class="sd">    memory.</span>
+
+<span class="sd">    **New samples.** The geodesic distance of a point outside the training</span>
+<span class="sd">    set is not defined. :meth:`predict_proba` uses the nearest training</span>
+<span class="sd">    sample as a proxy: the distance of a new point to a medoid is the</span>
+<span class="sd">    Euclidean distance to its nearest training neighbor plus that</span>
+<span class="sd">    neighbor's geodesic distance to the medoid. This is exact for training</span>
+<span class="sd">    points and a reasonable approximation close to the manifold.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] B. Feil, J. Abonyi, "Geodesic distance based fuzzy clustering",</span>
+<span class="sd">           in: Soft Computing in Industrial Applications, Advances in Soft</span>
+<span class="sd">           Computing 39, Springer, 50--59, 2007.</span>
+<span class="sd">    .. [2] J. B. Tenenbaum, V. de Silva, J. C. Langford, "A global geometric</span>
+<span class="sd">           framework for nonlinear dimensionality reduction", Science 290,</span>
+<span class="sd">           2319--2323, 2000.</span>
+<span class="sd">    .. [3] L. Kaufman, P. J. Rousseeuw, "Finding Groups in Data", Wiley, 1990.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.graph import GeodesicFCM</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.datasets import make_curved_manifold</span>
+<span class="sd">    &gt;&gt;&gt; X, y = make_curved_manifold(n_samples=300, random_state=0)</span>
+<span class="sd">    &gt;&gt;&gt; geo = GeodesicFCM(n_clusters=2, n_neighbors=5, random_state=0).fit(X)</span>
+<span class="sd">    &gt;&gt;&gt; geo.medoid_indices_.shape, geo.geodesic_distances_.shape</span>
+<span class="sd">    ((2,), (300, 300))</span>
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">n_clusters</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="n">n_neighbors</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="n">radius</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">connect_components</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">bridge_penalty</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">m</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
+        <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-4</span><span class="p">,</span>
+        <span class="n">max_iter</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">init</span><span class="o">=</span><span class="s2">"kmeans++"</span><span class="p">,</span>
+        <span class="n">n_init</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">n_clusters</span><span class="o">=</span><span class="n">n_clusters</span><span class="p">,</span>
+            <span class="n">m</span><span class="o">=</span><span class="n">m</span><span class="p">,</span>
+            <span class="n">tol</span><span class="o">=</span><span class="n">tol</span><span class="p">,</span>
+            <span class="n">max_iter</span><span class="o">=</span><span class="n">max_iter</span><span class="p">,</span>
+            <span class="n">init</span><span class="o">=</span><span class="n">init</span><span class="p">,</span>
+            <span class="n">n_init</span><span class="o">=</span><span class="n">n_init</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_neighbors</span> <span class="o">=</span> <span class="n">n_neighbors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="n">radius</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect_components</span> <span class="o">=</span> <span class="n">connect_components</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bridge_penalty</span> <span class="o">=</span> <span class="n">bridge_penalty</span>
+
+    <span class="c1"># ------------------------------------------------------------------ graph</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_check_params</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"GeodesicFCM requires m &gt; 1."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span>
+            <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_neighbors</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">))</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_neighbors</span> <span class="o">&lt;</span> <span class="mi">1</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"n_neighbors must be a positive integer."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"radius must be positive."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bridge_penalty</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"bridge_penalty must be non-negative."</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_graph</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_prepare_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Geodesic distances of the training data (``X`` is the array the AO loop receives)."""</span>
+        <span class="n">geo</span> <span class="o">=</span> <span class="n">geodesic_distances</span><span class="p">(</span>
+            <span class="n">X</span><span class="p">,</span>
+            <span class="n">n_neighbors</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_neighbors</span><span class="p">,</span>
+            <span class="n">radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span>
+            <span class="n">connect_components</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">connect_components</span><span class="p">,</span>
+            <span class="n">bridge_penalty</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bridge_penalty</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">D</span> <span class="o">=</span> <span class="n">geo</span><span class="o">.</span><span class="n">distances</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_X_fit</span> <span class="o">=</span> <span class="n">X</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geodesic_distances_</span> <span class="o">=</span> <span class="n">D</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">neighbors_graph_</span> <span class="o">=</span> <span class="n">geo</span><span class="o">.</span><span class="n">graph</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_components_</span> <span class="o">=</span> <span class="n">geo</span><span class="o">.</span><span class="n">n_components</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">component_labels_</span> <span class="o">=</span> <span class="n">geo</span><span class="o">.</span><span class="n">component_labels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bridge_edges_</span> <span class="o">=</span> <span class="n">geo</span><span class="o">.</span><span class="n">bridges</span>
+        <span class="n">finite</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">D</span><span class="p">)</span>
+        <span class="n">big</span> <span class="o">=</span> <span class="mf">10.0</span> <span class="o">*</span> <span class="n">D</span><span class="p">[</span><span class="n">finite</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="k">if</span> <span class="n">finite</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="k">else</span> <span class="mf">1.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_D2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">finite</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">big</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="c1"># ------------------------------------------------------------------ AO hooks</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
+        <span class="n">c</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_clusters</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">init</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">init</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">init</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">init</span> <span class="o">==</span> <span class="s2">"random"</span><span class="p">:</span>
+                <span class="n">idx</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">init</span> <span class="o">==</span> <span class="s2">"kmeans++"</span><span class="p">:</span>
+                <span class="n">idx</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">N</span><span class="p">))]</span>
+                <span class="n">dmin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_D2</span><span class="p">[:,</span> <span class="n">idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">c</span><span class="p">:</span>
+                    <span class="n">dmin</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+                    <span class="n">probs</span> <span class="o">=</span> <span class="n">dmin</span> <span class="o">/</span> <span class="n">dmin</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="k">if</span> <span class="n">dmin</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">N</span><span class="p">)</span>
+                    <span class="n">j</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">probs</span><span class="p">))</span>
+                    <span class="n">idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+                    <span class="n">dmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">dmin</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_D2</span><span class="p">[:,</span> <span class="n">j</span><span class="p">])</span>
+                <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unknown init='</span><span class="si">{</span><span class="n">init</span><span class="si">}</span><span class="s2">'. Use 'random', 'kmeans++' or an index array."</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">init</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">idx</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="n">c</span><span class="p">,)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">idx</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"init array must hold n_clusters integer medoid indices."</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">idx</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">idx</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">N</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"medoid indices out of range."</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">medoid_indices_</span> <span class="o">=</span> <span class="n">idx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cluster_centers_</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_memberships</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_D2</span><span class="p">[:,</span> <span class="n">idx</span><span class="p">])</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_prototypes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Um</span><span class="p">):</span>
+        <span class="c1"># cost of every sample as medoid of every cluster: (N x c) = D2 (N x N) @ Um (N x c)</span>
+        <span class="n">cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_D2</span> <span class="o">@</span> <span class="n">Um</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">cost</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">medoid_indices_</span> <span class="o">=</span> <span class="n">idx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cluster_centers_</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_distances</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">X</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">_X_fit</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_D2</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">medoid_indices_</span><span class="p">]</span>
+        <span class="c1"># nearest training sample as graph entry point (cdist is exact for identical rows)</span>
+        <span class="n">d_near</span> <span class="o">=</span> <span class="n">cdist</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_X_fit</span><span class="p">)</span>
+        <span class="n">nearest</span> <span class="o">=</span> <span class="n">d_near</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">hop</span> <span class="o">=</span> <span class="n">d_near</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">nearest</span><span class="p">]</span>
+        <span class="n">geo</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_D2</span><span class="p">[</span><span class="n">nearest</span><span class="p">][:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">medoid_indices_</span><span class="p">])</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">hop</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="n">geo</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_memberships</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d2</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">memberships_from_distances</span><span class="p">(</span><span class="n">d2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------- Algorithm I</span>
+<div class="viewcode-block" id="IsomapFCM">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.graph.IsomapFCM.html#fuzzyclust.graph.IsomapFCM">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">IsomapFCM</span><span class="p">(</span><span class="n">BaseFuzzyClusterer</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Fuzzy c-means on the Isomap projection (Feil and Abonyi, Algorithm I).</span>
+
+<span class="sd">    The manifold exploration is left entirely to Isomap: geodesic distances</span>
+<span class="sd">    on the neighborhood graph are embedded in :math:`q` dimensions by</span>
+<span class="sd">    classical multidimensional scaling, fuzzy c-means is run on the</span>
+<span class="sd">    projected data, and every center is "re-projected" into the feature</span>
+<span class="sd">    space as the sample whose projection is closest to it. The paper's</span>
+<span class="sd">    Algorithm II (:class:`GeodesicFCM`) avoids the projection step, which</span>
+<span class="sd">    is the bottleneck of this approach: Isomap can only embed a connected</span>
+<span class="sd">    graph, so disconnected components are bridged first</span>
+<span class="sd">    (see :func:`geodesic_distances`), and a projection that fails to unfold</span>
+<span class="sd">    the manifold spoils the clustering.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    n_clusters : int, default=3</span>
+<span class="sd">    n_components : int, default=2</span>
+<span class="sd">        Dimension :math:`q` of the Isomap embedding.</span>
+<span class="sd">    n_neighbors : int, default=10</span>
+<span class="sd">    radius : float or None, default=None</span>
+<span class="sd">    bridge_penalty : float, default=1.0</span>
+<span class="sd">        Graph construction, see :class:`GeodesicFCM` (components are always</span>
+<span class="sd">        connected here, because MDS needs finite distances).</span>
+<span class="sd">    m, tol, max_iter, init, n_init, random_state, verbose</span>
+<span class="sd">        Passed to the :class:`~fuzzyclust.cluster.FCM` run on the embedding.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    embedding_ : ndarray of shape (n_samples, n_components)</span>
+<span class="sd">        Isomap coordinates :math:`\mathbf{y}_k` of the training data.</span>
+<span class="sd">    embedded_centers_ : ndarray of shape (n_clusters, n_components)</span>
+<span class="sd">        FCM centers in the embedding.</span>
+<span class="sd">    medoid_indices_ : ndarray of shape (n_clusters,)</span>
+<span class="sd">        Samples closest to the centers in the embedding.</span>
+<span class="sd">    cluster_centers_ : ndarray of shape (n_clusters, n_features)</span>
+<span class="sd">        The re-projected centers ``X[medoid_indices_]``.</span>
+<span class="sd">    membership_, labels_, distances_, objective_, objective_history_, n_iter_</span>
+<span class="sd">        Of the FCM run in the embedding.</span>
+<span class="sd">    geodesic_objective_ : float</span>
+<span class="sd">        :math:`J` evaluated with geodesic distances to the re-projected</span>
+<span class="sd">        centers -- the quantity the paper compares between the algorithms.</span>
+<span class="sd">    residual_variance_ : float</span>
+<span class="sd">        Share of the MDS eigenvalue mass not captured by the embedding.</span>
+<span class="sd">    geodesic_distances_, neighbors_graph_, n_components_, component_labels_, bridge_edges_</span>
+<span class="sd">        See :class:`GeodesicFCM`.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    New samples are embedded through their nearest training sample</span>
+<span class="sd">    (:meth:`predict_proba`, :meth:`transform`): the proxy keeps training</span>
+<span class="sd">    points exact and is adequate close to the manifold.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] B. Feil, J. Abonyi, "Geodesic distance based fuzzy clustering",</span>
+<span class="sd">           in: Soft Computing in Industrial Applications, Advances in Soft</span>
+<span class="sd">           Computing 39, Springer, 50--59, 2007.</span>
+<span class="sd">    .. [2] J. B. Tenenbaum, V. de Silva, J. C. Langford, "A global geometric</span>
+<span class="sd">           framework for nonlinear dimensionality reduction", Science 290,</span>
+<span class="sd">           2319--2323, 2000.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.graph import IsomapFCM</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.datasets import make_curved_manifold</span>
+<span class="sd">    &gt;&gt;&gt; X, y = make_curved_manifold(n_samples=300, random_state=0)</span>
+<span class="sd">    &gt;&gt;&gt; iso = IsomapFCM(n_clusters=2, n_neighbors=5, random_state=0).fit(X)</span>
+<span class="sd">    &gt;&gt;&gt; iso.embedding_.shape, iso.cluster_centers_.shape</span>
+<span class="sd">    ((300, 2), (2, 2))</span>
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">n_clusters</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="n">n_components</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">n_neighbors</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="n">radius</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">bridge_penalty</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">m</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
+        <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-4</span><span class="p">,</span>
+        <span class="n">max_iter</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">300</span><span class="p">,</span>
+        <span class="n">init</span><span class="o">=</span><span class="s2">"random"</span><span class="p">,</span>
+        <span class="n">n_init</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">n_clusters</span><span class="o">=</span><span class="n">n_clusters</span><span class="p">,</span>
+            <span class="n">m</span><span class="o">=</span><span class="n">m</span><span class="p">,</span>
+            <span class="n">tol</span><span class="o">=</span><span class="n">tol</span><span class="p">,</span>
+            <span class="n">max_iter</span><span class="o">=</span><span class="n">max_iter</span><span class="p">,</span>
+            <span class="n">init</span><span class="o">=</span><span class="n">init</span><span class="p">,</span>
+            <span class="n">n_init</span><span class="o">=</span><span class="n">n_init</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_components</span> <span class="o">=</span> <span class="n">n_components</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_neighbors</span> <span class="o">=</span> <span class="n">n_neighbors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="n">radius</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bridge_penalty</span> <span class="o">=</span> <span class="n">bridge_penalty</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_check_params</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"IsomapFCM requires m &gt; 1."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_components</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">))</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_components</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"n_components must be a positive integer."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span>
+            <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_neighbors</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">))</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_neighbors</span> <span class="o">&lt;</span> <span class="mi">1</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"n_neighbors must be a positive integer."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"radius must be positive."</span><span class="p">)</span>
+
+<div class="viewcode-block" id="IsomapFCM.fit">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.graph.IsomapFCM.html#fuzzyclust.graph.IsomapFCM.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Embed the data by Isomap, cluster the embedding with FCM, re-project the centers.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : array-like of shape (n_samples, n_features)</span>
+<span class="sd">        y : Ignored</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        self : object</span>
+<span class="sd">        """</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">validate_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">ensure_min_samples</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_params</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_init</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">))</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_init</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"n_init must be a positive integer."</span><span class="p">)</span>
+        <span class="n">rng</span> <span class="o">=</span> <span class="n">check_random_state</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
+        <span class="n">geo</span> <span class="o">=</span> <span class="n">geodesic_distances</span><span class="p">(</span>
+            <span class="n">X</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_neighbors</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">radius</span><span class="p">,</span> <span class="n">connect_components</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">bridge_penalty</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bridge_penalty</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_X_fit</span> <span class="o">=</span> <span class="n">X</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geodesic_distances_</span> <span class="o">=</span> <span class="n">geo</span><span class="o">.</span><span class="n">distances</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">neighbors_graph_</span> <span class="o">=</span> <span class="n">geo</span><span class="o">.</span><span class="n">graph</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_components_</span> <span class="o">=</span> <span class="n">geo</span><span class="o">.</span><span class="n">n_components</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">component_labels_</span> <span class="o">=</span> <span class="n">geo</span><span class="o">.</span><span class="n">component_labels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bridge_edges_</span> <span class="o">=</span> <span class="n">geo</span><span class="o">.</span><span class="n">bridges</span>
+        <span class="n">Y</span><span class="p">,</span> <span class="n">w</span> <span class="o">=</span> <span class="n">isomap_embedding</span><span class="p">(</span><span class="n">geo</span><span class="o">.</span><span class="n">distances</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_components</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">embedding_</span> <span class="o">=</span> <span class="n">Y</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">residual_variance_</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">pos</span><span class="p">[:</span> <span class="n">Y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">pos</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="n">EPS</span><span class="p">))</span>
+
+        <span class="n">fcm</span> <span class="o">=</span> <span class="n">FCM</span><span class="p">(</span>
+            <span class="n">n_clusters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_clusters</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tol</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_iter</span><span class="p">,</span>
+            <span class="n">init</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="p">,</span> <span class="n">n_init</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_init</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">rng</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fcm_</span> <span class="o">=</span> <span class="n">fcm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">embedded_centers_</span> <span class="o">=</span> <span class="n">fcm</span><span class="o">.</span><span class="n">cluster_centers_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">medoid_indices_</span> <span class="o">=</span> <span class="n">sq_euclidean</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">fcm</span><span class="o">.</span><span class="n">cluster_centers_</span><span class="p">)</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cluster_centers_</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">medoid_indices_</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">membership_</span> <span class="o">=</span> <span class="n">fcm</span><span class="o">.</span><span class="n">membership_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels_</span> <span class="o">=</span> <span class="n">fcm</span><span class="o">.</span><span class="n">labels_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">distances_</span> <span class="o">=</span> <span class="n">fcm</span><span class="o">.</span><span class="n">distances_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objective_history_</span> <span class="o">=</span> <span class="n">fcm</span><span class="o">.</span><span class="n">objective_history_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objective_</span> <span class="o">=</span> <span class="n">fcm</span><span class="o">.</span><span class="n">objective_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_iter_</span> <span class="o">=</span> <span class="n">fcm</span><span class="o">.</span><span class="n">n_iter_</span>
+        <span class="n">dg2</span> <span class="o">=</span> <span class="n">geo</span><span class="o">.</span><span class="n">distances</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">medoid_indices_</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geodesic_objective_</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">membership_</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">m</span> <span class="o">*</span> <span class="n">dg2</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+    <span class="c1"># ------------------------------------------------------------------ base API hooks</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_prototypes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Um</span><span class="p">):</span>  <span class="c1"># pragma: no cover - fit is overridden</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_embed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">X</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">_X_fit</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">embedding_</span>
+        <span class="n">nearest</span> <span class="o">=</span> <span class="n">cdist</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_X_fit</span><span class="p">)</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">embedding_</span><span class="p">[</span><span class="n">nearest</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_distances</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">sq_euclidean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_embed</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">embedded_centers_</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_memberships</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d2</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">memberships_from_distances</span><span class="p">(</span><span class="n">d2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">)</span></div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, János Abonyi.
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.1.
+  </p>
+</div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

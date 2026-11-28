@@ -1,0 +1,12 @@
+﻿fuzzyclust.timeseries.make\_lorenz
+==================================
+
+.. currentmodule:: fuzzyclust.timeseries
+
+.. autofunction:: make_lorenz
+
+.. include:: fuzzyclust.timeseries.make_lorenz.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

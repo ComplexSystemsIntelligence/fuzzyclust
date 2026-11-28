@@ -1,0 +1,12 @@
+﻿fuzzyclust.validity.pcaes\_index
+================================
+
+.. currentmodule:: fuzzyclust.validity
+
+.. autofunction:: pcaes_index
+
+.. include:: fuzzyclust.validity.pcaes_index.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

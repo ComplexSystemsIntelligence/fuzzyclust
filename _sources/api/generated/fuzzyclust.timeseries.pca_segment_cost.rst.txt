@@ -1,0 +1,12 @@
+﻿fuzzyclust.timeseries.pca\_segment\_cost
+========================================
+
+.. currentmodule:: fuzzyclust.timeseries
+
+.. autofunction:: pca_segment_cost
+
+.. include:: fuzzyclust.timeseries.pca_segment_cost.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

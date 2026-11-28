@@ -1,0 +1,12 @@
+﻿fuzzyclust.image.add\_image\_noise
+==================================
+
+.. currentmodule:: fuzzyclust.image
+
+.. autofunction:: add_image_noise
+
+.. include:: fuzzyclust.image.add_image_noise.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

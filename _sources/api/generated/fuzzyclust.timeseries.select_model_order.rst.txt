@@ -1,0 +1,12 @@
+﻿fuzzyclust.timeseries.select\_model\_order
+==========================================
+
+.. currentmodule:: fuzzyclust.timeseries
+
+.. autofunction:: select_model_order
+
+.. include:: fuzzyclust.timeseries.select_model_order.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

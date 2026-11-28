@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Preface · Fuzzy Clustering and Data Analysis in Python</title>
+<meta name="description" content="Open-access book on fuzzy clustering and data analysis in Python with the fuzzyclust toolbox: fuzzy c-means, Gustafson-Kessel, Gath-Geva, cluster validity, visualisation, Takagi-Sugeno models, time-series segmentation and more, with runnable Colab examples." />
+<meta name="author" content="János Abonyi" />
+<link rel="canonical" href="https://complexsystemsintelligence.github.io/fuzzyclust/book/preface.html" />
+<meta property="og:title" content="Preface · Fuzzy Clustering and Data Analysis in Python" />
+<meta property="og:type" content="book" />
+<meta property="og:url" content="https://complexsystemsintelligence.github.io/fuzzyclust/book/preface.html" />
+<meta property="og:image" content="https://complexsystemsintelligence.github.io/fuzzyclust/book/cover.png" />
+<meta property="og:description" content="Open-access book on fuzzy clustering and data analysis in Python with the fuzzyclust toolbox: fuzzy c-means, Gustafson-Kessel, Gath-Geva, cluster validity, visualisation, Takagi-Sugeno models, time-series segmentation and more, with runnable Colab examples." />
+<link rel="icon" href="../_static/favicon.png" />
+<link rel="stylesheet" href="main_web.css" />
+<link rel="stylesheet" href="web.css" />
+</head>
+<body class="">
+<header class='topbar'><a class='brand' href='index.html'><img src='logo.svg' alt='' width='34' height='34' /><span><b>Fuzzy Clustering and Data Analysis in Python</b><small>The fuzzyclust toolbox</small></span></a><nav class='toplinks'><a href='../'>Documentation</a><a href='../auto_examples/index.html'>Examples</a><a href='../fuzzyclust-book.pdf'>PDF</a><a href='../fuzzyclust-book.epub'>EPUB</a><a href='https://github.com/ComplexSystemsIntelligence/fuzzyclust'>GitHub</a><a class='hub' href='https://complexsystemsintelligence.github.io/#textbooks'>All textbooks</a></nav></header>
+<div class="layout">
+<aside class="left"><nav class='toc' aria-label='Contents'><p class='toc-title'>Contents</p><ol><li class='current'><a href='preface.html'><span class='num'></span>Preface</a></li><li><a href='01-introduction.html'><span class='num'>1</span>Introduction</a></li><li><a href='02-foundations-of-prototype-based-clustering.html'><span class='num'>2</span>Foundations of prototype-based clustering</a></li><li><a href='03-hard-and-fuzzy-partitioning-algorithms.html'><span class='num'>3</span>Hard and fuzzy partitioning algorithms</a></li><li><a href='04-cluster-validity-and-the-number.html'><span class='num'>4</span>Cluster validity and the number of clusters</a></li><li><a href='05-visualization-of-fuzzy-clustering-results.html'><span class='num'>5</span>Visualization of fuzzy clustering results</a></li><li><a href='06-robust-and-shape-oriented-variants.html'><span class='num'>6</span>Robust and shape-oriented variants of fuzzy c-means</a></li><li><a href='07-graph-based-fuzzy-clustering.html'><span class='num'>7</span>Graph-based fuzzy clustering</a></li><li><a href='08-clustering-for-model-identification.html'><span class='num'>8</span>Clustering for model identification</a></li><li><a href='09-clustering-of-time-series.html'><span class='num'>9</span>Clustering of time series</a></li><li><a href='10-clustering-relational-categorical-and-mixed.html'><span class='num'>10</span>Clustering relational, categorical, and mixed data</a></li><li><a href='11-incomplete-very-large-and-image.html'><span class='num'>11</span>Incomplete, very large, and image data</a></li><li><a href='12-beyond-a-single-unsupervised-run.html'><span class='num'>12</span>Beyond a single unsupervised run: partial supervision,
+co-clustering, collaboration, and ensembles</a></li><li><a href='a-api-reference.html'><span class='num'>A</span>API reference</a></li><li><a href='b-migrating-from-the-matlab-toolbox.html'><span class='num'>B</span>Migrating from the MATLAB toolbox</a></li><li><a href='c-the-example-gallery.html'><span class='num'>C</span>The example gallery</a></li><li><a href='bibliography.html'><span class='num'></span>Bibliography</a></li></ol></nav></aside>
+<main class="content">
+
+<!-- l. 1 -->
+<h2 class="likechapterHead"><a id="x2-1000"></a>Preface</h2>
+<p><a id="x2-1000doc"></a>
+<a id="Q1-2-2"></a>
+</p><!-- l. 4 --><p class="noindent">This book is about clustering with fuzzy partitions and about what can be built
+on it: validity indices that estimate how many groups a data set contains,
+projections that make a high-dimensional partition visible, prototypes
+that are lines, shells, or local models, graphs that replace the prototype
+altogether, and clustering-based identification of dynamic systems and
+segmentation of time series. The last chapters carry the same machinery
+over to relational, categorical, incomplete, very large, and image data,
+and to partial supervision, co-clustering, collaborative clustering, and
+cluster ensembles. All of it is implemented in <span class="ec-lmtt-10x-x-109">fuzzyclust</span>, an open-source
+Python package with a scikit-learn interface, and every figure in the
+book that shows a computed result is produced by one of its example
+scripts.
+</p>
+<!-- l. 6 --><p class="noindent"><span class="paragraphHead"><a id="x2-2000"></a><span class="ec-lmbx-10x-x-109">Who the book is for.</span></span>
+   It is written for engineers, data scientists, and graduate students who know
+k-means and want to understand what fuzzy clustering adds, why the
+Gustafson–Kessel and Gath–Geva algorithms detect cluster shapes that fuzzy
+c-means cannot, and how a cluster becomes a rule of a Takagi–Sugeno model
+or a segment of a process record. The mathematics requires no more
+than linear algebra and elementary calculus; every algorithm is stated in
+a box, summarized in a few bullets, and demonstrated on data whose
+structure is known. Readers who only want to use the toolbox can skip
+the theory sections and read the <span class="ec-lmri-10x-x-109">Using it in fuzzyclust </span>and <span class="ec-lmri-10x-x-109">Examples</span>
+sections of each chapter; readers interested only in the methods can skip the
+code.
+</p>
+<!-- l. 8 --><p class="noindent"><span class="paragraphHead"><a id="x2-3000"></a><span class="ec-lmbx-10x-x-109">The toolbox and its predecessor.</span></span>
+<span class="ec-lmtt-10x-x-109">fuzzyclust </span>is the Python successor of the <span class="ec-lmri-10x-x-109">Fuzzy Clustering and Data
+Analysis Toolbox for MATLAB</span>, written in 2005 by Balázs Balaskó,
+Balázs Feil, and the author. The MATLAB toolbox accompanied the book
+<span class="ec-lmri-10x-x-109">Cluster Analysis for Data Mining and System Identification </span>and served
+the author’s research group at the University of Pannonia as the engine
+of a long line of work on clustering-based modeling, visualization, and
+time-series analysis. Its core—the partitioning algorithms, the validity
+indices, and the projection methods—maps function by function onto the
+Python package (chapter <a href="b-migrating-from-the-matlab-toolbox.html#x16-279000B">B</a>). The research threads that grew around
+                                                                     
+
+                                                                     
+it are collected in the later chapters and in the sub-packages <span class="ec-lmtt-10x-x-109">models</span>,
+<span class="ec-lmtt-10x-x-109">timeseries</span>, <span class="ec-lmtt-10x-x-109">viz</span>, and <span class="ec-lmtt-10x-x-109">graph</span>; further sub-packages add methods from the wider
+literature.
+</p>
+<!-- l. 10 --><p class="noindent"><span class="paragraphHead"><a id="x2-4000"></a><span class="ec-lmbx-10x-x-109">How to run the examples.</span></span>
+   The package is installed with <span class="ec-lmtt-10x-x-109">pip install fuzzyclust</span>. The scripts that
+produce the figures are in the <span class="ec-lmtt-10x-x-109">examples/ </span>directory of the repository, grouped into
+folders by topic, and are listed in chapter <a href="c-the-example-gallery.html#x17-284000C">C</a>. The sphinx-gallery extension
+renders them as the online gallery of the documentation and converts them into
+Jupyter notebooks that run in the browser on Binder or Google Colab, so every
+experiment in the book can be rerun and modified without a local installation.
+Apart from a few short listings, the code snippets printed in the chapters are
+extracted from the same scripts and therefore run with the version of the toolbox
+that the book describes.
+</p>
+<!-- l. 12 --><p class="noindent"><span class="paragraphHead"><a id="x2-5000"></a><span class="ec-lmbx-10x-x-109">Acknowledgments.</span></span>
+   Much of the design of the MATLAB toolbox, written with Balázs Balaskó
+and Balázs Feil, survives in the Python package. Many methods of the later
+chapters were developed with co-authors to whom the author is deeply indebted:
+Robert Babuška, Ferenc Szeifert, Sándor Németh, Péter Árva, Annamária
+Kovács, Sándor Migály, Daniela Girimonte, Ágnes Vathy-Fogarassy, and
+Tamás Kenesei; their papers are cited in the <span class="ec-lmri-10x-x-109">Further reading </span>sections of the
+chapters. The author acknowledges the support of the OTKA 143482 project of
+the National Research, Development and Innovation Office (NKFIH),
+Hungary.
+</p><!-- l. 15 --><p class="noindent">Veszprém, November 2026                                                     János
+Abonyi
+                                                                     
+
+                                                                     
+</p>
+<!-- l. 1 -->
+<!-- l. 1 --><p class="indent"> <a id="tailmain_webli1.html"></a> </p>
+<nav class='pager'><a class='prev' href='index.html'><small>Previous</small>Title page</a><a class='next' href='01-introduction.html'><small>Next</small>Introduction</a></nav>
+</main>
+<aside class="right"></aside>
+</div>
+<footer class='foot'>© 2026 János Abonyi, University of Pannonia · licensed under <a href='https://creativecommons.org/licenses/by/4.0/'>CC BY 4.0</a> · web edition of the book, generated from the same LaTeX source as the <a href='../fuzzyclust-book.pdf'>PDF</a> · software: <a href='https://github.com/ComplexSystemsIntelligence/fuzzyclust'>fuzzyclust</a> (MIT) · <code>pip install fuzzyclust</code></footer>
+</body>
+</html>

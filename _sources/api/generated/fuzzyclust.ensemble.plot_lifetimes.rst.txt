@@ -1,0 +1,12 @@
+﻿fuzzyclust.ensemble.plot\_lifetimes
+===================================
+
+.. currentmodule:: fuzzyclust.ensemble
+
+.. autofunction:: plot_lifetimes
+
+.. include:: fuzzyclust.ensemble.plot_lifetimes.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

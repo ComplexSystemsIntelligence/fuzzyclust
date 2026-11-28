@@ -1,0 +1,12 @@
+﻿fuzzyclust.collaborative.plot\_site\_partitions
+===============================================
+
+.. currentmodule:: fuzzyclust.collaborative
+
+.. autofunction:: plot_site_partitions
+
+.. include:: fuzzyclust.collaborative.plot_site_partitions.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

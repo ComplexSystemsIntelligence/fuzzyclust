@@ -1,0 +1,49 @@
+
+:orphan:
+
+.. _sphx_glr_auto_examples_04_timeseries_sg_execution_times:
+
+
+Computation times
+=================
+**00:26.792** total execution time for 5 files **from auto_examples/04_timeseries**:
+
+.. container::
+
+  .. raw:: html
+
+    <style scoped>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+    </style>
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script type="text/javascript" class="init">
+    $(document).ready( function () {
+        $('table.sg-datatable').DataTable({order: [[1, 'desc']]});
+    } );
+    </script>
+
+  .. list-table::
+   :header-rows: 1
+   :class: table table-striped sg-datatable
+
+   * - Example
+     - Time
+     - Mem (MB)
+   * - :ref:`sphx_glr_auto_examples_04_timeseries_plot_01_fuzzy_segmentation.py` (``plot_01_fuzzy_segmentation.py``)
+     - 00:08.749
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_04_timeseries_plot_03_fnn_model_order.py` (``plot_03_fnn_model_order.py``)
+     - 00:08.305
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_04_timeseries_plot_04_chaotic_reconstruction.py` (``plot_04_chaotic_reconstruction.py``)
+     - 00:07.857
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_04_timeseries_plot_05_mixed_input_structure.py` (``plot_05_mixed_input_structure.py``)
+     - 00:01.051
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_04_timeseries_plot_02_bottom_up_vs_fuzzy.py` (``plot_02_bottom_up_vs_fuzzy.py``)
+     - 00:00.830
+     - 0.0

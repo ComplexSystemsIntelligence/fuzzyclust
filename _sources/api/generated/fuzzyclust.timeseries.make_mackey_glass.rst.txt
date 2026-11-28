@@ -1,0 +1,12 @@
+﻿fuzzyclust.timeseries.make\_mackey\_glass
+=========================================
+
+.. currentmodule:: fuzzyclust.timeseries
+
+.. autofunction:: make_mackey_glass
+
+.. include:: fuzzyclust.timeseries.make_mackey_glass.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

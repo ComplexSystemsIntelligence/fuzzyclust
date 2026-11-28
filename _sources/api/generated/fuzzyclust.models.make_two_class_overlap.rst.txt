@@ -1,0 +1,12 @@
+﻿fuzzyclust.models.make\_two\_class\_overlap
+===========================================
+
+.. currentmodule:: fuzzyclust.models
+
+.. autofunction:: make_two_class_overlap
+
+.. include:: fuzzyclust.models.make_two_class_overlap.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

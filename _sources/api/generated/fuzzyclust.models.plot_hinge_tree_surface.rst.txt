@@ -1,0 +1,12 @@
+﻿fuzzyclust.models.plot\_hinge\_tree\_surface
+============================================
+
+.. currentmodule:: fuzzyclust.models
+
+.. autofunction:: plot_hinge_tree_surface
+
+.. include:: fuzzyclust.models.plot_hinge_tree_surface.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

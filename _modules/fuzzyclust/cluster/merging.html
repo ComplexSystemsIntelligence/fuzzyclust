@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>fuzzyclust.cluster.merging &#8212; fuzzyclust</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=c83e6b79" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=6a604523" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=e6ebbe3b" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
+
+    <script src="../../../_static/documentation_options.js?v=f2a433a1"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/sg-tags.js?v=d80f6fa4"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../../_static/design-tabs.js?v=fcb327ea"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/fuzzyclust/cluster/merging';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="icon" href="../../../_static/favicon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="1.0" />
+  
+    
+    <script src="../../../_static/searchtools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/logo.svg" class="logo__image only-light" alt=""/>
+    <img src="../../../_static/logo.svg" class="logo__image only-dark pst-js-only" alt=""/>
+  
+  
+    <p class="title logo__title">fuzzyclust</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../auto_examples/index.html">
+    Example gallery
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../book.html">
+    The book
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../migration.html">
+    Migrating from the MATLAB toolbox
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../citing.html">
+    Citing
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://complexsystemsintelligence.github.io/#textbooks">
+    All textbooks
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ComplexSystemsIntelligence/fuzzyclust" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../auto_examples/index.html">
+    Example gallery
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../book.html">
+    The book
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../migration.html">
+    Migrating from the MATLAB toolbox
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../citing.html">
+    Citing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://complexsystemsintelligence.github.io/#textbooks">
+    All textbooks
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ComplexSystemsIntelligence/fuzzyclust" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">fuzzyclust.cluster.merging</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for fuzzyclust.cluster.merging</h1><div class="highlight"><pre>
+<span></span><span class="c1"># SPDX-License-Identifier: MIT</span>
+<span class="c1"># Copyright (c) 2026 János Abonyi</span>
+<span class="sa">r</span><span class="sd">"""Compatible cluster merging: reducing a deliberately large number of clusters by merging compatible pairs.</span>
+
+<span class="sd">Instead of scanning the number of clusters with validity indices, the</span>
+<span class="sd">algorithm is started with more clusters than expected and pairs of clusters</span>
+<span class="sd">that are *compatible* are merged, re-clustering after every merge, until no</span>
+<span class="sd">compatible pair is left. Two families of criteria are implemented: the</span>
+<span class="sd">geometric criteria of Krishnapuram and Freg for thin (line- or plane-like)</span>
+<span class="sd">clusters---parallel normals, centers on the same hyperplane, centers close</span>
+<span class="sd">---and the similarity of the membership columns (Setnes et al.), used for</span>
+<span class="sd">merging by Kaymak and Setnes, for clusters of any shape.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">ClusterMixin</span><span class="p">,</span> <span class="n">TransformerMixin</span><span class="p">,</span> <span class="n">clone</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.utils.validation</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_is_fitted</span><span class="p">,</span> <span class="n">validate_data</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.._utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">EPS</span><span class="p">,</span> <span class="n">fuzzy_covariances</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.gk</span><span class="w"> </span><span class="kn">import</span> <span class="n">GK</span>
+
+<span class="n">_CRITERIA</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"geometric"</span><span class="p">,</span> <span class="s2">"similarity"</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="cluster_similarity">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.cluster.cluster_similarity.html#fuzzyclust.cluster.cluster_similarity">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cluster_similarity</span><span class="p">(</span><span class="n">U</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Pairwise similarity of fuzzy clusters from their membership columns (fuzzy Jaccard index).</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        S_{ij}=\frac{\sum_{k=1}^{N}\min(\mu_{ik},\mu_{jk})}{\sum_{k=1}^{N}\max(\mu_{ik},\mu_{jk})},</span>
+
+<span class="sd">    the fuzzy Jaccard similarity of the clusters seen as fuzzy sets over the</span>
+<span class="sd">    samples (Setnes et al., 1998): one for identical columns, zero for</span>
+<span class="sd">    disjoint supports. Kaymak and Setnes (2002), whose adaptive cluster</span>
+<span class="sd">    merging motivates this criterion, use a fuzzy inclusion measure instead,</span>
+<span class="sd">    :math:`S_{ij}=\max(I_{ij},I_{ji})` with</span>
+<span class="sd">    :math:`I_{ij}=\sum_k\min(\mu_{ik},\mu_{jk})/\sum_k\mu_{ik}`; the toolbox</span>
+<span class="sd">    uses the symmetric Jaccard form with a fixed threshold.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    U : ndarray of shape (n_samples, n_clusters)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    S : ndarray of shape (n_clusters, n_clusters)</span>
+<span class="sd">        Symmetric, with ones on the diagonal.</span>
+<span class="sd">    """</span>
+    <span class="n">U</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">U</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+            <span class="n">num</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">U</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">U</span><span class="p">[:,</span> <span class="n">j</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="n">den</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">U</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">U</span><span class="p">[:,</span> <span class="n">j</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="n">S</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">S</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">num</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">den</span><span class="p">,</span> <span class="n">EPS</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">S</span></div>
+
+
+
+<div class="viewcode-block" id="reference_fuzziness">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.cluster.reference_fuzziness.html#fuzzyclust.cluster.reference_fuzziness">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">reference_fuzziness</span><span class="p">(</span><span class="n">U</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">m</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">m_ref</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Rescale an FCM-type partition obtained with exponent ``m`` to the one exponent ``m_ref`` would give.</span>
+
+<span class="sd">    For memberships of the form :math:`\mu_{ik}\propto(D^2_{ik})^{-1/(m-1)}`</span>
+<span class="sd">    the partition for another exponent follows from the same distances by</span>
+<span class="sd">    :math:`\mu'_{ik}\propto\mu_{ik}^{(m-1)/(m_{\mathrm{ref}}-1)}`; a hard</span>
+<span class="sd">    partition (``m &lt;= 1``) is returned unchanged.</span>
+<span class="sd">    """</span>
+    <span class="n">U</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">m</span> <span class="o">&lt;=</span> <span class="mf">1.0</span> <span class="ow">or</span> <span class="n">m</span> <span class="o">==</span> <span class="n">m_ref</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">U</span>
+    <span class="n">W</span> <span class="o">=</span> <span class="p">(</span><span class="n">U</span> <span class="o">+</span> <span class="n">EPS</span><span class="p">)</span> <span class="o">**</span> <span class="p">((</span><span class="n">m</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">m_ref</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">W</span> <span class="o">/</span> <span class="n">W</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="geometric_compatibility">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.cluster.geometric_compatibility.html#fuzzyclust.cluster.geometric_compatibility">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">geometric_compatibility</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">parallel_threshold</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">hyperplane_threshold</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">distance_threshold</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
+                            <span class="n">thin_threshold</span><span class="o">=</span><span class="mf">0.2</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Compatibility of cluster pairs from centers and covariances (Krishnapuram &amp; Freg).</span>
+
+<span class="sd">    Let :math:`\boldsymbol\phi_i` be the eigenvector of the smallest</span>
+<span class="sd">    eigenvalue of :math:`\mathbf{F}_i` (the normal of a thin cluster),</span>
+<span class="sd">    :math:`\lambda_{i,\max}` its largest eigenvalue and</span>
+<span class="sd">    :math:`\sigma_i=\sqrt{\lambda_{i,\max}}` the extent of the cluster along</span>
+<span class="sd">    its main axis. Clusters :math:`i` and :math:`j` are compatible if</span>
+
+<span class="sd">    1. their normals are parallel, :math:`|\boldsymbol\phi_i\T\boldsymbol\phi_j|\ge\gamma_1`;</span>
+<span class="sd">    2. their centers lie on the same hyperplane,</span>
+<span class="sd">       :math:`|\tfrac12(\boldsymbol\phi_i+\boldsymbol\phi_j)\T(\mathbf{v}_i-\mathbf{v}_j)|</span>
+<span class="sd">       \le\gamma_2\,\tfrac12(\sigma_i+\sigma_j)`;</span>
+<span class="sd">    3. their centers are close, :math:`\|\mathbf{v}_i-\mathbf{v}_j\|\le\gamma_3(\sigma_i+\sigma_j)`;</span>
+
+<span class="sd">    and both are thin, :math:`\lambda_{\min}/\lambda_{\max}\le\gamma_4`. The</span>
+<span class="sd">    compatibility degree returned for a compatible pair is the normal</span>
+<span class="sd">    alignment :math:`|\boldsymbol\phi_i\T\boldsymbol\phi_j|` reduced by the</span>
+<span class="sd">    relative hyperplane offset and center distance, so that the most</span>
+<span class="sd">    compatible pair can be chosen; incompatible pairs get zero.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    V : ndarray of shape (n_clusters, n_features)</span>
+<span class="sd">    F : ndarray of shape (n_clusters, n_features, n_features)</span>
+<span class="sd">    parallel_threshold, hyperplane_threshold, distance_threshold, thin_threshold : float</span>
+<span class="sd">        :math:`\gamma_1,\dots,\gamma_4`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    C : ndarray of shape (n_clusters, n_clusters)</span>
+<span class="sd">        Compatibility degrees (zero for incompatible pairs and on the diagonal).</span>
+<span class="sd">    """</span>
+    <span class="n">V</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">F</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">V</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">w</span><span class="p">,</span> <span class="n">Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigh</span><span class="p">(</span><span class="n">F</span><span class="p">)</span>
+    <span class="n">normals</span> <span class="o">=</span> <span class="n">Q</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span>  <span class="c1"># (c, n): eigenvector of the smallest eigenvalue</span>
+    <span class="n">extent</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">w</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">EPS</span><span class="p">))</span>
+    <span class="n">thin</span> <span class="o">=</span> <span class="n">w</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">w</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">EPS</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">thin_threshold</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">c</span><span class="p">,</span> <span class="n">c</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">thin</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">and</span> <span class="n">thin</span><span class="p">[</span><span class="n">j</span><span class="p">]):</span>
+                <span class="k">continue</span>
+            <span class="n">align</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">normals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">@</span> <span class="n">normals</span><span class="p">[</span><span class="n">j</span><span class="p">]))</span>
+            <span class="k">if</span> <span class="n">align</span> <span class="o">&lt;</span> <span class="n">parallel_threshold</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="c1"># make the normals point the same way before averaging them</span>
+            <span class="n">nj</span> <span class="o">=</span> <span class="n">normals</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="k">if</span> <span class="n">normals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">@</span> <span class="n">normals</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">-</span><span class="n">normals</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            <span class="n">dv</span> <span class="o">=</span> <span class="n">V</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">V</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            <span class="n">offset</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">normals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">nj</span><span class="p">)</span> <span class="o">@</span> <span class="n">dv</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">extent</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">extent</span><span class="p">[</span><span class="n">j</span><span class="p">]))</span>
+            <span class="k">if</span> <span class="n">offset</span> <span class="o">&gt;</span> <span class="n">hyperplane_threshold</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">dist</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">dv</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">extent</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">extent</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">dist</span> <span class="o">&gt;</span> <span class="n">distance_threshold</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">C</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">C</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">align</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">offset</span> <span class="o">/</span> <span class="n">hyperplane_threshold</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span>
+                <span class="mf">1.0</span> <span class="o">-</span> <span class="n">dist</span> <span class="o">/</span> <span class="n">distance_threshold</span> <span class="o">/</span> <span class="mf">2.0</span>
+            <span class="p">)</span>
+    <span class="k">return</span> <span class="n">C</span></div>
+
+
+
+<div class="viewcode-block" id="CompatibleClusterMerging">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.cluster.CompatibleClusterMerging.html#fuzzyclust.cluster.CompatibleClusterMerging">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CompatibleClusterMerging</span><span class="p">(</span><span class="n">ClusterMixin</span><span class="p">,</span> <span class="n">TransformerMixin</span><span class="p">,</span> <span class="n">BaseEstimator</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Compatible cluster merging: find the number of clusters by merging from a large start.</span>
+
+<span class="sd">    A base estimator (Gustafson--Kessel by default) is fitted with</span>
+<span class="sd">    ``start_n_clusters`` clusters. The compatibility of every pair of</span>
+<span class="sd">    clusters is evaluated, the most compatible pair above the thresholds is</span>
+<span class="sd">    merged---their membership columns are added---and the base estimator is</span>
+<span class="sd">    refitted from the merged partition with one cluster less. This repeats</span>
+<span class="sd">    until no compatible pair remains or ``min_n_clusters`` is reached. The</span>
+<span class="sd">    *geometric* criterion of Krishnapuram and Freg is meant for clusters</span>
+<span class="sd">    that stand for lines, planes or local linear models: two thin clusters</span>
+<span class="sd">    are compatible if their normals are parallel, their centers lie on the</span>
+<span class="sd">    same hyperplane and are close. The *similarity* criterion (after Kaymak and</span>
+<span class="sd">    Setnes) works for any shape: two clusters are compatible if their</span>
+<span class="sd">    membership columns are similar as fuzzy sets.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    base_estimator : fuzzyclust clusterer or None, default=None</span>
+<span class="sd">        Cloned and refitted at every step; ``None`` means</span>
+<span class="sd">        ``GK(random_state=0)``. Its ``n_clusters`` and ``init`` are</span>
+<span class="sd">        overridden. The geometric criterion needs ``covariances_`` (FCM, GK,</span>
+<span class="sd">        GG and most extensions provide it; otherwise the fuzzy covariances</span>
+<span class="sd">        are computed from the partition).</span>
+<span class="sd">    start_n_clusters : int, default=8</span>
+<span class="sd">        Deliberately large initial number of clusters :math:`c_{\max}`.</span>
+<span class="sd">    min_n_clusters : int, default=1</span>
+<span class="sd">        Merging stops at this number of clusters at the latest.</span>
+<span class="sd">    criterion : {"geometric", "similarity"}, default="geometric"</span>
+<span class="sd">        Compatibility criterion, see :func:`geometric_compatibility` and</span>
+<span class="sd">        :func:`cluster_similarity`.</span>
+<span class="sd">    parallel_threshold : float, default=0.95</span>
+<span class="sd">        :math:`\gamma_1`: minimal :math:`|\boldsymbol\phi_i\T\boldsymbol\phi_j|` (geometric).</span>
+<span class="sd">    hyperplane_threshold : float, default=0.5</span>
+<span class="sd">        :math:`\gamma_2`: maximal offset of the centers from the common</span>
+<span class="sd">        hyperplane, relative to the mean extent (geometric).</span>
+<span class="sd">    distance_threshold : float, default=2.0</span>
+<span class="sd">        :math:`\gamma_3`: maximal center distance relative to the sum of the</span>
+<span class="sd">        extents (geometric).</span>
+<span class="sd">    thin_threshold : float, default=0.2</span>
+<span class="sd">        :math:`\gamma_4`: maximal :math:`\lambda_{\min}/\lambda_{\max}` for a</span>
+<span class="sd">        cluster to count as thin (geometric).</span>
+<span class="sd">    similarity_threshold : float, default=0.2</span>
+<span class="sd">        Minimal :math:`S_{ij}` for a merge (similarity criterion). The</span>
+<span class="sd">        similarity is evaluated on the partition rescaled to the reference</span>
+<span class="sd">        exponent :math:`m=2` (:math:`\mu_{ik}^{m-1}`, renormalized, see</span>
+<span class="sd">        :func:`reference_fuzziness`), so that the threshold does not depend</span>
+<span class="sd">        on the exponent of the base estimator. Two FCM clusters that share</span>
+<span class="sd">        one Gaussian group have :math:`S_{ij}\approx0.35` at :math:`m=2`</span>
+<span class="sd">        whatever :math:`c`, two separate groups well below :math:`0.2`.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    estimator_ : fitted base estimator</span>
+<span class="sd">        The final model with ``n_clusters_`` clusters.</span>
+<span class="sd">    n_clusters_ : int</span>
+<span class="sd">    cluster_centers_, membership_, labels_, distances_</span>
+<span class="sd">        Taken from ``estimator_``.</span>
+<span class="sd">    merge_history_ : list of dict</span>
+<span class="sd">        One entry per merge with ``n_clusters`` (before the merge), ``pair``</span>
+<span class="sd">        (the merged clusters) and ``compatibility`` (degree or similarity).</span>
+<span class="sd">    compatibility_ : ndarray of shape (``n_clusters_``, ``n_clusters_``)</span>
+<span class="sd">        Compatibility (or similarity) matrix of the final clusters; all</span>
+<span class="sd">        entries are below the thresholds.</span>
+<span class="sd">    n_features_in_, feature_names_in_</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Merging by adding membership columns and refitting with ``init`` set to</span>
+<span class="sd">    the merged partition is the generic form of Kelly's merging formulas</span>
+<span class="sd">    for the center and covariance of the union: the first iteration of the</span>
+<span class="sd">    refit computes exactly the membership-weighted center and covariance of</span>
+<span class="sd">    the merged cluster. Because the number of clusters only decreases, the</span>
+<span class="sd">    procedure costs at most :math:`c_{\max}-c^*` refits, each started close</span>
+<span class="sd">    to its solution, against :math:`c_{\max}-1` refits from scratch for a</span>
+<span class="sd">    validity scan.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] R. Krishnapuram, C.-P. Freg, "Fitting an unknown number of lines</span>
+<span class="sd">           and planes to image data through compatible cluster merging",</span>
+<span class="sd">           Pattern Recognition 25(4), 385--400, 1992.</span>
+<span class="sd">    .. [2] U. Kaymak, M. Setnes, "Fuzzy clustering with volume prototypes and</span>
+<span class="sd">           adaptive cluster merging", IEEE Transactions on Fuzzy Systems</span>
+<span class="sd">           10(6), 705--712, 2002.</span>
+<span class="sd">    .. [3] U. Kaymak, R. Babuška, "Compatible cluster merging for fuzzy</span>
+<span class="sd">           modeling", Proc. FUZZ-IEEE/IFES, Yokohama, 897--904, 1995.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.cluster import CompatibleClusterMerging, GK</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.datasets import make_lines</span>
+<span class="sd">    &gt;&gt;&gt; X, _ = make_lines(n_lines=3, random_state=0)</span>
+<span class="sd">    &gt;&gt;&gt; ccm = CompatibleClusterMerging(GK(random_state=0), start_n_clusters=8).fit(X)</span>
+<span class="sd">    &gt;&gt;&gt; int(ccm.n_clusters_)</span>
+<span class="sd">    3</span>
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">base_estimator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">start_n_clusters</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
+        <span class="n">min_n_clusters</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">criterion</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"geometric"</span><span class="p">,</span>
+        <span class="n">parallel_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.95</span><span class="p">,</span>
+        <span class="n">hyperplane_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">distance_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
+        <span class="n">thin_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
+        <span class="n">similarity_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_estimator</span> <span class="o">=</span> <span class="n">base_estimator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_n_clusters</span> <span class="o">=</span> <span class="n">start_n_clusters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_n_clusters</span> <span class="o">=</span> <span class="n">min_n_clusters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">criterion</span> <span class="o">=</span> <span class="n">criterion</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parallel_threshold</span> <span class="o">=</span> <span class="n">parallel_threshold</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hyperplane_threshold</span> <span class="o">=</span> <span class="n">hyperplane_threshold</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">distance_threshold</span> <span class="o">=</span> <span class="n">distance_threshold</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thin_threshold</span> <span class="o">=</span> <span class="n">thin_threshold</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">similarity_threshold</span> <span class="o">=</span> <span class="n">similarity_threshold</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_compatibility</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">est</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="n">U</span> <span class="o">=</span> <span class="n">est</span><span class="o">.</span><span class="n">membership_</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">criterion</span> <span class="o">==</span> <span class="s2">"similarity"</span><span class="p">:</span>
+            <span class="n">S</span> <span class="o">=</span> <span class="n">cluster_similarity</span><span class="p">(</span><span class="n">reference_fuzziness</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">est</span><span class="p">,</span> <span class="s2">"m"</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)))</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">fill_diagonal</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+            <span class="n">S</span><span class="p">[</span><span class="n">S</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">similarity_threshold</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="k">return</span> <span class="n">S</span>
+        <span class="n">V</span> <span class="o">=</span> <span class="n">est</span><span class="o">.</span><span class="n">cluster_centers_</span>
+        <span class="n">F</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">est</span><span class="p">,</span> <span class="s2">"covariances_"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">F</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">F</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="n">V</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="n">F</span> <span class="o">=</span> <span class="n">fuzzy_covariances</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span> <span class="o">**</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">est</span><span class="p">,</span> <span class="s2">"m"</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">),</span> <span class="n">V</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">geometric_compatibility</span><span class="p">(</span>
+            <span class="n">V</span><span class="p">,</span>
+            <span class="n">F</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parallel_threshold</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hyperplane_threshold</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">distance_threshold</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">thin_threshold</span><span class="p">,</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="CompatibleClusterMerging.fit">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.cluster.CompatibleClusterMerging.html#fuzzyclust.cluster.CompatibleClusterMerging.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Fit with ``start_n_clusters`` clusters and merge compatible pairs.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : array-like of shape (n_samples, n_features)</span>
+<span class="sd">        y : Ignored</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        self : object</span>
+<span class="sd">        """</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">validate_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">ensure_min_samples</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">criterion</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_CRITERIA</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"criterion must be one of </span><span class="si">{</span><span class="n">_CRITERIA</span><span class="si">}</span><span class="s2">."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_n_clusters</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">))</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_n_clusters</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"start_n_clusters must be a positive integer."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_n_clusters</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_n_clusters</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Need 1 &lt;= min_n_clusters &lt;= start_n_clusters."</span><span class="p">)</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">GK</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_estimator</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_estimator</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_n_clusters</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">est</span> <span class="o">=</span> <span class="n">clone</span><span class="p">(</span><span class="n">base</span><span class="p">)</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="n">c</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">history</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">C</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compatibility</span><span class="p">(</span><span class="n">est</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">c</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_n_clusters</span> <span class="ow">or</span> <span class="n">C</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">argmax</span><span class="p">()),</span> <span class="n">C</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">j</span><span class="p">)))</span>
+            <span class="n">history</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"n_clusters"</span><span class="p">:</span> <span class="n">c</span><span class="p">,</span> <span class="s2">"pair"</span><span class="p">:</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">),</span> <span class="s2">"compatibility"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">C</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">])})</span>
+            <span class="n">U</span> <span class="o">=</span> <span class="n">est</span><span class="o">.</span><span class="n">membership_</span>
+            <span class="n">U_merged</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">U_merged</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">U</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">U</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span>
+            <span class="n">c</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="n">est</span> <span class="o">=</span> <span class="n">clone</span><span class="p">(</span><span class="n">base</span><span class="p">)</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">U_merged</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimator_</span> <span class="o">=</span> <span class="n">est</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compatibility_</span> <span class="o">=</span> <span class="n">C</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">merge_history_</span> <span class="o">=</span> <span class="n">history</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_clusters_</span> <span class="o">=</span> <span class="n">c</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cluster_centers_</span> <span class="o">=</span> <span class="n">est</span><span class="o">.</span><span class="n">cluster_centers_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">membership_</span> <span class="o">=</span> <span class="n">est</span><span class="o">.</span><span class="n">membership_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels_</span> <span class="o">=</span> <span class="n">est</span><span class="o">.</span><span class="n">labels_</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">distances_</span> <span class="o">=</span> <span class="n">est</span><span class="o">.</span><span class="n">distances_</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+<div class="viewcode-block" id="CompatibleClusterMerging.predict_proba">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.cluster.CompatibleClusterMerging.html#fuzzyclust.cluster.CompatibleClusterMerging.predict_proba">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Memberships of (new) samples in the final clusters."""</span>
+        <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"estimator_"</span><span class="p">)</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">validate_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator_</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CompatibleClusterMerging.predict">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.cluster.CompatibleClusterMerging.html#fuzzyclust.cluster.CompatibleClusterMerging.predict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Hard labels of (new) samples."""</span>
+        <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"estimator_"</span><span class="p">)</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">validate_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator_</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CompatibleClusterMerging.transform">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.cluster.CompatibleClusterMerging.html#fuzzyclust.cluster.CompatibleClusterMerging.transform">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Distances of samples to the final prototypes, shape ``(n_samples, n_clusters_)``."""</span>
+        <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"estimator_"</span><span class="p">)</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">validate_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator_</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CompatibleClusterMerging.fit_transform">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.cluster.CompatibleClusterMerging.html#fuzzyclust.cluster.CompatibleClusterMerging.fit_transform">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">fit_params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CompatibleClusterMerging.score">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.cluster.CompatibleClusterMerging.html#fuzzyclust.cluster.CompatibleClusterMerging.score">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Score of the final estimator (negative objective)."""</span>
+        <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"estimator_"</span><span class="p">)</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">validate_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator_</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_feature_names_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_features</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"estimator_"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="sa">f</span><span class="s2">"dist_cluster_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_clusters_</span><span class="p">)],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__sklearn_tags__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">tags</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__sklearn_tags__</span><span class="p">()</span>
+        <span class="n">tags</span><span class="o">.</span><span class="n">input_tags</span><span class="o">.</span><span class="n">allow_nan</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="n">tags</span></div>
+
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"CompatibleClusterMerging"</span><span class="p">,</span> <span class="s2">"cluster_similarity"</span><span class="p">,</span> <span class="s2">"geometric_compatibility"</span><span class="p">,</span> <span class="s2">"reference_fuzziness"</span><span class="p">]</span>
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, János Abonyi.
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.1.
+  </p>
+</div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

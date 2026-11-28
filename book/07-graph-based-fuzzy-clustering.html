@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>7 Graph-based fuzzy clustering · Fuzzy Clustering and Data Analysis in Python</title>
+<meta name="description" content="Open-access book on fuzzy clustering and data analysis in Python with the fuzzyclust toolbox: fuzzy c-means, Gustafson-Kessel, Gath-Geva, cluster validity, visualisation, Takagi-Sugeno models, time-series segmentation and more, with runnable Colab examples." />
+<meta name="author" content="János Abonyi" />
+<link rel="canonical" href="https://complexsystemsintelligence.github.io/fuzzyclust/book/07-graph-based-fuzzy-clustering.html" />
+<meta property="og:title" content="7 Graph-based fuzzy clustering · Fuzzy Clustering and Data Analysis in Python" />
+<meta property="og:type" content="book" />
+<meta property="og:url" content="https://complexsystemsintelligence.github.io/fuzzyclust/book/07-graph-based-fuzzy-clustering.html" />
+<meta property="og:image" content="https://complexsystemsintelligence.github.io/fuzzyclust/book/cover.png" />
+<meta property="og:description" content="Open-access book on fuzzy clustering and data analysis in Python with the fuzzyclust toolbox: fuzzy c-means, Gustafson-Kessel, Gath-Geva, cluster validity, visualisation, Takagi-Sugeno models, time-series segmentation and more, with runnable Colab examples." />
+<link rel="icon" href="../_static/favicon.png" />
+<link rel="stylesheet" href="main_web.css" />
+<link rel="stylesheet" href="web.css" />
+</head>
+<body class="">
+<header class='topbar'><a class='brand' href='index.html'><img src='logo.svg' alt='' width='34' height='34' /><span><b>Fuzzy Clustering and Data Analysis in Python</b><small>The fuzzyclust toolbox</small></span></a><nav class='toplinks'><a href='../'>Documentation</a><a href='../auto_examples/index.html'>Examples</a><a href='../fuzzyclust-book.pdf'>PDF</a><a href='../fuzzyclust-book.epub'>EPUB</a><a href='https://github.com/ComplexSystemsIntelligence/fuzzyclust'>GitHub</a><a class='hub' href='https://complexsystemsintelligence.github.io/#textbooks'>All textbooks</a></nav></header>
+<div class="layout">
+<aside class="left"><nav class='toc' aria-label='Contents'><p class='toc-title'>Contents</p><ol><li><a href='preface.html'><span class='num'></span>Preface</a></li><li><a href='01-introduction.html'><span class='num'>1</span>Introduction</a></li><li><a href='02-foundations-of-prototype-based-clustering.html'><span class='num'>2</span>Foundations of prototype-based clustering</a></li><li><a href='03-hard-and-fuzzy-partitioning-algorithms.html'><span class='num'>3</span>Hard and fuzzy partitioning algorithms</a></li><li><a href='04-cluster-validity-and-the-number.html'><span class='num'>4</span>Cluster validity and the number of clusters</a></li><li><a href='05-visualization-of-fuzzy-clustering-results.html'><span class='num'>5</span>Visualization of fuzzy clustering results</a></li><li><a href='06-robust-and-shape-oriented-variants.html'><span class='num'>6</span>Robust and shape-oriented variants of fuzzy c-means</a></li><li class='current'><a href='07-graph-based-fuzzy-clustering.html'><span class='num'>7</span>Graph-based fuzzy clustering</a></li><li><a href='08-clustering-for-model-identification.html'><span class='num'>8</span>Clustering for model identification</a></li><li><a href='09-clustering-of-time-series.html'><span class='num'>9</span>Clustering of time series</a></li><li><a href='10-clustering-relational-categorical-and-mixed.html'><span class='num'>10</span>Clustering relational, categorical, and mixed data</a></li><li><a href='11-incomplete-very-large-and-image.html'><span class='num'>11</span>Incomplete, very large, and image data</a></li><li><a href='12-beyond-a-single-unsupervised-run.html'><span class='num'>12</span>Beyond a single unsupervised run: partial supervision,
+co-clustering, collaboration, and ensembles</a></li><li><a href='a-api-reference.html'><span class='num'>A</span>API reference</a></li><li><a href='b-migrating-from-the-matlab-toolbox.html'><span class='num'>B</span>Migrating from the MATLAB toolbox</a></li><li><a href='c-the-example-gallery.html'><span class='num'>C</span>The example gallery</a></li><li><a href='bibliography.html'><span class='num'></span>Bibliography</a></li></ol></nav></aside>
+<main class="content">
+
+<!-- l. 1 -->
+<h2 class="chapterHead"><span class="titlemark">Chapter 7</span><br/><a id="x9-1290007"></a>Graph-based fuzzy clustering</h2>
+<div class="box roadmap">
+<!-- l. 3 --><p class="indent">   Every algorithm so far described a cluster by a prototype (a point, an
+ellipsoid, a shell, a linear variety) and measured the distance of the samples
+to it. This chapter starts instead from a <span class="ec-lmri-10x-x-109">graph </span>over the samples and
+presents two methods of the Abonyi group that find clusters of arbitrary
+shape and return to a prototype description where one is useful. The
+first builds the minimal spanning tree of the data, removes inconsistent
+edges by Zahn’s criteria, splits the subtrees further as long as the total
+fuzzy hypervolume decreases, and hands the crisp partition to Gath–Geva
+clustering, which turns it into a mixture of Gaussians with memberships,
+covariances and a similarity structure among the clusters. The second
+keeps the c-means functional but replaces the Euclidean distance by the
+geodesic distance along a nearest-neighbor graph and the centers by
+medoids, so that the clusters follow the manifold the data lie on. Both are in
+<span class="ec-lmtt-10x-x-109">fuzzyclust.graph</span>, need only SciPy’s sparse-graph routines, and reuse the
+Gath–Geva clusterer and the volume-based validity indices of earlier
+chapters.
+</p>
+</div>
+<h3 class="sectionHead"><span class="titlemark">7.1   </span> <a id="x9-1300007.1"></a>Problem and idea</h3>
+<!-- l. 8 --><p class="noindent">Prototype-based clustering answers the question “which prototype is this sample
+closest to?” and therefore inherits the geometry of the prototype: fuzzy c-means
+finds spheres, Gustafson–Kessel and Gath–Geva find ellipsoids, and the shell and
+variety algorithms find shells and subspaces. When the groups have none of these
+shapes (a chain of points, a bent arm, two interleaved spirals, rings), the
+prototypes can only tile the groups into pieces, and the pieces are not
+the clusters a human sees. Hierarchical and graph-theoretic clustering
+take the opposite view: a cluster is a set of samples that are connected
+to each other through short steps and separated from the rest by long
+ones, whatever the shape of the set. Zahn’s classical formulation [<a id="x9-130001"></a><a href="bibliography.html#cite.0@zahn:1971">81</a>]
+uses the <span class="ec-lmri-10x-x-109">minimal spanning tree </span>(MST) of the data: the tree connects all
+<!-- l. 8 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>N</mi></math> samples
+with <!-- l. 8 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>N</mi> <mo class="MathClass-bin" stretchy="false">−</mo><mn>1</mn></mrow></math>
+                                                                     
+
+                                                                     
+edges of minimal total length, so that removing
+<!-- l. 8 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math> edges
+leaves <!-- l. 8 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>k</mi> <mo class="MathClass-bin" stretchy="false">+</mo> <mn>1</mn></mrow></math>
+subtrees that are candidate clusters (fig. <a href="#x9-130005r1">7.1</a>, top). The tree keeps only
+<!-- l. 8 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>N</mi> <mo class="MathClass-bin" stretchy="false">−</mo><mn>1</mn></mrow></math> of
+the <!-- l. 8 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>N</mi><mo class="MathClass-open" stretchy="false">(</mo><mi>N</mi> <mo class="MathClass-bin" stretchy="false">−</mo><mn>1</mn><mo class="MathClass-close" stretchy="false">)</mo><mo class="MathClass-bin" stretchy="false">∕</mo><mn>2</mn></mrow></math>
+pairwise distances, which makes the method cheap, and single-linkage
+clustering amounts to removing its edges in decreasing order of length
+[<a id="x9-130002"></a><a href="bibliography.html#cite.0@gower:1969:mst">82</a>].
+</p><!-- l. 10 --><p class="indent">   Two problems arise. The first is deciding which edges are “inconsistent”. The
+longest edges separate clusters only when all clusters have the same density: a
+global threshold either leaves tight groups merged or shatters diffuse ones, and
+the local comparison with neighboring edges that Zahn proposed requires the
+user to choose a factor and a neighborhood depth. The second is that no
+length criterion can detect a <span class="ec-lmri-10x-x-109">chain</span>: a thin sequence of points between two
+groups keeps every edge short, so the groups remain connected (fig. <a href="#x9-130005r1">7.1</a>,
+bottom); this is the chaining effect of single linkage. Vathy-Fogarassy, Feil
+and Abonyi [<a id="x9-130003"></a><a href="bibliography.html#cite.0@vathy:2005:mst">83</a>] solve both problems by combining the tree with fuzzy
+clustering. The tree is first cut by Zahn’s criteria; the subtrees are then split
+further at the edge that minimizes the total <span class="ec-lmri-10x-x-109">fuzzy hypervolume </span>of the
+resulting clusters, which is Gath and Geva’s validity measure [<a id="x9-130004"></a><a href="bibliography.html#cite.0@gath:1989">21</a>] used as a
+splitting criterion. A union of two compact groups, with or without a
+chain between them, has a far larger volume than its parts, whereas
+halving a Gaussian group increases the summed volume, so chains and
+bends are cut and Gaussian groups are left alone. Finally, the crisp tree
+partition initializes Gath–Geva clustering, which is too sensitive to its
+start to be run from a random partition on such data but turns a good
+start into a fuzzy, parametric description: centers, covariance matrices,
+memberships, and a similarity among the clusters that organizes them into a
+dendrogram.
+</p>
+<figure class="figure">
+<!-- l. 13 --><p class="noindent"><img alt="Figure 7.1" src="main_web42x.svg"/>
+<a id="x9-130005r1"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 7.1.  </span></span><span class="content"><span class="ec-lmr-10">Clustering  with  the  minimal  spanning  tree.  Top:  the  tree  of  two
+groups;                            the                            long                            edge</span>
+<!-- l. 44 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>e</mi></mrow><mrow><mi mathvariant="italic">ab</mi></mrow></msub></math>
+<span class="ec-lmr-10">between them is inconsistent because it is much longer than the edges in its tree
+neighborhood  (Zahn’s  local  criterion),  which  also  works  when  the  groups  have
+different densities. Bottom: a chain of points between two groups keeps every edge
+short and defeats all length criteria; the hybrid algorithm cuts the edge whose
+removal minimizes the summed fuzzy hypervolume of the two parts, because two
+compact groups have a much smaller volume than their elongated union.</span>
+</span></figcaption><!-- tex4ht:label?: x9-130005r1  -->
+</figure>
+<!-- l. 48 --><p class="indent">   The second method addresses a different failure of the prototype. Even where
+the groups are clear, the <span class="ec-lmri-10x-x-109">distance </span>may be wrong: when the data lie on a
+curved low-dimensional manifold, such as a spiral arm (fig. <a href="#x9-130010r2">7.2</a>) or an
+S-shaped sheet (fig. <a href="#x9-146002r18">7.18</a>), two samples that are close in the Euclidean
+sense may be far apart <span class="ec-lmri-10x-x-109">along </span>the manifold, and a center that is the
+mean of samples on both sides of a fold lies in empty space. Feil and
+Abonyi [<a id="x9-130006"></a><a href="bibliography.html#cite.0@feil:2007:geodesic">84</a>] replace the Euclidean distance by the <span class="ec-lmri-10x-x-109">geodesic </span>distance: the
+length of the shortest path in a graph that links every sample with its
+<!-- l. 48 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math>
+nearest neighbors, with the edges weighted by their Euclidean lengths. This is the
+distance Isomap [<a id="x9-130007"></a><a href="bibliography.html#cite.0@tenenbaum:2000:isomap">85</a>] uses to unfold manifolds, and it converges to the true
+geodesic as the sampling becomes dense [<a id="x9-130008"></a><a href="bibliography.html#cite.0@bernstein:2000:geodesic">86</a>]. Because geodesic distances exist
+only between samples, the prototypes are restricted to samples, which makes the
+algorithm a fuzzy c-medoid method in the spirit of Kaufman and Rousseeuw [<a id="x9-130009"></a><a href="bibliography.html#cite.0@kaufman:1990:groups">5</a>] and
+places the medoids on the manifold automatically. The only structural parameter
+is <!-- l. 48 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math>: if
+it is too small, the manifold falls apart into several graph components; if it is too
+large, edges “short-circuit” arms that come close to each other.
+</p>
+<figure class="figure">
+<!-- l. 51 --><p class="noindent"><img alt="Figure 7.2" src="main_web43x.svg"/>
+<a id="x9-130010r2"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 7.2. </span></span><span class="content"><span class="ec-lmr-10">Geodesic distance on a neighborhood graph. Left: two spiral arms
+sampled by 22 points each, linked to their two nearest neighbors. The samples</span>
+<!-- l. 77 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub></math>
+<span class="ec-lmr-10">and</span>
+<!-- l. 77 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>l</mi></mrow></msub></math>
+<span class="ec-lmr-10">are 3.6 apart in the plane but 8.0 along the arm; a Euclidean prototype between
+them would sit in empty space, whereas a medoid with geodesic distances stays on
+the                            arm.                            Right:                            with</span>
+<!-- l. 77 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>k</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>2</mn></mrow></math>
+<span class="ec-lmr-10">the arms are separate components of the graph. They are bridged through their
+closest pair of points with a penalty equal to the largest within-component distance,
+so that all distances are finite but the two arms remain geodesically far apart.</span>
+</span></figcaption><!-- tex4ht:label?: x9-130010r2  -->
+</figure>
+<h3 class="sectionHead"><span class="titlemark">7.2   </span> <a id="x9-1310007.2"></a>Theory</h3>
+<!-- l. 83 --><p class="noindent">The notation is that of the rest of the book:
+<!-- l. 83 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mstyle mathvariant="bold"><mi>X</mi></mstyle> <mo class="MathClass-rel" stretchy="false">∈</mo> <msup><mrow><mi>ℝ</mi></mrow><mrow><mi>N</mi><mo class="MathClass-bin" stretchy="false">×</mo><mi>n</mi></mrow></msup></mrow></math> with rows
+<!-- l. 83 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub></math>, memberships
+<!-- l. 83 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub></math> in the matrix
+<!-- l. 83 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mstyle mathvariant="bold"><mi>U</mi></mstyle> <mo class="MathClass-rel" stretchy="false">∈</mo> <msup><mrow><mi>ℝ</mi></mrow><mrow><mi>c</mi><mo class="MathClass-bin" stretchy="false">×</mo><mi>N</mi></mrow></msup></mrow></math> (stored transposed in
+the code), prototypes <!-- l. 83 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></math>
+with index <!-- l. 83 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>i</mi></math>
+(or <!-- l. 83 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>j</mi></math>), samples
+with index <!-- l. 83 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math>.
+We treat the hybrid MST–GG algorithm first (sections 7.2.1 to 7.2.3), then the
+geodesic distance (section <a href="#x9-1370007.2.4">7.2.4</a>) and the two clustering algorithms built on it
+(sections <a href="#x9-1380007.2.5">7.2.5</a> and <a href="#x9-1390007.2.6">7.2.6</a>).
+</p><!-- l. 85 --><p class="noindent">
+</p>
+<h4 class="subsectionHead"><span class="titlemark">7.2.1   </span> <a id="x9-1320007.2.1"></a>The minimal spanning tree and Zahn’s cutting criteria</h4>
+<!-- l. 87 --><p class="noindent">Let <!-- l. 87 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>G</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mo class="MathClass-open" stretchy="false">(</mo><mi>V</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>E</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>
+be the complete weighted graph on the samples, with edge weights
+<!-- l. 87 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>w</mi><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mi>e</mi></mrow><mrow><mi mathvariant="italic">kl</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo> <mo class="MathClass-rel" stretchy="false">=</mo> <mi>d</mi><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub><mo class="MathClass-punc" stretchy="false">,</mo><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>l</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>
+(Euclidean here; any metric would do). A spanning tree is a connected
+subgraph without cycles that reaches every vertex; the minimal spanning tree
+<!-- l. 87 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>T</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mo class="MathClass-open" stretchy="false">(</mo><mi>V</mi><mo class="MathClass-punc" stretchy="false">,</mo><msub><mrow><mi>E</mi></mrow><mrow><mi>T</mi> </mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow></math> is the
+one with the smallest total weight, </p><table class="equation"><tr><td>
+<!-- l. 88 --><p class="indent">
+</p><!-- l. 88 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x9-132001r1"></mstyle><!-- endlabel --><msub><mrow><mo>∑</mo>
+</mrow><mrow><mi>e</mi><mo class="MathClass-rel" stretchy="false">∈</mo><msub><mrow><mi>E</mi></mrow><mrow><mi>T</mi></mrow></msub></mrow></msub><mi>w</mi><mo class="MathClass-open" stretchy="false">(</mo><mi>e</mi><mo class="MathClass-close" stretchy="false">)</mo><mspace class="thickpace" width="0.28em"></mspace> <mo class="MathClass-rel" stretchy="false">=</mo> <mspace class="thickpace" width="0.28em"></mspace><mtext class="qopname">min</mtext><mo> ⁡<!-- FUNCTION APPLICATION --> </mo><mo class="MathClass-punc" stretchy="false">,</mo><mspace class="qquad" width="2em"></mspace><mo class="MathClass-rel" stretchy="false">|</mo><msub><mrow><mi>E</mi></mrow><mrow><mi>T</mi> </mrow></msub><mo class="MathClass-rel" stretchy="false">|</mo><mo class="MathClass-rel" stretchy="false">=</mo> <mi>N</mi> <mo class="MathClass-bin" stretchy="false">−</mo><mn>1</mn><mo class="MathClass-punc" stretchy="false">,</mo>
+</mrow></math></td><td class="eq-no">(7.1)</td></tr></table>
+<!-- l. 92 --><p class="indent">   computable by Prim’s algorithm in
+<!-- l. 92 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>O</mi><mo class="MathClass-open" stretchy="false">(</mo><msup><mrow><mi>N</mi></mrow><mrow><mn>2</mn></mrow></msup><mo class="MathClass-close" stretchy="false">)</mo></mrow></math> time or by
+Kruskal’s in <!-- l. 92 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>O</mi><mo class="MathClass-open" stretchy="false">(</mo><msup><mrow><mi>N</mi></mrow><mrow><mn>2</mn></mrow></msup><mtext class="qopname"> log</mtext><mo> ⁡<!-- FUNCTION APPLICATION --> </mo><!-- nolimits --><mi>N</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>
+[<a id="x9-132002"></a><a href="bibliography.html#cite.0@prim:1957">87</a>, <a id="x9-132003"></a><a href="bibliography.html#cite.0@kruskal:1956">88</a>] (<span class="ec-lmtt-10x-x-109">fuzzyclust </span>uses SciPy’s implementation on the dense distance matrix).
+Removing <!-- l. 92 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math>
+edges from <!-- l. 92 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>T</mi></math>
+leaves <!-- l. 92 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>k</mi> <mo class="MathClass-bin" stretchy="false">+</mo> <mn>1</mn></mrow></math>
+subtrees, and the sets of their vertices are the clusters; if
+<!-- l. 92 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>δ</mi></math> is
+the length of a removed edge, no point on one side of it is closer than
+<!-- l. 92 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>δ</mi></math> to a
+point on the other side. Clustering with the MST is therefore divisive hierarchical
+clustering, and the whole question is <span class="ec-lmri-10x-x-109">which </span>edges to remove.
+</p>
+<!-- l. 94 --><p class="noindent"><span class="paragraphHead"><a id="x9-133000"></a><span class="ec-lmbx-10x-x-109">Criterion 1 (global threshold).</span></span>
+   Remove every edge longer than a multiple of the mean edge length,
+</p><table class="equation"><tr><td>
+<!-- l. 95 --><p class="indent">
+</p><!-- l. 95 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x9-133001r2"></mstyle><!-- endlabel --><mi>w</mi><mo class="MathClass-open" stretchy="false">(</mo><mi>e</mi><mo class="MathClass-close" stretchy="false">)</mo> <mo class="MathClass-rel" stretchy="false">&gt;</mo> <mi>δ</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mi>λ</mi><mspace class="thinspace" width="0.17em"></mspace> <mfrac><mrow><mn>1</mn></mrow>
+<mrow><mi>N</mi> <mo class="MathClass-bin" stretchy="false">−</mo><mn>1</mn></mrow></mfrac><msub><mrow><mo>∑</mo>
+</mrow><mrow><mi mathvariant="italic">e′</mi><mo class="MathClass-rel" stretchy="false">∈</mo><msub><mrow><mi>E</mi></mrow><mrow><mi>T</mi></mrow></msub></mrow></msub><mi>w</mi><mo class="MathClass-open" stretchy="false">(</mo><mi mathvariant="italic">e′</mi><mo class="MathClass-close" stretchy="false">)</mo><mo class="MathClass-punc" stretchy="false">,</mo>
+</mrow></math></td><td class="eq-no">(7.2)</td></tr></table>
+<!-- l. 99 --><p class="indent">   or remove the longest edges one by one until the desired number of clusters is
+reached. Both forms presuppose a single density: the mean is dominated by the
+                                                                     
+
+                                                                     
+largest group, and a tight pair of groups sits below the threshold while the tails
+of a diffuse group are cut off (fig. <a href="#x9-143001r7">7.7</a>).
+</p>
+<!-- l. 101 --><p class="noindent"><span class="paragraphHead"><a id="x9-134000"></a><span class="ec-lmbx-10x-x-109">Criterion 2 (local inconsistency).</span></span>
+   Zahn [<a id="x9-134001"></a><a href="bibliography.html#cite.0@zahn:1971">81</a>] compares an edge with its surroundings instead. Let
+<!-- l. 101 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mstyle mathvariant="script"><mi>N</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mi>e</mi></mrow><mrow><mi mathvariant="italic">ab</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow></math> be the set of tree
+edges within <!-- l. 101 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math> steps
+of either endpoint <!-- l. 101 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>a</mi></math>
+or <!-- l. 101 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>b</mi></math> of the edge (not
+counting <!-- l. 101 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>e</mi></mrow><mrow><mi mathvariant="italic">ab</mi></mrow></msub></math> itself), with
+mean length <!-- l. 101 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mover accent="false" class="mml-overline"><mrow><mi>w</mi></mrow><mo accent="true">¯</mo></mover></math> and
+standard deviation <!-- l. 101 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>σ</mi></mrow><mrow><mi>w</mi></mrow></msub></math>.
+The edge is <span class="ec-lmri-10x-x-109">inconsistent </span>when </p><table class="equation"><tr><td>
+<!-- l. 102 --><p class="indent">
+</p><!-- l. 102 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x9-134002r3"></mstyle><!-- endlabel --><mi>w</mi><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mi>e</mi></mrow><mrow><mi mathvariant="italic">ab</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo> <mo class="MathClass-rel" stretchy="false">≥</mo><mi>f</mi><mspace class="thinspace" width="0.17em"></mspace><mover accent="false" class="mml-overline"><mrow><mi>w</mi></mrow><mo accent="true">¯</mo></mover><mspace class="quad" width="1em"></mspace><mstyle class="text"><mtext>(ratio form)</mtext></mstyle><mspace class="qquad" width="2em"></mspace><mstyle class="text"><mtext>or</mtext></mstyle><mspace class="qquad" width="2em"></mspace><mi>w</mi><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mi>e</mi></mrow><mrow><mi mathvariant="italic">ab</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo> <mo class="MathClass-rel" stretchy="false">&gt;</mo> <mover accent="false" class="mml-overline"><mrow><mi>w</mi></mrow><mo accent="true">¯</mo></mover> <mo class="MathClass-bin" stretchy="false">+</mo> <mi>s</mi><mspace class="thinspace" width="0.17em"></mspace><msub><mrow><mi>σ</mi></mrow><mrow><mi>w</mi></mrow></msub><mspace class="quad" width="1em"></mspace><mstyle class="text"><mtext>(deviation form)</mtext></mstyle><mo class="MathClass-punc" stretchy="false">,</mo>
+</mrow></math></td><td class="eq-no">(7.3)</td></tr></table>
+<!-- l. 107 --><p class="indent">   with a factor <!-- l. 107 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>f</mi></math> (typically
+<!-- l. 107 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mn>2</mn></math>–<!-- l. 107 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mn>3</mn></math>)
+or  a  number  of  standard  deviations
+<!-- l. 107 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>s</mi></math>. The
+hybrid algorithm uses the ratio form; the deviation form, Zahn’s second
+proposal, needs a deeper neighborhood, because the standard deviation of a
+handful of edges is a poor reference. The reference length adapts to the
+surroundings of every edge, so groups of widely different density are separated
+(fig. <a href="#x9-130005r1">7.1</a>, top), at the price of two parameters that interact: the deeper the
+neighborhood, the more stable the reference and the wider the range of factors
+that works. Both criteria cut edges in one pass; <span class="ec-lmtt-10x-x-109">fuzzyclust </span>applies the
+flagged cuts longest first and refuses a cut that would create a component
+                                                                     
+
+                                                                     
+smaller than <code class="lstinline"><span style="color:#000000">min_cluster_size</span></code>, which keeps single outliers from becoming
+clusters.
+</p><!-- l. 109 --><p class="noindent">
+</p>
+<h4 class="subsectionHead"><span class="titlemark">7.2.2   </span> <a id="x9-1350007.2.2"></a>Criterion 3: splitting by the fuzzy hypervolume</h4>
+<!-- l. 111 --><p class="noindent">Length criteria compare distances and are blind to chains. The hybrid algorithm
+therefore judges a candidate partition by the <span class="ec-lmri-10x-x-109">quality of the clusters it produces</span>,
+using a validity measure as the splitting criterion. Varma and Simon [<a id="x9-135001"></a><a href="bibliography.html#cite.0@varma:2004:mst">89</a>] used the
+Fukuyama–Sugeno measure [<a id="x9-135002"></a><a href="bibliography.html#cite.0@fukuyama:1989:validity">33</a>] in this role; Vathy-Fogarassy, Feil and Abonyi take
+the fuzzy hypervolume of Gath and Geva [<a id="x9-135003"></a><a href="bibliography.html#cite.0@gath:1989">21</a>], because the clusters will be refined
+by Gath–Geva clustering, to which the hypervolume belongs. For a partition
+<!-- l. 111 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mstyle mathvariant="bold"><mi>U</mi></mstyle></math> with
+centers <!-- l. 111 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>j</mi></mrow></msub></math>,
+the fuzzy covariance matrix, the hypervolume of cluster
+<!-- l. 111 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>j</mi></math> and
+the total hypervolume are </p><table class="equation"><tr><td>
+<!-- l. 112 --><p class="indent">
+</p><!-- l. 112 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x9-135004r4"></mstyle><!-- endlabel --><msub><mrow><mstyle mathvariant="bold"><mi>F</mi></mstyle></mrow><mrow><mi>j</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><munderover accent="false" accentunder="false"><mrow><mo>∑</mo>
+</mrow><mrow><mi>k</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>N</mi></mrow></munderover><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">jk</mi></mrow><mrow><mi>m</mi></mrow></msubsup><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>j</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo><msup><mrow><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>j</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow><mrow><mstyle mathvariant="sans-serif"><mi>T</mi></mstyle></mrow></msup></mrow>
+<mrow><munderover accent="false" accentunder="false"><mrow><mo> ∑</mo>
+</mrow><mrow><mi>k</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>N</mi></mrow></munderover><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">jk</mi></mrow><mrow><mi>m</mi></mrow></msubsup></mrow></mfrac> <mo class="MathClass-punc" stretchy="false">,</mo><mspace class="qquad" width="2em"></mspace><msub><mrow><mi>V</mi> </mrow><mrow><mi>j</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <msqrt><mrow><mtext class="qopname">det</mtext><mo> ⁡<!-- FUNCTION APPLICATION --> </mo><msub><mrow> <mstyle mathvariant="bold"> <mi>F</mi></mstyle> </mrow><mrow><mi>j</mi></mrow></msub></mrow></msqrt><mo class="MathClass-punc" stretchy="false">,</mo><mspace class="qquad" width="2em"></mspace><mi mathvariant="italic">FHV</mi> <mo class="MathClass-rel" stretchy="false">=</mo><munderover accent="false" accentunder="false"><mrow><mo> ∑</mo>
+</mrow><mrow><mi>j</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><msub><mrow><mi>V</mi> </mrow><mrow>
+<mi>j</mi></mrow></msub><mo class="MathClass-punc" stretchy="false">,</mo>
+</mrow></math></td><td class="eq-no">(7.4)</td></tr></table>
+<!-- l. 118 --><p class="indent">   evaluated during the tree phase with the crisp memberships of the tree
+partition. The alternative criterion of Varma and Simon, in its crisp form,
+</p><table class="equation"><tr><td>
+<!-- l. 119 --><p class="indent">
+</p><!-- l. 119 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x9-135005r5"></mstyle><!-- endlabel --><mi mathvariant="italic">FS</mi> <mo class="MathClass-rel" stretchy="false">=</mo><munderover accent="false" accentunder="false"><mrow><mo> ∑</mo>
+</mrow><mrow><mi>j</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><msub><mrow><mtext> ∑</mtext></mrow><mrow><msub><mrow><mstyle mathvariant="bold">
+<mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub><mo class="MathClass-rel" stretchy="false">∈</mo><msub><mrow><mi>S</mi></mrow><mrow><mi>j</mi></mrow></msub></mrow></msub><mstyle mathsize="1.61em"><mrow><mo fence="true" form="prefix"> (</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle><msup><mrow> <mrow><mo fence="true" form="prefix"> ‖</mo><mrow><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>j</mi></mrow></msub></mrow><mo fence="true" form="postfix">‖</mo></mrow> </mrow><mrow><mn>2</mn></mrow></msup> <mo class="MathClass-bin" stretchy="false">−</mo><msup><mrow> <mrow><mo fence="true" form="prefix"> ‖</mo><mrow><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow>
+<mi>j</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><mover accent="true"><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mo accent="true">¯</mo></mover></mrow><mo fence="true" form="postfix">‖</mo></mrow></mrow><mrow><mn>2</mn></mrow></msup><mstyle mathsize="1.61em"><mrow><mo fence="true" form="prefix"> )</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle><mo class="MathClass-punc" stretchy="false">,</mo>
+</mrow></math></td><td class="eq-no">(7.5)</td></tr></table>
+<!-- l. 123 --><p class="indent">   with <!-- l. 123 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mover accent="true"><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mo accent="true">¯</mo></mover></math>
+the global mean, rewards compact clusters with distant centers and is available as
+<code class="lstinline"><span style="color:#000000">criterion=</span><span style="color:#008662">"fukuyama_sugeno"</span></code>.
+</p><!-- l. 125 --><p class="indent">   The splitting starts with the subcluster of largest volume
+<!-- l. 125 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>V</mi> </mrow><mrow><mi>i</mi></mrow></msub></math>. Each
+of its <!-- l. 125 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>N</mi></mrow><mrow><mi>i</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><mn>1</mn></mrow></math>
+tree edges is removed in turn, which produces a binary split into
+<!-- l. 125 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>a</mi></math> and
+<!-- l. 125 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>b</mi></math> and a candidate partition
+with total volume <!-- l. 125 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi mathvariant="italic">FHV</mi> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mi>V</mi> </mrow><mrow><mi>i</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">+</mo> <msub><mrow><mi>V</mi> </mrow><mrow><mi>a</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">+</mo> <msub><mrow><mi>V</mi> </mrow><mrow><mi>b</mi></mrow></msub></mrow></math>;
+the cut with the smallest total volume is the best split of this subcluster.
+<span class="ec-lmtt-10x-x-109">fuzzyclust </span>accepts the best split when its <span class="ec-lmri-10x-x-109">relative </span>gain, </p><table class="equation"><tr><td>
+<!-- l. 126 --><p class="indent">
+</p><!-- l. 126 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x9-135006r6"></mstyle><!-- endlabel --><mfrac><mrow><msub><mrow><mi>V</mi> </mrow><mrow><mi>i</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mi>V</mi> </mrow><mrow><mi>a</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mi>V</mi> </mrow><mrow><mi>b</mi></mrow></msub></mrow>
+<mrow><msub><mrow><mi>V</mi> </mrow><mrow><mi>i</mi></mrow></msub></mrow></mfrac> <mo class="MathClass-rel" stretchy="false">&gt;</mo> <mstyle class="text"><mtext>min_gain</mtext></mstyle><mo class="MathClass-punc" stretchy="false">,</mo>
+</mrow></math></td><td class="eq-no">(7.6)</td></tr></table>
+<!-- l. 130 --><p class="indent">   exceeds a threshold (<!-- l. 130 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.15</mn></mrow></math>
+by default) and each part has at least <code class="lstinline"><span style="color:#000000">min_cluster_size</span></code> samples; otherwise
+the next largest subcluster is tried, and the procedure stops when no
+subcluster can be improved or <code class="lstinline"><span style="color:#000000">max_clusters</span></code> is reached. The threshold is the
+toolbox’s reading of the paper’s “special parameters that control the
+generalization level of the hierarchical clustering tree”: cutting a few
+                                                                     
+
+                                                                     
+tail points off a compact group always lowers the volume a little, and
+the relative gain separates such cosmetic cuts from real structure. The
+criterion spares Gaussian groups and breaks chains. Halving a Gaussian
+group along its principal axis reduces the variance along that axis to
+<!-- l. 130 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo class="MathClass-open" stretchy="false">(</mo><mn>1</mn> <mo class="MathClass-bin" stretchy="false">−</mo><mn>2</mn><mo class="MathClass-bin" stretchy="false">∕</mo><mi>π</mi><mo class="MathClass-close" stretchy="false">)</mo><msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup> <mo class="MathClass-rel" stretchy="false">≈</mo><mn>0.36</mn><mspace class="thinspace" width="0.17em"></mspace><msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow></math>, so each half
+keeps about <!-- l. 130 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.6</mn></mrow></math>
+of the volume and the two halves together have
+<!-- l. 130 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1.2</mn></mrow></math>
+times the volume of the whole; the split brings no gain. For two compact
+groups joined by a chain, the determinant of the union is inflated by the
+distance between the groups, and the parts are much smaller (fig. <a href="#x9-130005r1">7.1</a>,
+bottom). A curved group is split into arcs for the same reason, and
+this is intended: every final cluster is then well approximated by one
+Gaussian, which is the representation the refinement needs. Evaluating all
+<!-- l. 130 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>N</mi></mrow><mrow><mi>i</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><mn>1</mn></mrow></math> cuts
+is cheap: with the subtree rooted at any vertex, the count, the sum of
+<!-- l. 130 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub></math> and the sum
+of <!-- l. 130 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub><msubsup><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow><mrow><mstyle mathvariant="sans-serif"><mi>T</mi></mstyle></mrow></msubsup></mrow></math> below
+every vertex are accumulated in one pass from the leaves to the root, and the statistics
+of both sides of any edge follow by subtraction, so the statistics of all candidate cuts
+cost <!-- l. 130 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>O</mi><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mi>N</mi></mrow><mrow><mi>i</mi></mrow></msub><msup><mrow><mi>n</mi></mrow><mrow><mn>2</mn></mrow></msup><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>,
+plus two <!-- l. 130 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>n</mi> <mo class="MathClass-bin" stretchy="false">×</mo><mi>n</mi></mrow></math>
+determinants (one for each side) per cut.
+</p><!-- l. 132 --><p class="indent">   When the number of clusters is <span class="ec-lmri-10x-x-109">given </span>(<code class="lstinline"><span style="color:#000000">n_clusters=c</span></code>), the same
+machinery is steered toward it: coarse cuts of Criteria 1–2 beyond
+<!-- l. 132 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>c</mi></math> are undone
+shortest first, and the volume splitting continues with the best available cut, gain or no
+gain, until <!-- l. 132 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>c</mi></math>
+clusters exist. This makes the estimator usable in the validity
+scans of the toolbox; the scan of the volume indices over
+<!-- l. 132 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>c</mi></math>
+shows a knee at the number where the automatic rule stops (fig. <a href="#x9-144001r10">7.10</a>).
+</p><!-- l. 134 --><p class="noindent">
+</p>
+<h4 class="subsectionHead"><span class="titlemark">7.2.3   </span> <a id="x9-1360007.2.3"></a>Gath–Geva refinement and the analysis of the result</h4>
+<!-- l. 136 --><p class="noindent">The tree partition is crisp and carries no model. In Step 4 of the
+                                                                     
+
+                                                                     
+algorithm it initializes Gath–Geva clustering with as many clusters as
+the tree partition has: the crisp membership matrix is the starting
+<!-- l. 136 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mstyle mathvariant="bold"><mi>U</mi></mstyle></math>, and the GG
+iterations (prior <!-- l. 136 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>α</mi></mrow><mrow><mi>i</mi></mrow></msub></math>,
+center <!-- l. 136 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></math>, fuzzy
+covariance <!-- l. 136 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>F</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></math>,
+exponential distance, membership update) run to convergence as in section <a href="03-hard-and-fuzzy-partitioning-algorithms.html#x5-430003.2.5">3.2.5</a>.
+GG is a maximum-likelihood estimator of a Gaussian mixture and is notoriously
+sensitive to its initialization: started from FCM or at random on a chained or
+curved data set, it merges a group with a chain or splits a group. Here, however,
+it only has to <span class="ec-lmri-10x-x-109">polish </span>the tree partition, and it does so without leaving it (fig. <a href="#x9-142003r5">7.5</a>).
+The result is a fuzzy partition with centers, covariance matrices and priors: a
+compact parametric description of clusters whose shapes the tree found, and the
+basis of the membership contours and covariance ellipses in the figures. (FCM as
+refinement, <code class="lstinline"><span style="color:#000000">refine=</span><span style="color:#008662">"fcm"</span></code>, is pulled off the tree partition by the chain points;
+<code class="lstinline"><span style="color:#000000">refine=None</span></code> keeps the crisp partition with the covariances of the tree
+clusters.)
+</p><!-- l. 138 --><p class="indent">   Two measures evaluate the result. The adequacy of a cut
+<!-- l. 138 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>e</mi></mrow><mrow><mi mathvariant="italic">ab</mi></mrow></msub></math> that produced
+clusters <!-- l. 138 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>C</mi></mrow><mrow><mi>a</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">∋</mo><mi>a</mi></mrow></math>
+and <!-- l. 138 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>C</mi></mrow><mrow><mi>b</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">∋</mo><mi>b</mi></mrow></math>
+is read off the refined memberships, </p><table class="equation"><tr><td>
+<!-- l. 139 --><p class="indent">
+</p><!-- l. 139 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x9-136001r7"></mstyle><!-- endlabel --><mi mathvariant="italic">CP</mi><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mi>e</mi></mrow><mrow><mi mathvariant="italic">ab</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo> <mo class="MathClass-rel" stretchy="false">=</mo><msub><mrow><mo> ∑</mo>
+</mrow><mrow><mi>k</mi><mo class="MathClass-rel" stretchy="false">∈</mo><mo class="MathClass-open" stretchy="false">{</mo><mi>a</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>b</mi><mo class="MathClass-close" stretchy="false">}</mo></mrow></msub> <mrow><mo fence="true" form="prefix"> |</mo><mrow><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">jk</mi></mrow></msub></mrow><mo fence="true" form="postfix">|</mo></mrow> <mo class="MathClass-punc" stretchy="false">,</mo><mspace class="qquad" width="2em"></mspace><mi>i</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mstyle class="text"><mtext>cluster of </mtext></mstyle><mi>a</mi><mo class="MathClass-punc" stretchy="false">,</mo><mspace class="thickpace" width="0.28em"></mspace><mi>j</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mstyle class="text"><mtext>cluster of </mtext></mstyle><mi>b</mi><mo class="MathClass-punc" stretchy="false">,</mo>
+</mrow></math></td><td class="eq-no">(7.7)</td></tr></table>
+<!-- l. 143 --><p class="indent">   which is <!-- l. 143 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mn>2</mn></math>
+when the two endpoints belong firmly to different clusters and
+<!-- l. 143 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mn>0</mn></math> when
+the refinement has re-united them (<code class="lstinline"><span style="color:#000000">cut_quality_</span></code>). The clusters themselves are
+compared as fuzzy sets over the samples by the ratio of fuzzy intersection and
+                                                                     
+
+                                                                     
+union, </p><table class="equation"><tr><td>
+<!-- l. 144 --><p class="indent">
+</p><!-- l. 144 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x9-136002r8"></mstyle><!-- endlabel --><msub><mrow><mi>S</mi></mrow><mrow><mi mathvariant="italic">ij</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><munderover accent="false" accentunder="false"><mrow><mo>∑</mo>
+</mrow><mrow><mi>k</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>N</mi></mrow></munderover><mtext class="qopname"> min</mtext><mo> ⁡<!-- FUNCTION APPLICATION --> </mo><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><mo class="MathClass-punc" stretchy="false">,</mo><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">jk</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow>
+<mrow><munderover accent="false" accentunder="false"><mrow><mo>∑</mo>
+</mrow><mrow><mi>k</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>N</mi></mrow></munderover><mtext class="qopname"> max</mtext><mo> ⁡<!-- FUNCTION APPLICATION --> </mo><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><mo class="MathClass-punc" stretchy="false">,</mo><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">jk</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow></mfrac> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><mo class="MathClass-rel" stretchy="false">|</mo><msub><mrow><mi>A</mi></mrow><mrow><mi>i</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">∩</mo><msub><mrow><mi>A</mi></mrow><mrow><mi>j</mi></mrow></msub><mo class="MathClass-rel" stretchy="false">|</mo></mrow>
+<mrow><mo class="MathClass-rel" stretchy="false">|</mo><msub><mrow><mi>A</mi></mrow><mrow><mi>i</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">∪</mo><msub><mrow><mi>A</mi></mrow><mrow><mi>j</mi></mrow></msub><mo class="MathClass-rel" stretchy="false">|</mo></mrow></mfrac><mo class="MathClass-punc" stretchy="false">,</mo>
+</mrow></math></td><td class="eq-no">(7.8)</td></tr></table>
+<!-- l. 148 --><p class="indent">   a symmetric matrix with unit diagonal (<code class="lstinline"><span style="color:#000000">cluster_similarity_</span></code>). Used as the
+distance <!-- l. 148 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1</mn> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mi>S</mi></mrow><mrow><mi mathvariant="italic">ij</mi></mrow></msub></mrow></math>
+in single-linkage clustering, it yields a dendrogram of the clusters: pieces of one
+nonconvex group share samples with intermediate memberships and join at a low
+level, while pieces of different groups do not, so the dendrogram shows
+which clusters may be merged and how they are related in the original
+space (fig. <a href="#x9-144003r12">7.12</a>). GG memberships are nearly crisp, so the similarities
+are small (the dendrogram in the paper also spans only the range from
+<!-- l. 148 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.96</mn></mrow></math> to
+<!-- l. 148 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mn>1</mn></math>), but
+their order carries the structure.
+</p>
+<p><img alt="Algorithm" class="algobox" src="main_web44x.svg"/><a id="x9-136003r1"></a><a id="x9-136004r27"></a><a id="x9-136005r1"></a><a id="x9-136006r2"></a><a id="x9-136007r3"></a><a id="x9-136008r4"></a><a id="x9-136009r5"></a><a id="x9-136010r6"></a><a id="x9-136011r7"></a><a id="x9-136012r8"></a><a id="x9-136013r9"></a><a id="x9-136014r10"></a><a id="x9-136015r11"></a> </p><div class="box summarybox">
+<!-- l. 171 --><p class="noindent"><span class="ec-lmbx-10x-x-109">In a nutshell: Hybrid MST–GG clustering</span>
+</p>
+<ul class="itemize1">
+<li class="itemize">Divisive clustering on the minimal spanning tree: Zahn’s global and
+     local length criteria separate distinct groups (also of different density);
+     the fuzzy hypervolume criterion cuts chains and bends that length
+                                                                     
+
+                                                                     
+     criteria cannot see and spares Gaussian groups.
+     </li>
+<li class="itemize">The tree partition initializes Gath–Geva clustering, which turns it into
+     a mixture of Gaussians with memberships and covariances without
+     destroying it; nonconvex groups come out as Gaussian pieces.
+     </li>
+<li class="itemize">Parameters: factor <!-- l. 175 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>f</mi></math>
+     and depth <!-- l. 175 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math>
+     of the local criterion (<!-- l. 175 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>f</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>3</mn></mrow></math>–<!-- l. 175 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mn>4</mn></math>
+     with <!-- l. 175 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>k</mi> <mo class="MathClass-rel" stretchy="false">≥</mo><mn>3</mn></mrow></math>
+     in the examples), or a global <!-- l. 175 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>λ</mi></math>;
+     <code class="lstinline"><span style="color:#000000">min_gain</span></code> and  <code class="lstinline"><span style="color:#000000">min_cluster_size</span></code> for  the  splitting;  <code class="lstinline"><span style="color:#000000">n_clusters</span></code> to  steer
+     toward a given number.
+     </li>
+<li class="itemize">Analysis: cut adequacy <!-- l. 176 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi mathvariant="italic">CP</mi><mo class="MathClass-open" stretchy="false">(</mo><mi>e</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>,
+     similarity <!-- l. 176 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>S</mi></mrow><mrow><mi mathvariant="italic">ij</mi></mrow></msub></math>
+     of the fuzzy clusters and its dendrogram for merging and visualization;
+     <!-- l. 176 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>O</mi><mo class="MathClass-open" stretchy="false">(</mo><msup><mrow><mi>N</mi></mrow><mrow><mn>2</mn></mrow></msup><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>
+     memory for the distance matrix.</li></ul>
+</div>
+<!-- l. 180 --><p class="noindent">
+</p>
+<h4 class="subsectionHead"><span class="titlemark">7.2.4   </span> <a id="x9-1370007.2.4"></a>Geodesic distances on a neighborhood graph</h4>
+<!-- l. 182 --><p class="noindent">Let the samples lie on (or near) a smooth manifold
+<!-- l. 182 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>M</mi> <mo class="MathClass-rel" stretchy="false">⊂</mo> <msup><mrow><mi>ℝ</mi></mrow><mrow><mi>n</mi></mrow></msup></mrow></math> of lower
+dimension. The intrinsic distance between two samples is the length of the shortest curve <span class="ec-lmri-10x-x-109">on</span>
+<!-- l. 182 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>M</mi></math> connecting them, the
+geodesic distance <!-- l. 182 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>d</mi></mrow><mrow><mi>M</mi></mrow></msub></math>,
+which can differ arbitrarily from the Euclidean chord (fig. <a href="#x9-130010r2">7.2</a>, left). Isomap [<a id="x9-137001"></a><a href="bibliography.html#cite.0@tenenbaum:2000:isomap">85</a>]
+approximates it in two steps. A neighborhood graph links each sample with its
+<!-- l. 182 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math> nearest neighbors
+(<!-- l. 182 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math>-Isomap) or with all
+samples within a radius <!-- l. 182 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>𝜀</mi></math>
+                                                                     
+
+                                                                     
+(<!-- l. 182 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>𝜀</mi></math>-Isomap),
+every edge weighted by its Euclidean length; the graph distance
+<!-- l. 182 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>d</mi></mrow><mrow><mi>g</mi></mrow></msub><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub><mo class="MathClass-punc" stretchy="false">,</mo><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>l</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>, the length
+of the shortest path found by Dijkstra’s or Floyd’s algorithm [<a id="x9-137002"></a><a href="bibliography.html#cite.0@dijkstra:1959">90</a>, <a id="x9-137003"></a><a href="bibliography.html#cite.0@floyd:1962">91</a>], then stands in for
+<!-- l. 182 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>d</mi></mrow><mrow><mi>M</mi></mrow></msub></math>. Bernstein et
+al. [<a id="x9-137004"></a><a href="bibliography.html#cite.0@bernstein:2000:geodesic">86</a>] prove that <!-- l. 182 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>d</mi></mrow><mrow><mi>g</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">→</mo><msub><mrow><mi>d</mi></mrow><mrow><mi>M</mi></mrow></msub></mrow></math>
+as the sampling density grows: short edges follow the manifold, and the shortest path
+cannot cut through empty space because there are no edges there. The approximation is
+good when <!-- l. 182 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math>
+(or <!-- l. 182 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>𝜀</mi></math>) is
+large enough for the graph to be connected along the manifold and small enough that
+no edge jumps across a gap between folds or arms (a “short-circuit”). The scale-free
+<!-- l. 182 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math> is easier
+to set than <!-- l. 182 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>𝜀</mi></math>,
+and the number of connected components of the graph is the first diagnostic.
+</p><!-- l. 184 --><p class="indent">   Components are the practical difficulty: if the graph is disconnected, the
+geodesic distance between components is undefined (infinite). The paper treats
+the components of the spiral as distinct manifolds that the clustering should keep
+apart. <span class="ec-lmtt-10x-x-109">fuzzyclust </span>follows this and makes it operational: components are linked
+through their closest pair of points by a <span class="ec-lmri-10x-x-109">bridge </span>whose length is the Euclidean gap
+plus a penalty, by default equal to the largest finite geodesic distance of the
+unbridged graph (fig. <a href="#x9-130010r2">7.2</a>, right). Every distance is then finite, and a path across
+a bridge is longer than any path inside a component, so clusters do not
+span components, while a component without a medoid still receives
+memberships through its bridge instead of being lost. The penalty can be set to
+zero when the components are known to be fragments of one manifold
+(<!-- l. 184 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math> too
+small), in which case the plain bridge re-joins them at their natural junctions
+(fig. <a href="#x9-146004r20">7.20</a>).
+</p><!-- l. 186 --><p class="noindent">
+</p>
+<h4 class="subsectionHead"><span class="titlemark">7.2.5   </span> <a id="x9-1380007.2.5"></a>Algorithm II: geodesic distance based fuzzy c-medoids</h4>
+<!-- l. 188 --><p class="noindent">The clustering minimizes the c-means functional of Bezdek [<a id="x9-138001"></a><a href="bibliography.html#cite.0@bezdek:1981">3</a>] with geodesic
+distances and prototypes restricted to samples, </p><table class="equation"><tr><td>
+<!-- l. 189 --><p class="indent">
+</p><!-- l. 189 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x9-138002r9"></mstyle><!-- endlabel --><mi>J</mi> <mo class="MathClass-rel" stretchy="false">=</mo><munderover accent="false" accentunder="false"><mrow><mo> ∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><munderover accent="false" accentunder="false"><mrow><mtext> ∑</mtext></mrow><mrow>
+<mi>k</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>N</mi></mrow></munderover><msubsup><mrow><mi>μ</mi></mrow><mrow>
+<mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup><mspace class="thinspace" width="0.17em"></mspace><msub><mrow><mi>d</mi></mrow><mrow>
+<mi>g</mi></mrow></msub><msup><mrow><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub><mo class="MathClass-punc" stretchy="false">,</mo><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow><mrow><mn>2</mn></mrow></msup><mo class="MathClass-punc" stretchy="false">,</mo><mspace class="qquad" width="2em"></mspace><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow>
+<mi>i</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">∈</mo><mo class="MathClass-open" stretchy="false">{</mo><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mn>1</mn></mrow></msub><mo class="MathClass-punc" stretchy="false">,</mo><mo>…</mo><mo class="MathClass-punc" stretchy="false">,</mo><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>N</mi></mrow></msub><mo class="MathClass-close" stretchy="false">}</mo><mo class="MathClass-punc" stretchy="false">,</mo>
+</mrow></math></td><td class="eq-no">(7.9)</td></tr></table>
+<!-- l. 193 --><p class="indent">   under the usual constraints <!-- l. 193 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi class="MathClass-op">∑</mi><mo> ⁡<!-- FUNCTION APPLICATION --></mo>
+<!-- nolimits --></mrow><mrow><mi>i</mi></mrow></msub><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>1</mn></mrow></math>.
+The restriction is forced by the distance, since
+<!-- l. 193 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>d</mi></mrow><mrow><mi>g</mi></mrow></msub></math> exists
+only between samples, and it is welcome: a medoid lies on the manifold by
+construction, whereas a mean of samples on both sides of a fold does not
+(fig. <a href="#x9-146002r18">7.18</a>). The alternating optimization has the two familiar steps. For fixed
+medoids, the Lagrange conditions give the FCM membership formula with
+<!-- l. 193 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>d</mi></mrow><mrow><mi>g</mi></mrow></msub></math>,
+</p><table class="equation"><tr><td>
+<!-- l. 194 --><p class="indent">
+</p><!-- l. 194 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x9-138003r10"></mstyle><!-- endlabel --><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><mn>1</mn></mrow>
+<mrow><munderover accent="false" accentunder="false"><mrow><mo>∑</mo>
+</mrow><mrow><mi>j</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><mstyle mathsize="1.19em"><mrow><mo fence="true" form="prefix"> (</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle><msub><mrow><mi>d</mi></mrow><mrow><mi>g</mi></mrow></msub><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub><mo class="MathClass-punc" stretchy="false">,</mo><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo><mo class="MathClass-bin" stretchy="false">∕</mo><msub><mrow><mi>d</mi></mrow><mrow><mi>g</mi></mrow></msub><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub><mo class="MathClass-punc" stretchy="false">,</mo><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>j</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo><msup><mrow><mstyle mathsize="1.19em"><mrow><mo fence="true" form="prefix"> )</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle></mrow><mrow><mn>2</mn><mo class="MathClass-bin" stretchy="false">∕</mo><mo class="MathClass-open" stretchy="false">(</mo><mi>m</mi><mo class="MathClass-bin" stretchy="false">−</mo><mn>1</mn><mo class="MathClass-close" stretchy="false">)</mo></mrow></msup></mrow></mfrac><mo class="MathClass-punc" stretchy="false">,</mo>
+</mrow></math></td><td class="eq-no">(7.10)</td></tr></table>
+<!-- l. 198 --><p class="indent">   and for fixed memberships every sample is tried as the medoid of every
+cluster, and the one with the smallest weighted sum of squared geodesic distances
+is taken, </p><table class="equation"><tr><td>
+<!-- l. 199 --><p class="indent">
+</p><!-- l. 199 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x9-138004r11"></mstyle><!-- endlabel --><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo><msub><mrow> <mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>j</mi></mrow></msub><mo class="MathClass-punc" stretchy="false">,</mo><mspace class="qquad" width="2em"></mspace><mi>j</mi> <mo class="MathClass-rel" stretchy="false">=</mo><msub><mrow><mstyle class="qopname"> arg<mspace class="thinspace" width="0.17em"></mspace>min</mstyle><mo> ⁡<!-- FUNCTION APPLICATION --> </mo><!-- nolimits --></mrow><mrow><mi>l</mi></mrow></msub><munderover accent="false" accentunder="false"><mrow><mo> ∑</mo>
+</mrow><mrow><mi>k</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>N</mi></mrow></munderover><msubsup><mrow><mi>μ</mi></mrow><mrow>
+<mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup><mspace class="thinspace" width="0.17em"></mspace><msub><mrow><mi>d</mi></mrow><mrow>
+<mi>g</mi></mrow></msub><msup><mrow><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub><mo class="MathClass-punc" stretchy="false">,</mo><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>l</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow><mrow><mn>2</mn></mrow></msup><mo class="MathClass-punc" stretchy="false">,</mo>
+</mrow></math></td><td class="eq-no">(7.11)</td></tr></table>
+<!-- l. 203 --><p class="indent">   which is one matrix product <!-- l. 203 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msubsup><mrow><mstyle mathvariant="bold"><mi>D</mi></mstyle></mrow><mrow><mi>g</mi></mrow><mrow><mo class="MathClass-open" stretchy="false">(</mo><mn>2</mn><mo class="MathClass-close" stretchy="false">)</mo></mrow></msubsup><msup><mrow><mo class="MathClass-open" stretchy="false">(</mo><msup><mrow><mstyle mathvariant="bold"><mi>U</mi></mstyle></mrow><mrow><mi>m</mi></mrow></msup><mo class="MathClass-close" stretchy="false">)</mo></mrow><mrow><mstyle mathvariant="sans-serif"><mi>T</mi></mstyle></mrow></msup></mrow></math>
+of the squared distance matrix with the powered memberships,
+<!-- l. 203 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>O</mi><mo class="MathClass-open" stretchy="false">(</mo><mi>c</mi><msup><mrow><mi>N</mi></mrow><mrow><mn>2</mn></mrow></msup><mo class="MathClass-close" stretchy="false">)</mo></mrow></math> per
+iteration. The iterations stop when the medoids no longer change (or
+<!-- l. 203 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mtext class="qopname">max</mtext><mo> ⁡<!-- FUNCTION APPLICATION --> </mo> <mo class="MathClass-rel" stretchy="false">|</mo><mi mathvariant="normal">Δ</mi><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><mo class="MathClass-rel" stretchy="false">|</mo><mo class="MathClass-rel" stretchy="false">&lt;</mo> <mi>𝜖</mi></mrow></math>). The paper
+starts from <!-- l. 203 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>c</mi></math>
+arbitrary samples. <span class="ec-lmtt-10x-x-109">fuzzyclust </span>defaults to a
+D<!-- l. 203 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msup><mrow></mrow><mrow><mn>2</mn></mrow></msup></math>-weighted
+seeding on geodesic distances (<code class="lstinline"><span style="color:#000000">init=</span><span style="color:#008662">"kmeans++"</span></code>), because a medoid rarely migrates
+across a penalized bridge during the iterations: a random start that puts every
+medoid into one graph component leaves the other components without a
+prototype. Random starts with restarts are available as well. The dense geodesic
+distance matrix and the exhaustive medoid search limit the method to a few
+thousand samples; the paper points to sampling schemes such as CLARA [<a id="x9-138005"></a><a href="bibliography.html#cite.0@kaufman:1990:groups">5</a>] for
+larger data sets. A new sample has no geodesic distance of its own; <span class="ec-lmtt-10x-x-109">fuzzyclust</span>
+enters the graph at the nearest training sample and adds the Euclidean
+distance to it, which is exact for training points and adequate close to the
+manifold.
+</p>
+<p><img alt="Algorithm" class="algobox" src="main_web45x.svg"/><a id="x9-138006r2"></a><a id="x9-138007r28"></a><a id="x9-138008r1"></a><a id="x9-138009r2"></a><a id="x9-138010r3"></a><a id="x9-138011r4"></a><a id="x9-138012r5"></a><a id="x9-138013r6"></a><a id="x9-138014r7"></a><a id="x9-138015r8"></a><a id="x9-138016r9"></a> </p><div class="box summarybox">
+<!-- l. 219 --><p class="noindent"><span class="ec-lmbx-10x-x-109">In a nutshell: Geodesic fuzzy c-medoids</span>
+</p>
+<ul class="itemize1">
+<li class="itemize">The c-means functional with the geodesic (shortest-path) distance of a
+     <!-- l. 221 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math>-nearest-neighbor
+     graph and medoids as prototypes: clusters follow the manifold, and
+     memberships fade along it, not across it.
+     </li>
+<li class="itemize">One structural parameter, <!-- l. 222 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math>:
+     large enough to keep each manifold connected, small enough not to
+     connect different ones; the component count and the plateau of the
+     result over <!-- l. 222 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math>
+     show the usable range.
+     </li>
+<li class="itemize">Disconnected components are bridged with a penalty (kept apart, all
+     distances finite) or, when they are fragments of one manifold, with
+     plain bridges; <!-- l. 223 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>m</mi></math>
+     plays its usual role.
+     </li>
+<li class="itemize"><!-- l. 224 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>O</mi><mo class="MathClass-open" stretchy="false">(</mo><msup><mrow><mi>N</mi></mrow><mrow><mn>2</mn></mrow></msup><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>
+     memory and <!-- l. 224 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>O</mi><mo class="MathClass-open" stretchy="false">(</mo><mi>c</mi><msup><mrow><mi>N</mi></mrow><mrow><mn>2</mn></mrow></msup><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>
+     time  per  iteration,  which  suits  small  and  medium  data  sets;  new
+     samples enter through their nearest training sample.</li></ul>
+</div>
+<!-- l. 228 --><p class="noindent">
+</p>
+<h4 class="subsectionHead"><span class="titlemark">7.2.6   </span> <a id="x9-1390007.2.6"></a>Algorithm I: clustering of the Isomap projection</h4>
+<!-- l. 230 --><p class="noindent">The paper’s first route leaves the manifold entirely to Isomap and clusters its
+output. Classical multidimensional scaling [<a id="x9-139001"></a><a href="bibliography.html#cite.0@torgerson:1952:mds">92</a>] of the geodesic distance matrix
+<!-- l. 230 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>D</mi></mstyle></mrow><mrow><mi>g</mi></mrow></msub></math> gives
+coordinates <!-- l. 230 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mstyle mathvariant="bold"><mi>y</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">∈</mo> <msup><mrow><mi>ℝ</mi></mrow><mrow><mi>q</mi></mrow></msup></mrow></math>
+that reproduce the geodesic distances as well as possible: with
+<!-- l. 230 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mstyle mathvariant="bold"><mi>H</mi></mstyle> <mo class="MathClass-rel" stretchy="false">=</mo> <mstyle mathvariant="bold"><mi>I</mi></mstyle> <mo class="MathClass-bin" stretchy="false">−</mo><mstyle displaystyle="false"><mfrac><mrow><mn>1</mn>
+</mrow><mrow><mi>N</mi> </mrow></mfrac></mstyle><mstyle mathvariant="bold"><mn>1</mn></mstyle><msup><mrow><mstyle mathvariant="bold"><mn>1</mn></mstyle></mrow><mrow><mstyle mathvariant="sans-serif"><mi>T</mi></mstyle></mrow></msup></mrow></math>, the matrix
+<!-- l. 230 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mstyle mathvariant="bold"><mi>B</mi></mstyle> <mo class="MathClass-rel" stretchy="false">=</mo> <mo class="MathClass-bin" stretchy="false">−</mo><mstyle displaystyle="false"><mfrac><mrow><mn>1</mn>
+</mrow><mrow><mn>2</mn></mrow></mfrac></mstyle><mstyle mathvariant="bold"><mi>H</mi></mstyle><msubsup><mrow><mstyle mathvariant="bold"><mi>D</mi></mstyle></mrow><mrow><mi>g</mi></mrow><mrow><mo class="MathClass-open" stretchy="false">(</mo><mn>2</mn><mo class="MathClass-close" stretchy="false">)</mo></mrow></msubsup><mstyle mathvariant="bold"><mi>H</mi></mstyle></mrow></math> is decomposed,
+and <!-- l. 230 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mstyle mathvariant="bold"><mi>Y</mi></mstyle> <mo class="MathClass-rel" stretchy="false">=</mo><msub><mrow> <mstyle mathvariant="bold"><mi>Q</mi></mstyle></mrow><mrow><mi>q</mi></mrow></msub><msubsup><mrow><mstyle mathvariant="bold-italic"><mstyle mathvariant="bold"><mi>Λ</mi></mstyle></mstyle></mrow><mrow><mi>q</mi></mrow><mrow><mn>1</mn><mo class="MathClass-bin" stretchy="false">∕</mo><mn>2</mn></mrow></msubsup></mrow></math> is formed
+from its <!-- l. 230 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>q</mi></math> largest
+eigenpairs. The discarded share of the eigenvalue mass is the residual variance, and its
+decrease with <!-- l. 230 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>q</mi></math>
+indicates the intrinsic dimension of the manifold. Fuzzy c-means is run on
+<!-- l. 230 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mstyle mathvariant="bold"><mi>Y</mi></mstyle></math>, and
+each center is “re-projected” into the feature space as the sample whose
+projection is closest to it, so that the prototypes lie on the manifold here too; the
+cost (<a href="#x9-138002r9">7.9<!-- tex4ht:ref: eq:graph:J  --></a>) evaluated with geodesic distances to the re-projected centers compares
+the two routes. The weakness is the projection: Isomap can only embed a
+connected graph (hence the bridges), and a projection that folds the manifold
+spoils the clustering. The paper found Algorithm II slightly better on the S-curve
+and the spiral; in <span class="ec-lmtt-10x-x-109">fuzzyclust </span>the two reach nearly the same geodesic cost
+(fig. <a href="#x9-146002r18">7.18</a>).
+                                                                     
+
+                                                                     
+</p>
+<p><img alt="Algorithm" class="algobox" src="main_web46x.svg"/><a id="x9-139002r3"></a><a id="x9-139003r1"></a><a id="x9-139004r2"></a><a id="x9-139005r3"></a><a id="x9-139006r4"></a> </p><div class="box summarybox">
+<!-- l. 240 --><p class="noindent"><span class="ec-lmbx-10x-x-109">In a nutshell: Clustering of the Isomap projection</span>
+</p>
+<ul class="itemize1">
+<li class="itemize">Isomap unfolds the manifold, FCM clusters the flat picture, and the
+     centers return to the data space as the closest samples.
+     </li>
+<li class="itemize">Needs  a  connected  (or  bridged)  graph  and  a  good  projection;
+     the  residual  variance  tells  how  much  of  the  geodesic  geometry
+     <!-- l. 243 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>q</mi></math>
+     dimensions keep.
+     </li>
+<li class="itemize">The  graph  parameters  of  Algorithm  II  (components  are  always
+     bridged) plus the embedding dimension <!-- l. 244 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>q</mi></math>;
+     the FCM step inherits <code class="lstinline"><span style="color:#000000">init</span></code> and <code class="lstinline"><span style="color:#000000">n_init</span></code>.</li></ul>
+</div>
+<!-- l. 248 --><p class="noindent">
+</p>
+<h3 class="sectionHead"><span class="titlemark">7.3   </span> <a id="x9-1400007.3"></a>Using it in fuzzyclust</h3>
+<!-- l. 250 --><p class="noindent">Everything in this chapter is in <span class="ec-lmtt-10x-x-109">fuzzyclust.graph</span>. The three estimators derive
+from <span class="ec-lmtt-10x-x-109">BaseFuzzyClusterer </span>and have the usual methods <span class="ec-lmtt-10x-x-109">fit</span>, <span class="ec-lmtt-10x-x-109">predict</span>,
+<span class="ec-lmtt-10x-x-109">predict_proba</span>, <span class="ec-lmtt-10x-x-109">transform </span>and <span class="ec-lmtt-10x-x-109">score</span>. The graph utilities are functions
+built on the sparse-graph routines of SciPy, so no optional dependency is
+needed; <span class="ec-lmtt-10x-x-109">networkx </span>is accepted only as an alternative backend for the
+tree.
+</p>
+<div class="box apibox">
+<!-- l. 252 --><p class="noindent"><span class="ec-lmtk-10x-x-109">fuzzyclust.graph.MSTClustering</span>
+</p><!-- l. 253 --><p class="indent"> <span class="ec-lmtt-10x-x-109">n_clusters=None</span>, <span class="ec-lmtt-10x-x-109">threshold=None</span>, <span class="ec-lmtt-10x-x-109">inconsistency=2.5</span>,
+<span class="ec-lmtt-10x-x-109">inconsistency_std=None</span>, <span class="ec-lmtt-10x-x-109">n_hops=2</span>, <span class="ec-lmtt-10x-x-109">criterion="hypervolume"|
+"fukuyama_sugeno"</span>, <span class="ec-lmtt-10x-x-109">min_gain=0.15</span>, <span class="ec-lmtt-10x-x-109">min_cluster_size=5</span>, <span class="ec-lmtt-10x-x-109">max_clusters=20</span>,
+<span class="ec-lmtt-10x-x-109">refine="gg"|"fcm"|None</span>, <span class="ec-lmtt-10x-x-109">m=2.0</span>, <span class="ec-lmtt-10x-x-109">gamma=0.0</span>, <span class="ec-lmtt-10x-x-109">tol</span>, <span class="ec-lmtt-10x-x-109">max_iter</span>, <span class="ec-lmtt-10x-x-109">backend="scipy"|
+"networkx"</span>, <span class="ec-lmtt-10x-x-109">random_state</span>, <span class="ec-lmtt-10x-x-109">verbose</span>.<br class="newline"/>Attributes <span class="ec-lmtt-10x-x-109">n_clusters_</span>, <span class="ec-lmtt-10x-x-109">tree_labels_ </span>(crisp tree partition), <span class="ec-lmtt-10x-x-109">labels_</span>,
+<span class="ec-lmtt-10x-x-109">membership_</span>, <span class="ec-lmtt-10x-x-109">cluster_centers_</span>, <span class="ec-lmtt-10x-x-109">covariances_</span>, <span class="ec-lmtt-10x-x-109">mst_edges_</span>, <span class="ec-lmtt-10x-x-109">mst_weights_</span>,
+<span class="ec-lmtt-10x-x-109">cut_edges_</span>, <span class="ec-lmtt-10x-x-109">cut_phases_ </span>(0: length criteria, 1: volume), <span class="ec-lmtt-10x-x-109">cut_quality_</span>
+(<!-- l. 254 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi mathvariant="italic">CP</mi></mrow></math>), <span class="ec-lmtt-10x-x-109">hypervolumes_</span>,
+<span class="ec-lmtt-10x-x-109">cluster_similarity_ </span>(<!-- l. 254 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>S</mi></mrow><mrow><mi mathvariant="italic">ij</mi></mrow></msub></math>),
+<span class="ec-lmtt-10x-x-109">refiner_ </span>(the fitted GG or FCM). <span class="ec-lmtt-10x-x-109">min_gain=1.0 </span>disables the splitting phase
+(unless <span class="ec-lmtt-10x-x-109">n_clusters </span>is given); <span class="ec-lmtt-10x-x-109">threshold=None </span>and <span class="ec-lmtt-10x-x-109">inconsistency=None</span>, with
+the default <span class="ec-lmtt-10x-x-109">inconsistency_std=None</span>, disable the length criteria.
+</p>
+</div>
+<div class="box apibox">
+<!-- l. 257 --><p class="noindent"><span class="ec-lmtk-10x-x-109">fuzzyclust.graph.GeodesicFCM</span>
+</p><!-- l. 258 --><p class="indent"> <span class="ec-lmtt-10x-x-109">n_clusters=3</span>, <span class="ec-lmtt-10x-x-109">n_neighbors=10</span>, <span class="ec-lmtt-10x-x-109">radius=None</span>, <span class="ec-lmtt-10x-x-109">connect_components=True</span>,
+<span class="ec-lmtt-10x-x-109">bridge_penalty=1.0</span>, <span class="ec-lmtt-10x-x-109">m=2.0</span>, <span class="ec-lmtt-10x-x-109">tol</span>, <span class="ec-lmtt-10x-x-109">max_iter</span>, <span class="ec-lmtt-10x-x-109">init="kmeans++"|"random"|
+index array</span>, <span class="ec-lmtt-10x-x-109">n_init=1</span>, <span class="ec-lmtt-10x-x-109">random_state</span>, <span class="ec-lmtt-10x-x-109">verbose</span>.<br class="newline"/>Attributes <span class="ec-lmtt-10x-x-109">medoid_indices_</span>, <span class="ec-lmtt-10x-x-109">cluster_centers_ </span>(the medoids), <span class="ec-lmtt-10x-x-109">membership_</span>,
+<span class="ec-lmtt-10x-x-109">labels_</span>, <span class="ec-lmtt-10x-x-109">geodesic_distances_</span>, <span class="ec-lmtt-10x-x-109">neighbors_graph_</span>, <span class="ec-lmtt-10x-x-109">n_components_</span>,
+<span class="ec-lmtt-10x-x-109">component_labels_</span>, <span class="ec-lmtt-10x-x-109">bridge_edges_</span>, <span class="ec-lmtt-10x-x-109">objective_</span>, <span class="ec-lmtt-10x-x-109">objective_history_</span>,
+<span class="ec-lmtt-10x-x-109">n_iter_</span>. New samples enter the graph through their nearest training
+sample.
+</p>
+</div>
+<div class="box apibox">
+<!-- l. 262 --><p class="noindent"><span class="ec-lmtk-10x-x-109">fuzzyclust.graph.IsomapFCM</span>
+</p><!-- l. 263 --><p class="indent"> <span class="ec-lmtt-10x-x-109">n_clusters=3</span>, <span class="ec-lmtt-10x-x-109">n_components=2</span>, <span class="ec-lmtt-10x-x-109">n_neighbors=10</span>, <span class="ec-lmtt-10x-x-109">radius=None</span>,
+<span class="ec-lmtt-10x-x-109">bridge_penalty=1.0</span>, <span class="ec-lmtt-10x-x-109">m</span>, <span class="ec-lmtt-10x-x-109">tol</span>, <span class="ec-lmtt-10x-x-109">max_iter</span>, <span class="ec-lmtt-10x-x-109">init</span>, <span class="ec-lmtt-10x-x-109">n_init</span>, <span class="ec-lmtt-10x-x-109">random_state</span>,
+<span class="ec-lmtt-10x-x-109">verbose</span>.<br class="newline"/>Attributes <span class="ec-lmtt-10x-x-109">embedding_ </span>(<!-- l. 264 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mstyle mathvariant="bold"><mi>Y</mi></mstyle></math>),
+<span class="ec-lmtt-10x-x-109">embedded_centers_</span>, <span class="ec-lmtt-10x-x-109">medoid_indices_</span>, <span class="ec-lmtt-10x-x-109">cluster_centers_ </span>(re-projected),
+<span class="ec-lmtt-10x-x-109">membership_</span>, <span class="ec-lmtt-10x-x-109">labels_</span>, <span class="ec-lmtt-10x-x-109">geodesic_objective_</span>, <span class="ec-lmtt-10x-x-109">residual_variance_</span>, <span class="ec-lmtt-10x-x-109">fcm_ </span>and
+the graph attributes of <span class="ec-lmtt-10x-x-109">GeodesicFCM</span>.
+</p>
+</div>
+<div class="box apibox">
+<!-- l. 267 --><p class="noindent"><span class="ec-lmtk-10x-x-109">graph utilities, data generators and plot helpers</span>
+</p><!-- l. 268 --><p class="indent"> <span class="ec-lmtt-10x-x-109">minimum_spanning_tree(X, backend)</span>
+<!-- l. 268 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow> <mo class="MathClass-rel" stretchy="false">→</mo></mrow></math>
+edges, lengths; <span class="ec-lmtt-10x-x-109">neighbors_graph(X, n_neighbors, radius)</span>
+<!-- l. 268 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow> <mo class="MathClass-rel" stretchy="false">→</mo></mrow></math> sparse adjacency;
+<span class="ec-lmtt-10x-x-109">geodesic_distances(X, n_neighbors, radius, connect_components, bridge_penalty)</span>
+<!-- l. 268 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow> <mo class="MathClass-rel" stretchy="false">→</mo></mrow></math> <span class="ec-lmtt-10x-x-109">Bunch(distances,
+ graph, n_components, component_labels, bridges)</span>; <span class="ec-lmtt-10x-x-109">isomap_embedding(D,
+ n_components) </span><!-- l. 268 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow> <mo class="MathClass-rel" stretchy="false">→</mo></mrow></math>
+coordinates, eigenvalues; <span class="ec-lmtt-10x-x-109">fuzzy_cluster_similarity(U)</span>
+<!-- l. 268 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow> <mo class="MathClass-rel" stretchy="false">→</mo></mrow></math>
+<!-- l. 268 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>S</mi></mrow><mrow><mi mathvariant="italic">ij</mi></mrow></msub></math>.
+Generators <span class="ec-lmtt-10x-x-109">make_chained_blobs</span>, <span class="ec-lmtt-10x-x-109">make_density_blobs</span>, <span class="ec-lmtt-10x-x-109">make_s_curve</span>
+(with <span class="ec-lmtt-10x-x-109">make_rings</span>, <span class="ec-lmtt-10x-x-109">make_two_moons</span>, <span class="ec-lmtt-10x-x-109">make_curved_manifold </span>of
+<span class="ec-lmtt-10x-x-109">fuzzyclust.datasets</span>). Plots <span class="ec-lmtt-10x-x-109">plot_mst(X, model)</span>, <span class="ec-lmtt-10x-x-109">plot_neighbors_graph(X,
+ graph_or_model)</span>, <span class="ec-lmtt-10x-x-109">plot_geodesic_path(X, graph, source, target)</span>,
+<span class="ec-lmtt-10x-x-109">plot_similarity_dendrogram(S)</span>.
+</p>
+</div>
+<!-- l. 271 --><p class="indent">   The classical tree clusterer and the hybrid one differ in two parameters:
+</p><!-- l. 272 --><pre class="lstinputlisting" id="listing-59"><span class="label"><a id="x9-140002r48"></a></span><span style="color:#000000"><span class="ec-lmtt-9">tree_only</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= MSTClustering(threshold=</span></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">None</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">inconsistency=</span></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">None</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">min_gain=1.0, refine=</span></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">None</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span><span style="color:#000000"><span class="ec-lmtt-9">.</span></span><span style="color:#000000"><span class="ec-lmtt-9">fit</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">X</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span> 
+<span class="label"><a id="x9-140003r49"></a></span><span style="color:#000000"><span class="ec-lmtt-9">zahn</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= MSTClustering(inconsistency=2.5, n_hops=2, min_gain=1.0, refine=</span></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">None</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span><span style="color:#000000"><span class="ec-lmtt-9">.</span></span><span style="color:#000000"><span class="ec-lmtt-9">fit</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">X</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span> 
+<span class="label"><a id="x9-140004r50"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">print</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">tree</span></span><span style="color:#008662"> <span class="ec-lmtt-9">only  :"</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">tree_only.n_clusters_,</span> </span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">cluster</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span> 
+<span class="label"><a id="x9-140005r51"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">print</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">Zahn</span></span><span style="color:#008662"> <span class="ec-lmtt-9">(f=2.5):"</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">zahn.n_clusters_,</span> </span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">clusters</span></span><span style="color:#008662"><span class="ec-lmtt-9">,</span></span><span style="color:#008662"> <span class="ec-lmtt-9">cut edges:"</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">len</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">zahn</span></span><span style="color:#000000"><span class="ec-lmtt-9">.</span></span><span style="color:#000000"><span class="ec-lmtt-9">cut_edges_</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span>
+   </pre>
+<!-- l. 273 --><pre class="lstinputlisting" id="listing-60"><span class="label"><a id="x9-140009r72"></a></span><span style="color:#000000"><span class="ec-lmtt-9">mst</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= MSTClustering(random_state=0).fit(X)</span> 
+</span><span class="label"><a id="x9-140010r73"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">print</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">clusters</span></span><span style="color:#008662"> <span class="ec-lmtt-9">found:"</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">mst.n_clusters_)</span> 
+</span><span class="label"><a id="x9-140011r74"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">print</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">cut</span></span><span style="color:#008662"> <span class="ec-lmtt-9">phases    :"</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">mst.cut_phases_,</span> </span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"> <span class="ec-lmtt-9">(0 = length criteria, 1 = volume criterion)"</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span> 
+<span class="label"><a id="x9-140012r75"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">print</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">hypervolumes</span></span><span style="color:#008662">  <span class="ec-lmtt-9">:"</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">mst.hypervolumes_.</span></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">round</span></span><span style="color:#000000"><span class="ec-lmtt-9">(3)</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span>
+   </pre>
+<!-- l. 274 --><p class="noindent">The refinement and its adequacy measures are part of the fit, and the number of
+clusters can be prescribed and scanned with the validity functions of the toolbox:
+</p><!-- l. 275 --><pre class="lstinputlisting" id="listing-61"><span class="label"><a id="x9-140016r96"></a></span><span style="color:#000000"><span class="ec-lmtt-9">gg_random</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= GG(n_clusters=mst.n_clusters_, random_state=0).fit(X)</span> 
+</span><span class="label"><a id="x9-140017r97"></a></span><span style="color:#000000"><span class="ec-lmtt-9">ari_tree</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= adjusted_rand_score(y[blob], mst.tree_labels_[blob])</span> 
+</span><span class="label"><a id="x9-140018r98"></a></span><span style="color:#000000"><span class="ec-lmtt-9">ari_gg</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= adjusted_rand_score(y[blob], mst.labels_[blob])</span> 
+</span><span class="label"><a id="x9-140019r99"></a></span><span style="color:#000000"><span class="ec-lmtt-9">ari_random</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= adjusted_rand_score(y[blob], gg_random.labels_[blob])</span> 
+</span><span class="label"><a id="x9-140020r100"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">print</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">f</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">ARI</span></span><span style="color:#008662"> <span class="ec-lmtt-9">of the blobs: tree partition {ari_tree:.2f}, MST-GG {ari_gg:.2f}, GG from random start {ari_random:.2f}"</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span> 
+<span class="label"><a id="x9-140021r101"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">print</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">cut</span></span><span style="color:#008662"> <span class="ec-lmtt-9">adequacy CP(e):"</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">mst.cut_quality_.</span></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">round</span></span><span style="color:#000000"><span class="ec-lmtt-9">(2)</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span>
+   </pre>
+<!-- l. 276 --><pre class="lstinputlisting" id="listing-62"><span class="label"><a id="x9-140025r50"></a></span><span style="color:#000000"><span class="ec-lmtt-9">cs</span></span><span style="color:#000000"> <span class="ec-lmtt-9">=</span> </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">range</span></span><span style="color:#000000"><span class="ec-lmtt-9">(2,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">9)</span> 
+</span><span class="label"><a id="x9-140026r51"></a></span><span style="color:#000000"><span class="ec-lmtt-9">rows</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= []</span> 
+</span><span class="label"><a id="x9-140027r52"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">for</span></span><span style="color:#000000"> <span class="ec-lmtt-9">c</span> </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">in</span></span><span style="color:#000000"> <span class="ec-lmtt-9">cs:</span> 
+</span><span class="label"><a id="x9-140028r53"></a></span><span style="color:#000000">    <span class="ec-lmtt-9">model = MSTClustering(n_clusters=c, random_state=0).fit(X)</span> 
+</span><span class="label"><a id="x9-140029r54"></a></span><span style="color:#000000">    <span class="ec-lmtt-9">U, V = model.membership_, model.cluster_centers_</span> 
+</span><span class="label"><a id="x9-140030r55"></a></span><span style="color:#000000">    <span class="ec-lmtt-9">rows.append((</span> 
+</span><span class="label"><a id="x9-140031r56"></a></span><span style="color:#000000">        <span class="ec-lmtt-9">validity.fuzzy_hypervolume(X, U, V),</span> 
+</span><span class="label"><a id="x9-140032r57"></a></span><span style="color:#000000">        <span class="ec-lmtt-9">validity.partition_density(X, U, V),</span> 
+</span><span class="label"><a id="x9-140033r58"></a></span><span style="color:#000000">        <span class="ec-lmtt-9">validity.average_partition_density(X, U, V),</span> 
+</span><span class="label"><a id="x9-140034r59"></a></span><span style="color:#000000">        <span class="ec-lmtt-9">adjusted_rand_score(y, model.labels_),</span> 
+</span><span class="label"><a id="x9-140035r60"></a></span><span style="color:#000000">    <span class="ec-lmtt-9">))</span> 
+</span><span class="label"><a id="x9-140036r61"></a></span><span style="color:#000000"><span class="ec-lmtt-9">rows</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= np.array(rows)</span> 
+</span><span class="label"><a id="x9-140037r62"></a></span><span style="color:#000000"><span class="ec-lmtt-9">auto</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= MSTClustering(random_state=0).fit(X)</span> 
+</span><span class="label"><a id="x9-140038r63"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">print</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">volume</span></span><span style="color:#008662"> <span class="ec-lmtt-9">criterion alone picks"</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">auto.n_clusters_,</span> </span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">clusters</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span>
+   </pre>
+<!-- l. 277 --><p class="noindent">The geodesic clusterer is a drop-in replacement for FCM, and the geodesic distances
+and paths are available on their own:  </p><!-- l. 278 --><pre class="lstinputlisting" id="listing-63"><span class="label"><a id="x9-140042r51"></a></span><span style="color:#000000"><span class="ec-lmtt-9">k</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= 8</span> 
+</span><span class="label"><a id="x9-140043r52"></a></span><span style="color:#000000"><span class="ec-lmtt-9">results</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= {}</span> 
+</span><span class="label"><a id="x9-140044r53"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">for</span></span><span style="color:#000000"> <span class="ec-lmtt-9">name, (X, y)</span> </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">in</span></span><span style="color:#000000"> <span class="ec-lmtt-9">datasets.items():</span> 
+</span><span class="label"><a id="x9-140045r54"></a></span><span style="color:#000000">    <span class="ec-lmtt-9">fcm = FCM(n_clusters=2, random_state=0).fit(X)</span> 
+</span><span class="label"><a id="x9-140046r55"></a></span><span style="color:#000000">    <span class="ec-lmtt-9">geo = GeodesicFCM(n_clusters=2, n_neighbors=k, random_state=0).fit(X)</span> 
+</span><span class="label"><a id="x9-140047r56"></a></span><span style="color:#000000">    <span class="ec-lmtt-9">results[name] = (fcm, geo)</span> 
+</span><span class="label"><a id="x9-140048r57"></a></span><span style="color:#000000">    </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">print</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">f</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">{</span></span><span style="color:#008662"><span class="ec-lmtt-9">name</span></span><span style="color:#008662"><span class="ec-lmtt-9">:16</span></span><span style="color:#008662"><span class="ec-lmtt-9">s</span></span><span style="color:#008662"><span class="ec-lmtt-9">}:</span></span><span style="color:#008662"> <span class="ec-lmtt-9">FCM ARI = {adjusted_rand_score(y, fcm.labels_):.2f}, "</span> 
+</span><span class="label"><a id="x9-140049r58"></a></span><span style="color:#000000">          <span class="ec-lmtt-9">f</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">geodesic</span></span><span style="color:#008662"> <span class="ec-lmtt-9">c-medoids ARI = {adjusted_rand_score(y, geo.labels_):.2f} "</span> 
+</span><span class="label"><a id="x9-140050r59"></a></span><span style="color:#000000">          <span class="ec-lmtt-9">f</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">({</span></span><span style="color:#008662"><span class="ec-lmtt-9">geo</span></span><span style="color:#008662"><span class="ec-lmtt-9">.</span></span><span style="color:#008662"><span class="ec-lmtt-9">n_components_</span></span><span style="color:#008662"><span class="ec-lmtt-9">}</span></span><span style="color:#008662"> <span class="ec-lmtt-9">graph component(s), {geo.n_iter_} iterations)"</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span>
+   </pre>
+<!-- l. 279 --><pre class="lstinputlisting" id="listing-64"><span class="label"><a id="x9-140054r50"></a></span><span style="color:#000000"><span class="ec-lmtt-9">geo</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= geodesic_distances(X, n_neighbors=8)</span> 
+</span><span class="label"><a id="x9-140055r51"></a></span><span style="color:#000000"><span class="ec-lmtt-9">D</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">G = geo.distances, geo.graph</span> 
+</span><span class="label"><a id="x9-140056r52"></a></span><span style="color:#6B7785"><span class="ec-lmtti-10x-x-90">#</span></span><span style="color:#6B7785"> <span class="ec-lmtti-10x-x-90">two samples of the first arm, far apart along the arm</span> 
+</span><span class="label"><a id="x9-140057r53"></a></span><span style="color:#000000"><span class="ec-lmtt-9">arm</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= np.flatnonzero(y == 0)</span> 
+</span><span class="label"><a id="x9-140058r54"></a></span><span style="color:#000000"><span class="ec-lmtt-9">radius</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= np.linalg.norm(X[arm], axis=1)</span> 
+</span><span class="label"><a id="x9-140059r55"></a></span><span style="color:#000000"><span class="ec-lmtt-9">source</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">target = arm[radius.argmin()], arm[radius.argmax()]</span> 
+</span><span class="label"><a id="x9-140060r56"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">print</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">f</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">Euclidean</span></span><span style="color:#008662"> <span class="ec-lmtt-9">distance {np.linalg.norm(X[source] - X[target]):.2f}, geodesic distance {D[source, target]:.2f}"</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span>
+   </pre>
+<!-- l. 280 --><pre class="lstinputlisting" id="listing-65"><span class="label"><a id="x9-140064r88"></a></span><span style="color:#000000"><span class="ec-lmtt-9">fcm</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= FCM(n_clusters=8, random_state=0).fit(Xs)</span> 
+</span><span class="label"><a id="x9-140065r89"></a></span><span style="color:#000000"><span class="ec-lmtt-9">geo</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= GeodesicFCM(n_clusters=8, n_neighbors=10, random_state=0).fit(Xs)</span> 
+</span><span class="label"><a id="x9-140066r90"></a></span><span style="color:#000000"><span class="ec-lmtt-9">iso</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= IsomapFCM(n_clusters=8, n_components=2, n_neighbors=10, random_state=0).fit(Xs)</span> 
+</span><span class="label"><a id="x9-140067r91"></a></span><span style="color:#6B7785"><span class="ec-lmtti-10x-x-90">#</span></span><span style="color:#6B7785"> <span class="ec-lmtti-10x-x-90">geodesic cost of the FCM partition, with the samples closest to its centers as prototypes</span> 
+</span><span class="label"><a id="x9-140068r92"></a></span><span style="color:#000000"><span class="ec-lmtt-9">Dg</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= geo.geodesic_distances_</span> 
+</span><span class="label"><a id="x9-140069r93"></a></span><span style="color:#000000"><span class="ec-lmtt-9">fcm_proxies</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= np.linalg.norm(Xs[:,</span> </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">None</span></span><span style="color:#000000"><span class="ec-lmtt-9">]</span></span><span style="color:#000000"> <span class="ec-lmtt-9">- fcm.cluster_centers_[</span></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">None</span></span><span style="color:#000000"><span class="ec-lmtt-9">],</span></span><span style="color:#000000"> <span class="ec-lmtt-9">axis=2).argmin(axis=0)</span> 
+</span><span class="label"><a id="x9-140070r94"></a></span><span style="color:#000000"><span class="ec-lmtt-9">J_fcm</span></span><span style="color:#000000"> <span class="ec-lmtt-9">=</span> </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">float</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">np</span></span><span style="color:#000000"><span class="ec-lmtt-9">.</span></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">sum</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">fcm</span></span><span style="color:#000000"><span class="ec-lmtt-9">.</span></span><span style="color:#000000"><span class="ec-lmtt-9">membership_</span></span><span style="color:#000000"><span class="ec-lmtt-9">**2</span></span><span style="color:#000000"> <span class="ec-lmtt-9">* Dg[:, fcm_proxies] ** 2))</span> 
+</span><span class="label"><a id="x9-140071r95"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">print</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">f</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">geodesic</span></span><span style="color:#008662"> <span class="ec-lmtt-9">cost J: FCM {J_fcm:.0f}, Isomap + FCM {iso.geodesic_objective_:.0f}, "</span> 
+</span><span class="label"><a id="x9-140072r96"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">f</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">geodesic</span></span><span style="color:#008662"> <span class="ec-lmtt-9">c-medoids {geo.objective_:.0f}"</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span> 
+<span class="label"><a id="x9-140073r97"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">print</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">f</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">Isomap</span></span><span style="color:#008662"> <span class="ec-lmtt-9">residual variance with 2 components: {iso.residual_variance_:.3f}"</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span>
+                                                                     
+
+                                                                     
+   </pre>
+<!-- l. 282 --><p class="noindent">
+</p>
+<h3 class="sectionHead"><span class="titlemark">7.4   </span> <a id="x9-1410007.4"></a>Examples</h3>
+<!-- l. 284 --><p class="noindent">
+</p>
+<h4 class="subsectionHead"><span class="titlemark">7.4.1   </span> <a id="x9-1420007.4.1"></a>Cutting, splitting and refining the tree</h4>
+<!-- l. 286 --><p class="noindent">Two Gaussian groups of 120 points are joined by a chain of 25 points (fig. <a href="#x9-142001r3">7.3</a>).
+Without any criterion the tree is one cluster. Zahn’s local criterion with
+<!-- l. 286 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>f</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>2.5</mn></mrow></math> and
+<!-- l. 286 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>k</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>2</mn></mrow></math> flags
+one edge, inside the chain close to the left group, so most of the chain stays
+attached to the right group: the length criteria cannot separate the groups
+from the chain. The volume criterion (fig. <a href="#x9-142002r4">7.4</a>) makes two further cuts,
+one where the chain meets the right group and one in the middle of the
+chain. The result is four tree clusters, the two groups with hypervolumes
+<!-- l. 286 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.29</mn></mrow></math> and
+<!-- l. 286 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.25</mn></mrow></math> (the
+left one with the six chain points left of the length cut) and two chain pieces with
+<!-- l. 286 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.02</mn></mrow></math> and
+<!-- l. 286 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.05</mn></mrow></math>, and the points
+of the two groups are separated exactly. Started from this partition, Gath–Geva keeps it
+(agreement <!-- l. 286 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.98</mn></mrow></math>
+with the tree partition) and delivers the membership contours and covariance
+ellipses of fig. <a href="#x9-142003r5">7.5</a>; the same GG started from a random partition with four
+clusters spends one Gaussian on the whole chain and collapses another
+onto a few points at the edge of the left group. The cut adequacies are
+<!-- l. 286 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mn>0</mn></math> for the cut of
+the length criterion, whose endpoints the refinement re-united in the neighboring chain
+piece, and <!-- l. 286 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1.5</mn></mrow></math>
+and <!-- l. 286 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>2.0</mn></mrow></math>
+for the two volume cuts. The parameter study (fig. <a href="#x9-142004r6">7.6</a>) shows the
+number of tree clusters falling as the required relative gain rises from
+                                                                     
+
+                                                                     
+<!-- l. 286 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.05</mn></mrow></math> to
+<!-- l. 286 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.6</mn></mrow></math>:
+from twenty to six with <code class="lstinline"><span style="color:#000000">min_cluster_size=2</span></code>, from five to two with the
+default size of five, and from three to two with sizes of ten and twenty,
+which remove the small fragments altogether. The printed comparison
+of the refinements shows FCM pulled off the tree partition (agreement
+<!-- l. 286 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.63</mn></mrow></math>)
+while GG stays on it.
+</p>
+<figure class="figure">
+<!-- l. 288 --><p class="noindent"><img alt="Figure 7.3" class="exfig" src="figures/05_graph/plot_01_mst_clustering_1.png"/> <a id="x9-142001r3"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 7.3. </span></span><span class="content"><span class="ec-lmr-10">The minimal spanning tree of two groups joined by a chain (left) and
+the single edge that Zahn’s local criterion removes (right, dashed): the chain stays
+attached to one group.</span> </span></figcaption><!-- tex4ht:label?: x9-142001r3  -->
+<p class="runbox"><a class="colab" href="https://colab.research.google.com/github/ComplexSystemsIntelligence/fuzzyclust/blob/gh-pages/notebooks/auto_examples/05_graph/plot_01_mst_clustering.ipynb">Open in Colab</a><a href="../auto_examples/05_graph/plot_01_mst_clustering.html">Example <code>plot_01_mst_clustering.py</code> in the gallery</a></p></figure>
+<figure class="figure">
+<!-- l. 289 --><p class="noindent"><img alt="Figure 7.4" class="exfig" src="figures/05_graph/plot_01_mst_clustering_2.png"/> <a id="x9-142002r4"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 7.4.  </span></span><span class="content"><span class="ec-lmr-10">The  volume  criterion  cuts  the  chain  (orange  dashed  edges)  and
+separates it from the groups; the length-criterion cut is drawn in vermilion.</span> </span></figcaption><!-- tex4ht:label?: x9-142002r4  -->
+</figure>
+<figure class="figure">
+<!-- l. 290 --><p class="noindent"><img alt="Figure 7.5" class="exfig" src="figures/05_graph/plot_01_mst_clustering_3.png"/> <a id="x9-142003r5"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 7.5. </span></span><span class="content"><span class="ec-lmr-10">Gath–Geva clustering initialized with the tree partition (left) polishes
+it into a fuzzy partition with covariance ellipses; the same GG from a random start
+(right) spends one Gaussian on the chain and collapses another onto a few points
+of the left group.</span> </span></figcaption><!-- tex4ht:label?: x9-142003r5  -->
+</figure>
+<figure class="figure">
+<!-- l. 291 --><p class="noindent"><img alt="Figure 7.6" class="exfig" src="figures/05_graph/plot_01_mst_clustering_4.png"/> <a id="x9-142004r6"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 7.6. </span></span><span class="content"><span class="ec-lmr-10">Left: the number of tree clusters against the required relative volume
+gain for several minimum cluster sizes. Right: FCM as refinement is pulled off the
+tree partition by the chain points.</span> </span></figcaption><!-- tex4ht:label?: x9-142004r6  -->
+</figure>
+<h4 class="subsectionHead"><span class="titlemark">7.4.2   </span> <a id="x9-1430007.4.2"></a>Which edges are inconsistent?</h4>
+<!-- l. 295 --><p class="noindent">The data are a diffuse group of 200 points next to two tight groups of 40 points
+(fig. <a href="#x9-143001r7">7.7</a>). A global threshold of twice the mean edge length cuts eight clusters
+out of the tree, mostly tails of the diffuse group; four times the mean leaves the
+two tight groups merged, and the printed scan shows that no threshold in
+between returns the three groups: the edge between the tight groups is no longer
+than the longest edges inside the diffuse group (fig. <a href="#x9-143002r8">7.8</a>). The local criterion with
+<!-- l. 295 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>f</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>2.5</mn></mrow></math> and
+<!-- l. 295 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>k</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>3</mn></mrow></math>
+finds the three groups exactly, because each separating edge is far longer
+than its own neighbors. Figure <a href="#x9-143003r9">7.9</a> varies the factor and the depth: with
+<!-- l. 295 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>k</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>1</mn></mrow></math> no factor returns the
+three groups (<!-- l. 295 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>f</mi> <mo class="MathClass-rel" stretchy="false">≤</mo><mn>3</mn></mrow></math> fragments
+the diffuse group, <!-- l. 295 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>f</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>4</mn></mrow></math> already
+misses a separation), with <!-- l. 295 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>k</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>3</mn></mrow></math>
+or <!-- l. 295 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mn>5</mn></math> every
+<!-- l. 295 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>f</mi></math> between
+<!-- l. 295 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>2.5</mn></mrow></math> and
+<!-- l. 295 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mn>4</mn></math> works
+(with <!-- l. 295 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>k</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>8</mn></mrow></math>
+from <!-- l. 295 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>f</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>3</mn></mrow></math>
+on), and <!-- l. 295 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>f</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>6</mn></mrow></math>
+misses a separation for every depth; the deviation form needs
+<!-- l. 295 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>k</mi> <mo class="MathClass-rel" stretchy="false">≥</mo><mn>5</mn></mrow></math> at three standard
+deviations and <!-- l. 295 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>k</mi> <mo class="MathClass-rel" stretchy="false">≥</mo><mn>2</mn></mrow></math>
+at four. Raising <code class="lstinline"><span style="color:#000000">min_cluster_size</span></code> tames an eager criterion
+(<!-- l. 295 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>f</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>2</mn></mrow></math>,
+<!-- l. 295 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>k</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>2</mn></mrow></math>: from
+ten clusters at size 5 to four at size 20).
+</p>
+<figure class="figure">
+<!-- l. 297 --><p class="noindent"><img alt="Figure 7.7" class="exfig" src="figures/05_graph/plot_02_mst_cut_criteria_1.png"/> <a id="x9-143001r7"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 7.7. </span></span><span class="content"><span class="ec-lmr-10">Length criteria on a diffuse group and two tight groups. A global
+threshold of twice the mean edge length shatters the diffuse group (left), four times
+the mean merges the tight groups (middle), and Zahn’s local criterion separates the
+three groups (right).</span> </span></figcaption><!-- tex4ht:label?: x9-143001r7  -->
+<p class="runbox"><a class="colab" href="https://colab.research.google.com/github/ComplexSystemsIntelligence/fuzzyclust/blob/gh-pages/notebooks/auto_examples/05_graph/plot_02_mst_cut_criteria.ipynb">Open in Colab</a><a href="../auto_examples/05_graph/plot_02_mst_cut_criteria.html">Example <code>plot_02_mst_cut_criteria.py</code> in the gallery</a></p></figure>
+<figure class="figure">
+<!-- l. 298 --><p class="noindent"><img alt="Figure 7.8" class="exfig" src="figures/05_graph/plot_02_mst_cut_criteria_2.png"/> <a id="x9-143002r8"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 7.8. </span></span><span class="content"><span class="ec-lmr-10">Edge lengths of the tree with the two global thresholds (dashed) and
+the two edges removed by the local criterion (vermilion): the edge between the tight
+groups lies among the long edges of the diffuse group.</span> </span></figcaption><!-- tex4ht:label?: x9-143002r8  -->
+</figure>
+<figure class="figure">
+<!-- l. 299 --><p class="noindent"><img alt="Figure 7.9" class="exfig" src="figures/05_graph/plot_02_mst_cut_criteria_3.png"/> <a id="x9-143003r9"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 7.9. </span></span><span class="content"><span class="ec-lmr-10">Number of clusters found by the ratio form (left) and the deviation
+form (right) of Criterion 2 as a function of the factor and the neighborhood depth;
+the dotted line is the true number.</span> </span></figcaption><!-- tex4ht:label?: x9-143003r9  -->
+</figure>
+<h4 class="subsectionHead"><span class="titlemark">7.4.3   </span> <a id="x9-1440007.4.3"></a>How many clusters?</h4>
+<!-- l. 303 --><p class="noindent">Four Gaussian groups of different sizes are clustered with <code class="lstinline"><span style="color:#000000">n_clusters</span></code> from 2 to 8,
+and the volume indices of Gath and Geva are computed from the refined
+partitions (fig. <a href="#x9-144001r10">7.10</a>). The fuzzy hypervolume falls by 38 % from three to four
+clusters and by less than 3 % for every further split; the partition density rises
+steeply up to four and then stays flat; the average partition density peaks at four
+but is overtaken at eight, where small dense fragments appear. The knee,
+not the extremum, carries the information, and the relative decrease of
+<!-- l. 303 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi mathvariant="italic">FHV</mi> </mrow></math> drops below the
+default <code class="lstinline"><span style="color:#000000">min_gain</span></code> of <!-- l. 303 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.15</mn></mrow></math>
+exactly where the automatic run stops, at four. Two concentric rings (fig. <a href="#x9-144002r11">7.11</a>)
+show the limits of the refinement: the tree partition with two clusters separates
+the rings perfectly, but a Gath–Geva refinement of two clusters fails (ARI
+<!-- l. 303 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.09</mn></mrow></math>),
+because one Gaussian cannot describe a hollow ring and the inner ring is absorbed
+by the broad outer Gaussian. Without a prescribed number, the volume criterion
+keeps splitting the rings into arcs that are approximately Gaussian until <code class="lstinline"><span style="color:#000000">max_clusters</span></code>
+is reached; with <code class="lstinline"><span style="color:#000000">max_clusters=12</span></code> it produces twelve arcs, and the refinement of the
+arcs is faithful. Their fuzzy similarity matrix (fig. <a href="#x9-144003r12">7.12</a>) has its large entries
+between neighboring arcs of the same ring, the single-linkage dendrogram of
+<!-- l. 303 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1</mn> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mi>S</mi></mrow><mrow><mi mathvariant="italic">ij</mi></mrow></msub></mrow></math> has two
+main branches, and cutting it into two groups merges the arcs back into the rings (ARI
+<!-- l. 303 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1.0</mn></mrow></math>). The similarities grow
+with the exponent <!-- l. 303 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>m</mi></math>
+of the refinement (the largest same-ring entry rises from
+<!-- l. 303 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.007</mn></mrow></math> at
+<!-- l. 303 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>m</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>1.5</mn></mrow></math> to
+<!-- l. 303 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.05</mn></mrow></math> at
+<!-- l. 303 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>m</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>4</mn></mrow></math>)
+while the merge stays correct, and the number of arcs follows <code class="lstinline"><span style="color:#000000">max_clusters</span></code>.
+</p>
+<figure class="figure">
+<!-- l. 305 --><p class="noindent"><img alt="Figure 7.10" class="exfig" src="figures/05_graph/plot_03_mst_validation_1.png"/> <a id="x9-144001r10"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 7.10. </span></span><span class="content"><span class="ec-lmr-10">Volume-based validity indices of the MST–GG partitions of four
+groups against the number of clusters: fuzzy hypervolume, partition density, average
+partition density and the relative decrease of the hypervolume with the default
+minimum gain (dashed); the dotted line is the number the automatic run picks.</span> </span></figcaption><!-- tex4ht:label?: x9-144001r10  -->
+<p class="runbox"><a class="colab" href="https://colab.research.google.com/github/ComplexSystemsIntelligence/fuzzyclust/blob/gh-pages/notebooks/auto_examples/05_graph/plot_03_mst_validation.ipynb">Open in Colab</a><a href="../auto_examples/05_graph/plot_03_mst_validation.html">Example <code>plot_03_mst_validation.py</code> in the gallery</a></p></figure>
+<figure class="figure">
+<!-- l. 306 --><p class="noindent"><img alt="Figure 7.11" class="exfig" src="figures/05_graph/plot_03_mst_validation_2.png"/> <a id="x9-144002r11"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 7.11.  </span></span><span class="content"><span class="ec-lmr-10">Two  rings:  the  tree  partition  with  two  clusters  (left),  the  failed
+Gath–Geva refinement of two clusters (middle) and the twelve Gaussian arcs the
+volume criterion produces (right).</span> </span></figcaption><!-- tex4ht:label?: x9-144002r11  -->
+</figure>
+<figure class="figure">
+<!-- l. 307 --><p class="noindent"><img alt="Figure 7.12" class="exfig" src="figures/05_graph/plot_03_mst_validation_3.png"/> <a id="x9-144003r12"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 7.12.  </span></span><span class="content"><span class="ec-lmr-10">Fuzzy  similarity  of  the  twelve  arcs  (left)  and  its  single-linkage
+dendrogram (right): the two branches are the two rings.</span> </span></figcaption><!-- tex4ht:label?: x9-144003r12  -->
+</figure>
+<h4 class="subsectionHead"><span class="titlemark">7.4.4   </span> <a id="x9-1450007.4.4"></a>Geodesic c-medoids versus fuzzy c-means</h4>
+<!-- l. 311 --><p class="noindent">The data sets are two spiral arms, two moons and two rings, each with
+two clusters (fig. <a href="#x9-145001r13">7.13</a>). FCM reaches adjusted Rand indices of only
+<!-- l. 311 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.02</mn></mrow></math>,
+<!-- l. 311 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.24</mn></mrow></math> and
+<!-- l. 311 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.00</mn></mrow></math>, because
+its centers cut straight across the manifolds, while the geodesic c-medoids with
+<!-- l. 311 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>k</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>8</mn></mrow></math>
+recover all three groupings exactly in three to five iterations. The spiral forms one
+graph component in which the path between the arms runs through the
+center; the moons and the rings fall into two components that are bridged
+with a penalty. The memberships (fig. <a href="#x9-145002r14">7.14</a>) fade along the arm from
+the medoid toward its ends, while a point of the other arm that is close
+in the Euclidean sense keeps a membership near zero. The scan over
+<!-- l. 311 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math>
+(fig. <a href="#x9-145003r15">7.15</a>) shows the two failure modes. A small
+<!-- l. 311 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math>
+fragments the sparsely sampled outer parts of the arms into
+components that have to be bridged, and the result degrades; a large
+<!-- l. 311 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math>
+connects the arms where they come close, and the geodesic
+distance loses its meaning. On the spiral the plateau spans
+<!-- l. 311 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>k</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>8</mn></mrow></math> to
+<!-- l. 311 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>15</mn></mrow></math>, on the
+moons <!-- l. 311 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mn>5</mn></math>
+to <!-- l. 311 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mn>8</mn></math>.
+Moons whose gap is narrower than the sample spacing form one component already
+at <!-- l. 311 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>k</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>3</mn></mrow></math>
+(fig. <a href="#x9-145003r15">7.15</a>, right) and cannot be separated for any
+<!-- l. 311 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math> (fig. <a href="#x9-145004r16">7.16</a>):
+the graph cannot resolve a gap the sampling does not resolve. The printed study shows the
+usual effect of <!-- l. 311 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>m</mi></math>
+on the softness of the partition. It also shows that on the rings a
+plain Euclidean bridge (<code class="lstinline"><span style="color:#000000">bridge_penalty=0</span></code>) lets the far side of the
+outer ring switch to the inner medoid through the bridge (ARI
+<!-- l. 311 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.28</mn></mrow></math>),
+                                                                     
+
+                                                                     
+whereas both the penalized bridge and infinite distances (<code class="lstinline"><span style="color:#000000">connect_components=False</span></code>)
+keep the rings apart.
+</p>
+<figure class="figure">
+<!-- l. 313 --><p class="noindent"><img alt="Figure 7.13" class="exfig" src="figures/05_graph/plot_04_geodesic_fcm_1.png"/> <a id="x9-145001r13"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 7.13.    </span></span><span class="content"><span class="ec-lmr-10">Fuzzy    c-means    (top)    and    geodesic    c-medoids    with</span>
+<!-- l. 313 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>k</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>8</mn></mrow></math>
+<span class="ec-lmr-10">(bottom, with the neighborhood graph and the bridge of the two-component cases)
+on two spiral arms, two moons and two rings: only the geodesic clusters follow the
+manifolds.</span> </span></figcaption><!-- tex4ht:label?: x9-145001r13  -->
+<p class="runbox"><a class="colab" href="https://colab.research.google.com/github/ComplexSystemsIntelligence/fuzzyclust/blob/gh-pages/notebooks/auto_examples/05_graph/plot_04_geodesic_fcm.ipynb">Open in Colab</a><a href="../auto_examples/05_graph/plot_04_geodesic_fcm.html">Example <code>plot_04_geodesic_fcm.py</code> in the gallery</a></p></figure>
+<figure class="figure">
+<!-- l. 314 --><p class="noindent"><img alt="Figure 7.14" class="exfig" src="figures/05_graph/plot_04_geodesic_fcm_2.png"/> <a id="x9-145002r14"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 7.14. </span></span><span class="content"><span class="ec-lmr-10">Memberships of the spiral samples in the two geodesic clusters: they
+fade along the arm, not across it.</span> </span></figcaption><!-- tex4ht:label?: x9-145002r14  -->
+</figure>
+<figure class="figure">
+<!-- l. 315 --><p class="noindent"><img alt="Figure 7.15" class="exfig" src="figures/05_graph/plot_04_geodesic_fcm_3.png"/> <a id="x9-145003r15"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 7.15.          </span></span><span class="content"><span class="ec-lmr-10">Agreement          with          the          true          groups
+(left) and number of graph components (right) against the number of neighbors</span>
+<!-- l. 315 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math>
+<span class="ec-lmr-10">for        the        four        data        sets:        good        results        need        a</span>
+<!-- l. 315 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math>
+<span class="ec-lmr-10">between fragmentation and short-circuits.</span> </span></figcaption><!-- tex4ht:label?: x9-145003r15  -->
+</figure>
+<figure class="figure">
+<!-- l. 316 --><p class="noindent"><img alt="Figure 7.16" class="exfig" src="figures/05_graph/plot_04_geodesic_fcm_4.png"/> <a id="x9-145004r16"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 7.16. </span></span><span class="content"><span class="ec-lmr-10">Noisier moons with </span><!-- l. 316 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>k</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>4</mn></mrow></math>
+<span class="ec-lmr-10">and </span><!-- l. 316 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>k</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>15</mn></mrow></math><span class="ec-lmr-10">:
+the gap is bridged by the graph itself, and the tips of the moons follow the other
+medoid.</span> </span></figcaption><!-- tex4ht:label?: x9-145004r16  -->
+</figure>
+<h4 class="subsectionHead"><span class="titlemark">7.4.5   </span> <a id="x9-1460007.4.5"></a>Geodesic paths, the S-curve and the Isomap route</h4>
+<!-- l. 320 --><p class="noindent">Figure <a href="#x9-146001r17">7.17</a> traces shortest paths through the
+<!-- l. 320 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>k</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>8</mn></mrow></math> graph of
+the spiral: between the inner and the outer end of one arm the geodesic distance is
+<!-- l. 320 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>32</mn></mrow></math> against a
+chord of <!-- l. 320 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>8.4</mn></mrow></math>,
+and the closest outer pair of samples of different arms,
+<!-- l. 320 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1.7</mn></mrow></math> apart in the
+plane, is <!-- l. 320 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>38</mn></mrow></math>
+apart along the graph. On the three-dimensional S-curve with eight clusters
+(fig. <a href="#x9-146002r18">7.18</a>) the FCM centers float between the layers of the S (up to
+<!-- l. 320 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.19</mn></mrow></math> from
+the nearest sample), while the medoids of Algorithm II and the re-projected
+centers of Algorithm I lie on the sheet. The geodesic cost of the partitions is
+<!-- l. 320 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>334</mn></mrow></math> for FCM
+against <!-- l. 320 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>269</mn></mrow></math>
+and <!-- l. 320 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>273</mn></mrow></math>
+for the two geodesic routes, which thus reach nearly the same solution by
+different means. The Isomap projection unrolls the S into a rectangle that
+FCM tiles regularly, and the geodesic clusters cover the sheet in the
+same way (fig. <a href="#x9-146003r19">7.19</a>). The study of Algorithm I on the spiral (fig. <a href="#x9-146004r20">7.20</a>)
+shows the role of the bridges when the graph is fragmented: with
+<!-- l. 320 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>k</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>4</mn></mrow></math> the
+arms break into seven components. The penalized bridges keep every
+fragment apart in the projection, and two clusters cannot collect them (ARI
+<!-- l. 320 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.86</mn></mrow></math> for
+both algorithms), whereas plain bridges re-join the fragments of an arm at
+their natural junctions, and both algorithms recover the arms. With
+<!-- l. 320 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>k</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>10</mn></mrow></math>
+the graph is connected and the bridges play no role. On the S-curve,
+two and three Isomap dimensions give nearly the same geodesic cost
+(<!-- l. 320 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>269</mn></mrow></math> and
+<!-- l. 320 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>272</mn></mrow></math>), whereas a single dimension
+raises it to <!-- l. 320 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>665</mn></mrow></math>; the residual
+variance drops from <!-- l. 320 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.09</mn></mrow></math>
+with one component to <!-- l. 320 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.04</mn></mrow></math>
+                                                                     
+
+                                                                     
+with two.
+</p>
+<figure class="figure">
+<!-- l. 322 --><p class="noindent"><img alt="Figure 7.17" class="exfig" src="figures/05_graph/plot_05_geodesic_path_isomap_1.png"/> <a id="x9-146001r17"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 7.17. </span></span><span class="content"><span class="ec-lmr-10">Shortest paths in the neighborhood graph of the spiral: along one
+arm from its inner to its outer end (left) and between the closest outer pair of
+samples of different arms (right); the dotted lines are the Euclidean chords.</span> </span></figcaption><!-- tex4ht:label?: x9-146001r17  -->
+<p class="runbox"><a class="colab" href="https://colab.research.google.com/github/ComplexSystemsIntelligence/fuzzyclust/blob/gh-pages/notebooks/auto_examples/05_graph/plot_05_geodesic_path_isomap.ipynb">Open in Colab</a><a href="../auto_examples/05_graph/plot_05_geodesic_path_isomap.html">Example <code>plot_05_geodesic_path_isomap.py</code> in the gallery</a></p></figure>
+<figure class="figure">
+<!-- l. 323 --><p class="noindent"><img alt="Figure 7.18" class="exfig" src="figures/05_graph/plot_05_geodesic_path_isomap_2.png"/> <a id="x9-146002r18"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 7.18. </span></span><span class="content"><span class="ec-lmr-10">Eight clusters on the S-curve: FCM centers float between the layers
+(left),  the  re-projected  centers  of  the  Isomap  route  (middle)  and  the  geodesic
+medoids (right) lie on the sheet.</span> </span></figcaption><!-- tex4ht:label?: x9-146002r18  -->
+</figure>
+<figure class="figure">
+<!-- l. 324 --><p class="noindent"><img alt="Figure 7.19" class="exfig" src="figures/05_graph/plot_05_geodesic_path_isomap_3.png"/> <a id="x9-146003r19"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 7.19. </span></span><span class="content"><span class="ec-lmr-10">The Isomap projection of the S-curve with the FCM centers (left)
+and the geodesic c-medoid clusters in the same projection (right): both tile the
+unrolled sheet regularly.</span> </span></figcaption><!-- tex4ht:label?: x9-146003r19  -->
+</figure>
+<figure class="figure">
+<!-- l. 325 --><p class="noindent"><img alt="Figure 7.20" class="exfig" src="figures/05_graph/plot_05_geodesic_path_isomap_4.png"/> <a id="x9-146004r20"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 7.20.        </span></span><span class="content"><span class="ec-lmr-10">Isomap        projection        of        the        spiral        with</span>
+<!-- l. 325 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>k</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>4</mn></mrow></math><span class="ec-lmr-10">,
+where  the  arms  are  fragmented  into  seven  components:  penalized  bridges  keep
+the fragments apart (left), plain bridges re-join the fragments of each arm (right);
+colors are the true arms, crosses the FCM centers.</span> </span></figcaption><!-- tex4ht:label?: x9-146004r20  -->
+</figure>
+<h3 class="sectionHead"><span class="titlemark">7.5   </span> <a id="x9-1470007.5"></a>Further reading</h3>
+<!-- l. 330 --><p class="noindent">The hybrid MST–GG algorithm was published in [<a id="x9-147001"></a><a href="bibliography.html#cite.0@vathy:2005:mst">83</a>]; it builds on Zahn’s
+graph-theoretical clustering [<a id="x9-147002"></a><a href="bibliography.html#cite.0@zahn:1971">81</a>], on the relation between the minimal spanning
+tree and single linkage [<a id="x9-147003"></a><a href="bibliography.html#cite.0@gower:1969:mst">82</a>], on the tree algorithms of Prim and Kruskal [<a id="x9-147004"></a><a href="bibliography.html#cite.0@prim:1957">87</a>, <a id="x9-147005"></a><a href="bibliography.html#cite.0@kruskal:1956">88</a>],
+on the hypervolume and density indices of Gath and Geva [<a id="x9-147006"></a><a href="bibliography.html#cite.0@gath:1989">21</a>], on the
+Fukuyama–Sugeno measure [<a id="x9-147007"></a><a href="bibliography.html#cite.0@fukuyama:1989:validity">33</a>] as used by Varma and Simon [<a id="x9-147008"></a><a href="bibliography.html#cite.0@varma:2004:mst">89</a>], and on
+compatible cluster merging [<a id="x9-147009"></a><a href="bibliography.html#cite.0@kaymak:1995:merging">40</a>] for the idea of merging similar fuzzy clusters; the
+Gath–Geva refinement may use the covariance regularization of [<a id="x9-147010"></a><a href="bibliography.html#cite.0@babuska:2002:covariance">19</a>].
+Graph-theoretic and hierarchical clustering in general are covered by [<a id="x9-147011"></a><a href="bibliography.html#cite.0@jain:1988:book">4</a>]. The
+geodesic clustering algorithms are from [<a id="x9-147012"></a><a href="bibliography.html#cite.0@feil:2007:geodesic">84</a>], which rests on Isomap [<a id="x9-147013"></a><a href="bibliography.html#cite.0@tenenbaum:2000:isomap">85</a>] and the
+convergence of graph distances to geodesics [<a id="x9-147014"></a><a href="bibliography.html#cite.0@bernstein:2000:geodesic">86</a>], on shortest paths [<a id="x9-147015"></a><a href="bibliography.html#cite.0@dijkstra:1959">90</a>, <a id="x9-147016"></a><a href="bibliography.html#cite.0@floyd:1962">91</a>], on
+classical multidimensional scaling [<a id="x9-147017"></a><a href="bibliography.html#cite.0@torgerson:1952:mds">92</a>], on the c-means functional [<a id="x9-147018"></a><a href="bibliography.html#cite.0@bezdek:1981">3</a>] and
+on the medoid methods of Kaufman and Rousseeuw [<a id="x9-147019"></a><a href="bibliography.html#cite.0@kaufman:1990:groups">5</a>]; locally linear
+embedding [<a id="x9-147020"></a><a href="bibliography.html#cite.0@roweis:2000:lle">93</a>] is the other classical manifold method the paper mentions.
+The fuzzy Sammon mapping of chapter <a href="05-visualization-of-fuzzy-clustering-results.html#x7-870005">5</a> [<a id="x9-147021"></a><a href="bibliography.html#cite.0@feil:2007:fuzzsam">51</a>] is the natural tool for
+inspecting the clusters found here when the data have more than two
+dimensions.
+                                                                     
+
+                                                                     
+</p>
+<!-- l. 1 -->
+<!-- l. 1 --><p class="indent"> <a id="tailmain_webch7.html"></a> </p>
+<nav class='pager'><a class='prev' href='06-robust-and-shape-oriented-variants.html'><small>Previous</small>Robust and shape-oriented variants of fuzzy c-means</a><a class='next' href='08-clustering-for-model-identification.html'><small>Next</small>Clustering for model identification</a></nav>
+</main>
+<aside class="right"><nav class='onpage' aria-label='On this page'><p class='toc-title'>On this page</p><ul><li><a href='#x9-1300007.1'>7.1 Problem and idea</a></li><li><a href='#x9-1310007.2'>7.2 Theory</a></li><li><a href='#x9-1400007.3'>7.3 Using it in fuzzyclust</a></li><li><a href='#x9-1410007.4'>7.4 Examples</a></li><li><a href='#x9-1470007.5'>7.5 Further reading</a></li></ul></nav></aside>
+</div>
+<footer class='foot'>© 2026 János Abonyi, University of Pannonia · licensed under <a href='https://creativecommons.org/licenses/by/4.0/'>CC BY 4.0</a> · web edition of the book, generated from the same LaTeX source as the <a href='../fuzzyclust-book.pdf'>PDF</a> · software: <a href='https://github.com/ComplexSystemsIntelligence/fuzzyclust'>fuzzyclust</a> (MIT) · <code>pip install fuzzyclust</code></footer>
+</body>
+</html>

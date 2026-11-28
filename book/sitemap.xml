@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<url><loc>https://complexsystemsintelligence.github.io/fuzzyclust/book/</loc></url>
+<url><loc>https://complexsystemsintelligence.github.io/fuzzyclust/book/preface.html</loc></url>
+<url><loc>https://complexsystemsintelligence.github.io/fuzzyclust/book/01-introduction.html</loc></url>
+<url><loc>https://complexsystemsintelligence.github.io/fuzzyclust/book/02-foundations-of-prototype-based-clustering.html</loc></url>
+<url><loc>https://complexsystemsintelligence.github.io/fuzzyclust/book/03-hard-and-fuzzy-partitioning-algorithms.html</loc></url>
+<url><loc>https://complexsystemsintelligence.github.io/fuzzyclust/book/04-cluster-validity-and-the-number.html</loc></url>
+<url><loc>https://complexsystemsintelligence.github.io/fuzzyclust/book/05-visualization-of-fuzzy-clustering-results.html</loc></url>
+<url><loc>https://complexsystemsintelligence.github.io/fuzzyclust/book/06-robust-and-shape-oriented-variants.html</loc></url>
+<url><loc>https://complexsystemsintelligence.github.io/fuzzyclust/book/07-graph-based-fuzzy-clustering.html</loc></url>
+<url><loc>https://complexsystemsintelligence.github.io/fuzzyclust/book/08-clustering-for-model-identification.html</loc></url>
+<url><loc>https://complexsystemsintelligence.github.io/fuzzyclust/book/09-clustering-of-time-series.html</loc></url>
+<url><loc>https://complexsystemsintelligence.github.io/fuzzyclust/book/10-clustering-relational-categorical-and-mixed.html</loc></url>
+<url><loc>https://complexsystemsintelligence.github.io/fuzzyclust/book/11-incomplete-very-large-and-image.html</loc></url>
+<url><loc>https://complexsystemsintelligence.github.io/fuzzyclust/book/12-beyond-a-single-unsupervised-run.html</loc></url>
+<url><loc>https://complexsystemsintelligence.github.io/fuzzyclust/book/a-api-reference.html</loc></url>
+<url><loc>https://complexsystemsintelligence.github.io/fuzzyclust/book/b-migrating-from-the-matlab-toolbox.html</loc></url>
+<url><loc>https://complexsystemsintelligence.github.io/fuzzyclust/book/c-the-example-gallery.html</loc></url>
+<url><loc>https://complexsystemsintelligence.github.io/fuzzyclust/book/bibliography.html</loc></url>
+</urlset>

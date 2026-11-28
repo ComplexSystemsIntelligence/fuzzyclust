@@ -1,0 +1,12 @@
+﻿fuzzyclust.validity.fuzzy\_adjusted\_rand\_index
+================================================
+
+.. currentmodule:: fuzzyclust.validity
+
+.. autofunction:: fuzzy_adjusted_rand_index
+
+.. include:: fuzzyclust.validity.fuzzy_adjusted_rand_index.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

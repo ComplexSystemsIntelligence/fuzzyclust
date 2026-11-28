@@ -1,0 +1,12 @@
+﻿fuzzyclust.timeseries.false\_nearest\_neighbors
+===============================================
+
+.. currentmodule:: fuzzyclust.timeseries
+
+.. autofunction:: false_nearest_neighbors
+
+.. include:: fuzzyclust.timeseries.false_nearest_neighbors.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

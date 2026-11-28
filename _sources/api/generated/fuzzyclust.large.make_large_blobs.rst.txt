@@ -1,0 +1,12 @@
+﻿fuzzyclust.large.make\_large\_blobs
+===================================
+
+.. currentmodule:: fuzzyclust.large
+
+.. autofunction:: make_large_blobs
+
+.. include:: fuzzyclust.large.make_large_blobs.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

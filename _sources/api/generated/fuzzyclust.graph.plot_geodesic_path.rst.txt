@@ -1,0 +1,12 @@
+﻿fuzzyclust.graph.plot\_geodesic\_path
+=====================================
+
+.. currentmodule:: fuzzyclust.graph
+
+.. autofunction:: plot_geodesic_path
+
+.. include:: fuzzyclust.graph.plot_geodesic_path.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

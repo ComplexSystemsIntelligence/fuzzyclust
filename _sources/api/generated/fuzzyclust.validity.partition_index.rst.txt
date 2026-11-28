@@ -1,0 +1,12 @@
+﻿fuzzyclust.validity.partition\_index
+====================================
+
+.. currentmodule:: fuzzyclust.validity
+
+.. autofunction:: partition_index
+
+.. include:: fuzzyclust.validity.partition_index.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

@@ -1,0 +1,12 @@
+﻿fuzzyclust.datasets.load\_motorcycle
+====================================
+
+.. currentmodule:: fuzzyclust.datasets
+
+.. autofunction:: load_motorcycle
+
+.. include:: fuzzyclust.datasets.load_motorcycle.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

@@ -1,0 +1,12 @@
+﻿fuzzyclust.relational.make\_categorical\_blobs
+==============================================
+
+.. currentmodule:: fuzzyclust.relational
+
+.. autofunction:: make_categorical_blobs
+
+.. include:: fuzzyclust.relational.make_categorical_blobs.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

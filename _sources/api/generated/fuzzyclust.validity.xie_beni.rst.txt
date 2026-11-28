@@ -1,0 +1,12 @@
+﻿fuzzyclust.validity.xie\_beni
+=============================
+
+.. currentmodule:: fuzzyclust.validity
+
+.. autofunction:: xie_beni
+
+.. include:: fuzzyclust.validity.xie_beni.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

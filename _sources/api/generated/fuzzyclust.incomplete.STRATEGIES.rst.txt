@@ -1,0 +1,6 @@
+﻿fuzzyclust.incomplete.STRATEGIES
+================================
+
+.. currentmodule:: fuzzyclust.incomplete
+
+.. autodata:: STRATEGIES

@@ -1,0 +1,12 @@
+﻿fuzzyclust.datasets.make\_lines
+===============================
+
+.. currentmodule:: fuzzyclust.datasets
+
+.. autofunction:: make_lines
+
+.. include:: fuzzyclust.datasets.make_lines.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

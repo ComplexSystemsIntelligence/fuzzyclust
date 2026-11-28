@@ -1,0 +1,12 @@
+﻿fuzzyclust.incomplete.plot\_incomplete\_clusters
+================================================
+
+.. currentmodule:: fuzzyclust.incomplete
+
+.. autofunction:: plot_incomplete_clusters
+
+.. include:: fuzzyclust.incomplete.plot_incomplete_clusters.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

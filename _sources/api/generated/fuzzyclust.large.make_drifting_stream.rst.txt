@@ -1,0 +1,12 @@
+﻿fuzzyclust.large.make\_drifting\_stream
+=======================================
+
+.. currentmodule:: fuzzyclust.large
+
+.. autofunction:: make_drifting_stream
+
+.. include:: fuzzyclust.large.make_drifting_stream.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

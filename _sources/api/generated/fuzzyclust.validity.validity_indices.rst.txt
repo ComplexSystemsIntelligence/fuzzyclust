@@ -1,0 +1,12 @@
+﻿fuzzyclust.validity.validity\_indices
+=====================================
+
+.. currentmodule:: fuzzyclust.validity
+
+.. autofunction:: validity_indices
+
+.. include:: fuzzyclust.validity.validity_indices.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

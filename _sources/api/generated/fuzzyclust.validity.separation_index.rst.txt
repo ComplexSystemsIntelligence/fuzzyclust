@@ -1,0 +1,12 @@
+﻿fuzzyclust.validity.separation\_index
+=====================================
+
+.. currentmodule:: fuzzyclust.validity
+
+.. autofunction:: separation_index
+
+.. include:: fuzzyclust.validity.separation_index.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

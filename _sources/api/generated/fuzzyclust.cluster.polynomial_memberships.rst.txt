@@ -1,0 +1,12 @@
+﻿fuzzyclust.cluster.polynomial\_memberships
+==========================================
+
+.. currentmodule:: fuzzyclust.cluster
+
+.. autofunction:: polynomial_memberships
+
+.. include:: fuzzyclust.cluster.polynomial_memberships.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

@@ -1,0 +1,12 @@
+﻿fuzzyclust.viz.grid\_laplacian
+==============================
+
+.. currentmodule:: fuzzyclust.viz
+
+.. autofunction:: grid_laplacian
+
+.. include:: fuzzyclust.viz.grid_laplacian.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

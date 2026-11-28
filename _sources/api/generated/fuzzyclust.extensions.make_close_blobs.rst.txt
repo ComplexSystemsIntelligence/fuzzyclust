@@ -1,0 +1,12 @@
+﻿fuzzyclust.extensions.make\_close\_blobs
+========================================
+
+.. currentmodule:: fuzzyclust.extensions
+
+.. autofunction:: make_close_blobs
+
+.. include:: fuzzyclust.extensions.make_close_blobs.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

@@ -1,0 +1,12 @@
+﻿fuzzyclust.extensions.make\_crossing\_lines
+===========================================
+
+.. currentmodule:: fuzzyclust.extensions
+
+.. autofunction:: make_crossing_lines
+
+.. include:: fuzzyclust.extensions.make_crossing_lines.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

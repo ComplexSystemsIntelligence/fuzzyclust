@@ -1,0 +1,12 @@
+﻿fuzzyclust.timeseries.cluster\_based\_threshold
+===============================================
+
+.. currentmodule:: fuzzyclust.timeseries
+
+.. autofunction:: cluster_based_threshold
+
+.. include:: fuzzyclust.timeseries.cluster_based_threshold.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

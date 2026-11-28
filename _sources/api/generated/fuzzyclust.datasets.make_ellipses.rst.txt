@@ -1,0 +1,12 @@
+﻿fuzzyclust.datasets.make\_ellipses
+==================================
+
+.. currentmodule:: fuzzyclust.datasets
+
+.. autofunction:: make_ellipses
+
+.. include:: fuzzyclust.datasets.make_ellipses.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

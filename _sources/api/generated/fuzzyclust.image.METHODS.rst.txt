@@ -1,0 +1,6 @@
+﻿fuzzyclust.image.METHODS
+========================
+
+.. currentmodule:: fuzzyclust.image
+
+.. autodata:: METHODS

@@ -1,0 +1,12 @@
+﻿fuzzyclust.relational.plot\_dtw\_alignment
+==========================================
+
+.. currentmodule:: fuzzyclust.relational
+
+.. autofunction:: plot_dtw_alignment
+
+.. include:: fuzzyclust.relational.plot_dtw_alignment.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

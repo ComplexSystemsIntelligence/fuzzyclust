@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>fuzzyclust.validity &#8212; fuzzyclust</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=c83e6b79" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=6a604523" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=e6ebbe3b" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
+
+    <script src="../../_static/documentation_options.js?v=f2a433a1"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/sg-tags.js?v=d80f6fa4"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../_static/design-tabs.js?v=fcb327ea"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/fuzzyclust/validity';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="icon" href="../../_static/favicon.png"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="1.0" />
+  
+    
+    <script src="../../_static/searchtools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/logo.svg" class="logo__image only-light" alt=""/>
+    <img src="../../_static/logo.svg" class="logo__image only-dark pst-js-only" alt=""/>
+  
+  
+    <p class="title logo__title">fuzzyclust</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../auto_examples/index.html">
+    Example gallery
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../book.html">
+    The book
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../migration.html">
+    Migrating from the MATLAB toolbox
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../citing.html">
+    Citing
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://complexsystemsintelligence.github.io/#textbooks">
+    All textbooks
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ComplexSystemsIntelligence/fuzzyclust" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../auto_examples/index.html">
+    Example gallery
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../book.html">
+    The book
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../migration.html">
+    Migrating from the MATLAB toolbox
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../citing.html">
+    Citing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://complexsystemsintelligence.github.io/#textbooks">
+    All textbooks
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ComplexSystemsIntelligence/fuzzyclust" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">fuzzyclust.validity</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for fuzzyclust.validity</h1><div class="highlight"><pre>
+<span></span><span class="c1"># SPDX-License-Identifier: MIT</span>
+<span class="c1"># Copyright (c) 2026 János Abonyi</span>
+<span class="sa">r</span><span class="sd">"""Cluster validity indices and model-order (number of clusters) selection.</span>
+
+<span class="sd">All index functions share the signature ``index(X, U, V, m=2.0)`` where</span>
+
+<span class="sd">* ``X`` is the data matrix :math:`\mathbf{X}` of shape ``(n_samples, n_features)``,</span>
+<span class="sd">* ``U`` the fuzzy partition :math:`\mathbf{U}^T` of shape ``(n_samples, n_clusters)``,</span>
+<span class="sd">* ``V`` the prototypes :math:`\mathbf{V}` of shape ``(n_clusters, n_features)``,</span>
+<span class="sd">* ``m`` the fuzziness exponent used by the clustering algorithm.</span>
+
+<span class="sd">Indices that need only the partition (PC, CE, MPC) ignore ``X`` and ``V``;</span>
+<span class="sd">indices that evaluate crisp clusters (DI, ADI, silhouette) harden the</span>
+<span class="sd">partition first. Distances between data and prototypes are Euclidean, which</span>
+<span class="sd">is the common convention in the validity literature; algorithm specific norms</span>
+<span class="sd">are therefore *not* used here.</span>
+
+<span class="sd">Two further groups of tools live here: *external* comparisons of two fuzzy</span>
+<span class="sd">partitions (the fuzzy Rand, adjusted Rand and Jaccard indices of</span>
+<span class="sd">Hüllermeier et al. and of Campello) and the *stability-based* selection of</span>
+<span class="sd">the number of clusters (Ben-Hur et al.; Lange et al.), which resamples the</span>
+<span class="sd">data and asks for which ``n_clusters`` the partitions agree.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterable</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.spatial.distance</span><span class="w"> </span><span class="kn">import</span> <span class="n">cdist</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">clone</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">._utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">EPS</span><span class="p">,</span> <span class="n">check_membership</span><span class="p">,</span> <span class="n">fuzzy_centers</span><span class="p">,</span> <span class="n">fuzzy_covariances</span><span class="p">,</span> <span class="n">harden</span><span class="p">,</span> <span class="n">sq_euclidean</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"partition_coefficient"</span><span class="p">,</span>
+    <span class="s2">"classification_entropy"</span><span class="p">,</span>
+    <span class="s2">"modified_partition_coefficient"</span><span class="p">,</span>
+    <span class="s2">"partition_index"</span><span class="p">,</span>
+    <span class="s2">"separation_index"</span><span class="p">,</span>
+    <span class="s2">"xie_beni"</span><span class="p">,</span>
+    <span class="s2">"fukuyama_sugeno"</span><span class="p">,</span>
+    <span class="s2">"dunn_index"</span><span class="p">,</span>
+    <span class="s2">"alternative_dunn_index"</span><span class="p">,</span>
+    <span class="s2">"silhouette"</span><span class="p">,</span>
+    <span class="s2">"fuzzy_hypervolume"</span><span class="p">,</span>
+    <span class="s2">"partition_density"</span><span class="p">,</span>
+    <span class="s2">"average_partition_density"</span><span class="p">,</span>
+    <span class="s2">"pbmf_index"</span><span class="p">,</span>
+    <span class="s2">"kwon_index"</span><span class="p">,</span>
+    <span class="s2">"pcaes_index"</span><span class="p">,</span>
+    <span class="s2">"fuzzy_rand_index"</span><span class="p">,</span>
+    <span class="s2">"fuzzy_adjusted_rand_index"</span><span class="p">,</span>
+    <span class="s2">"fuzzy_jaccard_index"</span><span class="p">,</span>
+    <span class="s2">"stability_selection"</span><span class="p">,</span>
+    <span class="s2">"validity_indices"</span><span class="p">,</span>
+    <span class="s2">"scan_n_clusters"</span><span class="p">,</span>
+    <span class="s2">"suggest_n_clusters"</span><span class="p">,</span>
+    <span class="s2">"INDEX_DIRECTION"</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="c1">#: For every index: ``"max"`` if the best partition maximizes it, ``"min"`` otherwise.</span>
+<span class="n">INDEX_DIRECTION</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"PC"</span><span class="p">:</span> <span class="s2">"max"</span><span class="p">,</span>
+    <span class="s2">"CE"</span><span class="p">:</span> <span class="s2">"min"</span><span class="p">,</span>
+    <span class="s2">"MPC"</span><span class="p">:</span> <span class="s2">"max"</span><span class="p">,</span>
+    <span class="s2">"SC"</span><span class="p">:</span> <span class="s2">"min"</span><span class="p">,</span>
+    <span class="s2">"S"</span><span class="p">:</span> <span class="s2">"min"</span><span class="p">,</span>
+    <span class="s2">"XB"</span><span class="p">:</span> <span class="s2">"min"</span><span class="p">,</span>
+    <span class="s2">"FS"</span><span class="p">:</span> <span class="s2">"min"</span><span class="p">,</span>
+    <span class="s2">"DI"</span><span class="p">:</span> <span class="s2">"max"</span><span class="p">,</span>
+    <span class="s2">"ADI"</span><span class="p">:</span> <span class="s2">"max"</span><span class="p">,</span>
+    <span class="s2">"SIL"</span><span class="p">:</span> <span class="s2">"max"</span><span class="p">,</span>
+    <span class="s2">"FHV"</span><span class="p">:</span> <span class="s2">"min"</span><span class="p">,</span>
+    <span class="s2">"PD"</span><span class="p">:</span> <span class="s2">"max"</span><span class="p">,</span>
+    <span class="s2">"APD"</span><span class="p">:</span> <span class="s2">"max"</span><span class="p">,</span>
+    <span class="s2">"PBMF"</span><span class="p">:</span> <span class="s2">"max"</span><span class="p">,</span>
+    <span class="s2">"KWON"</span><span class="p">:</span> <span class="s2">"min"</span><span class="p">,</span>
+    <span class="s2">"PCAES"</span><span class="p">:</span> <span class="s2">"max"</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_prep</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">):</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">U</span> <span class="o">=</span> <span class="n">check_membership</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">V</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span>
+
+
+<span class="c1"># ----------------------------------------------------------- partition-only indices</span>
+<div class="viewcode-block" id="partition_coefficient">
+<a class="viewcode-back" href="../../api/generated/fuzzyclust.validity.partition_coefficient.html#fuzzyclust.validity.partition_coefficient">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">partition_coefficient</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Partition coefficient (Bezdek).</span>
+
+<span class="sd">    .. math:: PC = \frac{1}{N}\sum_{i=1}^{c}\sum_{k=1}^{N}\mu_{ik}^2</span>
+
+<span class="sd">    Measures the amount of overlap between clusters; :math:`PC=1` for a hard</span>
+<span class="sd">    partition and :math:`1/c` for the fuzziest one. Higher is better. Its</span>
+<span class="sd">    drawback is the monotone dependence on :math:`c` and the lack of a direct</span>
+<span class="sd">    connection to the data.</span>
+<span class="sd">    """</span>
+    <span class="n">U</span> <span class="o">=</span> <span class="n">check_membership</span><span class="p">(</span><span class="n">U</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">U</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">U</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
+
+
+
+<div class="viewcode-block" id="classification_entropy">
+<a class="viewcode-back" href="../../api/generated/fuzzyclust.validity.classification_entropy.html#fuzzyclust.validity.classification_entropy">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">classification_entropy</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Classification (partition) entropy (Bezdek).</span>
+
+<span class="sd">    .. math:: CE = -\frac{1}{N}\sum_{i=1}^{c}\sum_{k=1}^{N}\mu_{ik}\log\mu_{ik}</span>
+
+<span class="sd">    Zero for a hard partition, :math:`\log c` for the fuzziest one. Lower is better.</span>
+<span class="sd">    """</span>
+    <span class="n">U</span> <span class="o">=</span> <span class="n">check_membership</span><span class="p">(</span><span class="n">U</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">U</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">U</span> <span class="o">+</span> <span class="n">EPS</span><span class="p">))</span> <span class="o">/</span> <span class="n">U</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
+
+
+
+<div class="viewcode-block" id="modified_partition_coefficient">
+<a class="viewcode-back" href="../../api/generated/fuzzyclust.validity.modified_partition_coefficient.html#fuzzyclust.validity.modified_partition_coefficient">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">modified_partition_coefficient</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Modified partition coefficient (Davé, 1996).</span>
+
+<span class="sd">    .. math:: MPC = 1 - \frac{c}{c-1}\left(1 - PC\right)</span>
+
+<span class="sd">    Rescales PC to :math:`[0,1]` to remove its monotone trend in :math:`c`.</span>
+<span class="sd">    Higher is better.</span>
+<span class="sd">    """</span>
+    <span class="n">U</span> <span class="o">=</span> <span class="n">check_membership</span><span class="p">(</span><span class="n">U</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">U</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">c</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">1.0</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">c</span> <span class="o">/</span> <span class="p">(</span><span class="n">c</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">partition_coefficient</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">)))</span></div>
+
+
+
+<span class="c1"># ------------------------------------------------------ compactness / separation</span>
+<div class="viewcode-block" id="partition_index">
+<a class="viewcode-back" href="../../api/generated/fuzzyclust.validity.partition_index.html#fuzzyclust.validity.partition_index">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">partition_index</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Partition index SC (Bensaid et al., 1996).</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        SC = \sum_{i=1}^{c}\frac{\sum_{k=1}^{N}\mu_{ik}^m\|\mathbf{x}_k-\mathbf{v}_i\|^2}</span>
+<span class="sd">                                {N_i\sum_{j=1}^{c}\|\mathbf{v}_j-\mathbf{v}_i\|^2},</span>
+<span class="sd">        \qquad N_i=\sum_{k=1}^{N}\mu_{ik}</span>
+
+<span class="sd">    Ratio of compactness to separation summed over clusters, normalized by</span>
+<span class="sd">    the fuzzy cardinality :math:`N_i`. Lower is better; useful to compare</span>
+<span class="sd">    partitions with the same number of clusters.</span>
+<span class="sd">    """</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span> <span class="o">=</span> <span class="n">_prep</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">V</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"nan"</span><span class="p">)</span>  <span class="c1"># separation of prototypes is undefined for one cluster</span>
+    <span class="n">d2</span> <span class="o">=</span> <span class="n">sq_euclidean</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+    <span class="n">comp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">U</span><span class="o">**</span><span class="n">m</span> <span class="o">*</span> <span class="n">d2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">card</span> <span class="o">=</span> <span class="n">U</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">sep</span> <span class="o">=</span> <span class="n">sq_euclidean</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">comp</span> <span class="o">/</span> <span class="p">(</span><span class="n">card</span> <span class="o">*</span> <span class="n">sep</span> <span class="o">+</span> <span class="n">EPS</span><span class="p">)))</span></div>
+
+
+
+<div class="viewcode-block" id="separation_index">
+<a class="viewcode-back" href="../../api/generated/fuzzyclust.validity.separation_index.html#fuzzyclust.validity.separation_index">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">separation_index</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Separation index S: Xie--Beni in its original form, with squared memberships (Xie and Beni, 1991).</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        S = \frac{\sum_{i=1}^{c}\sum_{k=1}^{N}\mu_{ik}^2\|\mathbf{x}_k-\mathbf{v}_i\|^2}</span>
+<span class="sd">                 {N\min_{i\neq j}\|\mathbf{v}_j-\mathbf{v}_i\|^2}</span>
+
+<span class="sd">    Like SC but with a minimum-distance separation term. Lower is better.</span>
+<span class="sd">    """</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span> <span class="o">=</span> <span class="n">_prep</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">V</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"nan"</span><span class="p">)</span>  <span class="c1"># separation of prototypes is undefined for one cluster</span>
+    <span class="n">d2</span> <span class="o">=</span> <span class="n">sq_euclidean</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+    <span class="n">comp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">U</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">d2</span><span class="p">)</span>
+    <span class="n">vv</span> <span class="o">=</span> <span class="n">sq_euclidean</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">fill_diagonal</span><span class="p">(</span><span class="n">vv</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">comp</span> <span class="o">/</span> <span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">vv</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">+</span> <span class="n">EPS</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="xie_beni">
+<a class="viewcode-back" href="../../api/generated/fuzzyclust.validity.xie_beni.html#fuzzyclust.validity.xie_beni">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">xie_beni</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Xie–Beni index (Xie &amp; Beni, 1991).</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        XB = \frac{\sum_{i=1}^{c}\sum_{k=1}^{N}\mu_{ik}^m\|\mathbf{x}_k-\mathbf{v}_i\|^2}</span>
+<span class="sd">                  {N\min_{i\neq j}\|\mathbf{v}_j-\mathbf{v}_i\|^2}</span>
+
+<span class="sd">    Total within-cluster variation over the minimal separation of</span>
+<span class="sd">    prototypes. Lower is better; the index tends to decrease monotonically for</span>
+<span class="sd">    large :math:`c`, so it is usually inspected for the first pronounced minimum.</span>
+<span class="sd">    """</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span> <span class="o">=</span> <span class="n">_prep</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">V</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"nan"</span><span class="p">)</span>  <span class="c1"># separation of prototypes is undefined for one cluster</span>
+    <span class="n">d2</span> <span class="o">=</span> <span class="n">sq_euclidean</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+    <span class="n">comp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">U</span><span class="o">**</span><span class="n">m</span> <span class="o">*</span> <span class="n">d2</span><span class="p">)</span>
+    <span class="n">vv</span> <span class="o">=</span> <span class="n">sq_euclidean</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">fill_diagonal</span><span class="p">(</span><span class="n">vv</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">comp</span> <span class="o">/</span> <span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">vv</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">+</span> <span class="n">EPS</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="fukuyama_sugeno">
+<a class="viewcode-back" href="../../api/generated/fuzzyclust.validity.fukuyama_sugeno.html#fuzzyclust.validity.fukuyama_sugeno">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fukuyama_sugeno</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Fukuyama–Sugeno index (1989).</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        FS = \sum_{i=1}^{c}\sum_{k=1}^{N}\mu_{ik}^m\left(\|\mathbf{x}_k-\mathbf{v}_i\|^2</span>
+<span class="sd">             - \|\mathbf{v}_i-\bar{\mathbf{x}}\|^2\right)</span>
+
+<span class="sd">    Compactness minus separation from the grand mean :math:`\bar{\mathbf{x}}`.</span>
+<span class="sd">    Lower is better.</span>
+<span class="sd">    """</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span> <span class="o">=</span> <span class="n">_prep</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+    <span class="n">d2</span> <span class="o">=</span> <span class="n">sq_euclidean</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+    <span class="n">vbar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">V</span> <span class="o">-</span> <span class="n">X</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">U</span><span class="o">**</span><span class="n">m</span> <span class="o">*</span> <span class="p">(</span><span class="n">d2</span> <span class="o">-</span> <span class="n">vbar</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:])))</span></div>
+
+
+
+<span class="c1"># ------------------------------------------------------------- crisp indices</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_crisp_groups</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">):</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">harden</span><span class="p">(</span><span class="n">U</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">labels</span><span class="p">,</span> <span class="p">[</span><span class="n">X</span><span class="p">[</span><span class="n">labels</span> <span class="o">==</span> <span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">U</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+
+
+<div class="viewcode-block" id="dunn_index">
+<a class="viewcode-back" href="../../api/generated/fuzzyclust.validity.dunn_index.html#fuzzyclust.validity.dunn_index">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">dunn_index</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Dunn's index (1974) on the hardened partition.</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        DI = \min_{i}\min_{j\neq i}\left\{</span>
+<span class="sd">             \frac{\min_{\mathbf{x}\in C_i,\mathbf{y}\in C_j} d(\mathbf{x},\mathbf{y})}</span>
+<span class="sd">                  {\max_{l}\max_{\mathbf{x},\mathbf{y}\in C_l} d(\mathbf{x},\mathbf{y})}\right\}</span>
+
+<span class="sd">    Smallest inter-cluster distance over the largest cluster diameter. Higher</span>
+<span class="sd">    is better. Designed for compact, well separated clusters; unreliable for</span>
+<span class="sd">    overlapping ones and :math:`O(N^2)` to compute.</span>
+<span class="sd">    """</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_prep</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">U</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">groups</span> <span class="o">=</span> <span class="n">_crisp_groups</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">groups</span><span class="p">)</span>
+    <span class="n">diam</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">diam</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">diam</span><span class="p">,</span> <span class="n">cdist</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+    <span class="n">sep</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">groups</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="ow">and</span> <span class="n">groups</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+                <span class="n">sep</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">sep</span><span class="p">,</span> <span class="n">cdist</span><span class="p">(</span><span class="n">groups</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">groups</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">sep</span><span class="p">)</span> <span class="ow">or</span> <span class="n">diam</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"nan"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">sep</span> <span class="o">/</span> <span class="n">diam</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="alternative_dunn_index">
+<a class="viewcode-back" href="../../api/generated/fuzzyclust.validity.alternative_dunn_index.html#fuzzyclust.validity.alternative_dunn_index">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">alternative_dunn_index</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Alternative Dunn index (ADI) of the MATLAB toolbox.</span>
+
+<span class="sd">    The inter-cluster distance :math:`\min d(\mathbf{x},\mathbf{y})` of Dunn's</span>
+<span class="sd">    index is bounded from below via the triangle inequality</span>
+<span class="sd">    :math:`d(\mathbf{x},\mathbf{y})\ge|d(\mathbf{y},\mathbf{v}_j)-d(\mathbf{x},\mathbf{v}_j)|`,</span>
+<span class="sd">    which is much cheaper to evaluate:</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        ADI = \min_{i}\min_{j\neq i}\left\{</span>
+<span class="sd">              \frac{\min_{\mathbf{x}\in C_i,\mathbf{y}\in C_j}</span>
+<span class="sd">                    |d(\mathbf{y},\mathbf{v}_j)-d(\mathbf{x},\mathbf{v}_j)|}</span>
+<span class="sd">                   {\max_{l}\max_{\mathbf{x},\mathbf{y}\in C_l} d(\mathbf{x},\mathbf{y})}\right\}.</span>
+
+<span class="sd">    Higher is better.</span>
+<span class="sd">    """</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span> <span class="o">=</span> <span class="n">_prep</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">groups</span> <span class="o">=</span> <span class="n">_crisp_groups</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">groups</span><span class="p">)</span>
+    <span class="n">diam</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">diam</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">diam</span><span class="p">,</span> <span class="n">cdist</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+    <span class="n">sep</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">j</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">groups</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">groups</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">dj</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">groups</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">V</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">di</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">groups</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">V</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">sep</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">sep</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">dj</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">-</span> <span class="n">di</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:])</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">sep</span><span class="p">)</span> <span class="ow">or</span> <span class="n">diam</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"nan"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">sep</span> <span class="o">/</span> <span class="n">diam</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="silhouette">
+<a class="viewcode-back" href="../../api/generated/fuzzyclust.validity.silhouette.html#fuzzyclust.validity.silhouette">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">silhouette</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Mean silhouette coefficient (Rousseeuw, 1987) of the hardened partition."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">silhouette_score</span>
+
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">harden</span><span class="p">(</span><span class="n">check_membership</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"nan"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">silhouette_score</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">labels</span><span class="p">))</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># Density-based indices of Gath and Geva (1989)</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_gg_prep</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span> <span class="o">=</span> <span class="n">_prep</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">V</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">V</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">V</span> <span class="o">=</span> <span class="n">fuzzy_centers</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="o">**</span><span class="n">m</span><span class="p">)</span>
+    <span class="n">F</span> <span class="o">=</span> <span class="n">fuzzy_covariances</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="o">**</span><span class="n">m</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">F</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_central_members</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">F</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Sum of memberships of the samples inside the unit Mahalanobis ellipsoid of each cluster."""</span>
+    <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">V</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">V</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="n">xv</span> <span class="o">=</span> <span class="n">X</span> <span class="o">-</span> <span class="n">V</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">maha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">"kj,jl,kl-&gt;k"</span><span class="p">,</span> <span class="n">xv</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">pinv</span><span class="p">(</span><span class="n">F</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="n">xv</span><span class="p">)</span>
+        <span class="n">S</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">U</span><span class="p">[</span><span class="n">maha</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">S</span>
+
+
+<div class="viewcode-block" id="fuzzy_hypervolume">
+<a class="viewcode-back" href="../../api/generated/fuzzyclust.validity.fuzzy_hypervolume.html#fuzzyclust.validity.fuzzy_hypervolume">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fuzzy_hypervolume</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Fuzzy hypervolume :math:`FHV = \sum_i \sqrt{\det\mathbf{F}_i}` (Gath &amp; Geva, 1989). Min is best.</span>
+
+<span class="sd">    Measures the total volume of the clusters; compact clusters give small</span>
+<span class="sd">    values. It is the natural companion of the GG algorithm because it uses</span>
+<span class="sd">    the same fuzzy covariance matrices.</span>
+<span class="sd">    """</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">F</span> <span class="o">=</span> <span class="n">_gg_prep</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">Fi</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">))</span> <span class="k">for</span> <span class="n">Fi</span> <span class="ow">in</span> <span class="n">F</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="partition_density">
+<a class="viewcode-back" href="../../api/generated/fuzzyclust.validity.partition_density.html#fuzzyclust.validity.partition_density">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">partition_density</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Partition density :math:`PD = \sum_i S_i / FHV` (Gath &amp; Geva, 1989). Max is best.</span>
+
+<span class="sd">    :math:`S_i=\sum_{k:\,(\mathbf{x}_k-\mathbf{v}_i)^T\mathbf{F}_i^{-1}(\mathbf{x}_k-\mathbf{v}_i)&lt;1}\mu_{ik}`</span>
+<span class="sd">    is the membership mass inside the unit Mahalanobis ellipsoid of cluster :math:`i`.</span>
+<span class="sd">    """</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">F</span> <span class="o">=</span> <span class="n">_gg_prep</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
+    <span class="n">fhv</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">Fi</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">))</span> <span class="k">for</span> <span class="n">Fi</span> <span class="ow">in</span> <span class="n">F</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">fhv</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"inf"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">_central_members</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">F</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">fhv</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="average_partition_density">
+<a class="viewcode-back" href="../../api/generated/fuzzyclust.validity.average_partition_density.html#fuzzyclust.validity.average_partition_density">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">average_partition_density</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Average partition density (Gath &amp; Geva). Max is best.</span>
+
+<span class="sd">    .. math:: APD = \frac1c\sum_i S_i/\sqrt{\det\mathbf{F}_i}</span>
+<span class="sd">    """</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">F</span> <span class="o">=</span> <span class="n">_gg_prep</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
+    <span class="n">S</span> <span class="o">=</span> <span class="n">_central_members</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">F</span><span class="p">)</span>
+    <span class="n">vols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">Fi</span><span class="p">),</span> <span class="n">EPS</span><span class="p">))</span> <span class="k">for</span> <span class="n">Fi</span> <span class="ow">in</span> <span class="n">F</span><span class="p">])</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">S</span> <span class="o">/</span> <span class="n">vols</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="pbmf_index">
+<a class="viewcode-back" href="../../api/generated/fuzzyclust.validity.pbmf_index.html#fuzzyclust.validity.pbmf_index">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">pbmf_index</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""PBM-F index (Pakhira, Bandyopadhyay &amp; Maulik, 2004). Max is best.</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        PBMF = \left(\frac{1}{c}\cdot\frac{E_1}{J_m}\cdot D_c\right)^2,\quad</span>
+<span class="sd">        E_1=\sum_k\|\mathbf{x}_k-\bar{\mathbf{x}}\|,\;</span>
+<span class="sd">        J_m=\sum_{i,k}\mu_{ik}^m\|\mathbf{x}_k-\mathbf{v}_i\|,\;</span>
+<span class="sd">        D_c=\max_{i,j}\|\mathbf{v}_i-\mathbf{v}_j\|</span>
+<span class="sd">    """</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span> <span class="o">=</span> <span class="n">_prep</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">V</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">E1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(((</span><span class="n">X</span> <span class="o">-</span> <span class="n">X</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">Jm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">U</span><span class="o">**</span><span class="n">m</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sq_euclidean</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">V</span><span class="p">)))</span>
+    <span class="n">Dc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sq_euclidean</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">V</span><span class="p">))</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="k">if</span> <span class="n">c</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mf">0.0</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">((</span><span class="n">E1</span> <span class="o">/</span> <span class="p">(</span><span class="n">c</span> <span class="o">*</span> <span class="nb">max</span><span class="p">(</span><span class="n">Jm</span><span class="p">,</span> <span class="n">EPS</span><span class="p">))</span> <span class="o">*</span> <span class="n">Dc</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="kwon_index">
+<a class="viewcode-back" href="../../api/generated/fuzzyclust.validity.kwon_index.html#fuzzyclust.validity.kwon_index">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">kwon_index</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Kwon's index (1998). Min is best.</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        K=\frac{\sum_{i=1}^{c}\sum_{k=1}^{N}\mu_{ik}^2\|\mathbf{x}_k-\mathbf{v}_i\|^2</span>
+<span class="sd">                 +\frac1c\sum_{i=1}^{c}\|\mathbf{v}_i-\bar{\mathbf{x}}\|^2}</span>
+<span class="sd">                {\min_{i\neq j}\|\mathbf{v}_i-\mathbf{v}_j\|^2}</span>
+
+<span class="sd">    The Xie--Beni ratio with a punishing term in the numerator, the mean</span>
+<span class="sd">    squared distance of the prototypes from the grand mean</span>
+<span class="sd">    :math:`\bar{\mathbf{x}}`, which grows when prototypes are added and so</span>
+<span class="sd">    removes the monotone decrease of XB for large :math:`c`.</span>
+<span class="sd">    """</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span> <span class="o">=</span> <span class="n">_prep</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">V</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">c</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"nan"</span><span class="p">)</span>  <span class="c1"># separation of prototypes is undefined for one cluster</span>
+    <span class="n">comp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">U</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">sq_euclidean</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">V</span><span class="p">))</span>
+    <span class="n">punish</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">V</span> <span class="o">-</span> <span class="n">X</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">c</span>
+    <span class="n">vv</span> <span class="o">=</span> <span class="n">sq_euclidean</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">fill_diagonal</span><span class="p">(</span><span class="n">vv</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">((</span><span class="n">comp</span> <span class="o">+</span> <span class="n">punish</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">vv</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">+</span> <span class="n">EPS</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="pcaes_index">
+<a class="viewcode-back" href="../../api/generated/fuzzyclust.validity.pcaes_index.html#fuzzyclust.validity.pcaes_index">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">pcaes_index</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Partition coefficient and exponential separation, PCAES (Wu &amp; Yang, 2005). Max is best.</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        PCAES=\sum_{i=1}^{c}\frac{\sum_{k=1}^{N}\mu_{ik}^2}{\mu_M}</span>
+<span class="sd">              -\sum_{i=1}^{c}\exp\Bigl(-\frac{\min_{j\neq i}\|\mathbf{v}_i-\mathbf{v}_j\|^2}{\beta_T}\Bigr),</span>
+<span class="sd">        \quad \mu_M=\min_i\sum_k\mu_{ik}^2,\ \</span>
+<span class="sd">        \beta_T=\frac1c\sum_{i=1}^{c}\|\mathbf{v}_i-\bar{\mathbf{x}}\|^2 .</span>
+
+<span class="sd">    The first sum is a partition coefficient normalized per cluster by the</span>
+<span class="sd">    least compact cluster (a cluster-wise measure of how well the members</span>
+<span class="sd">    are covered), the second penalizes every prototype by how close its</span>
+<span class="sd">    nearest neighbor is on the scale :math:`\beta_T` of the spread of the</span>
+<span class="sd">    prototypes; a cluster with a neighbor much closer than</span>
+<span class="sd">    :math:`\sqrt{\beta_T}` costs nearly one unit. Since the first sum is</span>
+<span class="sd">    at least :math:`c` and the penalty at most :math:`c`, the index is</span>
+<span class="sd">    nonnegative. Because :math:`\mu_M` is the mass of the *smallest*</span>
+<span class="sd">    cluster (as published), a spurious tiny cluster inflates the index;</span>
+<span class="sd">    inspect the scan curve rather than only its maximum.</span>
+<span class="sd">    """</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span> <span class="o">=</span> <span class="n">_prep</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">V</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">c</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"nan"</span><span class="p">)</span>  <span class="c1"># separation of prototypes is undefined for one cluster</span>
+    <span class="n">mass</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">U</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">mu_M</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">mass</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">EPS</span><span class="p">)</span>
+    <span class="n">beta_T</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">V</span> <span class="o">-</span> <span class="n">X</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">c</span><span class="p">,</span> <span class="n">EPS</span><span class="p">)</span>
+    <span class="n">vv</span> <span class="o">=</span> <span class="n">sq_euclidean</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">fill_diagonal</span><span class="p">(</span><span class="n">vv</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mass</span> <span class="o">/</span> <span class="n">mu_M</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">vv</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">beta_T</span><span class="p">)))</span></div>
+
+
+
+<span class="n">_INDEX_FUNCS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"PC"</span><span class="p">:</span> <span class="n">partition_coefficient</span><span class="p">,</span>
+    <span class="s2">"CE"</span><span class="p">:</span> <span class="n">classification_entropy</span><span class="p">,</span>
+    <span class="s2">"MPC"</span><span class="p">:</span> <span class="n">modified_partition_coefficient</span><span class="p">,</span>
+    <span class="s2">"SC"</span><span class="p">:</span> <span class="n">partition_index</span><span class="p">,</span>
+    <span class="s2">"S"</span><span class="p">:</span> <span class="n">separation_index</span><span class="p">,</span>
+    <span class="s2">"XB"</span><span class="p">:</span> <span class="n">xie_beni</span><span class="p">,</span>
+    <span class="s2">"FS"</span><span class="p">:</span> <span class="n">fukuyama_sugeno</span><span class="p">,</span>
+    <span class="s2">"DI"</span><span class="p">:</span> <span class="n">dunn_index</span><span class="p">,</span>
+    <span class="s2">"ADI"</span><span class="p">:</span> <span class="n">alternative_dunn_index</span><span class="p">,</span>
+    <span class="s2">"SIL"</span><span class="p">:</span> <span class="n">silhouette</span><span class="p">,</span>
+    <span class="s2">"FHV"</span><span class="p">:</span> <span class="n">fuzzy_hypervolume</span><span class="p">,</span>
+    <span class="s2">"PD"</span><span class="p">:</span> <span class="n">partition_density</span><span class="p">,</span>
+    <span class="s2">"APD"</span><span class="p">:</span> <span class="n">average_partition_density</span><span class="p">,</span>
+    <span class="s2">"PBMF"</span><span class="p">:</span> <span class="n">pbmf_index</span><span class="p">,</span>
+    <span class="s2">"KWON"</span><span class="p">:</span> <span class="n">kwon_index</span><span class="p">,</span>
+    <span class="s2">"PCAES"</span><span class="p">:</span> <span class="n">pcaes_index</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># Comparing two fuzzy partitions</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="n">_TNORMS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"product"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">a</span> <span class="o">*</span> <span class="n">b</span><span class="p">,</span>
+    <span class="s2">"minimum"</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">,</span>
+    <span class="s2">"lukasiewicz"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+<span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_pair_mask</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">triu</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">),</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_equivalence_huellermeier</span><span class="p">(</span><span class="n">U</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Degree to which two samples share a cluster: 1 - L1/2 distance of their membership rows."""</span>
+    <span class="n">U</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">U</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">U</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_agreement_campello</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">tnorm</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Campello's degrees that a pair is in the same (V) or in different (X) clusters."""</span>
+    <span class="n">U</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">N</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">U</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="n">_TNORMS</span><span class="p">[</span><span class="n">tnorm</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">tnorm</span> <span class="o">==</span> <span class="s2">"product"</span><span class="p">:</span>
+        <span class="n">V</span> <span class="o">=</span> <span class="n">U</span> <span class="o">@</span> <span class="n">U</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">Xd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">U</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">U</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span> <span class="o">-</span> <span class="n">V</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">V</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span>
+        <span class="n">Xd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
+                <span class="n">t</span> <span class="o">=</span> <span class="n">T</span><span class="p">(</span><span class="n">U</span><span class="p">[:,</span> <span class="n">i</span><span class="p">][:,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">U</span><span class="p">[:,</span> <span class="n">j</span><span class="p">][</span><span class="kc">None</span><span class="p">,</span> <span class="p">:])</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">j</span><span class="p">:</span>
+                    <span class="n">V</span> <span class="o">+=</span> <span class="n">t</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">Xd</span> <span class="o">+=</span> <span class="n">t</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">Xd</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_pair_counts</span><span class="p">(</span><span class="n">U1</span><span class="p">,</span> <span class="n">U2</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"huellermeier"</span><span class="p">,</span> <span class="n">tnorm</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Fuzzy pair counts a, b, c, d: together in both, only in the first, only in the second, in neither."""</span>
+    <span class="n">U1</span> <span class="o">=</span> <span class="n">check_membership</span><span class="p">(</span><span class="n">U1</span><span class="p">)</span>
+    <span class="n">U2</span> <span class="o">=</span> <span class="n">check_membership</span><span class="p">(</span><span class="n">U2</span><span class="p">,</span> <span class="n">U1</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">U1</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"At least two samples are needed to compare partitions."</span><span class="p">)</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">_pair_mask</span><span class="p">(</span><span class="n">U1</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">"huellermeier"</span><span class="p">:</span>
+        <span class="n">T</span> <span class="o">=</span> <span class="n">_TNORMS</span><span class="p">[</span><span class="s2">"lukasiewicz"</span> <span class="k">if</span> <span class="n">tnorm</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">tnorm</span><span class="p">]</span>
+        <span class="n">E1</span><span class="p">,</span> <span class="n">E2</span> <span class="o">=</span> <span class="n">_equivalence_huellermeier</span><span class="p">(</span><span class="n">U1</span><span class="p">),</span> <span class="n">_equivalence_huellermeier</span><span class="p">(</span><span class="n">U2</span><span class="p">)</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">T</span><span class="p">(</span><span class="n">E1</span><span class="p">,</span> <span class="n">E2</span><span class="p">)[</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">T</span><span class="p">(</span><span class="n">E1</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">E2</span><span class="p">)[</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">T</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">E1</span><span class="p">,</span> <span class="n">E2</span><span class="p">)[</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">T</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">E1</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">E2</span><span class="p">)[</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">"campello"</span><span class="p">:</span>
+        <span class="n">tn</span> <span class="o">=</span> <span class="s2">"product"</span> <span class="k">if</span> <span class="n">tnorm</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">tnorm</span>
+        <span class="n">T</span> <span class="o">=</span> <span class="n">_TNORMS</span><span class="p">[</span><span class="n">tn</span><span class="p">]</span>
+        <span class="n">V1</span><span class="p">,</span> <span class="n">X1</span> <span class="o">=</span> <span class="n">_agreement_campello</span><span class="p">(</span><span class="n">U1</span><span class="p">,</span> <span class="n">tn</span><span class="p">)</span>
+        <span class="n">V2</span><span class="p">,</span> <span class="n">X2</span> <span class="o">=</span> <span class="n">_agreement_campello</span><span class="p">(</span><span class="n">U2</span><span class="p">,</span> <span class="n">tn</span><span class="p">)</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">T</span><span class="p">(</span><span class="n">V1</span><span class="p">,</span> <span class="n">V2</span><span class="p">)[</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">T</span><span class="p">(</span><span class="n">V1</span><span class="p">,</span> <span class="n">X2</span><span class="p">)[</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">T</span><span class="p">(</span><span class="n">X1</span><span class="p">,</span> <span class="n">V2</span><span class="p">)[</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">T</span><span class="p">(</span><span class="n">X1</span><span class="p">,</span> <span class="n">X2</span><span class="p">)[</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"method must be 'huellermeier' or 'campello'."</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">b</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">c</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="fuzzy_rand_index">
+<a class="viewcode-back" href="../../api/generated/fuzzyclust.validity.fuzzy_rand_index.html#fuzzyclust.validity.fuzzy_rand_index">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fuzzy_rand_index</span><span class="p">(</span><span class="n">U1</span><span class="p">,</span> <span class="n">U2</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"huellermeier"</span><span class="p">,</span> <span class="n">tnorm</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Fuzzy Rand index between two fuzzy partitions of the same samples.</span>
+
+<span class="sd">    The Rand index counts the pairs of samples on which two partitions</span>
+<span class="sd">    agree---together in both or apart in both---over all pairs. Two fuzzy</span>
+<span class="sd">    generalizations are implemented.</span>
+
+<span class="sd">    * ``"huellermeier"`` (Hüllermeier, Rifqi, Henzgen &amp; Senge, 2012): every</span>
+<span class="sd">      partition defines a fuzzy equivalence relation</span>
+<span class="sd">      :math:`E_U(k,l)=1-\tfrac12\sum_i|\mu_{ik}-\mu_{il}|` (the degree to</span>
+<span class="sd">      which samples :math:`k` and :math:`l` are in the same cluster), and</span>
+<span class="sd">      the index is one minus the normalized distance between the two</span>
+<span class="sd">      relations,</span>
+
+<span class="sd">      .. math::</span>
+<span class="sd">          R_E(\mathbf{U}_1,\mathbf{U}_2)=1-\frac{\sum_{k&lt;l}|E_1(k,l)-E_2(k,l)|}{N(N-1)/2} .</span>
+
+<span class="sd">      This distance-based form is the definition of the paper and is what</span>
+<span class="sd">      ``tnorm=None`` computes. Passing a t-norm instead evaluates the</span>
+<span class="sd">      count-based form :math:`(a+d)/(a+b+c+d)` with</span>
+<span class="sd">      :math:`a=\sum\top(E_1,E_2)`, :math:`b=\sum\top(E_1,1-E_2)`, etc.;</span>
+<span class="sd">      for soft partitions the two forms differ (the four degrees of a pair</span>
+<span class="sd">      need not sum to one), for hard partitions both equal the classical</span>
+<span class="sd">      Rand index. The adjusted Rand and Jaccard variants use the counts</span>
+<span class="sd">      (Łukasiewicz t-norm by default).</span>
+<span class="sd">    * ``"campello"`` (Campello, 2007): for every pair the degrees of being</span>
+<span class="sd">      in the same cluster, :math:`V_{kl}=\sum_i\top(\mu_{ik},\mu_{il})`,</span>
+<span class="sd">      and in different clusters, :math:`X_{kl}=\sum_{i\neq j}\top(\mu_{ik},\mu_{jl})`,</span>
+<span class="sd">      are formed with a t-norm :math:`\top` for both partitions, and the</span>
+<span class="sd">      four counts are :math:`a=\sum_{k&lt;l}\top(V^{(1)}_{kl},V^{(2)}_{kl})`,</span>
+<span class="sd">      :math:`b=\sum\top(V^{(1)},X^{(2)})`, :math:`c=\sum\top(X^{(1)},V^{(2)})`,</span>
+<span class="sd">      :math:`d=\sum\top(X^{(1)},X^{(2)})`; the Rand index is</span>
+<span class="sd">      :math:`(a+d)/(a+b+c+d)`.</span>
+
+<span class="sd">    Both reduce to the classical Rand index for hard partitions.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    U1, U2 : array-like of shape (n_samples, n_clusters_1) and (n_samples, n_clusters_2)</span>
+<span class="sd">        Membership matrices (rows sum to one); hard partitions as one-hot</span>
+<span class="sd">        matrices (:func:`fuzzyclust._utils.labels_to_membership`).</span>
+<span class="sd">    method : {"huellermeier", "campello"}, default="huellermeier"</span>
+<span class="sd">    tnorm : {"product", "minimum", "lukasiewicz"} or None, default=None</span>
+<span class="sd">        t-norm; ``None`` gives the distance-based index for</span>
+<span class="sd">        ``"huellermeier"`` and the product t-norm for ``"campello"``.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float in [0, 1]</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] E. Hüllermeier, M. Rifqi, S. Henzgen, R. Senge, "Comparing fuzzy</span>
+<span class="sd">           partitions: a generalization of the Rand index and related</span>
+<span class="sd">           measures", IEEE Trans. Fuzzy Systems 20(3), 546--556, 2012.</span>
+<span class="sd">    .. [2] R. J. G. B. Campello, "A fuzzy extension of the Rand index and</span>
+<span class="sd">           other related indexes for clustering and classification</span>
+<span class="sd">           assessment", Pattern Recognition Letters 28(7), 833--841, 2007.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.cluster import FCM, GK</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.datasets import make_fuzzy_blobs</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.validity import fuzzy_rand_index</span>
+<span class="sd">    &gt;&gt;&gt; X, _ = make_fuzzy_blobs(random_state=0)</span>
+<span class="sd">    &gt;&gt;&gt; U1 = FCM(n_clusters=3, random_state=0).fit(X).membership_</span>
+<span class="sd">    &gt;&gt;&gt; U2 = GK(n_clusters=3, random_state=0).fit(X).membership_</span>
+<span class="sd">    &gt;&gt;&gt; round(fuzzy_rand_index(U1, U2), 2) &gt; 0.9</span>
+<span class="sd">    True</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">"huellermeier"</span> <span class="ow">and</span> <span class="n">tnorm</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">U1</span> <span class="o">=</span> <span class="n">check_membership</span><span class="p">(</span><span class="n">U1</span><span class="p">)</span>
+        <span class="n">U2</span> <span class="o">=</span> <span class="n">check_membership</span><span class="p">(</span><span class="n">U2</span><span class="p">,</span> <span class="n">U1</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">U1</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"At least two samples are needed to compare partitions."</span><span class="p">)</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">_pair_mask</span><span class="p">(</span><span class="n">U1</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">_equivalence_huellermeier</span><span class="p">(</span><span class="n">U1</span><span class="p">)</span> <span class="o">-</span> <span class="n">_equivalence_huellermeier</span><span class="p">(</span><span class="n">U2</span><span class="p">))[</span><span class="n">mask</span><span class="p">]</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">diff</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">_pair_counts</span><span class="p">(</span><span class="n">U1</span><span class="p">,</span> <span class="n">U2</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">tnorm</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">((</span><span class="n">a</span> <span class="o">+</span> <span class="n">d</span><span class="p">)</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="o">+</span> <span class="n">c</span> <span class="o">+</span> <span class="n">d</span><span class="p">,</span> <span class="n">EPS</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="fuzzy_adjusted_rand_index">
+<a class="viewcode-back" href="../../api/generated/fuzzyclust.validity.fuzzy_adjusted_rand_index.html#fuzzyclust.validity.fuzzy_adjusted_rand_index">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fuzzy_adjusted_rand_index</span><span class="p">(</span><span class="n">U1</span><span class="p">,</span> <span class="n">U2</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"huellermeier"</span><span class="p">,</span> <span class="n">tnorm</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Fuzzy adjusted Rand index (chance-corrected), from the fuzzy pair counts of :func:`fuzzy_rand_index`.</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        ARI=\frac{a-\frac{(a+b)(a+c)}{a+b+c+d}}{\frac12\bigl((a+b)+(a+c)\bigr)-\frac{(a+b)(a+c)}{a+b+c+d}}</span>
+
+<span class="sd">    (Hubert and Arabie's correction applied to the fuzzy pair counts). Zero</span>
+<span class="sd">    in expectation for independent partitions, one for identical ones;</span>
+<span class="sd">    coincides with ``sklearn.metrics.adjusted_rand_score`` for hard partitions.</span>
+<span class="sd">    """</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">_pair_counts</span><span class="p">(</span><span class="n">U1</span><span class="p">,</span> <span class="n">U2</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">tnorm</span><span class="p">)</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="o">+</span> <span class="n">c</span> <span class="o">+</span> <span class="n">d</span>
+    <span class="n">expected</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">c</span><span class="p">)</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">EPS</span><span class="p">)</span>
+    <span class="n">maximum</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">((</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">c</span><span class="p">))</span>
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">maximum</span> <span class="o">-</span> <span class="n">expected</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">EPS</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">1.0</span> <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">a</span> <span class="o">-</span> <span class="n">expected</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">EPS</span> <span class="k">else</span> <span class="mf">0.0</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">((</span><span class="n">a</span> <span class="o">-</span> <span class="n">expected</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">maximum</span> <span class="o">-</span> <span class="n">expected</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="fuzzy_jaccard_index">
+<a class="viewcode-back" href="../../api/generated/fuzzyclust.validity.fuzzy_jaccard_index.html#fuzzyclust.validity.fuzzy_jaccard_index">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fuzzy_jaccard_index</span><span class="p">(</span><span class="n">U1</span><span class="p">,</span> <span class="n">U2</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"huellermeier"</span><span class="p">,</span> <span class="n">tnorm</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Fuzzy Jaccard index :math:`a/(a+b+c)` from the fuzzy pair counts of :func:`fuzzy_rand_index`.</span>
+
+<span class="sd">    Ignores the pairs that are apart in both partitions, which dominate the</span>
+<span class="sd">    Rand index when the number of clusters is large.</span>
+<span class="sd">    """</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_pair_counts</span><span class="p">(</span><span class="n">U1</span><span class="p">,</span> <span class="n">U2</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">tnorm</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">a</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="o">+</span> <span class="n">c</span><span class="p">,</span> <span class="n">EPS</span><span class="p">))</span></div>
+
+
+
+<span class="n">_STABILITY_INDICES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"fuzzy_ari"</span><span class="p">:</span> <span class="n">fuzzy_adjusted_rand_index</span><span class="p">,</span>
+    <span class="s2">"fuzzy_rand"</span><span class="p">:</span> <span class="n">fuzzy_rand_index</span><span class="p">,</span>
+    <span class="s2">"fuzzy_jaccard"</span><span class="p">:</span> <span class="n">fuzzy_jaccard_index</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_seeded</span><span class="p">(</span><span class="n">estimator</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Clone ``estimator`` with ``n_clusters=c`` and, if it has one, a seed drawn from ``rng``."""</span>
+    <span class="n">est</span> <span class="o">=</span> <span class="n">clone</span><span class="p">(</span><span class="n">estimator</span><span class="p">)</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="n">c</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s2">"random_state"</span> <span class="ow">in</span> <span class="n">est</span><span class="o">.</span><span class="n">get_params</span><span class="p">()</span> <span class="ow">and</span> <span class="n">est</span><span class="o">.</span><span class="n">get_params</span><span class="p">()[</span><span class="s2">"random_state"</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">est</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">est</span>
+
+
+<div class="viewcode-block" id="stability_selection">
+<a class="viewcode-back" href="../../api/generated/fuzzyclust.validity.stability_selection.html#fuzzyclust.validity.stability_selection">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">stability_selection</span><span class="p">(</span>
+    <span class="n">estimator</span><span class="p">,</span>
+    <span class="n">X</span><span class="p">,</span>
+    <span class="n">n_clusters_range</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">11</span><span class="p">),</span>
+    <span class="n">n_splits</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
+    <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"subsample"</span><span class="p">,</span>
+    <span class="n">subsample</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span>
+    <span class="n">index</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"fuzzy_ari"</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Stability of the partition against resampling, for every number of clusters.</span>
+
+<span class="sd">    A number of clusters that reflects structure in the data gives the same</span>
+<span class="sd">    partition on different subsets of the data; a wrong one splits or</span>
+<span class="sd">    merges groups arbitrarily and the partitions of two subsets disagree.</span>
+<span class="sd">    Two protocols are implemented.</span>
+
+<span class="sd">    * ``"subsample"`` (Ben-Hur, Elisseeff &amp; Guyon, 2002): two random</span>
+<span class="sd">      sub-samples of a fraction ``subsample`` of the data are clustered</span>
+<span class="sd">      independently and their partitions compared on the samples they</span>
+<span class="sd">      share.</span>
+<span class="sd">    * ``"split"`` (Lange, Roth, Braun &amp; Buhmann, 2004): the data are split</span>
+<span class="sd">      into two halves, the estimator is fitted on each, the model of the</span>
+<span class="sd">      first half predicts the memberships of the second half</span>
+<span class="sd">      (``predict_proba`` acts as the classifier of the original method),</span>
+<span class="sd">      and the prediction is compared with the second half's own partition.</span>
+
+<span class="sd">    The comparison uses a fuzzy partition index, by default the fuzzy</span>
+<span class="sd">    adjusted Rand index, which is zero for chance agreement and so needs no</span>
+<span class="sd">    further normalization (the raw fuzzy Rand index grows with :math:`c`</span>
+<span class="sd">    because pairs apart in both partitions count as agreement). The</span>
+<span class="sd">    statistic to inspect is the distribution over splits: a stable</span>
+<span class="sd">    :math:`c` has a mean near one and a small spread.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    estimator : fuzzyclust clusterer</span>
+<span class="sd">        Cloned and refitted for every value of ``n_clusters`` and every split.</span>
+<span class="sd">    X : array-like of shape (n_samples, n_features)</span>
+<span class="sd">    n_clusters_range : iterable of int, default=range(2, 11)</span>
+<span class="sd">    n_splits : int, default=20</span>
+<span class="sd">        Number of resampling repetitions per ``n_clusters``.</span>
+<span class="sd">    method : {"subsample", "split"}, default="subsample"</span>
+<span class="sd">    subsample : float, default=0.8</span>
+<span class="sd">        Fraction of the samples in every sub-sample (``"subsample"`` only).</span>
+<span class="sd">    index : {"fuzzy_ari", "fuzzy_rand", "fuzzy_jaccard"}, default="fuzzy_ari"</span>
+<span class="sd">    random_state : int, RandomState instance or None</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pandas.DataFrame</span>
+<span class="sd">        Indexed by ``n_clusters`` with one column per split (``split_0``,</span>
+<span class="sd">        ...); ``table.mean(axis=1).idxmax()`` is the most stable :math:`c`.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] A. Ben-Hur, A. Elisseeff, I. Guyon, "A stability based method for</span>
+<span class="sd">           discovering structure in clustered data", Pacific Symposium on</span>
+<span class="sd">           Biocomputing 7, 6--17, 2002.</span>
+<span class="sd">    .. [2] T. Lange, V. Roth, M. L. Braun, J. M. Buhmann, "Stability-based</span>
+<span class="sd">           validation of clustering solutions", Neural Computation 16(6),</span>
+<span class="sd">           1299--1323, 2004.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.cluster import FCM</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.datasets import make_fuzzy_blobs</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.validity import stability_selection</span>
+<span class="sd">    &gt;&gt;&gt; X, _ = make_fuzzy_blobs(n_clusters=4, random_state=0)</span>
+<span class="sd">    &gt;&gt;&gt; table = stability_selection(FCM(random_state=0), X, range(2, 7), n_splits=5, random_state=0)</span>
+<span class="sd">    &gt;&gt;&gt; int(table.mean(axis=1).idxmax())</span>
+<span class="sd">    4</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_random_state</span>
+
+    <span class="k">if</span> <span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"subsample"</span><span class="p">,</span> <span class="s2">"split"</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"method must be 'subsample' or 'split'."</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">index</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_STABILITY_INDICES</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"index must be one of </span><span class="si">{</span><span class="nb">tuple</span><span class="p">(</span><span class="n">_STABILITY_INDICES</span><span class="p">)</span><span class="si">}</span><span class="s2">."</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="mf">0.0</span> <span class="o">&lt;</span> <span class="n">subsample</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"subsample must lie in (0, 1)."</span><span class="p">)</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">rng</span> <span class="o">=</span> <span class="n">check_random_state</span><span class="p">(</span><span class="n">random_state</span><span class="p">)</span>
+    <span class="n">score</span> <span class="o">=</span> <span class="n">_STABILITY_INDICES</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+    <span class="n">n_sub</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">subsample</span> <span class="o">*</span> <span class="n">N</span><span class="p">)),</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">n_clusters_range</span><span class="p">:</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_splits</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">"subsample"</span><span class="p">:</span>
+                <span class="n">idx1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">n_sub</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+                <span class="n">idx2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">n_sub</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+                <span class="n">common</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">intersect1d</span><span class="p">(</span><span class="n">idx1</span><span class="p">,</span> <span class="n">idx2</span><span class="p">)</span>
+                <span class="n">est1</span> <span class="o">=</span> <span class="n">_seeded</span><span class="p">(</span><span class="n">estimator</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">),</span> <span class="n">rng</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">idx1</span><span class="p">])</span>
+                <span class="n">est2</span> <span class="o">=</span> <span class="n">_seeded</span><span class="p">(</span><span class="n">estimator</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">),</span> <span class="n">rng</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">idx2</span><span class="p">])</span>
+                <span class="n">U1</span> <span class="o">=</span> <span class="n">est1</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">common</span><span class="p">])</span>
+                <span class="n">U2</span> <span class="o">=</span> <span class="n">est2</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">common</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">perm</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+                <span class="n">half1</span><span class="p">,</span> <span class="n">half2</span> <span class="o">=</span> <span class="n">perm</span><span class="p">[:</span> <span class="n">N</span> <span class="o">//</span> <span class="mi">2</span><span class="p">],</span> <span class="n">perm</span><span class="p">[</span><span class="n">N</span> <span class="o">//</span> <span class="mi">2</span> <span class="p">:]</span>
+                <span class="n">est1</span> <span class="o">=</span> <span class="n">_seeded</span><span class="p">(</span><span class="n">estimator</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">),</span> <span class="n">rng</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">half1</span><span class="p">])</span>
+                <span class="n">est2</span> <span class="o">=</span> <span class="n">_seeded</span><span class="p">(</span><span class="n">estimator</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">),</span> <span class="n">rng</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">half2</span><span class="p">])</span>
+                <span class="n">U1</span> <span class="o">=</span> <span class="n">est1</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">half2</span><span class="p">])</span>
+                <span class="n">U2</span> <span class="o">=</span> <span class="n">est2</span><span class="o">.</span><span class="n">membership_</span>
+            <span class="n">vals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">score</span><span class="p">(</span><span class="n">U1</span><span class="p">,</span> <span class="n">U2</span><span class="p">))</span>
+        <span class="n">rows</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">)]</span> <span class="o">=</span> <span class="n">vals</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s2">"index"</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">"split_</span><span class="si">{</span><span class="n">s</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_splits</span><span class="p">)])</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">"n_clusters"</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+
+
+
+<div class="viewcode-block" id="validity_indices">
+<a class="viewcode-back" href="../../api/generated/fuzzyclust.validity.validity_indices.html#fuzzyclust.validity.validity_indices">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">validity_indices</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">m</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Evaluate several validity indices at once.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    X, U, V, m</span>
+<span class="sd">        See module docstring.</span>
+<span class="sd">    indices : iterable of str, optional</span>
+<span class="sd">        Subset of ``{"PC","CE","MPC","SC","S","XB","FS","DI","ADI","SIL","FHV","PD","APD","PBMF",</span>
+<span class="sd">        "KWON","PCAES"}``. Default: all.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict</span>
+<span class="sd">        Index name -&gt; value.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.cluster import FCM</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.datasets import make_fuzzy_blobs</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.validity import validity_indices</span>
+<span class="sd">    &gt;&gt;&gt; X, _ = make_fuzzy_blobs(random_state=0)</span>
+<span class="sd">    &gt;&gt;&gt; fcm = FCM(n_clusters=3, random_state=0).fit(X)</span>
+<span class="sd">    &gt;&gt;&gt; res = validity_indices(X, fcm.membership_, fcm.cluster_centers_, m=fcm.m)</span>
+<span class="sd">    &gt;&gt;&gt; sorted(res)[:3]</span>
+<span class="sd">    ['ADI', 'APD', 'CE']</span>
+<span class="sd">    """</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="k">if</span> <span class="n">indices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">list</span><span class="p">(</span><span class="n">_INDEX_FUNCS</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">_INDEX_FUNCS</span><span class="p">[</span><span class="n">name</span><span class="p">](</span><span class="n">X</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="scan_n_clusters">
+<a class="viewcode-back" href="../../api/generated/fuzzyclust.validity.scan_n_clusters.html#fuzzyclust.validity.scan_n_clusters">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">scan_n_clusters</span><span class="p">(</span>
+    <span class="n">estimator</span><span class="p">,</span>
+    <span class="n">X</span><span class="p">,</span>
+    <span class="n">n_clusters_range</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">11</span><span class="p">),</span>
+    <span class="n">indices</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Fit the estimator for several numbers of clusters and tabulate validity indices.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    estimator : fitted or unfitted fuzzyclust estimator</span>
+<span class="sd">        Cloned and refitted for every value of ``n_clusters``.</span>
+<span class="sd">    X : array-like of shape (n_samples, n_features)</span>
+<span class="sd">    n_clusters_range : iterable of int, default=range(2, 11)</span>
+<span class="sd">    indices : iterable of str, optional</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pandas.DataFrame</span>
+<span class="sd">        Indexed by ``n_clusters`` with one column per index.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.cluster import FCM</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.datasets import make_fuzzy_blobs</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.validity import scan_n_clusters</span>
+<span class="sd">    &gt;&gt;&gt; X, _ = make_fuzzy_blobs(random_state=0)</span>
+<span class="sd">    &gt;&gt;&gt; table = scan_n_clusters(FCM(random_state=0), X, range(2, 6), indices=["PC", "XB"])</span>
+<span class="sd">    &gt;&gt;&gt; list(table.columns)</span>
+<span class="sd">    ['PC', 'XB']</span>
+<span class="sd">    """</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">n_clusters_range</span><span class="p">:</span>
+        <span class="n">est</span> <span class="o">=</span> <span class="n">clone</span><span class="p">(</span><span class="n">estimator</span><span class="p">)</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">))</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">est</span><span class="p">,</span> <span class="s2">"m"</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span>
+        <span class="n">rows</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">)]</span> <span class="o">=</span> <span class="n">validity_indices</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">est</span><span class="o">.</span><span class="n">membership_</span><span class="p">,</span> <span class="n">est</span><span class="o">.</span><span class="n">cluster_centers_</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s2">"index"</span><span class="p">)</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">"n_clusters"</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+
+
+
+<div class="viewcode-block" id="suggest_n_clusters">
+<a class="viewcode-back" href="../../api/generated/fuzzyclust.validity.suggest_n_clusters.html#fuzzyclust.validity.suggest_n_clusters">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">suggest_n_clusters</span><span class="p">(</span><span class="n">table</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Optimal number of clusters suggested by every index of a scan table.</span>
+
+<span class="sd">    Uses :data:`INDEX_DIRECTION` to pick the arg-max or arg-min of each column.</span>
+<span class="sd">    PC and CE decrease/increase monotonically with :math:`c`, so for them the</span>
+<span class="sd">    knee rather than the extremum is often the better choice; the raw</span>
+<span class="sd">    suggestion is still reported for completeness.</span>
+<span class="sd">    """</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">table</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">table</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="n">out</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+            <span class="k">continue</span>
+        <span class="n">out</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">idxmax</span><span class="p">()</span> <span class="k">if</span> <span class="n">INDEX_DIRECTION</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="s2">"min"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"max"</span> <span class="k">else</span> <span class="n">s</span><span class="o">.</span><span class="n">idxmin</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"suggested_n_clusters"</span><span class="p">)</span></div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, János Abonyi.
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.1.
+  </p>
+</div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>fuzzyclust.cluster.subtractive &#8212; fuzzyclust</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=c83e6b79" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=6a604523" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=e6ebbe3b" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
+
+    <script src="../../../_static/documentation_options.js?v=f2a433a1"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/sg-tags.js?v=d80f6fa4"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../../_static/design-tabs.js?v=fcb327ea"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/fuzzyclust/cluster/subtractive';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="icon" href="../../../_static/favicon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="1.0" />
+  
+    
+    <script src="../../../_static/searchtools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/logo.svg" class="logo__image only-light" alt=""/>
+    <img src="../../../_static/logo.svg" class="logo__image only-dark pst-js-only" alt=""/>
+  
+  
+    <p class="title logo__title">fuzzyclust</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../auto_examples/index.html">
+    Example gallery
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../book.html">
+    The book
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../migration.html">
+    Migrating from the MATLAB toolbox
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../citing.html">
+    Citing
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://complexsystemsintelligence.github.io/#textbooks">
+    All textbooks
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ComplexSystemsIntelligence/fuzzyclust" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../auto_examples/index.html">
+    Example gallery
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../book.html">
+    The book
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../migration.html">
+    Migrating from the MATLAB toolbox
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../citing.html">
+    Citing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://complexsystemsintelligence.github.io/#textbooks">
+    All textbooks
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ComplexSystemsIntelligence/fuzzyclust" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">fuzzyclust.cluster.subtractive</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for fuzzyclust.cluster.subtractive</h1><div class="highlight"><pre>
+<span></span><span class="c1"># SPDX-License-Identifier: MIT</span>
+<span class="c1"># Copyright (c) 2026 János Abonyi</span>
+<span class="sa">r</span><span class="sd">"""Density-based estimation of the number and location of clusters: mountain method, subtractive clustering.</span>
+
+<span class="sd">Both methods compute a density-like *potential* at candidate points, select</span>
+<span class="sd">the point of highest potential as a cluster center, subtract the influence</span>
+<span class="sd">of that center from the potential of its neighborhood and repeat until the</span>
+<span class="sd">remaining potential is small. They need no number of clusters and no</span>
+<span class="sd">initialization; their result---a set of centers and their number---is the</span>
+<span class="sd">natural starting point for the alternating-optimization algorithms and for</span>
+<span class="sd">the rule-number question of fuzzy model identification.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">ClusterMixin</span><span class="p">,</span> <span class="n">TransformerMixin</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.utils.validation</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_is_fitted</span><span class="p">,</span> <span class="n">validate_data</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.._utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">EPS</span><span class="p">,</span> <span class="n">sq_euclidean</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_scaled_sq_distances</span><span class="p">(</span><span class="n">A</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">B</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">radii</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Squared distances ``(len(A), len(B))`` with every feature divided by its radius."""</span>
+    <span class="k">return</span> <span class="n">sq_euclidean</span><span class="p">(</span><span class="n">A</span> <span class="o">/</span> <span class="n">radii</span><span class="p">,</span> <span class="n">B</span> <span class="o">/</span> <span class="n">radii</span><span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_DensityPeaks</span><span class="p">(</span><span class="n">ClusterMixin</span><span class="p">,</span> <span class="n">TransformerMixin</span><span class="p">,</span> <span class="n">BaseEstimator</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Shared inference methods of the two potential-based estimators."""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_radii</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="n">radii</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">radii</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">radii</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">radii</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">radii</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">radii</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="n">n</span><span class="p">,)</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">radii</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"radii must be a positive scalar or an array of </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2"> positive values."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">squash</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"squash must be positive."</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">radii</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Min--max scale to the unit hypercube (fitted bounds); constant features are left at zero."""</span>
+        <span class="n">span</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_span</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_span</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">X</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lo</span><span class="p">)</span> <span class="o">/</span> <span class="n">span</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_d2_to_centers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Radius-scaled squared distances of (raw) samples to the centers."""</span>
+        <span class="k">return</span> <span class="n">_scaled_sq_distances</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_normalize</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_centers_unit</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">radii_</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Gaussian membership :math:`\exp(-4D^2_{ik}/r_a^2)` in every center, normalized per sample.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        U : ndarray of shape (n_samples, ``n_clusters_``)</span>
+<span class="sd">        """</span>
+        <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"cluster_centers_"</span><span class="p">)</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">validate_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">U</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">4.0</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d2_to_centers</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">U</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">U</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">EPS</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Index of the nearest center (in the radius-scaled metric) of (new) samples."""</span>
+        <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"cluster_centers_"</span><span class="p">)</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">validate_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d2_to_centers</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Euclidean distances to the centers (original units), shape ``(n_samples, n_clusters_)``."""</span>
+        <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"cluster_centers_"</span><span class="p">)</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">validate_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sq_euclidean</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster_centers_</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">fit_params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_feature_names_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_features</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"cluster_centers_"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="sa">f</span><span class="s2">"dist_cluster_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_clusters_</span><span class="p">)],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__sklearn_tags__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">tags</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__sklearn_tags__</span><span class="p">()</span>
+        <span class="n">tags</span><span class="o">.</span><span class="n">input_tags</span><span class="o">.</span><span class="n">allow_nan</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="n">tags</span>
+
+
+<div class="viewcode-block" id="SubtractiveClustering">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.cluster.SubtractiveClustering.html#fuzzyclust.cluster.SubtractiveClustering">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SubtractiveClustering</span><span class="p">(</span><span class="n">_DensityPeaks</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Subtractive clustering (Chiu, 1994): cluster centers from the potential of the data points.</span>
+
+<span class="sd">    Every data point is a candidate center. Its *potential* is the sum of</span>
+<span class="sd">    Gaussian influences of all other points within a neighborhood radius</span>
+<span class="sd">    :math:`r_a`; the point of highest potential becomes the first center,</span>
+<span class="sd">    its influence (with a somewhat larger radius :math:`r_b`) is subtracted</span>
+<span class="sd">    from the potential of all points, and the next highest potential is</span>
+<span class="sd">    examined. A candidate is accepted when its remaining potential is still</span>
+<span class="sd">    a large fraction of the first one, rejected---and the procedure</span>
+<span class="sd">    stopped---when it is a small fraction, and in between accepted only if</span>
+<span class="sd">    it is far enough from the existing centers. The method is the</span>
+<span class="sd">    data-point version of the mountain method (:class:`MountainClustering`),</span>
+<span class="sd">    which it frees from the exponential cost of a grid, and it is the</span>
+<span class="sd">    classical estimator of the number of rules of a Takagi--Sugeno model</span>
+<span class="sd">    identified in the product space of inputs and output. The data are</span>
+<span class="sd">    scaled to the unit hypercube internally, so the radii are fractions of</span>
+<span class="sd">    the data range.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    radii : float or array-like of shape (n_features,), default=0.5</span>
+<span class="sd">        Neighborhood radius :math:`r_a` of a center as a fraction of the</span>
+<span class="sd">        range of every feature (one value per feature allowed). Smaller</span>
+<span class="sd">        radii give more clusters. Chiu recommends :math:`0.2`--:math:`0.5`</span>
+<span class="sd">        for his examples; :math:`0.5` is the usual default.</span>
+<span class="sd">    squash : float, default=1.25</span>
+<span class="sd">        Squash factor :math:`\eta`: the potentials are revised with the radius</span>
+<span class="sd">        :math:`r_b=\eta\,r_a&gt;r_a` so that no center is placed close to an</span>
+<span class="sd">        existing one.</span>
+<span class="sd">    accept_ratio : float, default=0.5</span>
+<span class="sd">        Acceptance ratio :math:`\bar\varepsilon`: a candidate with potential</span>
+<span class="sd">        above :math:`\bar\varepsilon P^*_1` is accepted outright.</span>
+<span class="sd">    reject_ratio : float, default=0.15</span>
+<span class="sd">        Rejection ratio :math:`\underline\varepsilon`: a candidate with</span>
+<span class="sd">        potential below :math:`\underline\varepsilon P^*_1` is rejected and</span>
+<span class="sd">        the search ends.</span>
+<span class="sd">    max_clusters : int or None, default=None</span>
+<span class="sd">        Upper bound on the number of centers (``None``: no bound).</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cluster_centers_ : ndarray of shape (``n_clusters_``, n_features)</span>
+<span class="sd">        The selected data points, in the original units.</span>
+<span class="sd">    center_indices_ : ndarray of shape (``n_clusters_``,)</span>
+<span class="sd">        Row indices of the centers in the training data.</span>
+<span class="sd">    n_clusters_ : int</span>
+<span class="sd">        Number of centers found.</span>
+<span class="sd">    potentials_ : ndarray of shape (``n_clusters_``,)</span>
+<span class="sd">        Potential :math:`P^*_i` of every center at the moment of its selection,</span>
+<span class="sd">        relative to the first (:math:`P^*_1=1`).</span>
+<span class="sd">    initial_potentials_ : ndarray of shape (n_samples,)</span>
+<span class="sd">        Potential of every training sample before any subtraction (a density estimate).</span>
+<span class="sd">    membership_ : ndarray of shape (n_samples, ``n_clusters_``)</span>
+<span class="sd">        Normalized Gaussian memberships of the training samples (``predict_proba``).</span>
+<span class="sd">    labels_ : ndarray of shape (n_samples,)</span>
+<span class="sd">        Nearest center of every training sample.</span>
+<span class="sd">    radii_ : ndarray of shape (n_features,)</span>
+<span class="sd">        Radii actually used (in the unit hypercube).</span>
+<span class="sd">    n_features_in_, feature_names_in_</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    With the data scaled to :math:`[0,1]^n` and :math:`\alpha=4/r_a^2`,</span>
+<span class="sd">    :math:`\beta=4/r_b^2`, the potential of sample :math:`k` is</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        P_k=\sum_{l=1}^{N}\exp\bigl(-\alpha\,\|\mathbf{x}_k-\mathbf{x}_l\|^2\bigr),</span>
+
+<span class="sd">    (with a per-feature radius the squared distance is</span>
+<span class="sd">    :math:`\sum_j(x_{kj}-x_{lj})^2/r_j^2` and :math:`\alpha=4`). After the</span>
+<span class="sd">    selection of the center :math:`\mathbf{x}^*_i` with potential</span>
+<span class="sd">    :math:`P^*_i`, the potentials are revised,</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        P_k\leftarrow P_k-P^*_i\exp\bigl(-\beta\,\|\mathbf{x}_k-\mathbf{x}^*_i\|^2\bigr),</span>
+
+<span class="sd">    and the candidate with the largest remaining potential is accepted if</span>
+<span class="sd">    :math:`P^*&gt;\bar\varepsilon P^*_1`, rejected (end) if</span>
+<span class="sd">    :math:`P^*&lt;\underline\varepsilon P^*_1`, and otherwise accepted only if</span>
+<span class="sd">    :math:`d_{\min}/r_a+P^*/P^*_1\ge1`, where :math:`d_{\min}` is its</span>
+<span class="sd">    distance to the nearest existing center; a candidate that fails this</span>
+<span class="sd">    test has its potential set to zero and the next one is examined. The</span>
+<span class="sd">    returned centers can be passed as ``init`` to :class:`~fuzzyclust.cluster.FCM`</span>
+<span class="sd">    or :class:`~fuzzyclust.cluster.GK` together with ``n_clusters_``, and</span>
+<span class="sd">    ``n_clusters_`` of a run on the product-space data ``[X, y]`` is a</span>
+<span class="sd">    rule-number estimate for :class:`~fuzzyclust.models.TakagiSugeno`.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] S. L. Chiu, "Fuzzy model identification based on cluster</span>
+<span class="sd">           estimation", Journal of Intelligent and Fuzzy Systems 2(3),</span>
+<span class="sd">           267--278, 1994.</span>
+<span class="sd">    .. [2] R. R. Yager, D. P. Filev, "Approximate clustering via the mountain</span>
+<span class="sd">           method", IEEE Transactions on Systems, Man, and Cybernetics 24(8),</span>
+<span class="sd">           1279--1284, 1994.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.cluster import SubtractiveClustering, FCM</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.datasets import make_fuzzy_blobs</span>
+<span class="sd">    &gt;&gt;&gt; X, _ = make_fuzzy_blobs(n_clusters=4, random_state=0)</span>
+<span class="sd">    &gt;&gt;&gt; sub = SubtractiveClustering(radii=0.3).fit(X)</span>
+<span class="sd">    &gt;&gt;&gt; int(sub.n_clusters_)</span>
+<span class="sd">    4</span>
+<span class="sd">    &gt;&gt;&gt; fcm = FCM(n_clusters=sub.n_clusters_, init=sub.cluster_centers_).fit(X)</span>
+<span class="sd">    &gt;&gt;&gt; fcm.n_iter_ &lt; 20</span>
+<span class="sd">    True</span>
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">radii</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">squash</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.25</span><span class="p">,</span>
+        <span class="n">accept_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">reject_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.15</span><span class="p">,</span>
+        <span class="n">max_clusters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radii</span> <span class="o">=</span> <span class="n">radii</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">squash</span> <span class="o">=</span> <span class="n">squash</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">accept_ratio</span> <span class="o">=</span> <span class="n">accept_ratio</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reject_ratio</span> <span class="o">=</span> <span class="n">reject_ratio</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_clusters</span> <span class="o">=</span> <span class="n">max_clusters</span>
+
+<div class="viewcode-block" id="SubtractiveClustering.fit">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.cluster.SubtractiveClustering.html#fuzzyclust.cluster.SubtractiveClustering.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Estimate the cluster centers.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : array-like of shape (n_samples, n_features)</span>
+<span class="sd">        y : Ignored</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        self : object</span>
+<span class="sd">        """</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">validate_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">ensure_min_samples</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">N</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">radii</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_radii</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="mf">0.0</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reject_ratio</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">accept_ratio</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Need 0 &lt;= reject_ratio &lt;= accept_ratio &lt;= 1."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_clusters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_clusters</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"max_clusters must be &gt;= 1 or None."</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lo</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_span</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lo</span>
+        <span class="n">Z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radii_</span> <span class="o">=</span> <span class="n">radii</span>
+        <span class="n">d2</span> <span class="o">=</span> <span class="n">_scaled_sq_distances</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">radii</span><span class="p">)</span>  <span class="c1"># (N, N), in units of r_a^2</span>
+        <span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">4.0</span> <span class="o">*</span> <span class="n">d2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initial_potentials_</span> <span class="o">=</span> <span class="n">P</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">beta_over_alpha</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">squash</span><span class="o">**</span><span class="mi">2</span>  <span class="c1"># exp(-4 d2 / squash^2) = exp(-beta ||.||^2)</span>
+        <span class="n">centers</span><span class="p">,</span> <span class="n">pots</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="n">max_c</span> <span class="o">=</span> <span class="n">N</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_clusters</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_clusters</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+        <span class="n">P_first</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">centers</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">max_c</span><span class="p">:</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">argmax</span><span class="p">())</span>
+            <span class="n">Pk</span> <span class="o">=</span> <span class="n">P</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">P_first</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">P_first</span> <span class="o">=</span> <span class="n">Pk</span>
+                <span class="n">accept</span> <span class="o">=</span> <span class="n">Pk</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="k">elif</span> <span class="n">Pk</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">accept_ratio</span> <span class="o">*</span> <span class="n">P_first</span><span class="p">:</span>
+                <span class="n">accept</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">elif</span> <span class="n">Pk</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">reject_ratio</span> <span class="o">*</span> <span class="n">P_first</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">d_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">d2</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">centers</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>  <span class="c1"># in units of r_a</span>
+                <span class="k">if</span> <span class="n">d_min</span> <span class="o">+</span> <span class="n">Pk</span> <span class="o">/</span> <span class="n">P_first</span> <span class="o">&gt;=</span> <span class="mf">1.0</span><span class="p">:</span>
+                    <span class="n">accept</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">P</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>  <span class="c1"># not a center; examine the next candidate</span>
+                    <span class="k">continue</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">accept</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">centers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+            <span class="n">pots</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Pk</span> <span class="o">/</span> <span class="n">P_first</span><span class="p">)</span>
+            <span class="n">P</span> <span class="o">=</span> <span class="n">P</span> <span class="o">-</span> <span class="n">Pk</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">4.0</span> <span class="o">*</span> <span class="n">beta_over_alpha</span> <span class="o">*</span> <span class="n">d2</span><span class="p">[:,</span> <span class="n">k</span><span class="p">])</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">P</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">P</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">center_indices_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">centers</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_centers_unit</span> <span class="o">=</span> <span class="n">Z</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">center_indices_</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cluster_centers_</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">center_indices_</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_clusters_</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">centers</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">potentials_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">pots</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">membership_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="MountainClustering">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.cluster.MountainClustering.html#fuzzyclust.cluster.MountainClustering">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MountainClustering</span><span class="p">(</span><span class="n">_DensityPeaks</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Mountain method (Yager &amp; Filev, 1994): cluster centers from a mountain function on a grid.</span>
+
+<span class="sd">    A grid is laid over the data space and at every grid node the *mountain</span>
+<span class="sd">    function*---the sum of Gaussian influences of all data points---is</span>
+<span class="sd">    evaluated. The node of the highest mountain is the first center; its</span>
+<span class="sd">    mountain is subtracted from all nodes (the *destruction* of the</span>
+<span class="sd">    mountain) and the next peak is selected, until the remaining peak is a</span>
+<span class="sd">    small fraction of the first. Subtractive clustering (:class:`SubtractiveClustering`)</span>
+<span class="sd">    replaces the grid by the data points themselves; the mountain method is</span>
+<span class="sd">    kept for its didactic value and for low-dimensional problems, since the</span>
+<span class="sd">    number of nodes grows as ``grid_size ** n_features``.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    grid_size : int or None, default=None</span>
+<span class="sd">        Number of grid nodes per feature (the grid spans the data range).</span>
+<span class="sd">        ``None`` chooses the largest value whose total number of nodes</span>
+<span class="sd">        ``grid_size ** n_features`` does not exceed ``max_nodes`` (at least</span>
+<span class="sd">        two per feature).</span>
+<span class="sd">    max_nodes : int, default=10000</span>
+<span class="sd">        Upper bound on the total number of grid nodes; an explicit</span>
+<span class="sd">        ``grid_size`` that exceeds it raises an error. The bound makes the</span>
+<span class="sd">        exponential cost of the grid explicit.</span>
+<span class="sd">    radii : float or array-like of shape (n_features,), default=0.5</span>
+<span class="sd">        Width of the Gaussian influence as a fraction of the feature range;</span>
+<span class="sd">        :math:`\alpha=4/r_a^2` in the unit hypercube.</span>
+<span class="sd">    squash : float, default=1.25</span>
+<span class="sd">        Ratio :math:`r_b/r_a` of the destruction radius to the influence</span>
+<span class="sd">        radius, :math:`\beta=4/r_b^2`.</span>
+<span class="sd">    stop_ratio : float, default=0.15</span>
+<span class="sd">        The procedure stops when the highest remaining mountain falls below</span>
+<span class="sd">        this fraction of the first peak :math:`M^*_1`.</span>
+<span class="sd">    max_clusters : int or None, default=None</span>
+<span class="sd">        Upper bound on the number of centers.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cluster_centers_ : ndarray of shape (``n_clusters_``, n_features)</span>
+<span class="sd">        The selected grid nodes, in the original units.</span>
+<span class="sd">    n_clusters_ : int</span>
+<span class="sd">    grid_ : ndarray of shape (grid_size_ ** n_features, n_features)</span>
+<span class="sd">        The grid nodes (original units).</span>
+<span class="sd">    grid_size_ : int</span>
+<span class="sd">        Number of nodes per feature actually used.</span>
+<span class="sd">    mountain_ : ndarray of shape (grid_size_ ** n_features,)</span>
+<span class="sd">        Mountain function on the grid before any destruction.</span>
+<span class="sd">    potentials_ : ndarray of shape (``n_clusters_``,)</span>
+<span class="sd">        Peak heights :math:`M^*_i/M^*_1` at selection.</span>
+<span class="sd">    membership_, labels_, radii_</span>
+<span class="sd">        As in :class:`SubtractiveClustering`.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    With the data and the grid nodes :math:`\mathbf{N}_i` scaled to the unit</span>
+<span class="sd">    hypercube,</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        M(\mathbf{N}_i)=\sum_{k=1}^{N}\exp\bigl(-\alpha\|\mathbf{N}_i-\mathbf{x}_k\|^2\bigr),\qquad</span>
+<span class="sd">        M(\mathbf{N}_i)\leftarrow</span>
+<span class="sd">         M(\mathbf{N}_i)-M^*_j\exp\bigl(-\beta\|\mathbf{N}_i-\mathbf{N}^*_j\|^2\bigr),</span>
+
+<span class="sd">    where Yager and Filev's constants :math:`\alpha` and :math:`\beta` are</span>
+<span class="sd">    expressed through the radii as :math:`\alpha=4/r_a^2`, :math:`\beta=4/r_b^2`.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] R. R. Yager, D. P. Filev, "Approximate clustering via the mountain</span>
+<span class="sd">           method", IEEE Transactions on Systems, Man, and Cybernetics 24(8),</span>
+<span class="sd">           1279--1284, 1994.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.cluster import MountainClustering</span>
+<span class="sd">    &gt;&gt;&gt; from fuzzyclust.datasets import make_fuzzy_blobs</span>
+<span class="sd">    &gt;&gt;&gt; X, _ = make_fuzzy_blobs(n_clusters=3, random_state=0)</span>
+<span class="sd">    &gt;&gt;&gt; mc = MountainClustering(grid_size=15, radii=0.3).fit(X)</span>
+<span class="sd">    &gt;&gt;&gt; int(mc.n_clusters_), mc.grid_.shape</span>
+<span class="sd">    (3, (225, 2))</span>
+<span class="sd">    &gt;&gt;&gt; MountainClustering(radii=0.3).fit(X).grid_size_      # automatic: 100 x 100 nodes</span>
+<span class="sd">    100</span>
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">grid_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_nodes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">,</span>
+        <span class="n">radii</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">squash</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.25</span><span class="p">,</span>
+        <span class="n">stop_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.15</span><span class="p">,</span>
+        <span class="n">max_clusters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span> <span class="o">=</span> <span class="n">grid_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_nodes</span> <span class="o">=</span> <span class="n">max_nodes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radii</span> <span class="o">=</span> <span class="n">radii</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">squash</span> <span class="o">=</span> <span class="n">squash</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop_ratio</span> <span class="o">=</span> <span class="n">stop_ratio</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_clusters</span> <span class="o">=</span> <span class="n">max_clusters</span>
+
+<div class="viewcode-block" id="MountainClustering.fit">
+<a class="viewcode-back" href="../../../api/generated/fuzzyclust.cluster.MountainClustering.html#fuzzyclust.cluster.MountainClustering.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Estimate the cluster centers on the grid.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : array-like of shape (n_samples, n_features)</span>
+<span class="sd">        y : Ignored</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        self : object</span>
+<span class="sd">        """</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">validate_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">ensure_min_samples</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">N</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">radii</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_radii</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_nodes</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">))</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_nodes</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"max_nodes must be an integer &gt;= 2."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">grid_size</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_nodes</span> <span class="o">**</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">n</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-9</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">))</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"grid_size must be an integer &gt;= 2 or None."</span><span class="p">)</span>
+            <span class="n">grid_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">grid_size</span><span class="o">**</span><span class="n">n</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_nodes</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">"grid_size=</span><span class="si">{</span><span class="n">grid_size</span><span class="si">}</span><span class="s2"> gives </span><span class="si">{</span><span class="n">grid_size</span><span class="si">}</span><span class="s2">**</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2"> nodes &gt; max_nodes=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">max_nodes</span><span class="si">}</span><span class="s2">; "</span>
+                    <span class="s2">"use subtractive clustering for higher dimensions or raise max_nodes."</span>
+                <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_size_</span> <span class="o">=</span> <span class="n">grid_size</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="mf">0.0</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop_ratio</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"stop_ratio must lie in [0, 1]."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_clusters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_clusters</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"max_clusters must be &gt;= 1 or None."</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lo</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_span</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lo</span>
+        <span class="n">Z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radii_</span> <span class="o">=</span> <span class="n">radii</span>
+        <span class="n">axis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">grid_size</span><span class="p">)</span>
+        <span class="n">G</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="n">repeat</span><span class="o">=</span><span class="n">n</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">d2</span> <span class="o">=</span> <span class="n">_scaled_sq_distances</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">radii</span><span class="p">)</span>  <span class="c1"># (grid, N)</span>
+        <span class="n">M</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">4.0</span> <span class="o">*</span> <span class="n">d2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mountain_</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">beta_over_alpha</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">squash</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">centers</span><span class="p">,</span> <span class="n">pots</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="n">max_c</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_clusters</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_clusters</span><span class="p">,</span> <span class="n">G</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">M_first</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">centers</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">max_c</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">argmax</span><span class="p">())</span>
+            <span class="n">Mi</span> <span class="o">=</span> <span class="n">M</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">M_first</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">Mi</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="n">M_first</span> <span class="o">=</span> <span class="n">Mi</span>
+            <span class="k">elif</span> <span class="n">Mi</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop_ratio</span> <span class="o">*</span> <span class="n">M_first</span> <span class="ow">or</span> <span class="n">Mi</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">centers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">pots</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Mi</span> <span class="o">/</span> <span class="n">M_first</span><span class="p">)</span>
+            <span class="c1"># distances to the new center only: a full grid-by-grid matrix would need O(nodes^2) memory</span>
+            <span class="n">d2_center</span> <span class="o">=</span> <span class="n">_scaled_sq_distances</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">G</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">radii</span><span class="p">)[:,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">M</span> <span class="o">=</span> <span class="n">M</span> <span class="o">-</span> <span class="n">Mi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">4.0</span> <span class="o">*</span> <span class="n">beta_over_alpha</span> <span class="o">*</span> <span class="n">d2_center</span><span class="p">)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">M</span><span class="p">)</span>
+        <span class="n">span</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_span</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_span</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_</span> <span class="o">=</span> <span class="n">G</span> <span class="o">*</span> <span class="n">span</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lo</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_centers_unit</span> <span class="o">=</span> <span class="n">G</span><span class="p">[</span><span class="n">centers</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cluster_centers_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_</span><span class="p">[</span><span class="n">centers</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_clusters_</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">centers</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">potentials_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">pots</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">membership_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+</div>
+
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"SubtractiveClustering"</span><span class="p">,</span> <span class="s2">"MountainClustering"</span><span class="p">]</span>
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, János Abonyi.
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.1.
+  </p>
+</div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Takagi–Sugeno model of a static nonlinearity: clusters become rules &#8212; fuzzyclust</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=c83e6b79" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=6a604523" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=e6ebbe3b" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
+
+    <script src="../../_static/documentation_options.js?v=f2a433a1"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/sg-tags.js?v=d80f6fa4"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../../_static/design-tabs.js?v=fcb327ea"></script>
+    <script>window.MathJax = {"tex": {"macros": {"bm": ["\\boldsymbol{#1}", 1]}}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'auto_examples/03_models/plot_01_ts_sinc';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="icon" href="../../_static/favicon.png"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Identification of a nonlinear dynamic system with free-run validation" href="plot_02_ts_dynamic_plant.html" />
+    <link rel="prev" title="Clustering for model identification" href="index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="1.0" />
+  
+    
+    <script src="../../_static/searchtools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/logo.svg" class="logo__image only-light" alt=""/>
+    <img src="../../_static/logo.svg" class="logo__image only-dark pst-js-only" alt=""/>
+  
+  
+    <p class="title logo__title">fuzzyclust</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    Example gallery
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../book.html">
+    The book
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../migration.html">
+    Migrating from the MATLAB toolbox
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../citing.html">
+    Citing
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://complexsystemsintelligence.github.io/#textbooks">
+    All textbooks
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ComplexSystemsIntelligence/fuzzyclust" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page" aria-expanded="false" aria-controls="pst-secondary-sidebar-modal">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    Example gallery
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../book.html">
+    The book
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../migration.html">
+    Migrating from the MATLAB toolbox
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../citing.html">
+    Citing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../changelog.html">
+    Changelog
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://complexsystemsintelligence.github.io/#textbooks">
+    All textbooks
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ComplexSystemsIntelligence/fuzzyclust" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../01_clustering/index.html">Clustering algorithms and validation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../01_clustering/plot_01_fcm_basics.html">Fuzzy c-means: memberships and the fuzziness exponent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01_clustering/plot_02_hard_vs_fuzzy.html">Hard versus fuzzy partitions: k-means, k-medoids, and FCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01_clustering/plot_03_gk_ellipses.html">Gustafson–Kessel: clusters with their own shape</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01_clustering/plot_04_gg_densities.html">Gath–Geva: clusters of different size and density</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01_clustering/plot_05_validity_scan.html">Choosing the number of clusters with validity indices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01_clustering/plot_06_predict_new_data.html">Applying a fitted model to new data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01_clustering/plot_07_motorcycle_scaling.html">Feature scaling on real data: the motorcycle data set</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01_clustering/plot_08_sklearn_pandas_workflow.html">Working with pandas and scikit-learn: pipelines, DataFrames, and model selection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01_clustering/plot_09_fuzziness_exponent.html">The fuzziness exponent m: from crisp cells to uniform memberships</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01_clustering/plot_10_initialisation_restarts.html">Local optima and restarts: initializing Gustafson–Kessel on crossing lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01_clustering/plot_11_distance_norms.html">Distance norms: Euclidean, diagonal, and Mahalanobis fuzzy c-means</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01_clustering/plot_12_fuzzifiers_annealing.html">What makes a partition fuzzy: fuzzifiers, regularization, and annealing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01_clustering/plot_13_subtractive_clustering.html">Subtractive clustering: the number and location of clusters from density</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01_clustering/plot_14_merging_stability.html">Three routes to the number of clusters: merging, validity scan, and stability</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../02_visualization/index.html">Visualisation of clustering results</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../02_visualization/plot_01_pca_vs_sammon.html">PCA versus Sammon mapping: preserving variance or distances</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02_visualization/plot_02_fuzzy_sammon.html">Fuzzy Sammon mapping: projecting clusters, not just data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02_visualization/plot_03_fuzzy_som.html">Fuzzy self-organizing map: ordered prototypes by regularized FCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../02_visualization/plot_04_cluster_number_validation.html">Visual validation of the number of clusters with FUZZSAM</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../06_extensions/index.html">Robust and shape-oriented variants of fuzzy c-means</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../06_extensions/plot_01_pcm_typicality.html">Possibilistic c-means: typicalities, scales and coincident clusters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../06_extensions/plot_02_pfcm_trade_off.html">Possibilistic fuzzy c-means: memberships and typicalities together</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../06_extensions/plot_03_noise_clustering.html">Noise clustering: a virtual cluster at constant distance δ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../06_extensions/plot_04_kernel_fcm.html">Kernel fuzzy c-means: rings and moons through the kernel trick</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../06_extensions/plot_05_fuzzy_c_varieties.html">Fuzzy c-varieties: lines as prototypes, and the elliptotype compromise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../06_extensions/plot_06_fuzzy_c_shells.html">Fuzzy c-shells: circles as prototypes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../06_extensions/plot_07_feature_weighting.html">Learning which features matter: SCAD and the weighted FCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../06_extensions/plot_08_volume_prototypes.html">Volume prototypes and adaptive cluster merging</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../05_graph/index.html">Graph-based fuzzy clustering</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../05_graph/plot_01_mst_clustering.html">Minimal spanning tree clustering: cutting, splitting, and Gath–Geva refinement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05_graph/plot_02_mst_cut_criteria.html">Inconsistent edges: Zahn’s criteria and the neighborhood depth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05_graph/plot_03_mst_validation.html">Number of clusters: volume-based validity and fuzzy cluster similarity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05_graph/plot_04_geodesic_fcm.html">Geodesic-distance-based fuzzy clustering versus fuzzy c-means</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../05_graph/plot_05_geodesic_path_isomap.html">Geodesic paths, the S-curve, and clustering of the Isomap projection</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Clustering for model identification</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active"><a aria-current="page" class="current reference internal" href="#">Takagi–Sugeno model of a static nonlinearity: clusters become rules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_02_ts_dynamic_plant.html">Identification of a nonlinear dynamic system with free-run validation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_03_ts_mimo.html">MIMO Takagi–Sugeno model with local MIMO ARX consequents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_04_fcrm_switching.html">Fuzzy c-regression models: switching regression with crossing lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_05_supervised_classifier.html">Supervised fuzzy clustering: classifier rules that carry class probabilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_06_fuzzy_partition_tree.html">Supervised fuzzy partitions as a priori discretization for decision trees</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_07_hinging_tree.html">Hinging-hyperplane regression tree identified by fuzzy c-regression</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../04_timeseries/index.html">Clustering of time series</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../04_timeseries/plot_01_fuzzy_segmentation.html">Fuzzy segmentation of a multivariate time series</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04_timeseries/plot_02_bottom_up_vs_fuzzy.html">Bottom-up segmentation with PCA models versus fuzzy segmentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04_timeseries/plot_03_fnn_model_order.html">Model-order selection by false nearest neighbors with a cluster-based threshold</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04_timeseries/plot_04_chaotic_reconstruction.html">State-space reconstruction and prediction of a chaotic time series</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../04_timeseries/plot_05_mixed_input_structure.html">Model-free structure selection with mixed discrete and continuous inputs</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../07_relational/index.html">Relational, categorical and mixed data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../07_relational/plot_01_rfcm_fcm_duality.html">Relational fuzzy c-means and NERF for non-Euclidean data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../07_relational/plot_02_fcmdd_dtw_series.html">Fuzzy c-medoids on dynamic-time-warping dissimilarities of time series</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../07_relational/plot_03_kmodes_survey.html">Fuzzy k-modes on categorical survey data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../07_relational/plot_04_kprototypes_mixed.html">Fuzzy k-prototypes on mixed numeric and categorical data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../07_relational/plot_05_gower_fcmdd_vs_onehot.html">Gower’s dissimilarity versus one-hot encoding for mixed data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../07_relational/plot_06_autocorrelation_series.html">Autocorrelation-based fuzzy clustering of time series</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../08_data_realities/index.html">Incomplete, very large and image data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../08_data_realities/plot_01_missing_strategies.html">Clustering incomplete data: the four strategies of Hathaway and Bezdek</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../08_data_realities/plot_02_ocs_imputation.html">Imputation by clustering: accuracy of the completed values</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../08_data_realities/plot_03_large_data.html">Fuzzy c-means for very large data: rseFCM, spFCM and oFCM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../08_data_realities/plot_04_stream_drift.html">Clustering a drifting stream chunk by chunk with <code class="docutils literal notranslate"><span class="pre">partial_fit</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../08_data_realities/plot_05_image_noise.html">Image segmentation under noise: six spatially constrained FCM variants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../08_data_realities/plot_06_spatial_alpha_window.html">Spatial FCM: the neighborhood weight and the window size</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../09_beyond_unsupervised/index.html">Beyond a single unsupervised run</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../09_beyond_unsupervised/plot_01_ssfcm_partial_labels.html">Fuzzy c-means with partial supervision: label fraction and weight</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../09_beyond_unsupervised/plot_02_pcca_pairwise_constraints.html">Pairwise constraints: must-link, cannot-link and competitive agglomeration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../09_beyond_unsupervised/plot_03_fccm_document_term.html">Fuzzy co-clustering of a document–term matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../09_beyond_unsupervised/plot_04_collaborative_sites.html">Collaborative fuzzy clustering across three data sites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../09_beyond_unsupervised/plot_05_ensemble_consensus.html">Consensus of soft clusterings: a library beats a single run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../09_beyond_unsupervised/plot_06_ensemble_lifetime.html">The lifetime criterion of evidence accumulation</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Example gallery</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Clustering for model identification</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Takagi–Sugeno model of a static nonlinearity: clusters become rules</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-03-models-plot-01-ts-sinc-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code or to run this example in your browser via Binder.</p>
+</div>
+<section class="sphx-glr-example-title" id="takagisugeno-model-of-a-static-nonlinearity-clusters-become-rules">
+<span id="sphx-glr-auto-examples-03-models-plot-01-ts-sinc-py"></span><h1>Takagi–Sugeno model of a static nonlinearity: clusters become rules<a class="headerlink" href="#takagisugeno-model-of-a-static-nonlinearity-clusters-become-rules" title="Link to this heading">#</a></h1>
+<p>A Takagi–Sugeno (TS) fuzzy model consists of <span class="math notranslate nohighlight">\(c\)</span> rules</p>
+<div class="math notranslate nohighlight">
+\[R_i:\ \text{If } x \text{ is } A_i(x) \text{ then } \hat y_i = a_i x + b_i,\quad [w_i]\]</div>
+<p>whose outputs are combined with the normalized firing strengths
+<span class="math notranslate nohighlight">\(\beta_i(x)=w_i A_i(x)/\sum_j w_j A_j(x)\)</span>. Clustering in the product
+space of inputs and outputs, <span class="math notranslate nohighlight">\(\mathbf{z}_k=[x_k\ y_k]^T\)</span>, identifies both
+parts at once: each cluster is a region of the data that is well described by a
+local linear model, the projection of the cluster onto the input is the
+antecedent set, and the local model is the consequent. The modified Gath–Geva
+algorithm of Abonyi, Babuška, and Szeifert fits axis-parallel Gaussian clusters
+with a local linear model inside, so the antecedents are read off directly and
+no projection error arises. The classical alternative clusters the product
+space with Gustafson–Kessel or Gath–Geva and projects the oblique ellipsoids
+onto the input axes. This example identifies the sinc function both ways and
+studies the number of rules and the consequent estimator.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="nn">.</span><span class="nn">pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span><span class="w">
+</span><span class="w">
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">fuzzyclust</span><span class="nn">.</span><span class="nn">models</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-fuzzyclust-models sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../api/generated/fuzzyclust.models.TakagiSugeno.html#fuzzyclust.models.TakagiSugeno" title="fuzzyclust.models.TakagiSugeno"><span class="n">TakagiSugeno</span></a><span class="p">,</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-fuzzyclust-models sphx-glr-backref-type-py-function reference internal" href="../../api/generated/fuzzyclust.models.make_sinc.html#fuzzyclust.models.make_sinc" title="fuzzyclust.models.make_sinc"><span class="n">make_sinc</span></a><span class="p">,</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-fuzzyclust-models sphx-glr-backref-type-py-function reference internal" href="../../api/generated/fuzzyclust.models.plot_local_models.html#fuzzyclust.models.plot_local_models" title="fuzzyclust.models.plot_local_models"><span class="n">plot_local_models</span></a><span class="p">,</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-fuzzyclust-models sphx-glr-backref-type-py-function reference internal" href="../../api/generated/fuzzyclust.models.plot_membership_functions.html#fuzzyclust.models.plot_membership_functions" title="fuzzyclust.models.plot_membership_functions"><span class="n">plot_membership_functions</span></a><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">fuzzyclust</span><span class="nn">.</span><span class="nn">plotting</span><span class="w"> </span><span class="kn">import</span> <a class="sphx-glr-backref-module-fuzzyclust-plotting sphx-glr-backref-type-py-data reference internal" href="../../api/generated/fuzzyclust.plotting.PALETTE.html#fuzzyclust.plotting.PALETTE" title="fuzzyclust.plotting.PALETTE"><span class="n">PALETTE</span></a><span class="w">
+</span><span class="w">
+</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <a class="sphx-glr-backref-module-fuzzyclust-models sphx-glr-backref-type-py-function reference internal" href="../../api/generated/fuzzyclust.models.make_sinc.html#fuzzyclust.models.make_sinc" title="fuzzyclust.models.make_sinc"><span class="n">make_sinc</span></a><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="w">
+</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <a class="sphx-glr-backref-module-fuzzyclust-models sphx-glr-backref-type-py-function reference internal" href="../../api/generated/fuzzyclust.models.make_sinc.html#fuzzyclust.models.make_sinc" title="fuzzyclust.models.make_sinc"><span class="n">make_sinc</span></a><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
+<section id="four-rules-from-modified-gathgeva-clustering">
+<h2>Four rules from modified Gath–Geva clustering<a class="headerlink" href="#four-rules-from-modified-gathgeva-clustering" title="Link to this heading">#</a></h2>
+<p>The engine behind <code class="docutils literal notranslate"><span class="pre">TakagiSugeno</span></code> is <a class="reference internal" href="../../api/generated/fuzzyclust.models.ModifiedGG.html#fuzzyclust.models.ModifiedGG" title="fuzzyclust.models.ModifiedGG"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModifiedGG</span></code></a>.
+Its clusters consist of Gaussian membership functions on the input, local
+linear models, and prior probabilities; the rule weights
+<span class="math notranslate nohighlight">\(w_i=\alpha_i/\sqrt{2\pi\sigma_i^2}\)</span> follow from the clustering.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="c1"># [snippet:fit]</span><span class="w">
+</span><span class="n">ts</span> <span class="o">=</span> <a class="sphx-glr-backref-module-fuzzyclust-models sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../api/generated/fuzzyclust.models.TakagiSugeno.html#fuzzyclust.models.TakagiSugeno" title="fuzzyclust.models.TakagiSugeno"><span class="n">TakagiSugeno</span></a><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="n">ts</span><span class="o">.</span><span class="n">describe</span><span class="p">(</span><span class="n">digits</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span><span class="p">)</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="s2">R^2 on noise-free test data: </span><span class="si">{</span><span class="n">ts</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span><span class="w"> </span><span class="n">y_test</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="c1"># [/snippet:fit]</span><span class="w">
+</span><span class="w">
+</span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <a class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplots.html#matplotlib.pyplot.subplots" title="matplotlib.pyplot.subplots"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span><span class="p">,</span> <span class="n">gridspec_kw</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;</span><span class="s2">height_ratios</span><span class="s2">&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">2.4</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="p">}</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-fuzzyclust-models sphx-glr-backref-type-py-function reference internal" href="../../api/generated/fuzzyclust.models.plot_local_models.html#fuzzyclust.models.plot_local_models" title="fuzzyclust.models.plot_local_models"><span class="n">plot_local_models</span></a><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="p">)</span><span class="w">
+</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">Four local linear models interpolated by the firing strengths</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-fuzzyclust-models sphx-glr-backref-type-py-function reference internal" href="../../api/generated/fuzzyclust.models.plot_membership_functions.html#fuzzyclust.models.plot_membership_functions" title="fuzzyclust.models.plot_membership_functions"><span class="n">plot_membership_functions</span></a><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="p">]</span><span class="p">)</span><span class="w">
+</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">Gaussian antecedent sets $A_i(x)$ (projection of the clusters)</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">x</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">upper left</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">upper center</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.32</span><span class="p">)</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.tight_layout.html#matplotlib.pyplot.tight_layout" title="matplotlib.pyplot.tight_layout"><span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span></a><span class="p">(</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
+<img src="../../_images/sphx_glr_plot_01_ts_sinc_001.png" srcset="../../_images/sphx_glr_plot_01_ts_sinc_001.png" alt="Four local linear models interpolated by the firing strengths, Gaussian antecedent sets $A_i(x)$ (projection of the clusters)" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>R1: If x1 is N(2.03, 1.26) then y = -0.321*x1 +1.07
+R2: If x1 is N(-6.67, 1.88) then y = -0.0487*x1 -0.355
+R3: If x1 is N(7.24, 1.78) then y = +0.0418*x1 -0.31
+R4: If x1 is N(-1.85, 0.79) then y = +0.387*x1 +1.22
+R^2 on noise-free test data: 0.957
+</pre></div>
+</div>
+<p>The local models (colored) are the linear laws of the clusters; the thick
+parts show where each rule fires (<span class="math notranslate nohighlight">\(\beta_i&gt;0.05\)</span>). The black curve is
+the TS output, a smooth interpolation between the local lines; their
+weights are drawn as shaded areas on the right axis. The antecedent sets
+below are exactly the Gaussians of the clusters; nothing has been
+projected or approximated.</p>
+</section>
+<section id="axis-parallel-clusters-versus-projected-ellipsoids">
+<h2>Axis-parallel clusters versus projected ellipsoids<a class="headerlink" href="#axis-parallel-clusters-versus-projected-ellipsoids" title="Link to this heading">#</a></h2>
+<p>With <code class="docutils literal notranslate"><span class="pre">antecedent=&quot;gk_projected&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;gg_projected&quot;</span></code> the data are
+clustered in the <span class="math notranslate nohighlight">\((x, y)\)</span> plane with Gustafson–Kessel or Gath–Geva,
+and the marginal variance of every cluster along <span class="math notranslate nohighlight">\(x\)</span> defines the
+Gaussian set. The ellipsoids are oblique (they follow the local slope), so
+the projection loses the information about where exactly the cluster ends
+along <span class="math notranslate nohighlight">\(x\)</span>. This is the decomposition error that the modified
+algorithm avoids.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="n">variants</span> <span class="o">=</span> <span class="p">{</span><span class="w">
+</span>    <span class="s2">&quot;</span><span class="s2">modified GG (axis-parallel)</span><span class="s2">&quot;</span><span class="p">:</span> <a class="sphx-glr-backref-module-fuzzyclust-models sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../api/generated/fuzzyclust.models.TakagiSugeno.html#fuzzyclust.models.TakagiSugeno" title="fuzzyclust.models.TakagiSugeno"><span class="n">TakagiSugeno</span></a><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="s2">&quot;</span><span class="s2">GG + projection</span><span class="s2">&quot;</span><span class="p">:</span> <a class="sphx-glr-backref-module-fuzzyclust-models sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../api/generated/fuzzyclust.models.TakagiSugeno.html#fuzzyclust.models.TakagiSugeno" title="fuzzyclust.models.TakagiSugeno"><span class="n">TakagiSugeno</span></a><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">antecedent</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">gg_projected</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="s2">&quot;</span><span class="s2">GK + projection</span><span class="s2">&quot;</span><span class="p">:</span> <a class="sphx-glr-backref-module-fuzzyclust-models sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../api/generated/fuzzyclust.models.TakagiSugeno.html#fuzzyclust.models.TakagiSugeno" title="fuzzyclust.models.TakagiSugeno"><span class="n">TakagiSugeno</span></a><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">antecedent</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">gk_projected</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <a class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplots.html#matplotlib.pyplot.subplots" title="matplotlib.pyplot.subplots"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mf">4.4</span><span class="p">)</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="w">
+</span><span class="n">grid</span> <span class="o">=</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.linspace.html#numpy.linspace" title="numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">400</span><span class="p">)</span><span class="p">[</span><span class="p">:</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span><span class="w">
+</span><span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="n">variants</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="p">)</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="p">:</span><span class="w">
+</span>    <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span><span class="w">
+</span>    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="p">:</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">0.5</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">)</span><span class="w">
+</span>    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="p">:</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="p">,</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.sinc.html#numpy.sinc" title="numpy.sinc"><span class="n">np</span><span class="o">.</span><span class="n">sinc</span></a><span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="p">:</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-data reference external" href="https://numpy.org/doc/stable/reference/constants.html#numpy.pi" title="numpy.pi"><span class="n">np</span><span class="o">.</span><span class="n">pi</span></a><span class="p">)</span><span class="p">,</span> <span class="s2">&quot;</span><span class="s2">k--</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">true</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span>    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="p">:</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><a class="sphx-glr-backref-module-fuzzyclust-plotting sphx-glr-backref-type-py-data reference internal" href="../../api/generated/fuzzyclust.plotting.PALETTE.html#fuzzyclust.plotting.PALETTE" title="fuzzyclust.plotting.PALETTE"><span class="n">PALETTE</span></a><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">TS model</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span>    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="p">:</span><span class="w">
+</span>        <span class="n">ax</span><span class="o">.</span><span class="n">axvspan</span><span class="p">(</span><span class="w">
+</span>            <span class="n">model</span><span class="o">.</span><span class="n">centers_</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">model</span><span class="o">.</span><span class="n">sigmas_</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="p">,</span><span class="w">
+</span>            <span class="n">model</span><span class="o">.</span><span class="n">centers_</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">sigmas_</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="p">,</span><span class="w">
+</span>            <span class="n">color</span><span class="o">=</span><a class="sphx-glr-backref-module-fuzzyclust-plotting sphx-glr-backref-type-py-data reference internal" href="../../api/generated/fuzzyclust.plotting.PALETTE.html#fuzzyclust.plotting.PALETTE" title="fuzzyclust.plotting.PALETTE"><span class="n">PALETTE</span></a><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><a class="sphx-glr-backref-module-fuzzyclust-plotting sphx-glr-backref-type-py-data reference internal" href="../../api/generated/fuzzyclust.plotting.PALETTE.html#fuzzyclust.plotting.PALETTE" title="fuzzyclust.plotting.PALETTE"><span class="n">PALETTE</span></a><span class="p">)</span><span class="p">]</span><span class="p">,</span><span class="w">
+</span>            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.12</span><span class="p">,</span><span class="w">
+</span>            <span class="n">lw</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="w">
+</span>        <span class="p">)</span><span class="w">
+</span>    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: $R^2$ = </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span><span class="w"> </span><span class="n">y_test</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span>    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">x</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">y</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.tight_layout.html#matplotlib.pyplot.tight_layout" title="matplotlib.pyplot.tight_layout"><span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span></a><span class="p">(</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
+<img src="../../_images/sphx_glr_plot_01_ts_sinc_002.png" srcset="../../_images/sphx_glr_plot_01_ts_sinc_002.png" alt="modified GG (axis-parallel): $R^2$ = 0.957, GG + projection: $R^2$ = 0.858, GK + projection: $R^2$ = 0.945" class = "sphx-glr-single-img"/><p>The shaded bands are the <span class="math notranslate nohighlight">\(\pm\sigma_i\)</span> extents of the antecedent sets.
+The modified GG model is the most accurate. The projected variants place and
+size the sets differently because the width of an oblique ellipsoid along
+<span class="math notranslate nohighlight">\(x\)</span> is not the width of its operating region, and the Gath–Geva
+clusters, whose volumes are free, suffer most from the projection (the
+central peak is cut off). The paper’s remedy for the projected models is a
+global re-estimation of the consequents (<code class="docutils literal notranslate"><span class="pre">consequent=&quot;global&quot;</span></code>), which
+compensates for part of the decomposition error at the price of the local
+interpretation.
+The next figure shows the product-space view: the GK clusters are ellipses
+in the <span class="math notranslate nohighlight">\((x, y)\)</span> plane, whereas the modified GG clusters are Gaussians
+in <span class="math notranslate nohighlight">\(x\)</span> with a <em>line</em> inside.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="n">gk_ts</span> <span class="o">=</span> <span class="n">variants</span><span class="p">[</span><span class="s2">&quot;</span><span class="s2">GK + projection</span><span class="s2">&quot;</span><span class="p">]</span><span class="w">
+</span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <a class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplots.html#matplotlib.pyplot.subplots" title="matplotlib.pyplot.subplots"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="mf">4.4</span><span class="p">)</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="w">
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">fuzzyclust</span><span class="nn">.</span><span class="nn">plotting</span><span class="w"> </span><span class="kn">import</span> <a class="sphx-glr-backref-module-fuzzyclust-plotting sphx-glr-backref-type-py-function reference internal" href="../../api/generated/fuzzyclust.plotting.plot_covariance_ellipses.html#fuzzyclust.plotting.plot_covariance_ellipses" title="fuzzyclust.plotting.plot_covariance_ellipses"><span class="n">plot_covariance_ellipses</span></a>  <span class="c1"># noqa: E402</span><span class="w">
+</span><span class="w">
+</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="p">:</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="p">[</span><a class="sphx-glr-backref-module-fuzzyclust-plotting sphx-glr-backref-type-py-data reference internal" href="../../api/generated/fuzzyclust.plotting.PALETTE.html#fuzzyclust.plotting.PALETTE" title="fuzzyclust.plotting.PALETTE"><span class="n">PALETTE</span></a><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><a class="sphx-glr-backref-module-fuzzyclust-plotting sphx-glr-backref-type-py-data reference internal" href="../../api/generated/fuzzyclust.plotting.PALETTE.html#fuzzyclust.plotting.PALETTE" title="fuzzyclust.plotting.PALETTE"><span class="n">PALETTE</span></a><span class="p">)</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">gk_ts</span><span class="o">.</span><span class="n">clusterer_</span><span class="o">.</span><span class="n">labels_</span><span class="p">]</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-fuzzyclust-plotting sphx-glr-backref-type-py-function reference internal" href="../../api/generated/fuzzyclust.plotting.plot_covariance_ellipses.html#fuzzyclust.plotting.plot_covariance_ellipses" title="fuzzyclust.plotting.plot_covariance_ellipses"><span class="n">plot_covariance_ellipses</span></a><span class="p">(</span><span class="n">gk_ts</span><span class="o">.</span><span class="n">clusterer_</span><span class="o">.</span><span class="n">cluster_centers_</span><span class="p">,</span> <span class="n">gk_ts</span><span class="o">.</span><span class="n">clusterer_</span><span class="o">.</span><span class="n">covariances_</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="p">)</span><span class="w">
+</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">GK clusters in the product space $(x, y)$</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="p">:</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="p">[</span><a class="sphx-glr-backref-module-fuzzyclust-plotting sphx-glr-backref-type-py-data reference internal" href="../../api/generated/fuzzyclust.plotting.PALETTE.html#fuzzyclust.plotting.PALETTE" title="fuzzyclust.plotting.PALETTE"><span class="n">PALETTE</span></a><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><a class="sphx-glr-backref-module-fuzzyclust-plotting sphx-glr-backref-type-py-data reference internal" href="../../api/generated/fuzzyclust.plotting.PALETTE.html#fuzzyclust.plotting.PALETTE" title="fuzzyclust.plotting.PALETTE"><span class="n">PALETTE</span></a><span class="p">)</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ts</span><span class="o">.</span><span class="n">clusterer_</span><span class="o">.</span><span class="n">labels_</span><span class="p">]</span><span class="p">)</span><span class="w">
+</span><span class="n">local</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">local_predict</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span><span class="w">
+</span><span class="n">beta</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">firing_strengths</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span><span class="w">
+</span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="p">:</span><span class="w">
+</span>    <span class="n">strong</span> <span class="o">=</span> <span class="n">beta</span><span class="p">[</span><span class="p">:</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.05</span><span class="w">
+</span>    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="n">strong</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="p">,</span> <span class="n">local</span><span class="p">[</span><span class="n">strong</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><a class="sphx-glr-backref-module-fuzzyclust-plotting sphx-glr-backref-type-py-data reference internal" href="../../api/generated/fuzzyclust.plotting.PALETTE.html#fuzzyclust.plotting.PALETTE" title="fuzzyclust.plotting.PALETTE"><span class="n">PALETTE</span></a><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><a class="sphx-glr-backref-module-fuzzyclust-plotting sphx-glr-backref-type-py-data reference internal" href="../../api/generated/fuzzyclust.plotting.PALETTE.html#fuzzyclust.plotting.PALETTE" title="fuzzyclust.plotting.PALETTE"><span class="n">PALETTE</span></a><span class="p">)</span><span class="p">]</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">2.5</span><span class="p">)</span><span class="w">
+</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">Modified GG clusters: Gaussian in $x$, linear model in $y$</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">:</span><span class="w">
+</span>    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">x</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">y</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.tight_layout.html#matplotlib.pyplot.tight_layout" title="matplotlib.pyplot.tight_layout"><span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span></a><span class="p">(</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
+<img src="../../_images/sphx_glr_plot_01_ts_sinc_003.png" srcset="../../_images/sphx_glr_plot_01_ts_sinc_003.png" alt="GK clusters in the product space $(x, y)$, Modified GG clusters: Gaussian in $x$, linear model in $y$" class = "sphx-glr-single-img"/></section>
+<section id="consequent-estimation-local-global-or-total-least-squares">
+<h2>Consequent estimation: local, global, or total least squares<a class="headerlink" href="#consequent-estimation-local-global-or-total-least-squares" title="Link to this heading">#</a></h2>
+<p>With the antecedents fixed, the consequents can be estimated in three ways.
+<em>Local</em> weighted least squares (one problem per rule, with the memberships
+as weights) gives local linearizations of the function, which are
+interpretable but not the best global fit. <em>Global</em> least squares
+estimates all consequents in one problem with the normalized firing
+strengths as regressors; it gives the smallest prediction error, but the
+local models lose their meaning where rules overlap. <em>Total</em> least squares
+takes the hyperplane on which the product-space cluster lies (the
+eigenvector of its smallest eigenvalue).</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="n">rows</span> <span class="o">=</span> <span class="p">[</span><span class="p">]</span><span class="w">
+</span><span class="k">for</span> <span class="n">consequent</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;</span><span class="s2">local</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="s2">global</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="s2">tls</span><span class="s2">&quot;</span><span class="p">)</span><span class="p">:</span><span class="w">
+</span>    <span class="n">model</span> <span class="o">=</span> <a class="sphx-glr-backref-module-fuzzyclust-models sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../api/generated/fuzzyclust.models.TakagiSugeno.html#fuzzyclust.models.TakagiSugeno" title="fuzzyclust.models.TakagiSugeno"><span class="n">TakagiSugeno</span></a><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">consequent</span><span class="o">=</span><span class="n">consequent</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span><span class="w">
+</span>    <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="w">
+</span>        <span class="p">{</span><span class="w">
+</span>            <span class="s2">&quot;</span><span class="s2">consequent</span><span class="s2">&quot;</span><span class="p">:</span> <span class="n">consequent</span><span class="p">,</span><span class="w">
+</span>            <span class="s2">&quot;</span><span class="s2">train RMSE</span><span class="s2">&quot;</span><span class="p">:</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-data reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.sqrt.html#numpy.sqrt" title="numpy.sqrt"><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span></a><span class="p">(</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.mean.html#numpy.mean" title="numpy.mean"><span class="n">np</span><span class="o">.</span><span class="n">mean</span></a><span class="p">(</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">-</span> <span class="n">y</span><span class="p">)</span> <span class="o">*</span><span class="o">*</span> <span class="mi">2</span><span class="p">)</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>            <span class="s2">&quot;</span><span class="s2">test RMSE</span><span class="s2">&quot;</span><span class="p">:</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-data reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.sqrt.html#numpy.sqrt" title="numpy.sqrt"><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span></a><span class="p">(</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.mean.html#numpy.mean" title="numpy.mean"><span class="n">np</span><span class="o">.</span><span class="n">mean</span></a><span class="p">(</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span> <span class="o">-</span> <span class="n">y_test</span><span class="p">)</span> <span class="o">*</span><span class="o">*</span> <span class="mi">2</span><span class="p">)</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>            <span class="s2">&quot;</span><span class="s2">slopes</span><span class="s2">&quot;</span><span class="p">:</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.round.html#numpy.round" title="numpy.round"><span class="n">np</span><span class="o">.</span><span class="n">round</span></a><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">coef_</span><span class="p">[</span><span class="p">:</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>        <span class="p">}</span><span class="w">
+</span>    <span class="p">)</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><a class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame"><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></a><span class="p">(</span><span class="n">rows</span><span class="p">)</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>consequent  train RMSE  test RMSE                         slopes
+     local    0.073808   0.073765 [-0.321, -0.049, 0.042, 0.387]
+    global    0.067155   0.067715 [-0.355, -0.051, 0.019, 0.274]
+       tls    0.073520   0.073611  [-0.324, -0.049, 0.04, 0.388]
+</pre></div>
+</div>
+</section>
+<section id="parameter-study-the-number-of-rules">
+<h2>Parameter study: the number of rules<a class="headerlink" href="#parameter-study-the-number-of-rules" title="Link to this heading">#</a></h2>
+<p>More rules give a finer piecewise-linear approximation. Both errors fall
+with the number of rules, though not monotonically: the five-rule model is
+worse than the four-rule one, because the clustering, not the prediction
+error, places the rules. With 300 samples, the error on the noise-free test
+data keeps falling up to twelve rules (to about 0.016, below the noise
+level of 0.02), so in this range the rules do not yet fit the noise.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="c1"># [snippet:n_rules]</span><span class="w">
+</span><span class="n">n_rules</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">12</span><span class="p">]</span><span class="w">
+</span><span class="n">table</span> <span class="o">=</span> <a class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame"><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></a><span class="p">(</span><span class="w">
+</span>    <span class="p">{</span><span class="w">
+</span>        <span class="s2">&quot;</span><span class="s2">rules</span><span class="s2">&quot;</span><span class="p">:</span> <span class="n">n_rules</span><span class="p">,</span><span class="w">
+</span>        <span class="s2">&quot;</span><span class="s2">train RMSE</span><span class="s2">&quot;</span><span class="p">:</span> <span class="p">[</span><span class="w">
+</span>            <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-data reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.sqrt.html#numpy.sqrt" title="numpy.sqrt"><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span></a><span class="p">(</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.mean.html#numpy.mean" title="numpy.mean"><span class="n">np</span><span class="o">.</span><span class="n">mean</span></a><span class="p">(</span><span class="p">(</span><a class="sphx-glr-backref-module-fuzzyclust-models sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../api/generated/fuzzyclust.models.TakagiSugeno.html#fuzzyclust.models.TakagiSugeno" title="fuzzyclust.models.TakagiSugeno"><span class="n">TakagiSugeno</span></a><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">-</span> <span class="n">y</span><span class="p">)</span> <span class="o">*</span><span class="o">*</span> <span class="mi">2</span><span class="p">)</span><span class="p">)</span><span class="w">
+</span>            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">n_rules</span><span class="w">
+</span>        <span class="p">]</span><span class="p">,</span><span class="w">
+</span>        <span class="s2">&quot;</span><span class="s2">test RMSE</span><span class="s2">&quot;</span><span class="p">:</span> <span class="p">[</span><span class="w">
+</span>            <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-data reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.sqrt.html#numpy.sqrt" title="numpy.sqrt"><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span></a><span class="p">(</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.mean.html#numpy.mean" title="numpy.mean"><span class="n">np</span><span class="o">.</span><span class="n">mean</span></a><span class="p">(</span><span class="p">(</span><a class="sphx-glr-backref-module-fuzzyclust-models sphx-glr-backref-type-py-class sphx-glr-backref-instance reference internal" href="../../api/generated/fuzzyclust.models.TakagiSugeno.html#fuzzyclust.models.TakagiSugeno" title="fuzzyclust.models.TakagiSugeno"><span class="n">TakagiSugeno</span></a><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span> <span class="o">-</span> <span class="n">y_test</span><span class="p">)</span> <span class="o">*</span><span class="o">*</span> <span class="mi">2</span><span class="p">)</span><span class="p">)</span><span class="w">
+</span>            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">n_rules</span><span class="w">
+</span>        <span class="p">]</span><span class="p">,</span><span class="w">
+</span>    <span class="p">}</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="c1"># [/snippet:n_rules]</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">to_string</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <a class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplots.html#matplotlib.pyplot.subplots" title="matplotlib.pyplot.subplots"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span><span class="p">)</span><span class="w">
+</span><span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">table</span><span class="p">[</span><span class="s2">&quot;</span><span class="s2">rules</span><span class="s2">&quot;</span><span class="p">]</span><span class="p">,</span> <span class="n">table</span><span class="p">[</span><span class="s2">&quot;</span><span class="s2">train RMSE</span><span class="s2">&quot;</span><span class="p">]</span><span class="p">,</span> <span class="s2">&quot;</span><span class="s2">o-</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><a class="sphx-glr-backref-module-fuzzyclust-plotting sphx-glr-backref-type-py-data reference internal" href="../../api/generated/fuzzyclust.plotting.PALETTE.html#fuzzyclust.plotting.PALETTE" title="fuzzyclust.plotting.PALETTE"><span class="n">PALETTE</span></a><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">training data (noisy)</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">table</span><span class="p">[</span><span class="s2">&quot;</span><span class="s2">rules</span><span class="s2">&quot;</span><span class="p">]</span><span class="p">,</span> <span class="n">table</span><span class="p">[</span><span class="s2">&quot;</span><span class="s2">test RMSE</span><span class="s2">&quot;</span><span class="p">]</span><span class="p">,</span> <span class="s2">&quot;</span><span class="s2">s-</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><a class="sphx-glr-backref-module-fuzzyclust-plotting sphx-glr-backref-type-py-data reference internal" href="../../api/generated/fuzzyclust.plotting.PALETTE.html#fuzzyclust.plotting.PALETTE" title="fuzzyclust.plotting.PALETTE"><span class="n">PALETTE</span></a><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">test data (noise-free)</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="n">ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">0.5</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">:</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">noise level</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">number of rules $c$</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">RMSE</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">Approximation error versus number of rules</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span><span class="w">
+</span><span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">0.9</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.tight_layout.html#matplotlib.pyplot.tight_layout" title="matplotlib.pyplot.tight_layout"><span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span></a><span class="p">(</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
+<img src="../../_images/sphx_glr_plot_01_ts_sinc_004.png" srcset="../../_images/sphx_glr_plot_01_ts_sinc_004.png" alt="Approximation error versus number of rules" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>rules  train RMSE  test RMSE
+    2      0.2343     0.2436
+    3      0.1599     0.1629
+    4      0.0738     0.0738
+    5      0.0958     0.0990
+    6      0.0407     0.0383
+    8      0.0333     0.0293
+   10      0.0288     0.0228
+   12      0.0233     0.0162
+</pre></div>
+</div>
+<p><strong>Take-away.</strong> Product-space clustering turns every cluster into a rule: the
+cluster’s extent along the inputs is the antecedent, and the linear law
+hidden in the cluster is the consequent. Modified Gath–Geva clustering fits
+axis-parallel Gaussians with a local linear model inside, so the rules are
+exactly the clusters; GK or GG clustering of the product space needs a
+projection that introduces a decomposition error. Local weighted least
+squares keeps the consequents interpretable, whereas global least squares
+minimizes the prediction error. The number of rules is the main complexity
+parameter: four rules already give <span class="math notranslate nohighlight">\(R^2\approx0.96\)</span>, six bring the
+test RMSE below 0.04, and up to twelve rules the model does not overfit
+these 300 samples.</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 1.195 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-03-models-plot-01-ts-sinc-py">
+<div class="binder-badge docutils container">
+<a class="reference external image-reference" href="https://mybinder.org/v2/gh/ComplexSystemsIntelligence/fuzzyclust/main?urlpath=lab/tree/notebooks/auto_examples/03_models/plot_01_ts_sinc.ipynb"><img alt="Launch binder" src="../../_images/binder_badge_logo4.svg" style="width: 150px;" />
+</a>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/cf67e566adae55e21592c0d67261583f/plot_01_ts_sinc.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_01_ts_sinc.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/44e46e092b082c12d933c3c683889d38/plot_01_ts_sinc.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_01_ts_sinc.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/ee5019d40f0d9cd4cd91a2453b454482/plot_01_ts_sinc.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">plot_01_ts_sinc.zip</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Clustering for model identification</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="plot_02_ts_dynamic_plant.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Identification of a nonlinear dynamic system with free-run validation</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal" tabindex="-1"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#four-rules-from-modified-gathgeva-clustering">Four rules from modified Gath–Geva clustering</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#axis-parallel-clusters-versus-projected-ellipsoids">Axis-parallel clusters versus projected ellipsoids</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#consequent-estimation-local-global-or-total-least-squares">Consequent estimation: local, global, or total least squares</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parameter-study-the-number-of-rules">Parameter study: the number of rules</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../../_sources/auto_examples/03_models/plot_01_ts_sinc.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2026, János Abonyi.
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.1.
+  </p>
+</div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

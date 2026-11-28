@@ -1,0 +1,12 @@
+﻿fuzzyclust.image.segmentation\_accuracy
+=======================================
+
+.. currentmodule:: fuzzyclust.image
+
+.. autofunction:: segmentation_accuracy
+
+.. include:: fuzzyclust.image.segmentation_accuracy.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

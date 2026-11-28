@@ -1,0 +1,12 @@
+﻿fuzzyclust.timeseries.embedding\_scan
+=====================================
+
+.. currentmodule:: fuzzyclust.timeseries
+
+.. autofunction:: embedding_scan
+
+.. include:: fuzzyclust.timeseries.embedding_scan.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

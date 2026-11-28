@@ -1,0 +1,12 @@
+﻿fuzzyclust.models.make\_mimo\_plant
+===================================
+
+.. currentmodule:: fuzzyclust.models
+
+.. autofunction:: make_mimo_plant
+
+.. include:: fuzzyclust.models.make_mimo_plant.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

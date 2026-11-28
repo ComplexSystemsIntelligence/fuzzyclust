@@ -1,0 +1,12 @@
+﻿fuzzyclust.image.plot\_label\_image
+===================================
+
+.. currentmodule:: fuzzyclust.image
+
+.. autofunction:: plot_label_image
+
+.. include:: fuzzyclust.image.plot_label_image.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

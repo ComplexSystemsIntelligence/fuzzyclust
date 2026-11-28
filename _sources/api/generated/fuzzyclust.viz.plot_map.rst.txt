@@ -1,0 +1,12 @@
+﻿fuzzyclust.viz.plot\_map
+========================
+
+.. currentmodule:: fuzzyclust.viz
+
+.. autofunction:: plot_map
+
+.. include:: fuzzyclust.viz.plot_map.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

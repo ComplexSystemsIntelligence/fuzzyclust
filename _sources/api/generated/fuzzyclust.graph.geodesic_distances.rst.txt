@@ -1,0 +1,12 @@
+﻿fuzzyclust.graph.geodesic\_distances
+====================================
+
+.. currentmodule:: fuzzyclust.graph
+
+.. autofunction:: geodesic_distances
+
+.. include:: fuzzyclust.graph.geodesic_distances.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

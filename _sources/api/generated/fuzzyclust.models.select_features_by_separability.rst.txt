@@ -1,0 +1,12 @@
+﻿fuzzyclust.models.select\_features\_by\_separability
+====================================================
+
+.. currentmodule:: fuzzyclust.models
+
+.. autofunction:: select_features_by_separability
+
+.. include:: fuzzyclust.models.select_features_by_separability.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

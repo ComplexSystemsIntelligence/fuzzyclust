@@ -1,0 +1,12 @@
+﻿fuzzyclust.validity.fuzzy\_jaccard\_index
+=========================================
+
+.. currentmodule:: fuzzyclust.validity
+
+.. autofunction:: fuzzy_jaccard_index
+
+.. include:: fuzzyclust.validity.fuzzy_jaccard_index.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

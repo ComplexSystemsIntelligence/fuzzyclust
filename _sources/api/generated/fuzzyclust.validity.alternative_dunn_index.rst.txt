@@ -1,0 +1,12 @@
+﻿fuzzyclust.validity.alternative\_dunn\_index
+============================================
+
+.. currentmodule:: fuzzyclust.validity
+
+.. autofunction:: alternative_dunn_index
+
+.. include:: fuzzyclust.validity.alternative_dunn_index.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

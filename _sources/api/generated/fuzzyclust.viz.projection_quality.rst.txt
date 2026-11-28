@@ -1,0 +1,12 @@
+﻿fuzzyclust.viz.projection\_quality
+==================================
+
+.. currentmodule:: fuzzyclust.viz
+
+.. autofunction:: projection_quality
+
+.. include:: fuzzyclust.viz.projection_quality.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

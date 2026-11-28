@@ -1,0 +1,12 @@
+﻿fuzzyclust.semisupervised.constraint\_satisfaction
+==================================================
+
+.. currentmodule:: fuzzyclust.semisupervised
+
+.. autofunction:: constraint_satisfaction
+
+.. include:: fuzzyclust.semisupervised.constraint_satisfaction.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

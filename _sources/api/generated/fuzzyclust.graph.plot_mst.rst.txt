@@ -1,0 +1,12 @@
+﻿fuzzyclust.graph.plot\_mst
+==========================
+
+.. currentmodule:: fuzzyclust.graph
+
+.. autofunction:: plot_mst
+
+.. include:: fuzzyclust.graph.plot_mst.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

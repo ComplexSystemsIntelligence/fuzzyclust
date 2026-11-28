@@ -1,0 +1,148 @@
+
+
+.. _sphx_glr_auto_examples_09_beyond_unsupervised:
+
+Beyond a single unsupervised run
+--------------------------------
+
+Fuzzy clustering that uses more than one data matrix and one random start:
+partial supervision by a few class labels (Pedrycz--Waletzky) and by
+must-link / cannot-link pairs (pairwise-constrained competitive
+agglomeration), co-clustering of the rows and columns of a document--term
+matrix (FCCM, Fuzzy CoDoK), collaborative clustering of the same objects
+at several data sites that exchange only partition matrices, and
+consensus clustering of a library of soft partitions (co-association
+matrix, consensus functions, evidence accumulation and the lifetime
+criterion for the number of clusters).
+
+
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Unsupervised clustering finds the structure the distance suggests, which need not be the structure the user means. Pedrycz and Waletzky add to the c-means functional a term that penalizes the difference between the memberships of a few labeled samples and their labels,">
+
+.. only:: html
+
+  .. image:: /auto_examples/09_beyond_unsupervised/images/thumb/sphx_glr_plot_01_ssfcm_partial_labels_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/09_beyond_unsupervised/plot_01_ssfcm_partial_labels`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fuzzy c-means with partial supervision: label fraction and weight</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Class labels require an agreed set of classes. Often the user can only say whether two objects belong together or not, for example whether two images show the same scene or two records describe the same customer. Grira, Crucianu and Boujemaa (PCCA) add to the c-means functional the expected number of violated must-link and cannot-link pairs, weighted by \alpha, and optionally the competitive agglomeration term of Frigui and Krishnapuram, which lets an overestimated number of clusters shrink to the number the data support. The two parallel bars of the previous example are used again: unconstrained FCM cuts across them, and a few dozen pairs tell it not to.">
+
+.. only:: html
+
+  .. image:: /auto_examples/09_beyond_unsupervised/images/thumb/sphx_glr_plot_02_pcca_pairwise_constraints_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/09_beyond_unsupervised/plot_02_pcca_pairwise_constraints`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Pairwise constraints: must-link, cannot-link and competitive agglomeration</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A document--term matrix has two kinds of entities, documents (rows) and terms (columns), and a topic is a pair: a group of documents and the vocabulary that characterizes it. Fuzzy co-clustering assigns memberships to both: u_{ik} of document k and w_{ij} of term j in co-cluster i. FCCM (Oh, Honda and Ichihashi) maximizes the aggregation degree \sum_{ikj}u_{ik}w_{ij}r_{kj} regularized by the entropies of both membership sets; Fuzzy CoDoK (Kummamuru, Dhawale and Krishnapuram) uses quadratic regularizers instead. Neither needs a distance between sparse count vectors. The data are a synthetic corpus: four topics with vocabularies of different size, Poisson counts that are high inside a topic block and low elsewhere, plus twenty general terms that occur everywhere at the background rate. Rows and columns are shuffled, so the blocks are invisible until the co-clusters reorder the matrix.">
+
+.. only:: html
+
+  .. image:: /auto_examples/09_beyond_unsupervised/images/thumb/sphx_glr_plot_03_fccm_document_term_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/09_beyond_unsupervised/plot_03_fccm_document_term`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fuzzy co-clustering of a document--term matrix</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Three sites, such as hospitals, branches of a company or laboratories, describe the same 300 objects with different features, and the raw data may not leave the sites. Pedrycz&#x27;s collaborative clustering runs fuzzy c-means at every site, then lets the sites exchange only their partition matrices and re-cluster with a term that penalizes the difference from the other sites&#x27; memberships,">
+
+.. only:: html
+
+  .. image:: /auto_examples/09_beyond_unsupervised/images/thumb/sphx_glr_plot_04_collaborative_sites_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/09_beyond_unsupervised/plot_04_collaborative_sites`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Collaborative fuzzy clustering across three data sites</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A single run of fuzzy c-means depends on its random start, on the sample it saw and on the features it used. A cluster ensemble fits a library of such runs and combines them. Soft partitions are combined through the co-association matrix: the library average of the similarity of two objects&#x27; membership vectors, which needs no matching of cluster labels between the members and works even when the members have different numbers of clusters. A consensus function then partitions the objects from this matrix: fuzzy c-means on its rows, spectral partitioning, evidence accumulation (hierarchical clustering of 1-s_{kl}), the soft meta-clustering algorithm sMCLA or information-theoretic k-means (Punera and Ghosh; Strehl and Ghosh; Fred and Jain).">
+
+.. only:: html
+
+  .. image:: /auto_examples/09_beyond_unsupervised/images/thumb/sphx_glr_plot_05_ensemble_consensus_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/09_beyond_unsupervised/plot_05_ensemble_consensus`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Consensus of soft clusterings: a library beats a single run</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Fred and Jain&#x27;s evidence accumulation turns the choice of the number of clusters into a property of the co-association matrix. The members of the library deliberately over-segment the data (many more clusters than expected, a different number for each member); objects of the same natural group stay together in most members, objects of different groups rarely. Hierarchical clustering of the distance 1-s_{kl} then gives a dendrogram, and the chosen number of clusters is the one that persists over the widest range of thresholds, that is, the one with the longest lifetime. Neither the members nor the consensus needs to know the number of groups.">
+
+.. only:: html
+
+  .. image:: /auto_examples/09_beyond_unsupervised/images/thumb/sphx_glr_plot_06_ensemble_lifetime_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/09_beyond_unsupervised/plot_06_ensemble_lifetime`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">The lifetime criterion of evidence accumulation</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/09_beyond_unsupervised/plot_01_ssfcm_partial_labels
+   /auto_examples/09_beyond_unsupervised/plot_02_pcca_pairwise_constraints
+   /auto_examples/09_beyond_unsupervised/plot_03_fccm_document_term
+   /auto_examples/09_beyond_unsupervised/plot_04_collaborative_sites
+   /auto_examples/09_beyond_unsupervised/plot_05_ensemble_consensus
+   /auto_examples/09_beyond_unsupervised/plot_06_ensemble_lifetime
+

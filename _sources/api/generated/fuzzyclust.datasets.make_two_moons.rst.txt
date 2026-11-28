@@ -1,0 +1,12 @@
+﻿fuzzyclust.datasets.make\_two\_moons
+====================================
+
+.. currentmodule:: fuzzyclust.datasets
+
+.. autofunction:: make_two_moons
+
+.. include:: fuzzyclust.datasets.make_two_moons.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

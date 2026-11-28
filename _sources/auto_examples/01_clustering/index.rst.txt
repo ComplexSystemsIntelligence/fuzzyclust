@@ -1,0 +1,288 @@
+
+
+.. _sphx_glr_auto_examples_01_clustering:
+
+Clustering algorithms and validation
+------------------------------------
+
+Hard and fuzzy partitioning (k-means, k-medoids, FCM, GK, GG), evaluating new
+data, choosing the number of clusters and working with pandas / scikit-learn.
+Also: generalized fuzzifiers and deterministic annealing, subtractive and
+mountain clustering, compatible cluster merging and stability-based
+selection of the number of clusters.
+
+
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Fuzzy c-means (FCM) is the workhorse of fuzzy clustering. Instead of assigning every sample \mathbf{x}_k to exactly one cluster, it assigns a membership degree \mu_{ik}\in[0,1] to every cluster i, with \sum_i \mu_{ik}=1. The algorithm alternates two closed-form updates derived from the c-means functional J=\sum_i\sum_k \mu_{ik}^m D^2_{ik}:">
+
+.. only:: html
+
+  .. image:: /auto_examples/01_clustering/images/thumb/sphx_glr_plot_01_fcm_basics_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/01_clustering/plot_01_fcm_basics`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fuzzy c-means: memberships and the fuzziness exponent</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Hard clustering assigns each sample to exactly one cluster (\mu_{ik}\in\{0,1\}); fuzzy clustering lets the memberships vary in [0,1]. All three algorithms minimize the same type of objective">
+
+.. only:: html
+
+  .. image:: /auto_examples/01_clustering/images/thumb/sphx_glr_plot_02_hard_vs_fuzzy_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/01_clustering/plot_02_hard_vs_fuzzy`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Hard versus fuzzy partitions: k-means, k-medoids, and FCM</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="FCM measures all distances with one fixed norm, so it can only find clusters of one shape (spheres for the Euclidean norm). The Gustafson–Kessel (GK) algorithm gives every cluster its own norm-inducing matrix">
+
+.. only:: html
+
+  .. image:: /auto_examples/01_clustering/images/thumb/sphx_glr_plot_03_gk_ellipses_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/01_clustering/plot_03_gk_ellipses`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Gustafson–Kessel: clusters with their own shape</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="GK fixes the volume of every cluster, so it handles a small dense cluster next to a large diffuse one poorly: the volume constraint forces the dense cluster to &quot;steal&quot; points from its big neighbor. The Gath–Geva (GG) algorithm uses the fuzzy maximum-likelihood distance">
+
+.. only:: html
+
+  .. image:: /auto_examples/01_clustering/images/thumb/sphx_glr_plot_04_gg_densities_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/01_clustering/plot_04_gg_densities`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Gath–Geva: clusters of different size and density</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A clustering algorithm always delivers a partition for the requested c, whether or not it is meaningful. Cluster validity indices quantify how well a partition fits the data; running the algorithm for c = 2,\dots,c_{\max} and locating the extremum of the indices is the classical recipe for selecting the number of clusters. No single index is reliable on its own, so fuzzyclust.validity offers a family of them:">
+
+.. only:: html
+
+  .. image:: /auto_examples/01_clustering/images/thumb/sphx_glr_plot_05_validity_scan_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/01_clustering/plot_05_validity_scan`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Choosing the number of clusters with validity indices</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A fitted clustering model is more than a partition of the training data: its prototypes (and, for GK and GG, the cluster covariances and priors) define a membership function over the whole data space. The MATLAB toolbox provided this as clusteval; in fuzzyclust it is the scikit-learn trio">
+
+.. only:: html
+
+  .. image:: /auto_examples/01_clustering/images/thumb/sphx_glr_plot_06_predict_new_data_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/01_clustering/plot_06_predict_new_data`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Applying a fitted model to new data</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Distance-based clustering is meaningful only when the features are commensurable. The motorcycle data set (time after impact in ms versus head acceleration in g) is a classical case: the two variables have different units and ranges, so the raw Euclidean distance is dominated by the variable with the larger spread. The MATLAB toolbox offered clust_normalize for this purpose; fuzzyclust delegates scaling to scikit-learn so that it composes with Pipeline, and keeps fuzzyclust.preprocessing.normalize as a convenience function that also returns the scaler for the inverse transformation.">
+
+.. only:: html
+
+  .. image:: /auto_examples/01_clustering/images/thumb/sphx_glr_plot_07_motorcycle_scaling_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/01_clustering/plot_07_motorcycle_scaling`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Feature scaling on real data: the motorcycle data set</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Every estimator of fuzzyclust follows the scikit-learn conventions, so it works with the usual tooling: Pipeline, set_output(transform=&quot;pandas&quot;), clone, GridSearchCV, pickling, and so on. Feature names of a pandas.DataFrame are stored in feature_names_in_, and the distance matrix returned by transform can itself be a DataFrame.">
+
+.. only:: html
+
+  .. image:: /auto_examples/01_clustering/images/thumb/sphx_glr_plot_08_sklearn_pandas_workflow_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/01_clustering/plot_08_sklearn_pandas_workflow`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Working with pandas and scikit-learn: pipelines, DataFrames, and model selection</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The fuzzy c-means functional J=\sum_i\sum_k\mu_{ik}^m D^2_{ik} has a single parameter besides the number of clusters: the weighting exponent m&gt;1. For fixed prototypes the memberships are">
+
+.. only:: html
+
+  .. image:: /auto_examples/01_clustering/images/thumb/sphx_glr_plot_09_fuzziness_exponent_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/01_clustering/plot_09_fuzziness_exponent`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">The fuzziness exponent m: from crisp cells to uniform memberships</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Alternating optimization decreases the objective J monotonically, but it stops at the first stationary point it reaches, and which one that is depends on the initial partition. Data made of several crossing line segments are a classical trap for the Gustafson--Kessel algorithm: an elongated prototype may lock onto the &quot;wrong&quot; pieces of two lines, and the iteration cannot escape, because every piece is locally consistent with a thin ellipsoid. This example fits GK from many random initializations, shows the spread of the final objectives and partitions, and compares the two devices offered by fuzzyclust: random restarts (``n_init``) and k-means++ seeding (``init=&quot;kmeans++&quot;``). Restarts help; on these data, the &quot;clever&quot; seeding does not.">
+
+.. only:: html
+
+  .. image:: /auto_examples/01_clustering/images/thumb/sphx_glr_plot_10_initialisation_restarts_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/01_clustering/plot_10_initialisation_restarts`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Local optima and restarts: initializing Gustafson--Kessel on crossing lines</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Fuzzy c-means measures every distance with one inner-product norm">
+
+.. only:: html
+
+  .. image:: /auto_examples/01_clustering/images/thumb/sphx_glr_plot_11_distance_norms_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/01_clustering/plot_11_distance_norms`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Distance norms: Euclidean, diagonal, and Mahalanobis fuzzy c-means</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Fuzzy c-means turns the hard c-means functional into a fuzzy one by raising the memberships to the power m. This is only one of several mechanisms. Adding an entropy term \lambda\sum_{ik}\mu_{ik}\log\mu_{ik} to the hard functional gives Gaussian-shaped memberships \mu_{ik}\propto\exp(-D^2_{ik}/\lambda); a quadratic term \lambda\sum_{ik}\mu_{ik}^2 gives piecewise linear memberships; and the polynomial fuzzifier of Klawonn and Höppner, g(\mu)=\frac{1-\beta}{1+\beta}\mu^2+\frac{2\beta}{1+\beta}\mu, replaces \mu^m by a function with a positive slope at zero. The last two produce exact zeros: a sample does not belong at all to a cluster on the far side of the data, whereas the FCM membership never vanishes. The entropy functional is also the free energy of deterministic annealing: lowering the temperature \lambda from a large value lets the prototypes split at critical temperatures, which reveals the cluster structure scale by scale.">
+
+.. only:: html
+
+  .. image:: /auto_examples/01_clustering/images/thumb/sphx_glr_plot_12_fuzzifiers_annealing_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/01_clustering/plot_12_fuzzifiers_annealing`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">What makes a partition fuzzy: fuzzifiers, regularization, and annealing</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Every alternating-optimization algorithm needs the number of clusters and a starting point. The mountain method of Yager and Filev and its data-point version, Chiu&#x27;s subtractive clustering, provide both without iteration. Every candidate point (a grid node or a data point) receives a potential, the sum of the Gaussian influences of all samples, with influence radius r_a:">
+
+.. only:: html
+
+  .. image:: /auto_examples/01_clustering/images/thumb/sphx_glr_plot_13_subtractive_clustering_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/01_clustering/plot_13_subtractive_clustering`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Subtractive clustering: the number and location of clusters from density</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The number of clusters can be chosen in three conceptually different ways.">
+
+.. only:: html
+
+  .. image:: /auto_examples/01_clustering/images/thumb/sphx_glr_plot_14_merging_stability_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/01_clustering/plot_14_merging_stability`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Three routes to the number of clusters: merging, validity scan, and stability</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/01_clustering/plot_01_fcm_basics
+   /auto_examples/01_clustering/plot_02_hard_vs_fuzzy
+   /auto_examples/01_clustering/plot_03_gk_ellipses
+   /auto_examples/01_clustering/plot_04_gg_densities
+   /auto_examples/01_clustering/plot_05_validity_scan
+   /auto_examples/01_clustering/plot_06_predict_new_data
+   /auto_examples/01_clustering/plot_07_motorcycle_scaling
+   /auto_examples/01_clustering/plot_08_sklearn_pandas_workflow
+   /auto_examples/01_clustering/plot_09_fuzziness_exponent
+   /auto_examples/01_clustering/plot_10_initialisation_restarts
+   /auto_examples/01_clustering/plot_11_distance_norms
+   /auto_examples/01_clustering/plot_12_fuzzifiers_annealing
+   /auto_examples/01_clustering/plot_13_subtractive_clustering
+   /auto_examples/01_clustering/plot_14_merging_stability
+

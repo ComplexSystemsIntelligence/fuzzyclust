@@ -1,0 +1,12 @@
+﻿fuzzyclust.models.piecewise\_linear\_function
+=============================================
+
+.. currentmodule:: fuzzyclust.models
+
+.. autofunction:: piecewise_linear_function
+
+.. include:: fuzzyclust.models.piecewise_linear_function.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

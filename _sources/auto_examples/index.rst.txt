@@ -1,0 +1,1364 @@
+:orphan:
+
+Example gallery
+===============
+
+Every example is a self-contained script that generates its own data,
+explains the idea of the method and shows the effect of its parameters.
+The same scripts are rendered here, downloadable as Jupyter notebooks, and
+quoted in the book.
+
+
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+Clustering algorithms and validation
+------------------------------------
+
+Hard and fuzzy partitioning (k-means, k-medoids, FCM, GK, GG), evaluating new
+data, choosing the number of clusters and working with pandas / scikit-learn.
+Also: generalized fuzzifiers and deterministic annealing, subtractive and
+mountain clustering, compatible cluster merging and stability-based
+selection of the number of clusters.
+
+
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Fuzzy c-means (FCM) is the workhorse of fuzzy clustering. Instead of assigning every sample \mathbf{x}_k to exactly one cluster, it assigns a membership degree \mu_{ik}\in[0,1] to every cluster i, with \sum_i \mu_{ik}=1. The algorithm alternates two closed-form updates derived from the c-means functional J=\sum_i\sum_k \mu_{ik}^m D^2_{ik}:">
+
+.. only:: html
+
+  .. image:: /auto_examples/01_clustering/images/thumb/sphx_glr_plot_01_fcm_basics_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/01_clustering/plot_01_fcm_basics`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fuzzy c-means: memberships and the fuzziness exponent</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Hard clustering assigns each sample to exactly one cluster (\mu_{ik}\in\{0,1\}); fuzzy clustering lets the memberships vary in [0,1]. All three algorithms minimize the same type of objective">
+
+.. only:: html
+
+  .. image:: /auto_examples/01_clustering/images/thumb/sphx_glr_plot_02_hard_vs_fuzzy_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/01_clustering/plot_02_hard_vs_fuzzy`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Hard versus fuzzy partitions: k-means, k-medoids, and FCM</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="FCM measures all distances with one fixed norm, so it can only find clusters of one shape (spheres for the Euclidean norm). The Gustafson–Kessel (GK) algorithm gives every cluster its own norm-inducing matrix">
+
+.. only:: html
+
+  .. image:: /auto_examples/01_clustering/images/thumb/sphx_glr_plot_03_gk_ellipses_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/01_clustering/plot_03_gk_ellipses`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Gustafson–Kessel: clusters with their own shape</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="GK fixes the volume of every cluster, so it handles a small dense cluster next to a large diffuse one poorly: the volume constraint forces the dense cluster to &quot;steal&quot; points from its big neighbor. The Gath–Geva (GG) algorithm uses the fuzzy maximum-likelihood distance">
+
+.. only:: html
+
+  .. image:: /auto_examples/01_clustering/images/thumb/sphx_glr_plot_04_gg_densities_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/01_clustering/plot_04_gg_densities`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Gath–Geva: clusters of different size and density</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A clustering algorithm always delivers a partition for the requested c, whether or not it is meaningful. Cluster validity indices quantify how well a partition fits the data; running the algorithm for c = 2,\dots,c_{\max} and locating the extremum of the indices is the classical recipe for selecting the number of clusters. No single index is reliable on its own, so fuzzyclust.validity offers a family of them:">
+
+.. only:: html
+
+  .. image:: /auto_examples/01_clustering/images/thumb/sphx_glr_plot_05_validity_scan_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/01_clustering/plot_05_validity_scan`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Choosing the number of clusters with validity indices</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A fitted clustering model is more than a partition of the training data: its prototypes (and, for GK and GG, the cluster covariances and priors) define a membership function over the whole data space. The MATLAB toolbox provided this as clusteval; in fuzzyclust it is the scikit-learn trio">
+
+.. only:: html
+
+  .. image:: /auto_examples/01_clustering/images/thumb/sphx_glr_plot_06_predict_new_data_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/01_clustering/plot_06_predict_new_data`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Applying a fitted model to new data</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Distance-based clustering is meaningful only when the features are commensurable. The motorcycle data set (time after impact in ms versus head acceleration in g) is a classical case: the two variables have different units and ranges, so the raw Euclidean distance is dominated by the variable with the larger spread. The MATLAB toolbox offered clust_normalize for this purpose; fuzzyclust delegates scaling to scikit-learn so that it composes with Pipeline, and keeps fuzzyclust.preprocessing.normalize as a convenience function that also returns the scaler for the inverse transformation.">
+
+.. only:: html
+
+  .. image:: /auto_examples/01_clustering/images/thumb/sphx_glr_plot_07_motorcycle_scaling_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/01_clustering/plot_07_motorcycle_scaling`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Feature scaling on real data: the motorcycle data set</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Every estimator of fuzzyclust follows the scikit-learn conventions, so it works with the usual tooling: Pipeline, set_output(transform=&quot;pandas&quot;), clone, GridSearchCV, pickling, and so on. Feature names of a pandas.DataFrame are stored in feature_names_in_, and the distance matrix returned by transform can itself be a DataFrame.">
+
+.. only:: html
+
+  .. image:: /auto_examples/01_clustering/images/thumb/sphx_glr_plot_08_sklearn_pandas_workflow_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/01_clustering/plot_08_sklearn_pandas_workflow`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Working with pandas and scikit-learn: pipelines, DataFrames, and model selection</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The fuzzy c-means functional J=\sum_i\sum_k\mu_{ik}^m D^2_{ik} has a single parameter besides the number of clusters: the weighting exponent m&gt;1. For fixed prototypes the memberships are">
+
+.. only:: html
+
+  .. image:: /auto_examples/01_clustering/images/thumb/sphx_glr_plot_09_fuzziness_exponent_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/01_clustering/plot_09_fuzziness_exponent`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">The fuzziness exponent m: from crisp cells to uniform memberships</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Alternating optimization decreases the objective J monotonically, but it stops at the first stationary point it reaches, and which one that is depends on the initial partition. Data made of several crossing line segments are a classical trap for the Gustafson--Kessel algorithm: an elongated prototype may lock onto the &quot;wrong&quot; pieces of two lines, and the iteration cannot escape, because every piece is locally consistent with a thin ellipsoid. This example fits GK from many random initializations, shows the spread of the final objectives and partitions, and compares the two devices offered by fuzzyclust: random restarts (``n_init``) and k-means++ seeding (``init=&quot;kmeans++&quot;``). Restarts help; on these data, the &quot;clever&quot; seeding does not.">
+
+.. only:: html
+
+  .. image:: /auto_examples/01_clustering/images/thumb/sphx_glr_plot_10_initialisation_restarts_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/01_clustering/plot_10_initialisation_restarts`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Local optima and restarts: initializing Gustafson--Kessel on crossing lines</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Fuzzy c-means measures every distance with one inner-product norm">
+
+.. only:: html
+
+  .. image:: /auto_examples/01_clustering/images/thumb/sphx_glr_plot_11_distance_norms_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/01_clustering/plot_11_distance_norms`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Distance norms: Euclidean, diagonal, and Mahalanobis fuzzy c-means</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Fuzzy c-means turns the hard c-means functional into a fuzzy one by raising the memberships to the power m. This is only one of several mechanisms. Adding an entropy term \lambda\sum_{ik}\mu_{ik}\log\mu_{ik} to the hard functional gives Gaussian-shaped memberships \mu_{ik}\propto\exp(-D^2_{ik}/\lambda); a quadratic term \lambda\sum_{ik}\mu_{ik}^2 gives piecewise linear memberships; and the polynomial fuzzifier of Klawonn and Höppner, g(\mu)=\frac{1-\beta}{1+\beta}\mu^2+\frac{2\beta}{1+\beta}\mu, replaces \mu^m by a function with a positive slope at zero. The last two produce exact zeros: a sample does not belong at all to a cluster on the far side of the data, whereas the FCM membership never vanishes. The entropy functional is also the free energy of deterministic annealing: lowering the temperature \lambda from a large value lets the prototypes split at critical temperatures, which reveals the cluster structure scale by scale.">
+
+.. only:: html
+
+  .. image:: /auto_examples/01_clustering/images/thumb/sphx_glr_plot_12_fuzzifiers_annealing_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/01_clustering/plot_12_fuzzifiers_annealing`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">What makes a partition fuzzy: fuzzifiers, regularization, and annealing</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Every alternating-optimization algorithm needs the number of clusters and a starting point. The mountain method of Yager and Filev and its data-point version, Chiu&#x27;s subtractive clustering, provide both without iteration. Every candidate point (a grid node or a data point) receives a potential, the sum of the Gaussian influences of all samples, with influence radius r_a:">
+
+.. only:: html
+
+  .. image:: /auto_examples/01_clustering/images/thumb/sphx_glr_plot_13_subtractive_clustering_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/01_clustering/plot_13_subtractive_clustering`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Subtractive clustering: the number and location of clusters from density</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The number of clusters can be chosen in three conceptually different ways.">
+
+.. only:: html
+
+  .. image:: /auto_examples/01_clustering/images/thumb/sphx_glr_plot_14_merging_stability_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/01_clustering/plot_14_merging_stability`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Three routes to the number of clusters: merging, validity scan, and stability</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+Visualisation of clustering results
+-----------------------------------
+
+Projecting high-dimensional data and cluster prototypes to the plane (PCA,
+Sammon mapping, fuzzy Sammon mapping), measuring how faithful the picture is,
+and fuzzy self-organizing maps.
+
+
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A clustering of n-dimensional data cannot be inspected directly; the classical remedy is to project the data onto the plane. Principal component analysis (PCA) chooses the plane that retains as much variance as possible, which says nothing about the distances the clustering algorithm works with. Sammon&#x27;s mapping instead places the N points in the plane so that their pairwise distances d^*_{kl} reproduce the original distances d_{kl}; it minimizes the stress">
+
+.. only:: html
+
+  .. image:: /auto_examples/02_visualization/images/thumb/sphx_glr_plot_01_pca_vs_sammon_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/02_visualization/plot_01_pca_vs_sammon`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">PCA versus Sammon mapping: preserving variance or distances</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Sammon mapping preserves the Euclidean distances between all pairs of samples. A fuzzy clustering, however, is defined by the N\times c distances between the samples and the cluster prototypes, measured with the norm of the clustering algorithm (Euclidean for FCM, adaptive Mahalanobis norms for Gustafson–Kessel, and so on). The fuzzy Sammon mapping (FUZZSAM) preserves these distances, weighted by the memberships,">
+
+.. only:: html
+
+  .. image:: /auto_examples/02_visualization/images/thumb/sphx_glr_plot_02_fuzzy_sammon_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/02_visualization/plot_02_fuzzy_sammon`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fuzzy Sammon mapping: projecting clusters, not just data</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Fuzzy c-means places its prototypes wherever the data are dense, in no particular order. The fuzzy self-organizing map of Abonyi, Migály, and Szeifert arranges the prototypes on the nodes of a low-dimensional grid and adds a smoothness penalty to the FCM functional,">
+
+.. only:: html
+
+  .. image:: /auto_examples/02_visualization/images/thumb/sphx_glr_plot_03_fuzzy_som_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/02_visualization/plot_03_fuzzy_som`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fuzzy self-organizing map: ordered prototypes by regularized FCM</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Validity indices compress a partition into one number. A faithful 2-D picture of the partition tells more: whether the clusters are compact groups around their centers, whether two of them should be merged, or whether a cluster merely collects what the others leave. Since the fuzzy Sammon mapping shows the clustering as the algorithm sees it (every prototype becomes a point, and the recomputed memberships match the fitted ones), it is a natural tool for such user-guided validation. This example clusters the Wisconsin breast cancer data (569 samples, the ten standardized &quot;mean&quot; cell-nucleus features, two diagnoses) with FCM for c=2,3,4 and projects every result with FUZZSAM, as in the FUZZ-IEEE paper. It also reports the quality measures of the maps and the convergence of E_\text{fuzz} for several step sizes.">
+
+.. only:: html
+
+  .. image:: /auto_examples/02_visualization/images/thumb/sphx_glr_plot_04_cluster_number_validation_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/02_visualization/plot_04_cluster_number_validation`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Visual validation of the number of clusters with FUZZSAM</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+Robust and shape-oriented variants of fuzzy c-means
+---------------------------------------------------
+
+Fuzzy c-means assumes compact, roughly spherical clusters and is pulled
+away by outliers. These examples relax one assumption at a time: the
+possibilistic c-means (absolute typicalities, their scale parameters and the
+coincident-cluster failure), the possibilistic fuzzy c-means (memberships
+and typicalities with the a/b trade-off), noise clustering (a virtual noise
+cluster at constant distance δ), kernel fuzzy c-means (rings and moons with
+a kernel-width scan), fuzzy c-varieties and c-elliptotypes (lines as
+prototypes on crossing and collinear segments, compared with GK) and fuzzy
+c-shells (circles as prototypes on concentric and intersecting circles with
+radius recovery), volume prototypes with adaptive merging, and feature
+weighting (weighted FCM and SCAD) that learns which variables matter.
+
+
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Fuzzy c-means forces the memberships of every sample to sum to one, so an outlier far from all prototypes still receives a membership of about 1/c in every cluster and drags every prototype toward itself. The possibilistic c-means (PCM) of Krishnapuram and Keller drops this constraint: the typicality">
+
+.. only:: html
+
+  .. image:: /auto_examples/06_extensions/images/thumb/sphx_glr_plot_01_pcm_typicality_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/06_extensions/plot_01_pcm_typicality`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Possibilistic c-means: typicalities, scales and coincident clusters</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="FCM memberships are relative: they say to which cluster a sample belongs more than to the others, and they keep the prototypes apart because every sample has to be shared. PCM typicalities are absolute: they say how representative a sample is of a cluster and make the prototypes robust, but nothing keeps the prototypes apart. The possibilistic fuzzy c-means (PFCM) of Pal, Pal, Keller and Bezdek computes both and combines them in the prototype update,">
+
+.. only:: html
+
+  .. image:: /auto_examples/06_extensions/images/thumb/sphx_glr_plot_02_pfcm_trade_off_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/06_extensions/plot_02_pfcm_trade_off`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Possibilistic fuzzy c-means: memberships and typicalities together</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Davé&#x27;s noise clustering keeps the probabilistic constraint of FCM but adds a (c+1)-th noise prototype that is, by definition, at the same distance \delta from every sample. A sample farther than \delta from all real prototypes is closer to the noise prototype and gives most of its membership to the noise cluster; the real clusters only see the remainder,">
+
+.. only:: html
+
+  .. image:: /auto_examples/06_extensions/images/thumb/sphx_glr_plot_03_noise_clustering_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/06_extensions/plot_03_noise_clustering`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Noise clustering: a virtual cluster at constant distance δ</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="FCM finds clusters that are convex in the input space because its distance is Euclidean. Kernel FCM maps the data with an implicit nonlinear map \Phi into the feature space of a Mercer kernel K(\mathbf{x},\mathbf{y})=\langle\Phi(\mathbf{x}),\Phi(\mathbf{y})\rangle and runs FCM there: the prototypes are weighted means of the mapped samples, and the squared distance of a sample to a prototype is evaluated with kernel values only,">
+
+.. only:: html
+
+  .. image:: /auto_examples/06_extensions/images/thumb/sphx_glr_plot_04_kernel_fcm_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/06_extensions/plot_04_kernel_fcm`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Kernel fuzzy c-means: rings and moons through the kernel trick</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Data that lie along lines (or planes) are grouped not by their position but by the line they belong to. The fuzzy c-varieties (FCV) algorithm of Bezdek, Coray, Gunderson and Watson replaces the point prototype of FCM by an r-dimensional linear variety through a center \mathbf{v}_i spanned by orthonormal directions \mathbf{s}_{ij}, and measures the squared orthogonal distance">
+
+.. only:: html
+
+  .. image:: /auto_examples/06_extensions/images/thumb/sphx_glr_plot_05_fuzzy_c_varieties_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/06_extensions/plot_05_fuzzy_c_varieties`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fuzzy c-varieties: lines as prototypes, and the elliptotype compromise</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A ring has no interior points, so a point prototype placed at its center is far from every member, and FCM cannot tell concentric rings apart at all. Shell clustering describes cluster i by a center \mathbf{v}_i and a radius r_i and measures the distance of a sample as its deviation from the circle. The fuzzy c-spherical shells algorithm (FCSS) of Krishnapuram, Nasraoui and Frigui uses the algebraic distance (\|\mathbf{x}_k-\mathbf{v}_i\|^2-r_i^2)^2, which is quadratic in a reparametrized prototype and therefore has a closed-form weighted least-squares update; Davé&#x27;s original fuzzy c-shells (FCS) uses the radial distance (\|\mathbf{x}_k-\mathbf{v}_i\|-r_i)^2 and needs a Newton iteration per cluster. The example recovers the radii of concentric and of intersecting circles, compares the two algorithms, and shows why the initialization matters.">
+
+.. only:: html
+
+  .. image:: /auto_examples/06_extensions/images/thumb/sphx_glr_plot_06_fuzzy_c_shells_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/06_extensions/plot_06_fuzzy_c_shells`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fuzzy c-shells: circles as prototypes</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Fuzzy c-means treats every feature alike: after standardization a feature of pure noise contributes as much to the distance as a feature that separates the clusters, and enough such features drown the structure. Two extensions learn feature weights together with the partition. The weighted FCM of Keller and Klawonn uses one weight vector \boldsymbol\alpha for all clusters, D^2_{ik}=\sum_j\alpha_j^t(x_{kj}-v_{ij})^2, and SCAD (simultaneous clustering and attribute discrimination) of Frigui and Nasraoui gives every cluster its own weights w_{ij}. In both methods a feature receives a large weight when the members of the clusters scatter little along it: a noise feature, along which every cluster is as wide as the data, is down-weighted. This example adds noise features to three groups, compares the learned weights, and shows SCAD on clusters that live in different subspaces.">
+
+.. only:: html
+
+  .. image:: /auto_examples/06_extensions/images/thumb/sphx_glr_plot_07_feature_weighting_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/06_extensions/plot_07_feature_weighting`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Learning which features matter: SCAD and the weighted FCM</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A point prototype measures the distance to the center of a cluster, so a sample in the outer part of a large cluster is farther from its own prototype than a sample at the edge of a small neighboring cluster. This is why FCM and Gustafson--Kessel tend to equalize the clusters: a large, diffuse group is split and its pieces are handed to smaller groups. Kaymak and Setnes replace the point by a volume prototype, a hypersphere (or hyperellipsoid) of radius r_i inside which the distance is zero,">
+
+.. only:: html
+
+  .. image:: /auto_examples/06_extensions/images/thumb/sphx_glr_plot_08_volume_prototypes_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/06_extensions/plot_08_volume_prototypes`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Volume prototypes and adaptive cluster merging</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+Graph-based fuzzy clustering
+----------------------------
+
+Clusters of arbitrary shape found through a graph over the samples: the
+hybrid minimal spanning tree / Gath–Geva algorithm (inconsistent-edge
+cutting, volume-based splitting, GG refinement, validation of the number of
+clusters and similarity of the resulting fuzzy clusters) and fuzzy c-medoid
+clustering with geodesic distances on a k-nearest-neighbour graph, compared
+with fuzzy c-means and with clustering of the Isomap projection on rings,
+moons, spirals and the S-curve.
+
+
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Prototype-based algorithms describe a cluster by one geometric object and fail when the groups have arbitrary shapes. Graph-theoretic methods start instead from the minimal spanning tree (MST) of the data and obtain clusters by removing edges. Zahn&#x27;s classical criteria for choosing these edges compare an edge with the mean edge length of the whole tree (global threshold) or with the edges in its own neighborhood (local inconsistency). Both find well-separated groups, but a sparse chain of points between two groups keeps them together: the chaining effect of single linkage. The hybrid MST–GG algorithm of Vathy-Fogarassy, Feil, and Abonyi adds a third criterion. A subtree is split at the edge that minimizes the total fuzzy hypervolume \sum_j\sqrt{\det\mathbf{F}_j} of the resulting parts, which breaks chains and bends because a union of two compact groups has a far larger volume than its parts. Finally, the crisp tree partition initializes Gath–Geva clustering, which is too sensitive to its starting point to be run from a random partition on such data but refines a good start into a fuzzy, parametric description (centers, covariances, memberships).">
+
+.. only:: html
+
+  .. image:: /auto_examples/05_graph/images/thumb/sphx_glr_plot_01_mst_clustering_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/05_graph/plot_01_mst_clustering`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Minimal spanning tree clustering: cutting, splitting, and Gath–Geva refinement</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Removing the longest edges of the minimal spanning tree works as long as all clusters have the same density. When a diffuse group lies next to tight ones, the edges inside the diffuse group are as long as the edges that separate the tight groups, and a global length threshold (Criterion 1, w(e)&gt;\lambda\,\bar w) either leaves the tight groups merged or shatters the diffuse one. Zahn&#x27;s local criterion (Criterion 2) compares every edge with the edges in its own tree neighborhood. An edge is inconsistent when it is at least f times longer than the mean of the edges within k tree steps of its end points (ratio form), or when it exceeds that mean by more than a given number of standard deviations (deviation form). The factor f and the depth k (``inconsistency``, inconsistency_std, n_hops) are the parameters of the classical algorithm, and this example shows what they do. The splitting phase is switched off (``min_gain=1.0``) and no refinement is run, so only the length criteria act.">
+
+.. only:: html
+
+  .. image:: /auto_examples/05_graph/images/thumb/sphx_glr_plot_02_mst_cut_criteria_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/05_graph/plot_02_mst_cut_criteria`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Inconsistent edges: Zahn's criteria and the neighborhood depth</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The hybrid MST–GG algorithm uses the fuzzy hypervolume both as its splitting criterion and as a validity measure. This example looks at the number of clusters from two sides. First, the number is given (``n_clusters=c``), and the partitions obtained for a range of c are compared by the volume-based indices of Gath and Geva from fuzzyclust.validity (the fuzzy hypervolume FHV, the partition density PD, and the average partition density APD) and by the number the volume criterion picks on its own. Second, the clusters are not Gaussian: two concentric rings are split by the volume criterion into many small pieces, each well described by one Gaussian. The fuzzy similarity of the refined clusters, S_{ij}=\sum_k\min(\mu_{ik},\mu_{jk})/\sum_k\max(\mu_{ik},\mu_{jk}), drawn as a dendrogram, shows which pieces belong together; this is the analysis step the paper proposes for merging and for visualizing the result.">
+
+.. only:: html
+
+  .. image:: /auto_examples/05_graph/images/thumb/sphx_glr_plot_03_mst_validation_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/05_graph/plot_03_mst_validation`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Number of clusters: volume-based validity and fuzzy cluster similarity</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Fuzzy c-means measures the distance between a sample and a prototype with the Euclidean norm, so it can only find groups that are convex in the feature space. When the data lie on a curved manifold (a spiral, two interleaved moons, concentric rings), two points that are close in the Euclidean sense may be far apart along the manifold. Feil and Abonyi replace the Euclidean distance by the geodesic distance, the length of the shortest path in a k-nearest-neighbor graph whose edges are weighted by Euclidean lengths (the Isomap approximation of the manifold distance). Since the geodesic distance is only defined between samples, the prototypes are restricted to data points. The algorithm is thus a fuzzy c-medoid clustering with the FCM membership formula, each medoid being the sample that minimizes \sum_k\mu_{ik}^m d_g(\mathbf{x}_k,\cdot)^2. The number of neighbors k determines how the graph sees the manifold: if it is too small, the manifold falls apart into components; if it is too large, edges &quot;short-circuit&quot; neighboring arms.">
+
+.. only:: html
+
+  .. image:: /auto_examples/05_graph/images/thumb/sphx_glr_plot_04_geodesic_fcm_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/05_graph/plot_04_geodesic_fcm`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Geodesic-distance-based fuzzy clustering versus fuzzy c-means</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The geodesic distance between two samples is the length of the shortest path in the neighborhood graph. This example first draws such a path next to the Euclidean chord to make the difference tangible and then turns to the first benchmark of the paper, the three-dimensional S-curve, on which eight clusters are sought. Two routes are compared. Algorithm I projects the data with Isomap (classical MDS of the geodesic distance matrix), runs fuzzy c-means on the projection, and re-projects every center as the sample closest to it; Algorithm II (``GeodesicFCM``) clusters in the feature space with geodesic distances and medoids. Both place their prototypes on the manifold, which fuzzy c-means in the feature space does not, and the cost function evaluated with geodesic distances shows which partition follows the manifold better. Finally, the spiral illustrates the effect of the graph components on Algorithm I. Isomap can only embed a connected graph, so the components have to be bridged, and the penalty of the bridges determines whether the arms stay apart in the projection.">
+
+.. only:: html
+
+  .. image:: /auto_examples/05_graph/images/thumb/sphx_glr_plot_05_geodesic_path_isomap_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/05_graph/plot_05_geodesic_path_isomap`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Geodesic paths, the S-curve, and clustering of the Isomap projection</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+Clustering for model identification
+-----------------------------------
+
+Fuzzy clusters in the product space of inputs and outputs are local models:
+Takagi–Sugeno fuzzy models of static functions and of SISO / MIMO dynamic
+systems (modified Gath–Geva clustering), switching regression with fuzzy
+c-regression models, fuzzy classifiers from supervised clustering, supervised
+fuzzy partitions for decision trees, and hinging-hyperplane regression trees.
+
+
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A Takagi–Sugeno (TS) fuzzy model consists of c rules">
+
+.. only:: html
+
+  .. image:: /auto_examples/03_models/images/thumb/sphx_glr_plot_01_ts_sinc_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/03_models/plot_01_ts_sinc`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Takagi–Sugeno model of a static nonlinearity: clusters become rules</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The second benchmark of Abonyi, Babuška, and Szeifert (2002) is the second-order nonlinear plant">
+
+.. only:: html
+
+  .. image:: /auto_examples/03_models/images/thumb/sphx_glr_plot_02_ts_dynamic_plant_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/03_models/plot_02_ts_dynamic_plant`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Identification of a nonlinear dynamic system with free-run validation</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Clustering-based identification is usually applied to multi-input single-output systems, so a process with n_y outputs needs n_y separate rule bases whose interaction remains hidden. Abonyi and Szeifert instead proposed one rule base whose rules carry local MIMO ARX models,">
+
+.. only:: html
+
+  .. image:: /auto_examples/03_models/images/thumb/sphx_glr_plot_03_ts_mimo_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/03_models/plot_03_ts_mimo`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">MIMO Takagi–Sugeno model with local MIMO ARX consequents</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In a switching regression problem, every sample (\mathbf{x}_k, y_k) obeys one of c unknown linear laws, but which one is not known. Hathaway and Bezdek replaced the point prototypes of fuzzy c-means by regression models: the &quot;distance&quot; of a sample to cluster i is the squared residual E_{ik}=(y_k-\mathbf{x}_{e,k}^T\boldsymbol\theta_i)^2 of the i-th model, and the alternating optimization of">
+
+.. only:: html
+
+  .. image:: /auto_examples/03_models/images/thumb/sphx_glr_plot_04_fcrm_switching_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/03_models/plot_04_fcrm_switching`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fuzzy c-regression models: switching regression with crossing lines</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A classical fuzzy classifier has one rule per class and a crisp class label as its consequent, so every class must be a single compact region. Abonyi and Szeifert proposed rules of the form">
+
+.. only:: html
+
+  .. image:: /auto_examples/03_models/images/thumb/sphx_glr_plot_05_supervised_classifier_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/03_models/plot_05_supervised_classifier`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Supervised fuzzy clustering: classifier rules that carry class probabilities</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Rule- and tree-induction methods of the ID3 family work on discrete attributes, so continuous features are partitioned before the tree is grown. The usual a priori partitions (equal-width bins, equal-frequency bins, or a Ruspini partition of triangular sets) ignore the class labels, so their cut points fall anywhere. Abonyi (2010) proposed deriving the partition from the supervised fuzzy clustering of the previous example. Every rule&#x27;s Gaussian antecedent set, projected onto a feature, is a fuzzy set of that feature; the Gaussians are turned into trapezoids with the corner points v-3\sigma,\ v-\sigma/2,\ v+\sigma/2,\ v+3\sigma; similar sets (Jaccard similarity above a threshold \theta) are merged; and a feature left with a single set is a don&#x27;t care variable. The cut points therefore lie where the classes change. This example shows the partitions, feeds their crisp codes and their memberships to a scikit-learn decision tree, and compares the result with unsupervised discretizations.">
+
+.. only:: html
+
+  .. image:: /auto_examples/03_models/images/thumb/sphx_glr_plot_06_fuzzy_partition_tree_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/03_models/plot_06_fuzzy_partition_tree`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Supervised fuzzy partitions as a priori discretization for decision trees</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A hinging hyperplane (Breiman) is the continuous piecewise-linear function h(\mathbf{x})=\max(\mathbf{x}_e^T\boldsymbol\theta_1,\ \mathbf{x}_e^T\boldsymbol\theta_2) or the corresponding \min: two planes glued together along the hinge \{\mathbf{x}:\ \mathbf{x}_e^T(\boldsymbol\theta_1-\boldsymbol\theta_2)=0\}. Kenesei and Abonyi observed that fuzzy c-regression with c=2 finds two local linear models and their fuzzy operating regions at once, that is, one hinge, provided the two planes cross inside the data (a constraint added to the weighted least-squares step). The sign of the hinge function then splits the data into the two operating regions, each of which is again modeled by a hinge, and so on. The result is a binary regression tree with oblique splits whose leaves are hinge functions. No splitting variable has to be chosen, the tree is piecewise linear, and every node reports how well the crisp split agrees with the fuzzy partition. This example fits a surface made of two crossing hinges and studies the depth, the leaf size, and the growth strategy.">
+
+.. only:: html
+
+  .. image:: /auto_examples/03_models/images/thumb/sphx_glr_plot_07_hinging_tree_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/03_models/plot_07_hinging_tree`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Hinging-hyperplane regression tree identified by fuzzy c-regression</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+Clustering of time series
+-------------------------
+
+Fuzzy segmentation of multivariate time series with local PCA models
+(modified Gath–Geva clustering with a time prototype) against the bottom-up
+baseline, model-order selection of NARX models by false nearest neighbours
+with a cluster-based threshold, state-space reconstruction and prediction of
+chaotic series by clustering in the delay-embedded space, and model-free
+structure selection for models with mixed discrete and continuous inputs.
+
+
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A multivariate time series is segmented into internally homogeneous pieces. The segments are found by a modified Gath–Geva clustering whose prototype has two parts: a Gaussian membership function in time, which makes the clusters contiguous, and a local probabilistic PCA model of the observations, which measures the homogeneity of a segment. Because a PCA hyperplane reacts to changes in the mean, in the variance, and in the correlation structure, all three kinds of regime change are detected, including those that are invisible in any single variable.">
+
+.. only:: html
+
+  .. image:: /auto_examples/04_timeseries/images/thumb/sphx_glr_plot_01_fuzzy_segmentation_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/04_timeseries/plot_01_fuzzy_segmentation`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fuzzy segmentation of a multivariate time series</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The classical way to segment a time series is bottom-up: start from a fine partition into short pieces, compute the cost of merging every pair of adjacent segments, merge the cheapest pair, and repeat until the cheapest merge would cost more than a tolerance or until the desired number of segments is left. For multivariate data, the cost of a segment is the error of one PCA model fitted to it: the mean reconstruction error Q (distance from the hyperplane) or the mean Hotelling T^2 (spread inside the hyperplane). This is the baseline against which the segmentation paper compares, and its two costs see different things: Q reacts to changes in the correlation structure, T^2 to shifts of the operating point. The fuzzy segmentation combines both in one model.">
+
+.. only:: html
+
+  .. image:: /auto_examples/04_timeseries/images/thumb/sphx_glr_plot_02_bottom_up_vs_fuzzy_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/04_timeseries/plot_02_bottom_up_vs_fuzzy`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Bottom-up segmentation with PCA models versus fuzzy segmentation</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Before a nonlinear dynamic model y_k=f(\mathbf{x}_k) can be identified, the regression vector \mathbf{x}_k=[y_{k-1},\dots,y_{k-n_a},u_{k-1},\dots,u_{k-n_b}]^T has to be chosen. The false nearest neighbors (FNN) test is geometric: if the regressors carry enough information, two regression vectors that are close have close outputs, so the ratio |y_k-y_j|/\|\mathbf{x}_k-\mathbf{x}_j\| of a sample and its nearest neighbor is bounded by the norm of the gradient of f. A neighbor that violates the bound is false; the percentage of false neighbors drops to (nearly) zero once the regression vector is complete. The weak point is the bound R. For a nonlinear system the gradient varies over the operating range, so one constant is either too loose or too strict. Feil, Abonyi, and Szeifert estimate the gradient locally from a Gath–Geva clustering of the regression data (every cluster is a local linear model whose slope is read off the eigenvector of the smallest eigenvalue of the cluster covariance) and use the membership-weighted slope as a point-wise threshold R_k.">
+
+.. only:: html
+
+  .. image:: /auto_examples/04_timeseries/images/thumb/sphx_glr_plot_03_fnn_model_order_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/04_timeseries/plot_03_fnn_model_order`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Model-order selection by false nearest neighbors with a cluster-based threshold</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A deterministic system is observed through one scalar measurement y_k. By Takens&#x27; theorem, the delay vectors \mathbf{y}_k=[y_k, y_{k-\tau},\dots,y_{k-\tau(d_e-1)}]^T reconstruct the state space if the embedding dimension d_e is large enough. Abonyi, Feil, Németh, Árva, and Babuška identify the map \mathbf{y}_{k+1}=\mathbf{f}(\mathbf{y}_k) in the reconstructed space as an operating-regime model (Gaussian regimes with local linear models) by a modified Gath–Geva clustering of the pairs (\mathbf{y}_k, \mathbf{y}_{k+1}). One clustering provides three results: the embedding dimension (the one-step prediction error stops improving when d_e is large enough), the local dimension of the attractor (the clusters become flat, with a collapsing smallest eigenvalue, once d_e exceeds the dimension of the manifold on which the trajectory lies), and a model that predicts the series.">
+
+.. only:: html
+
+  .. image:: /auto_examples/04_timeseries/images/thumb/sphx_glr_plot_04_chaotic_reconstruction_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/04_timeseries/plot_04_chaotic_reconstruction`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">State-space reconstruction and prediction of a chaotic time series</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Girimonte, Babuška, and Abonyi select the inputs of a nonlinear model without fitting any model. Every continuous candidate input is partitioned into a few fuzzy sets by fuzzy c-means, every discrete input into one crisp set per value, and for every subset of inputs the data are decomposed into the product-space segments of these sets. If the subset explains the output, the output varies little inside every segment, and the total fuzzy variance \sigma_t (the squared error of the singleton fuzzy model that assigns each segment its membership-weighted mean) is small. All subsets up to a maximal size are ranked by \sigma_t. Because an irrelevant input also lowers \sigma_t a little (more segments, fewer samples each), the variance–complexity trade-off VCT=\sigma_t n_i is used to compare structures of similar variance: the first dip of the VCT curve marks the structure with only the relevant inputs.">
+
+.. only:: html
+
+  .. image:: /auto_examples/04_timeseries/images/thumb/sphx_glr_plot_05_mixed_input_structure_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/04_timeseries/plot_05_mixed_input_structure`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Model-free structure selection with mixed discrete and continuous inputs</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+Relational, categorical and mixed data
+--------------------------------------
+
+Fuzzy clustering when the objects are not feature vectors or the mean is
+meaningless: relational fuzzy c-means as the exact dual of FCM on a matrix
+of squared distances and its non-Euclidean extension with the adaptive
+β-spread (NERF), fuzzy c-medoids on dynamic-time-warping dissimilarities of
+time series with the linear-complexity candidate search, fuzzy k-modes on
+categorical survey data, fuzzy k-prototypes on mixed records with the
+weight γ, Gower's coefficient as a bridge between mixed data and the
+relational algorithms, and autocorrelation-based clustering of time series.
+
+
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Fuzzy c-means needs the data as vectors: a prototype is a weighted mean and the distance to it is Euclidean. Hathaway, Davenport and Bezdek showed that the same functional can be minimized when only the matrix \mathbf{R} of squared pairwise distances is known. The prototype becomes a weight vector over the objects, \mathbf{v}_i=\mathbf{U}_i^m/\sum_k\mu_{ik}^m, and the squared distance of object k to it is d^2_{ik}=(\mathbf{R}\mathbf{v}_i)_k-\tfrac12\mathbf{v}_i^T\mathbf{R}\mathbf{v}_i, an identity that holds for any weights summing to one as long as \mathbf{R} is Euclidean. Relational FCM (RFCM) therefore reproduces FCM exactly, iterate by iterate, when \mathbf{R} comes from Euclidean data. When it does not (squared city-block distances, cubed distances, dynamic-time-warping dissimilarities), some d^2_{ik} turn negative and RFCM breaks down. NERF c-means (Hathaway and Bezdek) adds a constant \beta to all off-diagonal entries, which shifts every relational distance by \tfrac{\beta}{2}\lVert\mathbf{e}_k-\mathbf{v}_i\rVert^2; it raises \beta adaptively, only when a negative distance appears and only as much as needed.">
+
+.. only:: html
+
+  .. image:: /auto_examples/07_relational/images/thumb/sphx_glr_plot_01_rfcm_fcm_duality_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/07_relational/plot_01_rfcm_fcm_duality`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Relational fuzzy c-means and NERF for non-Euclidean data</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Time series of the same shape rarely line up in time: a peak comes a little earlier or later, a ramp is stretched or compressed. The Euclidean distance between two such series compares values at equal time indices and is large even when the shapes agree, whereas dynamic time warping (Sakoe and Chiba) aligns the series by a monotone path through their cost matrix, within a band of width w, and compares what belongs together. DTW is a dissimilarity, not a metric, and its square is not Euclidean, so relational c-means would need the \beta-spread; fuzzy c-medoids (Krishnapuram, Joshi, Nasraoui and Yi) needs nothing of the kind. Its prototypes are objects (the medoid of a cluster is the series that minimizes the membership-weighted sum of dissimilarities to the others), so it works with any dissimilarity and returns representative series that can be plotted. The search for a medoid among all N objects costs O(N^2) per cluster and iteration; the linear variant of the paper searches only among the n_candidates objects with the highest memberships.">
+
+.. only:: html
+
+  .. image:: /auto_examples/07_relational/images/thumb/sphx_glr_plot_02_fcmdd_dtw_series_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/07_relational/plot_02_fcmdd_dtw_series`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fuzzy c-medoids on dynamic-time-warping dissimilarities of time series</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Categorical records such as survey answers, product attributes or diagnoses have no mean, and coding the categories as numbers imposes an order that does not exist. Huang&#x27;s k-modes replaces the mean by the mode (the most frequent category per attribute) and the Euclidean distance by the simple matching dissimilarity, the number of attributes in which two records differ. Fuzzy k-modes (Huang and Ng) keeps the FCM membership formula with this dissimilarity; its authors proved that the mode of a fuzzy cluster is, per attribute, the category that carries the largest membership mass \sum_k\mu_{ik}^m. The dissimilarity is integer-valued, so many records are equally far from several modes; the partition is therefore fuzzier than in FCM and the exponent m has to be chosen with care.">
+
+.. only:: html
+
+  .. image:: /auto_examples/07_relational/images/thumb/sphx_glr_plot_03_kmodes_survey_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/07_relational/plot_03_kmodes_survey`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fuzzy k-modes on categorical survey data</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Records that mix measurements and categories, such as age and income next to occupation and region, are the rule in applications. Huang&#x27;s k-prototypes measures the numeric part by the squared Euclidean distance, the categorical part by the number of mismatches, and adds the two with a weight \gamma: the prototype is the fuzzy mean of the numeric attributes together with the mode of every categorical one. With \gamma=0 the method is fuzzy c-means on the numeric columns, with a sufficiently large \gamma it is fuzzy k-modes on the categorical columns; in between, both kinds of information shape the partition. Huang suggests the average standard deviation of the numeric attributes as the scale of \gamma, and the implementation uses it as the default.">
+
+.. only:: html
+
+  .. image:: /auto_examples/07_relational/images/thumb/sphx_glr_plot_04_kprototypes_mixed_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/07_relational/plot_04_kprototypes_mixed`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fuzzy k-prototypes on mixed numeric and categorical data</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="There are two routes from mixed records to a fuzzy partition. The common shortcut encodes the categories as 0/1 indicator columns and runs fuzzy c-means on the result. The geometry is then arbitrary: a mismatch in a categorical attribute costs \sqrt2 whatever the attribute, the numeric columns count on their own scale, and the &quot;centers&quot; are fractional indicator vectors that correspond to no record. The relational route computes Gower&#x27;s general coefficient (Gower, 1971): every attribute contributes a score in [0,1], the range-scaled difference for a numeric one and a mismatch indicator for a categorical one, and the scores are averaged over the attributes observed in both records, so missing values need no special treatment. The resulting matrix feeds fuzzy c-medoids, whose prototypes are real records, or (since Gower showed that \sqrt{d_G} is Euclidean when nothing is missing) relational c-means.">
+
+.. only:: html
+
+  .. image:: /auto_examples/07_relational/images/thumb/sphx_glr_plot_05_gower_fcmdd_vs_onehot_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/07_relational/plot_05_gower_fcmdd_vs_onehot`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Gower's dissimilarity versus one-hot encoding for mixed data</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Some time series belong together not because their values agree but because they are generated by the same mechanism: two realizations of one stationary process have nothing in common point by point (their noise is independent), yet they share their dependence structure. D&#x27;Urso and Maharaj proposed representing every series by its estimated autocorrelation function up to lag L, (\hat\rho_k(1),\dots,\hat\rho_k(L)), and clustering these vectors with fuzzy c-means (A-FCM) or fuzzy c-medoids (A-FCMd) under the (optionally lag-weighted) squared Euclidean distance. The representation is independent of level, scale and phase and has the same length for series of any length; the fuzzy memberships express that a process can lie between two typical dependence patterns. The squared autocorrelation distance is Euclidean, so relational fuzzy c-means on it is exactly A-FCM.">
+
+.. only:: html
+
+  .. image:: /auto_examples/07_relational/images/thumb/sphx_glr_plot_06_autocorrelation_series_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/07_relational/plot_06_autocorrelation_series`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Autocorrelation-based fuzzy clustering of time series</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+Incomplete, very large and image data
+--------------------------------------
+
+Fuzzy c-means meets three realities of data that the textbook setting
+leaves out. Values are *missing*: the four strategies of Hathaway and
+Bezdek (whole data, partial distances, optimal completion, nearest
+prototype) are compared across missingness rates, and the imputation that
+optimal completion delivers is examined. Data are *very large* or arrive
+as a *stream*: random sample and extend, single-pass and online FCM are
+compared with the literal FCM on 200 000 points in time and agreement, and
+a drifting stream is processed chunk by chunk with ``partial_fit``. The
+data are an *image*: spatially constrained variants (FCM_S, FCM_S1/S2,
+EnFCM, FGFCM, FLICM) are compared with pixel-wise FCM under increasing
+Gaussian and salt-and-pepper noise, and the neighborhood weight and window
+size are studied.
+
+
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Fuzzy c-means needs a complete data matrix: a distance between a sample and a prototype is a sum over all features. When values are missing (``NaN``), Hathaway and Bezdek (2001) distinguish four strategies. The whole-data strategy (WDS) drops every incomplete sample. The partial-distance strategy (PDS) keeps all samples and measures the distance over the observed features only, rescaled to the full dimension, D^2_{ik}=\frac{n}{I_k}\sum_j I_{kj}(x_{kj}-v_{ij})^2. The optimal completion strategy (OCS) treats the missing values as additional variables of the c-means functional and updates them to the membership-weighted mean of the prototype coordinates, so that the data are imputed while they are clustered. The nearest-prototype strategy (NPS) is its hard version: a missing value is copied from the nearest prototype. This example plants values missing completely at random into well-separated Gaussian clusters and asks how far each strategy&#x27;s prototypes drift from those of FCM on the complete data as the missing rate grows.">
+
+.. only:: html
+
+  .. image:: /auto_examples/08_data_realities/images/thumb/sphx_glr_plot_01_missing_strategies_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/08_data_realities/plot_01_missing_strategies`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Clustering incomplete data: the four strategies of Hathaway and Bezdek</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The optimal completion strategy (OCS) of Hathaway and Bezdek treats every missing value x_{kj} as a variable of the c-means functional and sets it to the membership-weighted mean of the prototype coordinates, x_{kj}=\sum_i\mu_{ik}^m v_{ij}/\sum_i\mu_{ik}^m. Clustering thus delivers an imputation of the data as a by-product. The same formula can be applied after a partial-distance (PDS) fit, with memberships that were computed from the observed features only, and the nearest-prototype strategy (NPS) copies the coordinate of the nearest prototype. This example measures how close the completed values come to the truth. Four Gaussian clusters in four dimensions are used because a cluster is then identified by some features better than by others: a sample that lost exactly its discriminating features is ambiguous, and how a strategy treats such samples decides its imputation error. Two baselines put the numbers in perspective: the column mean (what a clustering-free imputer would do) and the oracle, the mean of the sample&#x27;s true cluster, which is the best any prototype-based imputation can achieve.">
+
+.. only:: html
+
+  .. image:: /auto_examples/08_data_realities/images/thumb/sphx_glr_plot_02_ocs_imputation_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/08_data_realities/plot_02_ocs_imputation`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Imputation by clustering: accuracy of the completed values</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Literal fuzzy c-means touches every sample in every iteration and keeps the N\times c partition in memory. Havens, Bezdek, Leckie, Hall and Palaniswami (2012) compared three ways around this. Random sample and extend (rseFCM) clusters a random sample and computes the memberships of all samples in one pass from the fixed prototypes. Single-pass FCM (spFCM) walks through the data in chunks and carries the prototypes of a chunk, weighted by the membership mass they collected, into the next chunk as c heavy samples of weighted FCM. Online FCM (oFCM) clusters every chunk independently and clusters the weighted chunk prototypes at the end. The paper measures the speedup over literal FCM and the agreement of the hardened partitions with the literal FCM partition. This example repeats the experiment on 200 000 two-dimensional samples of five clusters of unequal size; the smallest holds only 5 % of the data, which makes a small random sample risky.">
+
+.. only:: html
+
+  .. image:: /auto_examples/08_data_realities/images/thumb/sphx_glr_plot_03_large_data_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/08_data_realities/plot_03_large_data`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fuzzy c-means for very large data: rseFCM, spFCM and oFCM</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Single-pass and online FCM need only one chunk in memory, so they can consume a stream: partial_fit processes one chunk and keeps a summary of everything seen so far (c weighted prototypes for spFCM, all chunk prototypes for oFCM). Both summaries treat the stream as stationary: an observation from the first chunk counts as much as one from the last. When the clusters drift, the summary lags behind. This example sends a stream of 40 chunks through both algorithms while the three cluster centers move along straight lines, and measures the distance of the model&#x27;s prototypes from the current true centers. A forgetting factor \lambda (``forgetting_factor``, an addition to the published spFCM) multiplies the carried weights before every chunk, so that old data fade geometrically; the parameter study shows that the right \lambda balances lag against noise and depends on how fast the stream drifts.">
+
+.. only:: html
+
+  .. image:: /auto_examples/08_data_realities/images/thumb/sphx_glr_plot_04_stream_drift_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/08_data_realities/plot_04_stream_drift`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Clustering a drifting stream chunk by chunk with partial_fit</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Segmenting a gray-level image with fuzzy c-means means clustering the pixel values. Pixel-wise FCM labels every pixel on its own, so noise that pushes a pixel&#x27;s value across the midpoint between two gray levels produces a wrong label, however clear the surrounding region is. The spatially constrained variants add the neighborhood of every pixel to the functional: FCM_S (Ahmed et al. 2002) adds the distances of the neighbors to the prototype, FCM_S1 and FCM_S2 (Chen and Zhang 2004) replace them by a mean- or median-filtered image computed once, EnFCM (Szilágyi et al. 2003) clusters the gray-level histogram of a linearly smoothed image, FGFCM (Cai, Chen and Zhang 2007) does the same with locally adaptive weights, and FLICM (Krinidis and Chatzis 2010) adds a parameter-free fuzzy local factor. The test image has four regions with equally spaced gray levels and one disc of every class inside another region; it is corrupted by Gaussian noise (every pixel slightly) and by salt-and-pepper noise (a few pixels set to black or white), which call for different remedies.">
+
+.. only:: html
+
+  .. image:: /auto_examples/08_data_realities/images/thumb/sphx_glr_plot_05_image_noise_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/08_data_realities/plot_05_image_noise`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Image segmentation under noise: six spatially constrained FCM variants</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="FCM_S, FCM_S1/S2 and EnFCM mix every pixel with its neighborhood, and two parameters set how much. The weight \alpha balances the pixel against its neighbors (\alpha=0 is pixel-wise FCM, a large \alpha lets the neighborhood decide), and the window size sets how far the neighborhood reaches. Both suppress noise and both erase detail: a structure narrower than the window is outvoted by its surroundings. To make this trade-off visible, the test image of the previous example gets two thin bars, one and two pixels wide, and the accuracy is measured separately on the interior of the regions and on the detail, the pixels within one pixel of a region boundary, which include the bars. The study also shows why \alpha must exceed one for the median variant FCM_S2 to remove impulse noise.">
+
+.. only:: html
+
+  .. image:: /auto_examples/08_data_realities/images/thumb/sphx_glr_plot_06_spatial_alpha_window_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/08_data_realities/plot_06_spatial_alpha_window`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Spatial FCM: the neighborhood weight and the window size</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+Beyond a single unsupervised run
+--------------------------------
+
+Fuzzy clustering that uses more than one data matrix and one random start:
+partial supervision by a few class labels (Pedrycz--Waletzky) and by
+must-link / cannot-link pairs (pairwise-constrained competitive
+agglomeration), co-clustering of the rows and columns of a document--term
+matrix (FCCM, Fuzzy CoDoK), collaborative clustering of the same objects
+at several data sites that exchange only partition matrices, and
+consensus clustering of a library of soft partitions (co-association
+matrix, consensus functions, evidence accumulation and the lifetime
+criterion for the number of clusters).
+
+
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Unsupervised clustering finds the structure the distance suggests, which need not be the structure the user means. Pedrycz and Waletzky add to the c-means functional a term that penalizes the difference between the memberships of a few labeled samples and their labels,">
+
+.. only:: html
+
+  .. image:: /auto_examples/09_beyond_unsupervised/images/thumb/sphx_glr_plot_01_ssfcm_partial_labels_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/09_beyond_unsupervised/plot_01_ssfcm_partial_labels`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fuzzy c-means with partial supervision: label fraction and weight</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Class labels require an agreed set of classes. Often the user can only say whether two objects belong together or not, for example whether two images show the same scene or two records describe the same customer. Grira, Crucianu and Boujemaa (PCCA) add to the c-means functional the expected number of violated must-link and cannot-link pairs, weighted by \alpha, and optionally the competitive agglomeration term of Frigui and Krishnapuram, which lets an overestimated number of clusters shrink to the number the data support. The two parallel bars of the previous example are used again: unconstrained FCM cuts across them, and a few dozen pairs tell it not to.">
+
+.. only:: html
+
+  .. image:: /auto_examples/09_beyond_unsupervised/images/thumb/sphx_glr_plot_02_pcca_pairwise_constraints_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/09_beyond_unsupervised/plot_02_pcca_pairwise_constraints`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Pairwise constraints: must-link, cannot-link and competitive agglomeration</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A document--term matrix has two kinds of entities, documents (rows) and terms (columns), and a topic is a pair: a group of documents and the vocabulary that characterizes it. Fuzzy co-clustering assigns memberships to both: u_{ik} of document k and w_{ij} of term j in co-cluster i. FCCM (Oh, Honda and Ichihashi) maximizes the aggregation degree \sum_{ikj}u_{ik}w_{ij}r_{kj} regularized by the entropies of both membership sets; Fuzzy CoDoK (Kummamuru, Dhawale and Krishnapuram) uses quadratic regularizers instead. Neither needs a distance between sparse count vectors. The data are a synthetic corpus: four topics with vocabularies of different size, Poisson counts that are high inside a topic block and low elsewhere, plus twenty general terms that occur everywhere at the background rate. Rows and columns are shuffled, so the blocks are invisible until the co-clusters reorder the matrix.">
+
+.. only:: html
+
+  .. image:: /auto_examples/09_beyond_unsupervised/images/thumb/sphx_glr_plot_03_fccm_document_term_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/09_beyond_unsupervised/plot_03_fccm_document_term`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fuzzy co-clustering of a document--term matrix</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Three sites, such as hospitals, branches of a company or laboratories, describe the same 300 objects with different features, and the raw data may not leave the sites. Pedrycz&#x27;s collaborative clustering runs fuzzy c-means at every site, then lets the sites exchange only their partition matrices and re-cluster with a term that penalizes the difference from the other sites&#x27; memberships,">
+
+.. only:: html
+
+  .. image:: /auto_examples/09_beyond_unsupervised/images/thumb/sphx_glr_plot_04_collaborative_sites_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/09_beyond_unsupervised/plot_04_collaborative_sites`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Collaborative fuzzy clustering across three data sites</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A single run of fuzzy c-means depends on its random start, on the sample it saw and on the features it used. A cluster ensemble fits a library of such runs and combines them. Soft partitions are combined through the co-association matrix: the library average of the similarity of two objects&#x27; membership vectors, which needs no matching of cluster labels between the members and works even when the members have different numbers of clusters. A consensus function then partitions the objects from this matrix: fuzzy c-means on its rows, spectral partitioning, evidence accumulation (hierarchical clustering of 1-s_{kl}), the soft meta-clustering algorithm sMCLA or information-theoretic k-means (Punera and Ghosh; Strehl and Ghosh; Fred and Jain).">
+
+.. only:: html
+
+  .. image:: /auto_examples/09_beyond_unsupervised/images/thumb/sphx_glr_plot_05_ensemble_consensus_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/09_beyond_unsupervised/plot_05_ensemble_consensus`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Consensus of soft clusterings: a library beats a single run</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Fred and Jain&#x27;s evidence accumulation turns the choice of the number of clusters into a property of the co-association matrix. The members of the library deliberately over-segment the data (many more clusters than expected, a different number for each member); objects of the same natural group stay together in most members, objects of different groups rarely. Hierarchical clustering of the distance 1-s_{kl} then gives a dendrogram, and the chosen number of clusters is the one that persists over the widest range of thresholds, that is, the one with the longest lifetime. Neither the members nor the consensus needs to know the number of groups.">
+
+.. only:: html
+
+  .. image:: /auto_examples/09_beyond_unsupervised/images/thumb/sphx_glr_plot_06_ensemble_lifetime_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/09_beyond_unsupervised/plot_06_ensemble_lifetime`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">The lifetime criterion of evidence accumulation</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+   :includehidden:
+
+
+   /auto_examples/01_clustering/index.rst
+   /auto_examples/02_visualization/index.rst
+   /auto_examples/06_extensions/index.rst
+   /auto_examples/05_graph/index.rst
+   /auto_examples/03_models/index.rst
+   /auto_examples/04_timeseries/index.rst
+   /auto_examples/07_relational/index.rst
+   /auto_examples/08_data_realities/index.rst
+   /auto_examples/09_beyond_unsupervised/index.rst
+
+
+.. only:: html
+
+  .. container:: sphx-glr-footer sphx-glr-footer-gallery
+
+    .. container:: sphx-glr-download sphx-glr-download-python
+
+      :download:`Download all examples in Python source code: auto_examples_python.zip </auto_examples/auto_examples_python.zip>`
+
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
+
+      :download:`Download all examples in Jupyter notebooks: auto_examples_jupyter.zip </auto_examples/auto_examples_jupyter.zip>`
+
+
+.. only:: html
+
+ .. rst-class:: sphx-glr-signature
+
+    `Gallery generated by Sphinx-Gallery <https://sphinx-gallery.github.io>`_

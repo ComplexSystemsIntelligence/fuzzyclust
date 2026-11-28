@@ -1,0 +1,12 @@
+﻿fuzzyclust.semisupervised.make\_partial\_labels
+===============================================
+
+.. currentmodule:: fuzzyclust.semisupervised
+
+.. autofunction:: make_partial_labels
+
+.. include:: fuzzyclust.semisupervised.make_partial_labels.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

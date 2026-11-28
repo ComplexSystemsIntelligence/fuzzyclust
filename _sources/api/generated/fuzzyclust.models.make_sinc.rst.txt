@@ -1,0 +1,12 @@
+﻿fuzzyclust.models.make\_sinc
+============================
+
+.. currentmodule:: fuzzyclust.models
+
+.. autofunction:: make_sinc
+
+.. include:: fuzzyclust.models.make_sinc.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

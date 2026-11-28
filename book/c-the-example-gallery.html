@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>C The example gallery · Fuzzy Clustering and Data Analysis in Python</title>
+<meta name="description" content="Open-access book on fuzzy clustering and data analysis in Python with the fuzzyclust toolbox: fuzzy c-means, Gustafson-Kessel, Gath-Geva, cluster validity, visualisation, Takagi-Sugeno models, time-series segmentation and more, with runnable Colab examples." />
+<meta name="author" content="János Abonyi" />
+<link rel="canonical" href="https://complexsystemsintelligence.github.io/fuzzyclust/book/c-the-example-gallery.html" />
+<meta property="og:title" content="C The example gallery · Fuzzy Clustering and Data Analysis in Python" />
+<meta property="og:type" content="book" />
+<meta property="og:url" content="https://complexsystemsintelligence.github.io/fuzzyclust/book/c-the-example-gallery.html" />
+<meta property="og:image" content="https://complexsystemsintelligence.github.io/fuzzyclust/book/cover.png" />
+<meta property="og:description" content="Open-access book on fuzzy clustering and data analysis in Python with the fuzzyclust toolbox: fuzzy c-means, Gustafson-Kessel, Gath-Geva, cluster validity, visualisation, Takagi-Sugeno models, time-series segmentation and more, with runnable Colab examples." />
+<link rel="icon" href="../_static/favicon.png" />
+<link rel="stylesheet" href="main_web.css" />
+<link rel="stylesheet" href="web.css" />
+</head>
+<body class="">
+<header class='topbar'><a class='brand' href='index.html'><img src='logo.svg' alt='' width='34' height='34' /><span><b>Fuzzy Clustering and Data Analysis in Python</b><small>The fuzzyclust toolbox</small></span></a><nav class='toplinks'><a href='../'>Documentation</a><a href='../auto_examples/index.html'>Examples</a><a href='../fuzzyclust-book.pdf'>PDF</a><a href='../fuzzyclust-book.epub'>EPUB</a><a href='https://github.com/ComplexSystemsIntelligence/fuzzyclust'>GitHub</a><a class='hub' href='https://complexsystemsintelligence.github.io/#textbooks'>All textbooks</a></nav></header>
+<div class="layout">
+<aside class="left"><nav class='toc' aria-label='Contents'><p class='toc-title'>Contents</p><ol><li><a href='preface.html'><span class='num'></span>Preface</a></li><li><a href='01-introduction.html'><span class='num'>1</span>Introduction</a></li><li><a href='02-foundations-of-prototype-based-clustering.html'><span class='num'>2</span>Foundations of prototype-based clustering</a></li><li><a href='03-hard-and-fuzzy-partitioning-algorithms.html'><span class='num'>3</span>Hard and fuzzy partitioning algorithms</a></li><li><a href='04-cluster-validity-and-the-number.html'><span class='num'>4</span>Cluster validity and the number of clusters</a></li><li><a href='05-visualization-of-fuzzy-clustering-results.html'><span class='num'>5</span>Visualization of fuzzy clustering results</a></li><li><a href='06-robust-and-shape-oriented-variants.html'><span class='num'>6</span>Robust and shape-oriented variants of fuzzy c-means</a></li><li><a href='07-graph-based-fuzzy-clustering.html'><span class='num'>7</span>Graph-based fuzzy clustering</a></li><li><a href='08-clustering-for-model-identification.html'><span class='num'>8</span>Clustering for model identification</a></li><li><a href='09-clustering-of-time-series.html'><span class='num'>9</span>Clustering of time series</a></li><li><a href='10-clustering-relational-categorical-and-mixed.html'><span class='num'>10</span>Clustering relational, categorical, and mixed data</a></li><li><a href='11-incomplete-very-large-and-image.html'><span class='num'>11</span>Incomplete, very large, and image data</a></li><li><a href='12-beyond-a-single-unsupervised-run.html'><span class='num'>12</span>Beyond a single unsupervised run: partial supervision,
+co-clustering, collaboration, and ensembles</a></li><li><a href='a-api-reference.html'><span class='num'>A</span>API reference</a></li><li><a href='b-migrating-from-the-matlab-toolbox.html'><span class='num'>B</span>Migrating from the MATLAB toolbox</a></li><li class='current'><a href='c-the-example-gallery.html'><span class='num'>C</span>The example gallery</a></li><li><a href='bibliography.html'><span class='num'></span>Bibliography</a></li></ol></nav></aside>
+<main class="content">
+
+<!-- l. 1 -->
+<h2 class="appendixHead"><span class="titlemark">Appendix C</span><br/><a id="x17-284000C"></a>The example gallery</h2>
+<div class="box roadmap">
+<!-- l. 3 --><p class="indent">   Every algorithm of the toolbox has at least one runnable example script. The
+scripts generate their own data, explain the method in their comments, and
+end with a study of the main parameters. The same scripts produce the
+gallery of the online documentation, the Jupyter notebooks, and every
+computed figure and code listing of this book. The tables below list them by
+folder of <span class="ec-lmtt-10x-x-109">examples/</span>, with the first figure of the book that each script
+produced.
+</p>
+</div>
+<h3 class="sectionHead"><span class="titlemark">C.1   </span> <a id="x17-285000C.1"></a>Core partitioning algorithms and validity</h3>
+<!-- l. 7 --><p class="noindent">Folder <span class="ec-lmtt-10x-x-109">examples/01_clustering/</span>. The methods are described in chapter <a href="03-hard-and-fuzzy-partitioning-algorithms.html#x5-330003">3</a>.
+</p><!-- l. 9 --><p class="indent">
+<a id="x17-285001r1"></a></p> <!-- l. 10 --><div class="longtable"> <table class="longtable" id="TBL-47"><colgroup id="TBL-47-1g"><col id="TBL-47-1"/><col id="TBL-47-2"/><col id="TBL-47-3"/></colgroup>
+<tr id="TBL-47-1-" style="vertical-align:baseline;"><td class="td01" colspan="3" id="TBL-47-1-1" style="text-align:left;"></td></tr><tr id="TBL-47-2-" style="vertical-align:baseline;"><td class="td01" id="TBL-47-2-1" style="text-align:left;">
+<!-- l. 10 --><p class="noindent"><span class="ec-lmr-10">Script</span> </p></td><td class="td11" id="TBL-47-2-2" style="text-align:left;">
+<!-- l. 10 --><p class="noindent"><span class="ec-lmr-10">Topic</span> </p></td><td class="td10" id="TBL-47-2-3" style="text-align:left;">
+<!-- l. 10 --><p class="noindent"><span class="ec-lmr-10">Figure</span></p></td>
+</tr><tr id="TBL-47-3-" style="vertical-align:baseline;"><td class="td01" colspan="3" id="TBL-47-3-1" style="text-align:left;"></td></tr><tr id="TBL-47-4-" style="vertical-align:baseline;"><td class="td01" id="TBL-47-4-1" style="text-align:left;">
+<!-- l. 10 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-47-5-" style="vertical-align:baseline;"><td class="td01" id="TBL-47-5-1" style="text-align:left;"> </td><td class="td11" id="TBL-47-5-2" style="text-align:left;"> </td><td class="td10" id="TBL-47-5-3" style="text-align:left;">
+</td></tr>
+<tr id="TBL-47-14-" style="vertical-align:baseline;"><td class="td01" id="TBL-47-14-1" style="text-align:left;">
+<!-- l. 13 --><p class="noindent"><span class="ec-lmtt-10">plot_01_fcm_basics.py</span> </p></td><td class="td11" id="TBL-47-14-2" style="text-align:left;">
+<!-- l. 13 --><p class="noindent"><span class="ec-lmr-10">Fuzzy
+  c-means:
+  memberships
+  and
+  the
+  fuzziness
+  exponent</span> </p></td><td class="td10" id="TBL-47-14-3" style="text-align:left;">
+<!-- l. 13 --><p class="noindent"><a href="01-introduction.html#x3-12024r3"><span class="ec-lmr-10">1.3</span><!-- tex4ht:ref: fig:intro:first  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-47-15-" style="vertical-align:baseline;"><td class="td01" id="TBL-47-15-1" style="text-align:left;">
+<!-- l. 14 --><p class="noindent"><span class="ec-lmtt-10">plot_02_hard_vs_fuzzy.py</span> </p></td><td class="td11" id="TBL-47-15-2" style="text-align:left;">
+<!-- l. 14 --><p class="noindent"><span class="ec-lmr-10">Hard
+  versus
+  fuzzy
+  partitions:
+  k-means,
+  k-medoids,
+  and
+  FCM</span> </p></td><td class="td10" id="TBL-47-15-3" style="text-align:left;">
+<!-- l. 14 --><p class="noindent"><a href="03-hard-and-fuzzy-partitioning-algorithms.html#x5-59001r7"><span class="ec-lmr-10">3.7</span><!-- tex4ht:ref: fig:part:ex:hard  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-47-16-" style="vertical-align:baseline;"><td class="td01" id="TBL-47-16-1" style="text-align:left;">
+<!-- l. 15 --><p class="noindent"><span class="ec-lmtt-10">plot_03_gk_ellipses.py</span> </p></td><td class="td11" id="TBL-47-16-2" style="text-align:left;">
+<!-- l. 15 --><p class="noindent"><span class="ec-lmr-10">Gustafson–Kessel:
+  clusters
+  with
+  their
+  own
+  shape</span> </p></td><td class="td10" id="TBL-47-16-3" style="text-align:left;">
+<!-- l. 15 --><p class="noindent"><a href="03-hard-and-fuzzy-partitioning-algorithms.html#x5-60001r8"><span class="ec-lmr-10">3.8</span><!-- tex4ht:ref: fig:part:ex:gk  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-47-17-" style="vertical-align:baseline;"><td class="td01" id="TBL-47-17-1" style="text-align:left;">
+<!-- l. 16 --><p class="noindent"><span class="ec-lmtt-10">plot_04_gg_densities.py</span> </p></td><td class="td11" id="TBL-47-17-2" style="text-align:left;">
+<!-- l. 16 --><p class="noindent"><span class="ec-lmr-10">Gath–Geva:
+  clusters
+  of
+  different
+  size
+  and
+  density</span> </p></td><td class="td10" id="TBL-47-17-3" style="text-align:left;">
+<!-- l. 16 --><p class="noindent"><a href="03-hard-and-fuzzy-partitioning-algorithms.html#x5-62001r12"><span class="ec-lmr-10">3.12</span><!-- tex4ht:ref: fig:part:ex:gg  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-47-18-" style="vertical-align:baseline;"><td class="td01" id="TBL-47-18-1" style="text-align:left;">
+<!-- l. 17 --><p class="noindent"><span class="ec-lmtt-10">plot_05_validity_scan.py</span> </p></td><td class="td11" id="TBL-47-18-2" style="text-align:left;">
+<!-- l. 17 --><p class="noindent"><span class="ec-lmr-10">Choosing
+  the
+  number
+  of
+  clusters
+  with
+  validity
+  indices</span> </p></td><td class="td10" id="TBL-47-18-3" style="text-align:left;">
+<!-- l. 17 --><p class="noindent"><a href="04-cluster-validity-and-the-number.html#x6-82002r3"><span class="ec-lmr-10">4.3</span><!-- tex4ht:ref: fig:val:ex:scan  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-47-19-" style="vertical-align:baseline;"><td class="td01" id="TBL-47-19-1" style="text-align:left;">
+<!-- l. 18 --><p class="noindent"><span class="ec-lmtt-10">plot_06_predict_new_data.py</span> </p></td><td class="td11" id="TBL-47-19-2" style="text-align:left;">
+<!-- l. 18 --><p class="noindent"><span class="ec-lmr-10">Applying
+  a
+  fitted
+  model
+  to
+  new
+  data</span> </p></td><td class="td10" id="TBL-47-19-3" style="text-align:left;">
+<!-- l. 18 --><p class="noindent"><a href="03-hard-and-fuzzy-partitioning-algorithms.html#x5-63001r14"><span class="ec-lmr-10">3.14</span><!-- tex4ht:ref: fig:part:ex:predict  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-47-20-" style="vertical-align:baseline;"><td class="td01" id="TBL-47-20-1" style="text-align:left;">
+<!-- l. 19 --><p class="noindent"><span class="ec-lmtt-10">plot_07_motorcycle_scaling.py</span> </p> </td><td class="td11" id="TBL-47-20-2" style="text-align:left;">
+<!-- l. 19 --><p class="noindent"><span class="ec-lmr-10">Feature
+  scaling
+  on
+  real
+  data:
+  the
+  motorcycle
+  data
+  set</span> </p></td><td class="td10" id="TBL-47-20-3" style="text-align:left;">
+<!-- l. 19 --><p class="noindent"><a href="02-foundations-of-prototype-based-clustering.html#x4-29001r6"><span class="ec-lmr-10">2.6</span><!-- tex4ht:ref: fig:found:ex:scaling  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-47-21-" style="vertical-align:baseline;"><td class="td01" id="TBL-47-21-1" style="text-align:left;">
+<!-- l. 20 --><p class="noindent"><span class="ec-lmtt-10">plot_08_sklearn_pandas_workflow.py</span> </p> </td><td class="td11" id="TBL-47-21-2" style="text-align:left;">
+<!-- l. 20 --><p class="noindent"><span class="ec-lmr-10">Working
+  with
+  pandas
+  and
+  scikit-learn:
+  pipelines,
+  DataFrames,
+  and
+  model
+  selection</span> </p></td><td class="td10" id="TBL-47-21-3" style="text-align:left;">
+<!-- l. 20 --><p class="noindent"><a href="02-foundations-of-prototype-based-clustering.html#x4-31001r8"><span class="ec-lmr-10">2.8</span><!-- tex4ht:ref: fig:found:ex:sklearn  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-47-22-" style="vertical-align:baseline;"><td class="td01" id="TBL-47-22-1" style="text-align:left;">
+<!-- l. 21 --><p class="noindent"><span class="ec-lmtt-10">plot_09_fuzziness_exponent.py</span> </p> </td><td class="td11" id="TBL-47-22-2" style="text-align:left;">
+<!-- l. 21 --><p class="noindent"><span class="ec-lmr-10">The
+  fuzziness
+  exponent
+  m:
+  from
+  crisp
+  cells
+  to
+  uniform
+  memberships</span> </p></td><td class="td10" id="TBL-47-22-3" style="text-align:left;">
+<!-- l. 21 --><p class="noindent"><a href="03-hard-and-fuzzy-partitioning-algorithms.html#x5-58001r5"><span class="ec-lmr-10">3.5</span><!-- tex4ht:ref: fig:part:ex:m1d  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-47-23-" style="vertical-align:baseline;"><td class="td01" id="TBL-47-23-1" style="text-align:left;">
+<!-- l. 22 --><p class="noindent"><span class="ec-lmtt-10">plot_10_initialisation_restarts.py</span> </p> </td><td class="td11" id="TBL-47-23-2" style="text-align:left;">
+<!-- l. 22 --><p class="noindent"><span class="ec-lmr-10">Local
+  optima
+  and
+  restarts:
+  initializing
+  Gustafson–Kessel
+  on
+  crossing
+  lines</span> </p></td><td class="td10" id="TBL-47-23-3" style="text-align:left;">
+<!-- l. 22 --><p class="noindent"><a href="02-foundations-of-prototype-based-clustering.html#x4-30001r7"><span class="ec-lmr-10">2.7</span><!-- tex4ht:ref: fig:found:ex:restarts  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-47-24-" style="vertical-align:baseline;"><td class="td01" id="TBL-47-24-1" style="text-align:left;">
+<!-- l. 23 --><p class="noindent"><span class="ec-lmtt-10">plot_11_distance_norms.py</span> </p></td><td class="td11" id="TBL-47-24-2" style="text-align:left;">
+<!-- l. 23 --><p class="noindent"><span class="ec-lmr-10">Distance
+  norms:
+  Euclidean,
+  diagonal,
+  and
+  Mahalanobis
+  fuzzy
+  c-means</span> </p></td><td class="td10" id="TBL-47-24-3" style="text-align:left;">
+<!-- l. 23 --><p class="noindent"><a href="02-foundations-of-prototype-based-clustering.html#x4-28001r5"><span class="ec-lmr-10">2.5</span><!-- tex4ht:ref: fig:found:ex:norms  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-47-25-" style="vertical-align:baseline;"><td class="td01" id="TBL-47-25-1" style="text-align:left;">
+<!-- l. 24 --><p class="noindent"><span class="ec-lmtt-10">plot_12_fuzzifiers_annealing.py</span> </p> </td><td class="td11" id="TBL-47-25-2" style="text-align:left;">
+<!-- l. 24 --><p class="noindent"><span class="ec-lmr-10">What
+  makes
+  a
+  partition
+  fuzzy:
+  fuzzifiers,
+  regularization,
+  and
+  annealing</span> </p></td><td class="td10" id="TBL-47-25-3" style="text-align:left;">
+<!-- l. 24 --><p class="noindent"><a href="03-hard-and-fuzzy-partitioning-algorithms.html#x5-65001r16"><span class="ec-lmr-10">3.16</span><!-- tex4ht:ref: fig:part:ex:fuzz-line  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-47-26-" style="vertical-align:baseline;"><td class="td01" id="TBL-47-26-1" style="text-align:left;">
+<!-- l. 25 --><p class="noindent"><span class="ec-lmtt-10">plot_13_subtractive_clustering.py</span> </p> </td><td class="td11" id="TBL-47-26-2" style="text-align:left;">
+<!-- l. 25 --><p class="noindent"><span class="ec-lmr-10">Subtractive
+  clustering:
+  the
+  number
+  and
+  location
+  of
+  clusters
+  from
+  density</span> </p></td><td class="td10" id="TBL-47-26-3" style="text-align:left;">
+<!-- l. 25 --><p class="noindent"><a href="03-hard-and-fuzzy-partitioning-algorithms.html#x5-66001r20"><span class="ec-lmr-10">3.20</span><!-- tex4ht:ref: fig:part:ex:subtractive  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-47-27-" style="vertical-align:baseline;"><td class="td01" id="TBL-47-27-1" style="text-align:left;">
+<!-- l. 26 --><p class="noindent"><span class="ec-lmtt-10">plot_14_merging_stability.py</span> </p></td><td class="td11" id="TBL-47-27-2" style="text-align:left;">
+<!-- l. 26 --><p class="noindent"><span class="ec-lmr-10">Three
+  routes
+  to
+  the
+  number
+  of
+  clusters:
+  merging,
+  validity
+  scan,
+  and
+  stability</span> </p></td><td class="td10" id="TBL-47-27-3" style="text-align:left;">
+<!-- l. 26 --><p class="noindent"><a href="04-cluster-validity-and-the-number.html#x6-83001r4"><span class="ec-lmr-10">4.4</span><!-- tex4ht:ref: fig:val:ex:merging  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-47-30-" style="vertical-align:baseline;"><td class="td01" id="TBL-47-30-1" style="text-align:left;">
+<!-- l. 27 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-47-31-" style="vertical-align:baseline;"><td class="td01" id="TBL-47-31-1" style="text-align:left;">
+<!-- l. 27 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-47-32-" style="vertical-align:baseline;"><td class="td01" id="TBL-47-32-1" style="text-align:left;">
+<!-- l. 27 --><p class="noindent"> </p></td>
+</tr>
+<tr id="TBL-47-11-" style="vertical-align:baseline;"><td class="td01" colspan="3" id="TBL-47-11-1" style="text-align:left;"></td></tr><tr id="TBL-47-12-" style="vertical-align:baseline;"><td class="td01" id="TBL-47-12-1" style="text-align:left;">
+<!-- l. 12 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-47-13-" style="vertical-align:baseline;"><td class="td01" id="TBL-47-13-1" style="text-align:left;">
+<!-- l. 12 --><p class="noindent"> </p></td>
+</tr>
+</table></div>
+<!-- l. 29 --><p class="noindent">
+</p>
+<h3 class="sectionHead"><span class="titlemark">C.2   </span> <a id="x17-286000C.2"></a>Visualization of fuzzy clusters</h3>
+<!-- l. 30 --><p class="noindent">Folder <span class="ec-lmtt-10x-x-109">examples/02_visualization/</span>. The methods are described in
+chapter <a href="05-visualization-of-fuzzy-clustering-results.html#x7-870005">5</a>.
+</p><!-- l. 32 --><p class="indent">
+<a id="x17-286001r2"></a></p> <!-- l. 33 --><div class="longtable"> <table class="longtable" id="TBL-48"><colgroup id="TBL-48-1g"><col id="TBL-48-1"/><col id="TBL-48-2"/><col id="TBL-48-3"/></colgroup>
+<tr id="TBL-48-1-" style="vertical-align:baseline;"><td class="td01" colspan="3" id="TBL-48-1-1" style="text-align:left;"></td></tr><tr id="TBL-48-2-" style="vertical-align:baseline;"><td class="td01" id="TBL-48-2-1" style="text-align:left;">
+<!-- l. 33 --><p class="noindent"><span class="ec-lmr-10">Script</span> </p></td><td class="td11" id="TBL-48-2-2" style="text-align:left;">
+<!-- l. 33 --><p class="noindent"><span class="ec-lmr-10">Topic</span> </p></td><td class="td10" id="TBL-48-2-3" style="text-align:left;">
+<!-- l. 33 --><p class="noindent"><span class="ec-lmr-10">Figure</span></p></td>
+</tr><tr id="TBL-48-3-" style="vertical-align:baseline;"><td class="td01" colspan="3" id="TBL-48-3-1" style="text-align:left;"></td></tr><tr id="TBL-48-4-" style="vertical-align:baseline;"><td class="td01" id="TBL-48-4-1" style="text-align:left;">
+<!-- l. 33 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-48-5-" style="vertical-align:baseline;"><td class="td01" id="TBL-48-5-1" style="text-align:left;"> </td><td class="td11" id="TBL-48-5-2" style="text-align:left;"> </td><td class="td10" id="TBL-48-5-3" style="text-align:left;">
+</td></tr>
+<tr id="TBL-48-14-" style="vertical-align:baseline;"><td class="td01" id="TBL-48-14-1" style="text-align:left;">
+<!-- l. 36 --><p class="noindent"><span class="ec-lmtt-10">plot_01_pca_vs_sammon.py</span> </p></td><td class="td11" id="TBL-48-14-2" style="text-align:left;">
+<!-- l. 36 --><p class="noindent"><span class="ec-lmr-10">PCA
+  versus
+  Sammon
+  mapping:
+  preserving
+  variance
+  or
+  distances</span> </p></td><td class="td10" id="TBL-48-14-3" style="text-align:left;">
+<!-- l. 36 --><p class="noindent"><a href="05-visualization-of-fuzzy-clustering-results.html#x7-97001r3"><span class="ec-lmr-10">5.3</span><!-- tex4ht:ref: fig:viz:ex1a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-48-15-" style="vertical-align:baseline;"><td class="td01" id="TBL-48-15-1" style="text-align:left;">
+<!-- l. 37 --><p class="noindent"><span class="ec-lmtt-10">plot_02_fuzzy_sammon.py</span> </p></td><td class="td11" id="TBL-48-15-2" style="text-align:left;">
+<!-- l. 37 --><p class="noindent"><span class="ec-lmr-10">Fuzzy
+  Sammon
+  mapping:
+  projecting
+  clusters,
+  not
+  just
+  data</span> </p></td><td class="td10" id="TBL-48-15-3" style="text-align:left;">
+<!-- l. 37 --><p class="noindent"><a href="05-visualization-of-fuzzy-clustering-results.html#x7-98001r5"><span class="ec-lmr-10">5.5</span><!-- tex4ht:ref: fig:viz:ex2a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-48-16-" style="vertical-align:baseline;"><td class="td01" id="TBL-48-16-1" style="text-align:left;">
+<!-- l. 38 --><p class="noindent"><span class="ec-lmtt-10">plot_03_fuzzy_som.py</span> </p></td><td class="td11" id="TBL-48-16-2" style="text-align:left;">
+<!-- l. 38 --><p class="noindent"><span class="ec-lmr-10">Fuzzy
+  self-organizing
+  map:
+  ordered
+  prototypes
+  by
+  regularized
+  FCM</span> </p></td><td class="td10" id="TBL-48-16-3" style="text-align:left;">
+<!-- l. 38 --><p class="noindent"><a href="05-visualization-of-fuzzy-clustering-results.html#x7-99002r8"><span class="ec-lmr-10">5.8</span><!-- tex4ht:ref: fig:viz:ex3a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-48-17-" style="vertical-align:baseline;"><td class="td01" id="TBL-48-17-1" style="text-align:left;">
+<!-- l. 39 --><p class="noindent"><span class="ec-lmtt-10">plot_04_cluster_number_validation.py</span> </p> </td><td class="td11" id="TBL-48-17-2" style="text-align:left;">
+<!-- l. 39 --><p class="noindent"><span class="ec-lmr-10">Visual
+  validation
+  of
+  the
+  number
+  of
+  clusters
+  with
+  FUZZSAM</span> </p></td><td class="td10" id="TBL-48-17-3" style="text-align:left;">
+<!-- l. 39 --><p class="noindent"><a href="05-visualization-of-fuzzy-clustering-results.html#x7-100001r14"><span class="ec-lmr-10">5.14</span><!-- tex4ht:ref: fig:viz:ex4a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-48-20-" style="vertical-align:baseline;"><td class="td01" id="TBL-48-20-1" style="text-align:left;">
+<!-- l. 40 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-48-21-" style="vertical-align:baseline;"><td class="td01" id="TBL-48-21-1" style="text-align:left;">
+<!-- l. 40 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-48-22-" style="vertical-align:baseline;"><td class="td01" id="TBL-48-22-1" style="text-align:left;">
+<!-- l. 40 --><p class="noindent"> </p></td>
+</tr>
+<tr id="TBL-48-11-" style="vertical-align:baseline;"><td class="td01" colspan="3" id="TBL-48-11-1" style="text-align:left;"></td></tr><tr id="TBL-48-12-" style="vertical-align:baseline;"><td class="td01" id="TBL-48-12-1" style="text-align:left;">
+<!-- l. 35 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-48-13-" style="vertical-align:baseline;"><td class="td01" id="TBL-48-13-1" style="text-align:left;">
+<!-- l. 35 --><p class="noindent"> </p></td>
+</tr>
+</table></div>
+<!-- l. 42 --><p class="noindent">
+</p>
+<h3 class="sectionHead"><span class="titlemark">C.3   </span> <a id="x17-287000C.3"></a>Model identification</h3>
+<!-- l. 43 --><p class="noindent">Folder <span class="ec-lmtt-10x-x-109">examples/03_models/</span>. The methods are described in chapter <a href="08-clustering-for-model-identification.html#x10-1480008">8</a>.
+</p><!-- l. 45 --><p class="indent">
+<a id="x17-287001r3"></a></p> <!-- l. 46 --><div class="longtable"> <table class="longtable" id="TBL-49"><colgroup id="TBL-49-1g"><col id="TBL-49-1"/><col id="TBL-49-2"/><col id="TBL-49-3"/></colgroup>
+<tr id="TBL-49-1-" style="vertical-align:baseline;"><td class="td01" colspan="3" id="TBL-49-1-1" style="text-align:left;"></td></tr><tr id="TBL-49-2-" style="vertical-align:baseline;"><td class="td01" id="TBL-49-2-1" style="text-align:left;">
+<!-- l. 46 --><p class="noindent"><span class="ec-lmr-10">Script</span> </p></td><td class="td11" id="TBL-49-2-2" style="text-align:left;">
+<!-- l. 46 --><p class="noindent"><span class="ec-lmr-10">Topic</span> </p></td><td class="td10" id="TBL-49-2-3" style="text-align:left;">
+<!-- l. 46 --><p class="noindent"><span class="ec-lmr-10">Figure</span></p></td>
+</tr><tr id="TBL-49-3-" style="vertical-align:baseline;"><td class="td01" colspan="3" id="TBL-49-3-1" style="text-align:left;"></td></tr><tr id="TBL-49-4-" style="vertical-align:baseline;"><td class="td01" id="TBL-49-4-1" style="text-align:left;">
+<!-- l. 46 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-49-5-" style="vertical-align:baseline;"><td class="td01" id="TBL-49-5-1" style="text-align:left;"> </td><td class="td11" id="TBL-49-5-2" style="text-align:left;"> </td><td class="td10" id="TBL-49-5-3" style="text-align:left;">
+</td></tr>
+<tr id="TBL-49-14-" style="vertical-align:baseline;"><td class="td01" id="TBL-49-14-1" style="text-align:left;">
+<!-- l. 49 --><p class="noindent"><span class="ec-lmtt-10">plot_01_ts_sinc.py</span> </p></td><td class="td11" id="TBL-49-14-2" style="text-align:left;">
+<!-- l. 49 --><p class="noindent"><span class="ec-lmr-10">Takagi–Sugeno
+  model
+  of
+  a
+  static
+  nonlinearity:
+  clusters
+  become
+  rules</span> </p></td><td class="td10" id="TBL-49-14-3" style="text-align:left;">
+<!-- l. 49 --><p class="noindent"><a href="08-clustering-for-model-identification.html#x10-160001r5"><span class="ec-lmr-10">8.5</span><!-- tex4ht:ref: fig:models:ex1a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-49-15-" style="vertical-align:baseline;"><td class="td01" id="TBL-49-15-1" style="text-align:left;">
+<!-- l. 50 --><p class="noindent"><span class="ec-lmtt-10">plot_02_ts_dynamic_plant.py</span> </p></td><td class="td11" id="TBL-49-15-2" style="text-align:left;">
+<!-- l. 50 --><p class="noindent"><span class="ec-lmr-10">Identification
+  of
+  a
+  nonlinear
+  dynamic
+  system
+  with
+  free-run
+  validation</span> </p></td><td class="td10" id="TBL-49-15-3" style="text-align:left;">
+<!-- l. 50 --><p class="noindent"><a href="08-clustering-for-model-identification.html#x10-161002r9"><span class="ec-lmr-10">8.9</span><!-- tex4ht:ref: fig:models:ex2a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-49-16-" style="vertical-align:baseline;"><td class="td01" id="TBL-49-16-1" style="text-align:left;">
+<!-- l. 51 --><p class="noindent"><span class="ec-lmtt-10">plot_03_ts_mimo.py</span> </p></td><td class="td11" id="TBL-49-16-2" style="text-align:left;">
+<!-- l. 51 --><p class="noindent"><span class="ec-lmr-10">MIMO
+  Takagi–Sugeno
+  model
+  with
+  local
+  MIMO
+  ARX
+  consequents</span> </p></td><td class="td10" id="TBL-49-16-3" style="text-align:left;">
+<!-- l. 51 --><p class="noindent"><a href="08-clustering-for-model-identification.html#x10-162001r14"><span class="ec-lmr-10">8.14</span><!-- tex4ht:ref: fig:models:ex3a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-49-17-" style="vertical-align:baseline;"><td class="td01" id="TBL-49-17-1" style="text-align:left;">
+<!-- l. 52 --><p class="noindent"><span class="ec-lmtt-10">plot_04_fcrm_switching.py</span> </p></td><td class="td11" id="TBL-49-17-2" style="text-align:left;">
+<!-- l. 52 --><p class="noindent"><span class="ec-lmr-10">Fuzzy
+  c-regression
+  models:
+  switching
+  regression
+  with
+  crossing
+  lines</span> </p></td><td class="td10" id="TBL-49-17-3" style="text-align:left;">
+<!-- l. 52 --><p class="noindent"><a href="08-clustering-for-model-identification.html#x10-163001r17"><span class="ec-lmr-10">8.17</span><!-- tex4ht:ref: fig:models:ex4a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-49-18-" style="vertical-align:baseline;"><td class="td01" id="TBL-49-18-1" style="text-align:left;">
+<!-- l. 53 --><p class="noindent"><span class="ec-lmtt-10">plot_05_supervised_classifier.py</span> </p> </td><td class="td11" id="TBL-49-18-2" style="text-align:left;">
+<!-- l. 53 --><p class="noindent"><span class="ec-lmr-10">Supervised
+  fuzzy
+  clustering:
+  classifier
+  rules
+  that
+  carry
+  class
+  probabilities</span> </p></td><td class="td10" id="TBL-49-18-3" style="text-align:left;">
+<!-- l. 53 --><p class="noindent"><a href="08-clustering-for-model-identification.html#x10-164001r21"><span class="ec-lmr-10">8.21</span><!-- tex4ht:ref: fig:models:ex5a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-49-19-" style="vertical-align:baseline;"><td class="td01" id="TBL-49-19-1" style="text-align:left;">
+<!-- l. 54 --><p class="noindent"><span class="ec-lmtt-10">plot_06_fuzzy_partition_tree.py</span> </p> </td><td class="td11" id="TBL-49-19-2" style="text-align:left;">
+<!-- l. 54 --><p class="noindent"><span class="ec-lmr-10">Supervised
+  fuzzy
+  partitions
+  as
+  a
+  priori
+  discretization
+  for
+  decision
+  trees</span> </p></td><td class="td10" id="TBL-49-19-3" style="text-align:left;">
+<!-- l. 54 --><p class="noindent"><a href="08-clustering-for-model-identification.html#x10-165001r26"><span class="ec-lmr-10">8.26</span><!-- tex4ht:ref: fig:models:ex6a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-49-20-" style="vertical-align:baseline;"><td class="td01" id="TBL-49-20-1" style="text-align:left;">
+<!-- l. 55 --><p class="noindent"><span class="ec-lmtt-10">plot_07_hinging_tree.py</span> </p></td><td class="td11" id="TBL-49-20-2" style="text-align:left;">
+<!-- l. 55 --><p class="noindent"><span class="ec-lmr-10">Hinging-hyperplane
+  regression
+  tree
+  identified
+  by
+  fuzzy
+  c-regression</span> </p></td><td class="td10" id="TBL-49-20-3" style="text-align:left;">
+<!-- l. 55 --><p class="noindent"><a href="08-clustering-for-model-identification.html#x10-166001r29"><span class="ec-lmr-10">8.29</span><!-- tex4ht:ref: fig:models:ex7a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-49-23-" style="vertical-align:baseline;"><td class="td01" id="TBL-49-23-1" style="text-align:left;">
+<!-- l. 56 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-49-24-" style="vertical-align:baseline;"><td class="td01" id="TBL-49-24-1" style="text-align:left;">
+<!-- l. 56 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-49-25-" style="vertical-align:baseline;"><td class="td01" id="TBL-49-25-1" style="text-align:left;">
+<!-- l. 56 --><p class="noindent"> </p></td>
+</tr>
+<tr id="TBL-49-11-" style="vertical-align:baseline;"><td class="td01" colspan="3" id="TBL-49-11-1" style="text-align:left;"></td></tr><tr id="TBL-49-12-" style="vertical-align:baseline;"><td class="td01" id="TBL-49-12-1" style="text-align:left;">
+<!-- l. 48 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-49-13-" style="vertical-align:baseline;"><td class="td01" id="TBL-49-13-1" style="text-align:left;">
+<!-- l. 48 --><p class="noindent"> </p></td>
+</tr>
+</table></div>
+<!-- l. 58 --><p class="noindent">
+</p>
+<h3 class="sectionHead"><span class="titlemark">C.4   </span> <a id="x17-288000C.4"></a>Time-series analysis</h3>
+<!-- l. 59 --><p class="noindent">Folder <span class="ec-lmtt-10x-x-109">examples/04_timeseries/</span>. The methods are described in chapter <a href="09-clustering-of-time-series.html#x11-1680009">9</a>.
+</p><!-- l. 61 --><p class="indent">
+<a id="x17-288001r4"></a></p> <!-- l. 62 --><div class="longtable"> <table class="longtable" id="TBL-50"><colgroup id="TBL-50-1g"><col id="TBL-50-1"/><col id="TBL-50-2"/><col id="TBL-50-3"/></colgroup>
+<tr id="TBL-50-1-" style="vertical-align:baseline;"><td class="td01" colspan="3" id="TBL-50-1-1" style="text-align:left;"></td></tr><tr id="TBL-50-2-" style="vertical-align:baseline;"><td class="td01" id="TBL-50-2-1" style="text-align:left;">
+<!-- l. 62 --><p class="noindent"><span class="ec-lmr-10">Script</span> </p></td><td class="td11" id="TBL-50-2-2" style="text-align:left;">
+<!-- l. 62 --><p class="noindent"><span class="ec-lmr-10">Topic</span> </p></td><td class="td10" id="TBL-50-2-3" style="text-align:left;">
+<!-- l. 62 --><p class="noindent"><span class="ec-lmr-10">Figure</span></p></td>
+</tr><tr id="TBL-50-3-" style="vertical-align:baseline;"><td class="td01" colspan="3" id="TBL-50-3-1" style="text-align:left;"></td></tr><tr id="TBL-50-4-" style="vertical-align:baseline;"><td class="td01" id="TBL-50-4-1" style="text-align:left;">
+<!-- l. 62 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-50-5-" style="vertical-align:baseline;"><td class="td01" id="TBL-50-5-1" style="text-align:left;"> </td><td class="td11" id="TBL-50-5-2" style="text-align:left;"> </td><td class="td10" id="TBL-50-5-3" style="text-align:left;">
+</td></tr>
+<tr id="TBL-50-14-" style="vertical-align:baseline;"><td class="td01" id="TBL-50-14-1" style="text-align:left;">
+<!-- l. 65 --><p class="noindent"><span class="ec-lmtt-10">plot_01_fuzzy_segmentation.py</span> </p> </td><td class="td11" id="TBL-50-14-2" style="text-align:left;">
+<!-- l. 65 --><p class="noindent"><span class="ec-lmr-10">Fuzzy
+  segmentation
+  of
+  a
+  multivariate
+  time
+  series</span> </p></td><td class="td10" id="TBL-50-14-3" style="text-align:left;">
+<!-- l. 65 --><p class="noindent"><a href="09-clustering-of-time-series.html#x11-182001r4"><span class="ec-lmr-10">9.4</span><!-- tex4ht:ref: fig:ts:ex1a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-50-15-" style="vertical-align:baseline;"><td class="td01" id="TBL-50-15-1" style="text-align:left;">
+<!-- l. 66 --><p class="noindent"><span class="ec-lmtt-10">plot_02_bottom_up_vs_fuzzy.py</span> </p> </td><td class="td11" id="TBL-50-15-2" style="text-align:left;">
+<!-- l. 66 --><p class="noindent"><span class="ec-lmr-10">Bottom-up
+  segmentation
+  with
+  PCA
+  models
+  versus
+  fuzzy
+  segmentation</span> </p></td><td class="td10" id="TBL-50-15-3" style="text-align:left;">
+<!-- l. 66 --><p class="noindent"><a href="09-clustering-of-time-series.html#x11-183001r9"><span class="ec-lmr-10">9.9</span><!-- tex4ht:ref: fig:ts:ex2a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-50-16-" style="vertical-align:baseline;"><td class="td01" id="TBL-50-16-1" style="text-align:left;">
+<!-- l. 67 --><p class="noindent"><span class="ec-lmtt-10">plot_03_fnn_model_order.py</span> </p></td><td class="td11" id="TBL-50-16-2" style="text-align:left;">
+<!-- l. 67 --><p class="noindent"><span class="ec-lmr-10">Model-order
+  selection
+  by
+  false
+  nearest
+  neighbors
+  with
+  a
+  cluster-based
+  threshold</span> </p></td><td class="td10" id="TBL-50-16-3" style="text-align:left;">
+<!-- l. 67 --><p class="noindent"><a href="09-clustering-of-time-series.html#x11-184001r11"><span class="ec-lmr-10">9.11</span><!-- tex4ht:ref: fig:ts:ex3a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-50-17-" style="vertical-align:baseline;"><td class="td01" id="TBL-50-17-1" style="text-align:left;">
+<!-- l. 68 --><p class="noindent"><span class="ec-lmtt-10">plot_04_chaotic_reconstruction.py</span> </p> </td><td class="td11" id="TBL-50-17-2" style="text-align:left;">
+<!-- l. 68 --><p class="noindent"><span class="ec-lmr-10">State-space
+  reconstruction
+  and
+  prediction
+  of
+  a
+  chaotic
+  time
+  series</span> </p></td><td class="td10" id="TBL-50-17-3" style="text-align:left;">
+<!-- l. 68 --><p class="noindent"><a href="09-clustering-of-time-series.html#x11-185001r16"><span class="ec-lmr-10">9.16</span><!-- tex4ht:ref: fig:ts:ex4a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-50-18-" style="vertical-align:baseline;"><td class="td01" id="TBL-50-18-1" style="text-align:left;">
+<!-- l. 69 --><p class="noindent"><span class="ec-lmtt-10">plot_05_mixed_input_structure.py</span> </p> </td><td class="td11" id="TBL-50-18-2" style="text-align:left;">
+<!-- l. 69 --><p class="noindent"><span class="ec-lmr-10">Model-free
+  structure
+  selection
+  with
+  mixed
+  discrete
+  and
+  continuous
+  inputs</span> </p></td><td class="td10" id="TBL-50-18-3" style="text-align:left;">
+<!-- l. 69 --><p class="noindent"><a href="09-clustering-of-time-series.html#x11-186001r21"><span class="ec-lmr-10">9.21</span><!-- tex4ht:ref: fig:ts:ex5a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-50-21-" style="vertical-align:baseline;"><td class="td01" id="TBL-50-21-1" style="text-align:left;">
+<!-- l. 70 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-50-22-" style="vertical-align:baseline;"><td class="td01" id="TBL-50-22-1" style="text-align:left;">
+<!-- l. 70 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-50-23-" style="vertical-align:baseline;"><td class="td01" id="TBL-50-23-1" style="text-align:left;">
+<!-- l. 70 --><p class="noindent"> </p></td>
+</tr>
+<tr id="TBL-50-11-" style="vertical-align:baseline;"><td class="td01" colspan="3" id="TBL-50-11-1" style="text-align:left;"></td></tr><tr id="TBL-50-12-" style="vertical-align:baseline;"><td class="td01" id="TBL-50-12-1" style="text-align:left;">
+<!-- l. 64 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-50-13-" style="vertical-align:baseline;"><td class="td01" id="TBL-50-13-1" style="text-align:left;">
+<!-- l. 64 --><p class="noindent"> </p></td>
+</tr>
+</table></div>
+<!-- l. 72 --><p class="noindent">
+</p>
+<h3 class="sectionHead"><span class="titlemark">C.5   </span> <a id="x17-289000C.5"></a>Graph-based clustering</h3>
+<!-- l. 73 --><p class="noindent">Folder <span class="ec-lmtt-10x-x-109">examples/05_graph/</span>. The methods are described in chapter <a href="07-graph-based-fuzzy-clustering.html#x9-1290007">7</a>.
+</p><!-- l. 75 --><p class="indent">
+<a id="x17-289001r5"></a></p> <!-- l. 76 --><div class="longtable"> <table class="longtable" id="TBL-51"><colgroup id="TBL-51-1g"><col id="TBL-51-1"/><col id="TBL-51-2"/><col id="TBL-51-3"/></colgroup>
+<tr id="TBL-51-1-" style="vertical-align:baseline;"><td class="td01" colspan="3" id="TBL-51-1-1" style="text-align:left;"></td></tr><tr id="TBL-51-2-" style="vertical-align:baseline;"><td class="td01" id="TBL-51-2-1" style="text-align:left;">
+<!-- l. 76 --><p class="noindent"><span class="ec-lmr-10">Script</span> </p></td><td class="td11" id="TBL-51-2-2" style="text-align:left;">
+<!-- l. 76 --><p class="noindent"><span class="ec-lmr-10">Topic</span> </p></td><td class="td10" id="TBL-51-2-3" style="text-align:left;">
+<!-- l. 76 --><p class="noindent"><span class="ec-lmr-10">Figure</span></p></td>
+</tr><tr id="TBL-51-3-" style="vertical-align:baseline;"><td class="td01" colspan="3" id="TBL-51-3-1" style="text-align:left;"></td></tr><tr id="TBL-51-4-" style="vertical-align:baseline;"><td class="td01" id="TBL-51-4-1" style="text-align:left;">
+<!-- l. 76 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-51-5-" style="vertical-align:baseline;"><td class="td01" id="TBL-51-5-1" style="text-align:left;"> </td><td class="td11" id="TBL-51-5-2" style="text-align:left;"> </td><td class="td10" id="TBL-51-5-3" style="text-align:left;">
+</td></tr>
+<tr id="TBL-51-14-" style="vertical-align:baseline;"><td class="td01" id="TBL-51-14-1" style="text-align:left;">
+<!-- l. 79 --><p class="noindent"><span class="ec-lmtt-10">plot_01_mst_clustering.py</span> </p></td><td class="td11" id="TBL-51-14-2" style="text-align:left;">
+<!-- l. 79 --><p class="noindent"><span class="ec-lmr-10">Minimal
+  spanning
+  tree
+  clustering:
+  cutting,
+  splitting,
+  and
+  Gath–Geva
+  refinement</span> </p></td><td class="td10" id="TBL-51-14-3" style="text-align:left;">
+<!-- l. 79 --><p class="noindent"><a href="07-graph-based-fuzzy-clustering.html#x9-142001r3"><span class="ec-lmr-10">7.3</span><!-- tex4ht:ref: fig:graph:ex1a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-51-15-" style="vertical-align:baseline;"><td class="td01" id="TBL-51-15-1" style="text-align:left;">
+<!-- l. 80 --><p class="noindent"><span class="ec-lmtt-10">plot_02_mst_cut_criteria.py</span> </p></td><td class="td11" id="TBL-51-15-2" style="text-align:left;">
+<!-- l. 80 --><p class="noindent"><span class="ec-lmr-10">Inconsistent
+  edges:
+  Zahn’s
+  criteria
+  and
+  the
+  neighborhood
+  depth</span> </p></td><td class="td10" id="TBL-51-15-3" style="text-align:left;">
+<!-- l. 80 --><p class="noindent"><a href="07-graph-based-fuzzy-clustering.html#x9-143001r7"><span class="ec-lmr-10">7.7</span><!-- tex4ht:ref: fig:graph:ex2a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-51-16-" style="vertical-align:baseline;"><td class="td01" id="TBL-51-16-1" style="text-align:left;">
+<!-- l. 81 --><p class="noindent"><span class="ec-lmtt-10">plot_03_mst_validation.py</span> </p></td><td class="td11" id="TBL-51-16-2" style="text-align:left;">
+<!-- l. 81 --><p class="noindent"><span class="ec-lmr-10">Number
+  of
+  clusters:
+  volume-based
+  validity
+  and
+  fuzzy
+  cluster
+  similarity</span> </p></td><td class="td10" id="TBL-51-16-3" style="text-align:left;">
+<!-- l. 81 --><p class="noindent"><a href="07-graph-based-fuzzy-clustering.html#x9-144001r10"><span class="ec-lmr-10">7.10</span><!-- tex4ht:ref: fig:graph:ex3a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-51-17-" style="vertical-align:baseline;"><td class="td01" id="TBL-51-17-1" style="text-align:left;">
+<!-- l. 82 --><p class="noindent"><span class="ec-lmtt-10">plot_04_geodesic_fcm.py</span> </p></td><td class="td11" id="TBL-51-17-2" style="text-align:left;">
+<!-- l. 82 --><p class="noindent"><span class="ec-lmr-10">Geodesic-distance-based
+  fuzzy
+  clustering
+  versus
+  fuzzy
+  c-means</span> </p></td><td class="td10" id="TBL-51-17-3" style="text-align:left;">
+<!-- l. 82 --><p class="noindent"><a href="07-graph-based-fuzzy-clustering.html#x9-145001r13"><span class="ec-lmr-10">7.13</span><!-- tex4ht:ref: fig:graph:ex4a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-51-18-" style="vertical-align:baseline;"><td class="td01" id="TBL-51-18-1" style="text-align:left;">
+<!-- l. 83 --><p class="noindent"><span class="ec-lmtt-10">plot_05_geodesic_path_isomap.py</span> </p> </td><td class="td11" id="TBL-51-18-2" style="text-align:left;">
+<!-- l. 83 --><p class="noindent"><span class="ec-lmr-10">Geodesic
+  paths,
+  the
+  S-curve,
+  and
+  clustering
+  of
+  the
+  Isomap
+  projection</span> </p></td><td class="td10" id="TBL-51-18-3" style="text-align:left;">
+<!-- l. 83 --><p class="noindent"><a href="07-graph-based-fuzzy-clustering.html#x9-146001r17"><span class="ec-lmr-10">7.17</span><!-- tex4ht:ref: fig:graph:ex5a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-51-21-" style="vertical-align:baseline;"><td class="td01" id="TBL-51-21-1" style="text-align:left;">
+<!-- l. 84 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-51-22-" style="vertical-align:baseline;"><td class="td01" id="TBL-51-22-1" style="text-align:left;">
+<!-- l. 84 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-51-23-" style="vertical-align:baseline;"><td class="td01" id="TBL-51-23-1" style="text-align:left;">
+<!-- l. 84 --><p class="noindent"> </p></td>
+</tr>
+<tr id="TBL-51-11-" style="vertical-align:baseline;"><td class="td01" colspan="3" id="TBL-51-11-1" style="text-align:left;"></td></tr><tr id="TBL-51-12-" style="vertical-align:baseline;"><td class="td01" id="TBL-51-12-1" style="text-align:left;">
+<!-- l. 78 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-51-13-" style="vertical-align:baseline;"><td class="td01" id="TBL-51-13-1" style="text-align:left;">
+<!-- l. 78 --><p class="noindent"> </p></td>
+</tr>
+</table></div>
+<!-- l. 86 --><p class="noindent">
+</p>
+<h3 class="sectionHead"><span class="titlemark">C.6   </span> <a id="x17-290000C.6"></a>Possibilistic, noise, kernel, and shape-prototype extensions</h3>
+<!-- l. 87 --><p class="noindent">Folder <span class="ec-lmtt-10x-x-109">examples/06_extensions/</span>. The methods are described in chapter <a href="06-robust-and-shape-oriented-variants.html#x8-1020006">6</a>.
+</p><!-- l. 89 --><p class="indent">
+<a id="x17-290001r6"></a></p> <!-- l. 90 --><div class="longtable"> <table class="longtable" id="TBL-52"><colgroup id="TBL-52-1g"><col id="TBL-52-1"/><col id="TBL-52-2"/><col id="TBL-52-3"/></colgroup>
+<tr id="TBL-52-1-" style="vertical-align:baseline;"><td class="td01" colspan="3" id="TBL-52-1-1" style="text-align:left;"></td></tr><tr id="TBL-52-2-" style="vertical-align:baseline;"><td class="td01" id="TBL-52-2-1" style="text-align:left;">
+<!-- l. 90 --><p class="noindent"><span class="ec-lmr-10">Script</span> </p></td><td class="td11" id="TBL-52-2-2" style="text-align:left;">
+<!-- l. 90 --><p class="noindent"><span class="ec-lmr-10">Topic</span> </p></td><td class="td10" id="TBL-52-2-3" style="text-align:left;">
+<!-- l. 90 --><p class="noindent"><span class="ec-lmr-10">Figure</span></p></td>
+</tr><tr id="TBL-52-3-" style="vertical-align:baseline;"><td class="td01" colspan="3" id="TBL-52-3-1" style="text-align:left;"></td></tr><tr id="TBL-52-4-" style="vertical-align:baseline;"><td class="td01" id="TBL-52-4-1" style="text-align:left;">
+<!-- l. 90 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-52-5-" style="vertical-align:baseline;"><td class="td01" id="TBL-52-5-1" style="text-align:left;"> </td><td class="td11" id="TBL-52-5-2" style="text-align:left;"> </td><td class="td10" id="TBL-52-5-3" style="text-align:left;">
+</td></tr>
+<tr id="TBL-52-14-" style="vertical-align:baseline;"><td class="td01" id="TBL-52-14-1" style="text-align:left;">
+<!-- l. 93 --><p class="noindent"><span class="ec-lmtt-10">plot_01_pcm_typicality.py</span> </p></td><td class="td11" id="TBL-52-14-2" style="text-align:left;">
+<!-- l. 93 --><p class="noindent"><span class="ec-lmr-10">Possibilistic
+  c-means:
+  typicalities,
+  scales
+  and
+  coincident
+  clusters</span> </p></td><td class="td10" id="TBL-52-14-3" style="text-align:left;">
+<!-- l. 93 --><p class="noindent"><a href="06-robust-and-shape-oriented-variants.html#x8-120001r4"><span class="ec-lmr-10">6.4</span><!-- tex4ht:ref: fig:robust:ex:pcm1  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-52-15-" style="vertical-align:baseline;"><td class="td01" id="TBL-52-15-1" style="text-align:left;">
+<!-- l. 94 --><p class="noindent"><span class="ec-lmtt-10">plot_02_pfcm_trade_off.py</span> </p></td><td class="td11" id="TBL-52-15-2" style="text-align:left;">
+<!-- l. 94 --><p class="noindent"><span class="ec-lmr-10">Possibilistic
+  fuzzy
+  c-means:
+  memberships
+  and
+  typicalities
+  together</span> </p></td><td class="td10" id="TBL-52-15-3" style="text-align:left;">
+<!-- l. 94 --><p class="noindent"><a href="06-robust-and-shape-oriented-variants.html#x8-121001r8"><span class="ec-lmr-10">6.8</span><!-- tex4ht:ref: fig:robust:ex:pfcm1  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-52-16-" style="vertical-align:baseline;"><td class="td01" id="TBL-52-16-1" style="text-align:left;">
+<!-- l. 95 --><p class="noindent"><span class="ec-lmtt-10">plot_03_noise_clustering.py</span> </p></td><td class="td11" id="TBL-52-16-2" style="text-align:left;">
+<!-- l. 95 --><p class="noindent"><span class="ec-lmr-10">Noise
+  clustering:
+  a
+  virtual
+  cluster
+  at
+  constant
+  distance</span>
+<!-- l. 95 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>δ</mi></math> </p></td><td class="td10" id="TBL-52-16-3" style="text-align:left;">
+<!-- l. 95 --><p class="noindent"><a href="06-robust-and-shape-oriented-variants.html#x8-122001r11"><span class="ec-lmr-10">6.11</span><!-- tex4ht:ref: fig:robust:ex:nc1  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-52-17-" style="vertical-align:baseline;"><td class="td01" id="TBL-52-17-1" style="text-align:left;">
+<!-- l. 96 --><p class="noindent"><span class="ec-lmtt-10">plot_04_kernel_fcm.py</span> </p></td><td class="td11" id="TBL-52-17-2" style="text-align:left;">
+<!-- l. 96 --><p class="noindent"><span class="ec-lmr-10">Kernel
+  fuzzy
+  c-means:
+  rings
+  and
+  moons
+  through
+  the
+  kernel
+  trick</span> </p></td><td class="td10" id="TBL-52-17-3" style="text-align:left;">
+<!-- l. 96 --><p class="noindent"><a href="06-robust-and-shape-oriented-variants.html#x8-123001r15"><span class="ec-lmr-10">6.15</span><!-- tex4ht:ref: fig:robust:ex:kfcm1  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-52-18-" style="vertical-align:baseline;"><td class="td01" id="TBL-52-18-1" style="text-align:left;">
+<!-- l. 97 --><p class="noindent"><span class="ec-lmtt-10">plot_05_fuzzy_c_varieties.py</span> </p></td><td class="td11" id="TBL-52-18-2" style="text-align:left;">
+<!-- l. 97 --><p class="noindent"><span class="ec-lmr-10">Fuzzy
+  c-varieties:
+  lines
+  as
+  prototypes,
+  and
+  the
+  elliptotype
+  compromise</span> </p></td><td class="td10" id="TBL-52-18-3" style="text-align:left;">
+<!-- l. 97 --><p class="noindent"><a href="06-robust-and-shape-oriented-variants.html#x8-124001r19"><span class="ec-lmr-10">6.19</span><!-- tex4ht:ref: fig:robust:ex:fcv  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-52-19-" style="vertical-align:baseline;"><td class="td01" id="TBL-52-19-1" style="text-align:left;">
+<!-- l. 98 --><p class="noindent"><span class="ec-lmtt-10">plot_06_fuzzy_c_shells.py</span> </p></td><td class="td11" id="TBL-52-19-2" style="text-align:left;">
+<!-- l. 98 --><p class="noindent"><span class="ec-lmr-10">Fuzzy
+  c-shells:
+  circles
+  as
+  prototypes</span> </p></td><td class="td10" id="TBL-52-19-3" style="text-align:left;">
+<!-- l. 98 --><p class="noindent"><a href="06-robust-and-shape-oriented-variants.html#x8-125001r22"><span class="ec-lmr-10">6.22</span><!-- tex4ht:ref: fig:robust:ex:shells1  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-52-20-" style="vertical-align:baseline;"><td class="td01" id="TBL-52-20-1" style="text-align:left;">
+<!-- l. 99 --><p class="noindent"><span class="ec-lmtt-10">plot_07_feature_weighting.py</span> </p></td><td class="td11" id="TBL-52-20-2" style="text-align:left;">
+<!-- l. 99 --><p class="noindent"><span class="ec-lmr-10">Learning
+  which
+  features
+  matter:
+  SCAD
+  and
+  the
+  weighted
+  FCM</span> </p></td><td class="td10" id="TBL-52-20-3" style="text-align:left;">
+<!-- l. 99 --><p class="noindent"><a href="06-robust-and-shape-oriented-variants.html#x8-127001r30"><span class="ec-lmr-10">6.30</span><!-- tex4ht:ref: fig:robust:ex:weights1  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-52-21-" style="vertical-align:baseline;"><td class="td01" id="TBL-52-21-1" style="text-align:left;">
+<!-- l. 100 --><p class="noindent"><span class="ec-lmtt-10">plot_08_volume_prototypes.py</span> </p></td><td class="td11" id="TBL-52-21-2" style="text-align:left;">
+<!-- l. 100 --><p class="noindent"><span class="ec-lmr-10">Volume
+  prototypes
+  and
+  adaptive
+  cluster
+  merging</span> </p></td><td class="td10" id="TBL-52-21-3" style="text-align:left;">
+<!-- l. 100 --><p class="noindent"><a href="06-robust-and-shape-oriented-variants.html#x8-126001r26"><span class="ec-lmr-10">6.26</span><!-- tex4ht:ref: fig:robust:ex:volume1  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-52-24-" style="vertical-align:baseline;"><td class="td01" id="TBL-52-24-1" style="text-align:left;">
+<!-- l. 101 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-52-25-" style="vertical-align:baseline;"><td class="td01" id="TBL-52-25-1" style="text-align:left;">
+<!-- l. 101 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-52-26-" style="vertical-align:baseline;"><td class="td01" id="TBL-52-26-1" style="text-align:left;">
+<!-- l. 101 --><p class="noindent"> </p></td>
+</tr>
+<tr id="TBL-52-11-" style="vertical-align:baseline;"><td class="td01" colspan="3" id="TBL-52-11-1" style="text-align:left;"></td></tr><tr id="TBL-52-12-" style="vertical-align:baseline;"><td class="td01" id="TBL-52-12-1" style="text-align:left;">
+<!-- l. 92 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-52-13-" style="vertical-align:baseline;"><td class="td01" id="TBL-52-13-1" style="text-align:left;">
+<!-- l. 92 --><p class="noindent"> </p></td>
+</tr>
+</table></div>
+<!-- l. 103 --><p class="noindent">
+</p>
+<h3 class="sectionHead"><span class="titlemark">C.7   </span> <a id="x17-291000C.7"></a>Relational, categorical, and mixed data</h3>
+<!-- l. 104 --><p class="noindent">Folder <span class="ec-lmtt-10x-x-109">examples/07_relational/</span>. The methods are described in chapter <a href="10-clustering-relational-categorical-and-mixed.html#x12-18800010">10</a>.
+</p><!-- l. 106 --><p class="indent">
+<a id="x17-291001r7"></a></p> <!-- l. 107 --><div class="longtable"> <table class="longtable" id="TBL-53"><colgroup id="TBL-53-1g"><col id="TBL-53-1"/><col id="TBL-53-2"/><col id="TBL-53-3"/></colgroup>
+<tr id="TBL-53-1-" style="vertical-align:baseline;"><td class="td01" colspan="3" id="TBL-53-1-1" style="text-align:left;"></td></tr><tr id="TBL-53-2-" style="vertical-align:baseline;"><td class="td01" id="TBL-53-2-1" style="text-align:left;">
+<!-- l. 107 --><p class="noindent"><span class="ec-lmr-10">Script</span> </p></td><td class="td11" id="TBL-53-2-2" style="text-align:left;">
+<!-- l. 107 --><p class="noindent"><span class="ec-lmr-10">Topic</span> </p></td><td class="td10" id="TBL-53-2-3" style="text-align:left;">
+<!-- l. 107 --><p class="noindent"><span class="ec-lmr-10">Figure</span></p></td>
+</tr><tr id="TBL-53-3-" style="vertical-align:baseline;"><td class="td01" colspan="3" id="TBL-53-3-1" style="text-align:left;"></td></tr><tr id="TBL-53-4-" style="vertical-align:baseline;"><td class="td01" id="TBL-53-4-1" style="text-align:left;">
+<!-- l. 107 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-53-5-" style="vertical-align:baseline;"><td class="td01" id="TBL-53-5-1" style="text-align:left;"> </td><td class="td11" id="TBL-53-5-2" style="text-align:left;"> </td><td class="td10" id="TBL-53-5-3" style="text-align:left;">
+</td></tr>
+<tr id="TBL-53-14-" style="vertical-align:baseline;"><td class="td01" id="TBL-53-14-1" style="text-align:left;">
+<!-- l. 110 --><p class="noindent"><span class="ec-lmtt-10">plot_01_rfcm_fcm_duality.py</span> </p></td><td class="td11" id="TBL-53-14-2" style="text-align:left;">
+<!-- l. 110 --><p class="noindent"><span class="ec-lmr-10">Relational
+  fuzzy
+  c-means
+  and
+  NERF
+  for
+  non-Euclidean
+  data</span> </p></td><td class="td10" id="TBL-53-14-3" style="text-align:left;">
+<!-- l. 110 --><p class="noindent"><a href="10-clustering-relational-categorical-and-mixed.html#x12-202001r4"><span class="ec-lmr-10">10.4</span><!-- tex4ht:ref: fig:rel:ex1a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-53-15-" style="vertical-align:baseline;"><td class="td01" id="TBL-53-15-1" style="text-align:left;">
+<!-- l. 111 --><p class="noindent"><span class="ec-lmtt-10">plot_02_fcmdd_dtw_series.py</span> </p></td><td class="td11" id="TBL-53-15-2" style="text-align:left;">
+<!-- l. 111 --><p class="noindent"><span class="ec-lmr-10">Fuzzy
+  c-medoids
+  on
+  dynamic-time-warping
+  dissimilarities
+  of
+  time
+  series</span> </p></td><td class="td10" id="TBL-53-15-3" style="text-align:left;">
+<!-- l. 111 --><p class="noindent"><a href="10-clustering-relational-categorical-and-mixed.html#x12-203001r7"><span class="ec-lmr-10">10.7</span><!-- tex4ht:ref: fig:rel:ex2a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-53-16-" style="vertical-align:baseline;"><td class="td01" id="TBL-53-16-1" style="text-align:left;">
+<!-- l. 112 --><p class="noindent"><span class="ec-lmtt-10">plot_03_kmodes_survey.py</span> </p></td><td class="td11" id="TBL-53-16-2" style="text-align:left;">
+<!-- l. 112 --><p class="noindent"><span class="ec-lmr-10">Fuzzy
+  k-modes
+  on
+  categorical
+  survey
+  data</span> </p></td><td class="td10" id="TBL-53-16-3" style="text-align:left;">
+<!-- l. 112 --><p class="noindent"><a href="10-clustering-relational-categorical-and-mixed.html#x12-204001r12"><span class="ec-lmr-10">10.12</span><!-- tex4ht:ref: fig:rel:ex3a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-53-17-" style="vertical-align:baseline;"><td class="td01" id="TBL-53-17-1" style="text-align:left;">
+<!-- l. 113 --><p class="noindent"><span class="ec-lmtt-10">plot_04_kprototypes_mixed.py</span> </p></td><td class="td11" id="TBL-53-17-2" style="text-align:left;">
+<!-- l. 113 --><p class="noindent"><span class="ec-lmr-10">Fuzzy
+  k-prototypes
+  on
+  mixed
+  numeric
+  and
+  categorical
+  data</span> </p></td><td class="td10" id="TBL-53-17-3" style="text-align:left;">
+<!-- l. 113 --><p class="noindent"><a href="10-clustering-relational-categorical-and-mixed.html#x12-205001r16"><span class="ec-lmr-10">10.16</span><!-- tex4ht:ref: fig:rel:ex4a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-53-18-" style="vertical-align:baseline;"><td class="td01" id="TBL-53-18-1" style="text-align:left;">
+<!-- l. 114 --><p class="noindent"><span class="ec-lmtt-10">plot_05_gower_fcmdd_vs_onehot.py</span> </p> </td><td class="td11" id="TBL-53-18-2" style="text-align:left;">
+<!-- l. 114 --><p class="noindent"><span class="ec-lmr-10">Gower’s
+  dissimilarity
+  versus
+  one-hot
+  encoding
+  for
+  mixed
+  data</span> </p></td><td class="td10" id="TBL-53-18-3" style="text-align:left;">
+<!-- l. 114 --><p class="noindent"><a href="10-clustering-relational-categorical-and-mixed.html#x12-206001r19"><span class="ec-lmr-10">10.19</span><!-- tex4ht:ref: fig:rel:ex5a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-53-19-" style="vertical-align:baseline;"><td class="td01" id="TBL-53-19-1" style="text-align:left;">
+<!-- l. 115 --><p class="noindent"><span class="ec-lmtt-10">plot_06_autocorrelation_series.py</span> </p> </td><td class="td11" id="TBL-53-19-2" style="text-align:left;">
+<!-- l. 115 --><p class="noindent"><span class="ec-lmr-10">Autocorrelation-based
+  fuzzy
+  clustering
+  of
+  time
+  series</span> </p></td><td class="td10" id="TBL-53-19-3" style="text-align:left;">
+<!-- l. 115 --><p class="noindent"><a href="10-clustering-relational-categorical-and-mixed.html#x12-207001r22"><span class="ec-lmr-10">10.22</span><!-- tex4ht:ref: fig:rel:ex6a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-53-22-" style="vertical-align:baseline;"><td class="td01" id="TBL-53-22-1" style="text-align:left;">
+<!-- l. 116 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-53-23-" style="vertical-align:baseline;"><td class="td01" id="TBL-53-23-1" style="text-align:left;">
+<!-- l. 116 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-53-24-" style="vertical-align:baseline;"><td class="td01" id="TBL-53-24-1" style="text-align:left;">
+<!-- l. 116 --><p class="noindent"> </p></td>
+</tr>
+<tr id="TBL-53-11-" style="vertical-align:baseline;"><td class="td01" colspan="3" id="TBL-53-11-1" style="text-align:left;"></td></tr><tr id="TBL-53-12-" style="vertical-align:baseline;"><td class="td01" id="TBL-53-12-1" style="text-align:left;">
+<!-- l. 109 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-53-13-" style="vertical-align:baseline;"><td class="td01" id="TBL-53-13-1" style="text-align:left;">
+<!-- l. 109 --><p class="noindent"> </p></td>
+</tr>
+</table></div>
+<!-- l. 118 --><p class="noindent">
+</p>
+<h3 class="sectionHead"><span class="titlemark">C.8   </span> <a id="x17-292000C.8"></a>Incomplete, very large, and image data</h3>
+<!-- l. 119 --><p class="noindent">Folder <span class="ec-lmtt-10x-x-109">examples/08_data_realities/</span>. The methods are described in
+chapter <a href="11-incomplete-very-large-and-image.html#x13-20900011">11</a>.
+</p><!-- l. 121 --><p class="indent">
+<a id="x17-292001r8"></a></p> <!-- l. 122 --><div class="longtable"> <table class="longtable" id="TBL-54"><colgroup id="TBL-54-1g"><col id="TBL-54-1"/><col id="TBL-54-2"/><col id="TBL-54-3"/></colgroup>
+<tr id="TBL-54-1-" style="vertical-align:baseline;"><td class="td01" colspan="3" id="TBL-54-1-1" style="text-align:left;"></td></tr><tr id="TBL-54-2-" style="vertical-align:baseline;"><td class="td01" id="TBL-54-2-1" style="text-align:left;">
+<!-- l. 122 --><p class="noindent"><span class="ec-lmr-10">Script</span> </p></td><td class="td11" id="TBL-54-2-2" style="text-align:left;">
+<!-- l. 122 --><p class="noindent"><span class="ec-lmr-10">Topic</span> </p></td><td class="td10" id="TBL-54-2-3" style="text-align:left;">
+<!-- l. 122 --><p class="noindent"><span class="ec-lmr-10">Figure</span></p></td>
+</tr><tr id="TBL-54-3-" style="vertical-align:baseline;"><td class="td01" colspan="3" id="TBL-54-3-1" style="text-align:left;"></td></tr><tr id="TBL-54-4-" style="vertical-align:baseline;"><td class="td01" id="TBL-54-4-1" style="text-align:left;">
+<!-- l. 122 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-54-5-" style="vertical-align:baseline;"><td class="td01" id="TBL-54-5-1" style="text-align:left;"> </td><td class="td11" id="TBL-54-5-2" style="text-align:left;"> </td><td class="td10" id="TBL-54-5-3" style="text-align:left;">
+</td></tr>
+<tr id="TBL-54-14-" style="vertical-align:baseline;"><td class="td01" id="TBL-54-14-1" style="text-align:left;">
+<!-- l. 125 --><p class="noindent"><span class="ec-lmtt-10">plot_01_missing_strategies.py</span> </p> </td><td class="td11" id="TBL-54-14-2" style="text-align:left;">
+<!-- l. 125 --><p class="noindent"><span class="ec-lmr-10">Clustering
+  incomplete
+  data:
+  the
+  four
+  strategies
+  of
+  Hathaway
+  and
+  Bezdek</span> </p></td><td class="td10" id="TBL-54-14-3" style="text-align:left;">
+<!-- l. 125 --><p class="noindent"><a href="11-incomplete-very-large-and-image.html#x13-232001r4"><span class="ec-lmr-10">11.4</span><!-- tex4ht:ref: fig:data:ex1a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-54-15-" style="vertical-align:baseline;"><td class="td01" id="TBL-54-15-1" style="text-align:left;">
+<!-- l. 126 --><p class="noindent"><span class="ec-lmtt-10">plot_02_ocs_imputation.py</span> </p></td><td class="td11" id="TBL-54-15-2" style="text-align:left;">
+<!-- l. 126 --><p class="noindent"><span class="ec-lmr-10">Imputation
+  by
+  clustering:
+  accuracy
+  of
+  the
+  completed
+  values</span> </p></td><td class="td10" id="TBL-54-15-3" style="text-align:left;">
+<!-- l. 126 --><p class="noindent"><a href="11-incomplete-very-large-and-image.html#x13-233001r7"><span class="ec-lmr-10">11.7</span><!-- tex4ht:ref: fig:data:ex2a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-54-16-" style="vertical-align:baseline;"><td class="td01" id="TBL-54-16-1" style="text-align:left;">
+<!-- l. 127 --><p class="noindent"><span class="ec-lmtt-10">plot_03_large_data.py</span> </p></td><td class="td11" id="TBL-54-16-2" style="text-align:left;">
+<!-- l. 127 --><p class="noindent"><span class="ec-lmr-10">Fuzzy
+  c-means
+  for
+  very
+  large
+  data:
+  rseFCM,
+  spFCM
+  and
+  oFCM</span> </p></td><td class="td10" id="TBL-54-16-3" style="text-align:left;">
+<!-- l. 127 --><p class="noindent"><a href="11-incomplete-very-large-and-image.html#x13-234001r10"><span class="ec-lmr-10">11.10</span><!-- tex4ht:ref: fig:data:ex3a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-54-17-" style="vertical-align:baseline;"><td class="td01" id="TBL-54-17-1" style="text-align:left;">
+<!-- l. 128 --><p class="noindent"><span class="ec-lmtt-10">plot_04_stream_drift.py</span> </p></td><td class="td11" id="TBL-54-17-2" style="text-align:left;">
+<!-- l. 128 --><p class="noindent"><span class="ec-lmr-10">Clustering
+  a
+  drifting
+  stream
+  chunk
+  by
+  chunk
+  with
+  </span><span class="ec-lmtt-10">partial_fit</span> </p></td><td class="td10" id="TBL-54-17-3" style="text-align:left;">
+<!-- l. 128 --><p class="noindent"><a href="11-incomplete-very-large-and-image.html#x13-235001r13"><span class="ec-lmr-10">11.13</span><!-- tex4ht:ref: fig:data:ex4a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-54-18-" style="vertical-align:baseline;"><td class="td01" id="TBL-54-18-1" style="text-align:left;">
+<!-- l. 129 --><p class="noindent"><span class="ec-lmtt-10">plot_05_image_noise.py</span> </p></td><td class="td11" id="TBL-54-18-2" style="text-align:left;">
+<!-- l. 129 --><p class="noindent"><span class="ec-lmr-10">Image
+  segmentation
+  under
+  noise:
+  six
+  spatially
+  constrained
+  FCM
+  variants</span> </p></td><td class="td10" id="TBL-54-18-3" style="text-align:left;">
+<!-- l. 129 --><p class="noindent"><a href="11-incomplete-very-large-and-image.html#x13-236001r16"><span class="ec-lmr-10">11.16</span><!-- tex4ht:ref: fig:data:ex5a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-54-19-" style="vertical-align:baseline;"><td class="td01" id="TBL-54-19-1" style="text-align:left;">
+<!-- l. 130 --><p class="noindent"><span class="ec-lmtt-10">plot_06_spatial_alpha_window.py</span> </p> </td><td class="td11" id="TBL-54-19-2" style="text-align:left;">
+<!-- l. 130 --><p class="noindent"><span class="ec-lmr-10">Spatial
+  FCM:
+  the
+  neighborhood
+  weight
+  and
+  the
+  window
+  size</span> </p></td><td class="td10" id="TBL-54-19-3" style="text-align:left;">
+<!-- l. 130 --><p class="noindent"><a href="11-incomplete-very-large-and-image.html#x13-237001r19"><span class="ec-lmr-10">11.19</span><!-- tex4ht:ref: fig:data:ex6a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-54-22-" style="vertical-align:baseline;"><td class="td01" id="TBL-54-22-1" style="text-align:left;">
+<!-- l. 131 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-54-23-" style="vertical-align:baseline;"><td class="td01" id="TBL-54-23-1" style="text-align:left;">
+<!-- l. 131 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-54-24-" style="vertical-align:baseline;"><td class="td01" id="TBL-54-24-1" style="text-align:left;">
+<!-- l. 131 --><p class="noindent"> </p></td>
+</tr>
+<tr id="TBL-54-11-" style="vertical-align:baseline;"><td class="td01" colspan="3" id="TBL-54-11-1" style="text-align:left;"></td></tr><tr id="TBL-54-12-" style="vertical-align:baseline;"><td class="td01" id="TBL-54-12-1" style="text-align:left;">
+<!-- l. 124 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-54-13-" style="vertical-align:baseline;"><td class="td01" id="TBL-54-13-1" style="text-align:left;">
+<!-- l. 124 --><p class="noindent"> </p></td>
+</tr>
+</table></div>
+<!-- l. 133 --><p class="noindent">
+</p>
+<h3 class="sectionHead"><span class="titlemark">C.9   </span> <a id="x17-293000C.9"></a>Partial supervision, co-clustering, collaboration, and ensembles</h3>
+<!-- l. 134 --><p class="noindent">Folder <span class="ec-lmtt-10x-x-109">examples/09_beyond_unsupervised/</span>. The methods are described in
+chapter <a href="12-beyond-a-single-unsupervised-run.html#x14-23900012">12</a>.
+</p><!-- l. 136 --><p class="indent">
+<a id="x17-293001r9"></a></p> <!-- l. 137 --><div class="longtable"> <table class="longtable" id="TBL-55"><colgroup id="TBL-55-1g"><col id="TBL-55-1"/><col id="TBL-55-2"/><col id="TBL-55-3"/></colgroup>
+<tr id="TBL-55-1-" style="vertical-align:baseline;"><td class="td01" colspan="3" id="TBL-55-1-1" style="text-align:left;"></td></tr><tr id="TBL-55-2-" style="vertical-align:baseline;"><td class="td01" id="TBL-55-2-1" style="text-align:left;">
+<!-- l. 137 --><p class="noindent"><span class="ec-lmr-10">Script</span> </p></td><td class="td11" id="TBL-55-2-2" style="text-align:left;">
+<!-- l. 137 --><p class="noindent"><span class="ec-lmr-10">Topic</span> </p></td><td class="td10" id="TBL-55-2-3" style="text-align:left;">
+<!-- l. 137 --><p class="noindent"><span class="ec-lmr-10">Figure</span></p></td>
+</tr><tr id="TBL-55-3-" style="vertical-align:baseline;"><td class="td01" colspan="3" id="TBL-55-3-1" style="text-align:left;"></td></tr><tr id="TBL-55-4-" style="vertical-align:baseline;"><td class="td01" id="TBL-55-4-1" style="text-align:left;">
+<!-- l. 137 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-55-5-" style="vertical-align:baseline;"><td class="td01" id="TBL-55-5-1" style="text-align:left;"> </td><td class="td11" id="TBL-55-5-2" style="text-align:left;"> </td><td class="td10" id="TBL-55-5-3" style="text-align:left;">
+</td></tr>
+<tr id="TBL-55-14-" style="vertical-align:baseline;"><td class="td01" id="TBL-55-14-1" style="text-align:left;">
+<!-- l. 140 --><p class="noindent"><span class="ec-lmtt-10">plot_01_ssfcm_partial_labels.py</span> </p> </td><td class="td11" id="TBL-55-14-2" style="text-align:left;">
+<!-- l. 140 --><p class="noindent"><span class="ec-lmr-10">Fuzzy
+  c-means
+  with
+  partial
+  supervision:
+  label
+  fraction
+  and
+  weight</span> </p></td><td class="td10" id="TBL-55-14-3" style="text-align:left;">
+<!-- l. 140 --><p class="noindent"><a href="12-beyond-a-single-unsupervised-run.html#x14-252001r5"><span class="ec-lmr-10">12.5</span><!-- tex4ht:ref: fig:beyond:ex1a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-55-15-" style="vertical-align:baseline;"><td class="td01" id="TBL-55-15-1" style="text-align:left;">
+<!-- l. 141 --><p class="noindent"><span class="ec-lmtt-10">plot_02_pcca_pairwise_constraints.py</span> </p> </td><td class="td11" id="TBL-55-15-2" style="text-align:left;">
+<!-- l. 141 --><p class="noindent"><span class="ec-lmr-10">Pairwise
+  constraints:
+  must-link,
+  cannot-link
+  and
+  competitive
+  agglomeration</span> </p></td><td class="td10" id="TBL-55-15-3" style="text-align:left;">
+<!-- l. 141 --><p class="noindent"><a href="12-beyond-a-single-unsupervised-run.html#x14-253001r8"><span class="ec-lmr-10">12.8</span><!-- tex4ht:ref: fig:beyond:ex2a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-55-16-" style="vertical-align:baseline;"><td class="td01" id="TBL-55-16-1" style="text-align:left;">
+<!-- l. 142 --><p class="noindent"><span class="ec-lmtt-10">plot_03_fccm_document_term.py</span> </p> </td><td class="td11" id="TBL-55-16-2" style="text-align:left;">
+<!-- l. 142 --><p class="noindent"><span class="ec-lmr-10">Fuzzy
+  co-clustering
+  of
+  a
+  document–term
+  matrix</span> </p></td><td class="td10" id="TBL-55-16-3" style="text-align:left;">
+<!-- l. 142 --><p class="noindent"><a href="12-beyond-a-single-unsupervised-run.html#x14-254001r11"><span class="ec-lmr-10">12.11</span><!-- tex4ht:ref: fig:beyond:ex3a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-55-17-" style="vertical-align:baseline;"><td class="td01" id="TBL-55-17-1" style="text-align:left;">
+<!-- l. 143 --><p class="noindent"><span class="ec-lmtt-10">plot_04_collaborative_sites.py</span> </p> </td><td class="td11" id="TBL-55-17-2" style="text-align:left;">
+<!-- l. 143 --><p class="noindent"><span class="ec-lmr-10">Collaborative
+  fuzzy
+  clustering
+  across
+  three
+  data
+  sites</span> </p></td><td class="td10" id="TBL-55-17-3" style="text-align:left;">
+<!-- l. 143 --><p class="noindent"><a href="12-beyond-a-single-unsupervised-run.html#x14-255001r15"><span class="ec-lmr-10">12.15</span><!-- tex4ht:ref: fig:beyond:ex4a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-55-18-" style="vertical-align:baseline;"><td class="td01" id="TBL-55-18-1" style="text-align:left;">
+<!-- l. 144 --><p class="noindent"><span class="ec-lmtt-10">plot_05_ensemble_consensus.py</span> </p> </td><td class="td11" id="TBL-55-18-2" style="text-align:left;">
+<!-- l. 144 --><p class="noindent"><span class="ec-lmr-10">Consensus
+  of
+  soft
+  clusterings:
+  a
+  library
+  beats
+  a
+  single
+  run</span> </p></td><td class="td10" id="TBL-55-18-3" style="text-align:left;">
+<!-- l. 144 --><p class="noindent"><a href="12-beyond-a-single-unsupervised-run.html#x14-256001r17"><span class="ec-lmr-10">12.17</span><!-- tex4ht:ref: fig:beyond:ex5a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-55-19-" style="vertical-align:baseline;"><td class="td01" id="TBL-55-19-1" style="text-align:left;">
+<!-- l. 145 --><p class="noindent"><span class="ec-lmtt-10">plot_06_ensemble_lifetime.py</span> </p></td><td class="td11" id="TBL-55-19-2" style="text-align:left;">
+<!-- l. 145 --><p class="noindent"><span class="ec-lmr-10">The
+  lifetime
+  criterion
+  of
+  evidence
+  accumulation</span> </p></td><td class="td10" id="TBL-55-19-3" style="text-align:left;">
+<!-- l. 145 --><p class="noindent"><a href="12-beyond-a-single-unsupervised-run.html#x14-257001r20"><span class="ec-lmr-10">12.20</span><!-- tex4ht:ref: fig:beyond:ex6a  --></a></p></td>
+</tr><tr class="vspace" style="font-size:2.0pt"><td> </td><td> </td><td> </td></tr><tr id="TBL-55-22-" style="vertical-align:baseline;"><td class="td01" id="TBL-55-22-1" style="text-align:left;">
+<!-- l. 146 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-55-23-" style="vertical-align:baseline;"><td class="td01" id="TBL-55-23-1" style="text-align:left;">
+<!-- l. 146 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-55-24-" style="vertical-align:baseline;"><td class="td01" id="TBL-55-24-1" style="text-align:left;">
+<!-- l. 146 --><p class="noindent"> </p></td>
+</tr>
+<tr id="TBL-55-11-" style="vertical-align:baseline;"><td class="td01" colspan="3" id="TBL-55-11-1" style="text-align:left;"></td></tr><tr id="TBL-55-12-" style="vertical-align:baseline;"><td class="td01" id="TBL-55-12-1" style="text-align:left;">
+<!-- l. 139 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-55-13-" style="vertical-align:baseline;"><td class="td01" id="TBL-55-13-1" style="text-align:left;">
+<!-- l. 139 --><p class="noindent"> </p></td>
+</tr>
+</table></div>
+<!-- l. 55 -->
+<!-- l. 55 --><p class="indent"> <a id="tailmain_webap3.html"></a> </p>
+<nav class='pager'><a class='prev' href='b-migrating-from-the-matlab-toolbox.html'><small>Previous</small>Migrating from the MATLAB toolbox</a><a class='next' href='bibliography.html'><small>Next</small>Bibliography</a></nav>
+</main>
+<aside class="right"><nav class='onpage' aria-label='On this page'><p class='toc-title'>On this page</p><ul><li><a href='#x17-285000C.1'>C.1 Core partitioning algorithms and validity</a></li><li><a href='#x17-286000C.2'>C.2 Visualization of fuzzy clusters</a></li><li><a href='#x17-287000C.3'>C.3 Model identification</a></li><li><a href='#x17-288000C.4'>C.4 Time-series analysis</a></li><li><a href='#x17-289000C.5'>C.5 Graph-based clustering</a></li><li><a href='#x17-290000C.6'>C.6 Possibilistic, noise, kernel, and shape-prototype extensions</a></li><li><a href='#x17-291000C.7'>C.7 Relational, categorical, and mixed data</a></li><li><a href='#x17-292000C.8'>C.8 Incomplete, very large, and image data</a></li><li><a href='#x17-293000C.9'>C.9 Partial supervision, co-clustering, collaboration, and ensembles</a></li></ul></nav></aside>
+</div>
+<footer class='foot'>© 2026 János Abonyi, University of Pannonia · licensed under <a href='https://creativecommons.org/licenses/by/4.0/'>CC BY 4.0</a> · web edition of the book, generated from the same LaTeX source as the <a href='../fuzzyclust-book.pdf'>PDF</a> · software: <a href='https://github.com/ComplexSystemsIntelligence/fuzzyclust'>fuzzyclust</a> (MIT) · <code>pip install fuzzyclust</code></footer>
+</body>
+</html>

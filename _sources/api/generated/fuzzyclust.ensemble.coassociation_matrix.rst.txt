@@ -1,0 +1,12 @@
+﻿fuzzyclust.ensemble.coassociation\_matrix
+=========================================
+
+.. currentmodule:: fuzzyclust.ensemble
+
+.. autofunction:: coassociation_matrix
+
+.. include:: fuzzyclust.ensemble.coassociation_matrix.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

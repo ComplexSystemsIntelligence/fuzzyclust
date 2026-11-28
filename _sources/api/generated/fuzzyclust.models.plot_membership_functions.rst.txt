@@ -1,0 +1,12 @@
+﻿fuzzyclust.models.plot\_membership\_functions
+=============================================
+
+.. currentmodule:: fuzzyclust.models
+
+.. autofunction:: plot_membership_functions
+
+.. include:: fuzzyclust.models.plot_membership_functions.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

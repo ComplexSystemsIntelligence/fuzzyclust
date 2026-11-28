@@ -1,0 +1,12 @@
+﻿fuzzyclust.graph.make\_density\_blobs
+=====================================
+
+.. currentmodule:: fuzzyclust.graph
+
+.. autofunction:: make_density_blobs
+
+.. include:: fuzzyclust.graph.make_density_blobs.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>B Migrating from the MATLAB toolbox · Fuzzy Clustering and Data Analysis in Python</title>
+<meta name="description" content="Open-access book on fuzzy clustering and data analysis in Python with the fuzzyclust toolbox: fuzzy c-means, Gustafson-Kessel, Gath-Geva, cluster validity, visualisation, Takagi-Sugeno models, time-series segmentation and more, with runnable Colab examples." />
+<meta name="author" content="János Abonyi" />
+<link rel="canonical" href="https://complexsystemsintelligence.github.io/fuzzyclust/book/b-migrating-from-the-matlab-toolbox.html" />
+<meta property="og:title" content="B Migrating from the MATLAB toolbox · Fuzzy Clustering and Data Analysis in Python" />
+<meta property="og:type" content="book" />
+<meta property="og:url" content="https://complexsystemsintelligence.github.io/fuzzyclust/book/b-migrating-from-the-matlab-toolbox.html" />
+<meta property="og:image" content="https://complexsystemsintelligence.github.io/fuzzyclust/book/cover.png" />
+<meta property="og:description" content="Open-access book on fuzzy clustering and data analysis in Python with the fuzzyclust toolbox: fuzzy c-means, Gustafson-Kessel, Gath-Geva, cluster validity, visualisation, Takagi-Sugeno models, time-series segmentation and more, with runnable Colab examples." />
+<link rel="icon" href="../_static/favicon.png" />
+<link rel="stylesheet" href="main_web.css" />
+<link rel="stylesheet" href="web.css" />
+</head>
+<body class="">
+<header class='topbar'><a class='brand' href='index.html'><img src='logo.svg' alt='' width='34' height='34' /><span><b>Fuzzy Clustering and Data Analysis in Python</b><small>The fuzzyclust toolbox</small></span></a><nav class='toplinks'><a href='../'>Documentation</a><a href='../auto_examples/index.html'>Examples</a><a href='../fuzzyclust-book.pdf'>PDF</a><a href='../fuzzyclust-book.epub'>EPUB</a><a href='https://github.com/ComplexSystemsIntelligence/fuzzyclust'>GitHub</a><a class='hub' href='https://complexsystemsintelligence.github.io/#textbooks'>All textbooks</a></nav></header>
+<div class="layout">
+<aside class="left"><nav class='toc' aria-label='Contents'><p class='toc-title'>Contents</p><ol><li><a href='preface.html'><span class='num'></span>Preface</a></li><li><a href='01-introduction.html'><span class='num'>1</span>Introduction</a></li><li><a href='02-foundations-of-prototype-based-clustering.html'><span class='num'>2</span>Foundations of prototype-based clustering</a></li><li><a href='03-hard-and-fuzzy-partitioning-algorithms.html'><span class='num'>3</span>Hard and fuzzy partitioning algorithms</a></li><li><a href='04-cluster-validity-and-the-number.html'><span class='num'>4</span>Cluster validity and the number of clusters</a></li><li><a href='05-visualization-of-fuzzy-clustering-results.html'><span class='num'>5</span>Visualization of fuzzy clustering results</a></li><li><a href='06-robust-and-shape-oriented-variants.html'><span class='num'>6</span>Robust and shape-oriented variants of fuzzy c-means</a></li><li><a href='07-graph-based-fuzzy-clustering.html'><span class='num'>7</span>Graph-based fuzzy clustering</a></li><li><a href='08-clustering-for-model-identification.html'><span class='num'>8</span>Clustering for model identification</a></li><li><a href='09-clustering-of-time-series.html'><span class='num'>9</span>Clustering of time series</a></li><li><a href='10-clustering-relational-categorical-and-mixed.html'><span class='num'>10</span>Clustering relational, categorical, and mixed data</a></li><li><a href='11-incomplete-very-large-and-image.html'><span class='num'>11</span>Incomplete, very large, and image data</a></li><li><a href='12-beyond-a-single-unsupervised-run.html'><span class='num'>12</span>Beyond a single unsupervised run: partial supervision,
+co-clustering, collaboration, and ensembles</a></li><li><a href='a-api-reference.html'><span class='num'>A</span>API reference</a></li><li class='current'><a href='b-migrating-from-the-matlab-toolbox.html'><span class='num'>B</span>Migrating from the MATLAB toolbox</a></li><li><a href='c-the-example-gallery.html'><span class='num'>C</span>The example gallery</a></li><li><a href='bibliography.html'><span class='num'></span>Bibliography</a></li></ol></nav></aside>
+<main class="content">
+
+<!-- l. 1 -->
+<h2 class="appendixHead"><span class="titlemark">Appendix B</span><br/><a id="x16-279000B"></a>Migrating from the MATLAB toolbox</h2>
+<div class="box roadmap">
+<!-- l. 3 --><p class="indent">   This appendix is for readers who know the <span class="ec-lmri-10x-x-109">Fuzzy Clustering and Data
+Analysis Toolbox for MATLAB </span>[<a id="x16-279001"></a><a href="bibliography.html#cite.0@balasko:2005:toolbox">12</a>]. It maps every MATLAB function,
+parameter, and result field to its counterpart in <span class="ec-lmtt-10x-x-109">fuzzyclust </span>and lists the
+places where the Python toolbox deliberately behaves differently. The
+chapter column of the first table points to the full treatment of each
+method.
+</p>
+</div>
+<h3 class="sectionHead"><span class="titlemark">B.1   </span> <a id="x16-280000B.1"></a>Functions</h3>
+<!-- l. 8 --><p class="noindent">The MATLAB toolbox passed a <span class="ec-lmtt-10x-x-109">data </span>structure and a <span class="ec-lmtt-10x-x-109">param </span>structure to every
+function and returned a nested <span class="ec-lmtt-10x-x-109">result </span>structure. In <span class="ec-lmtt-10x-x-109">fuzzyclust </span>every algorithm
+is a scikit-learn estimator: the parameters are constructor arguments, the data
+matrix is the argument of <span class="ec-lmtt-10x-x-109">fit</span>, and the results are attributes of the fitted object.
+Table <a href="#x16-280001r1">B.1</a> maps the functions.
+</p>
+<div class="table">
+<!-- l. 10 --><p class="indent"> </p><figure class="float">
+<a id="x16-280001r1"></a>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Table B.1. </span></span><span class="content"><span class="ec-lmr-10">MATLAB toolbox functions and their </span><span class="ec-lmtt-10">fuzzyclust </span><span class="ec-lmr-10">counterparts.</span> </span></figcaption><!-- tex4ht:label?: x16-280001r1  -->
+<table class="tabular" id="TBL-40"><colgroup id="TBL-40-1g"><col id="TBL-40-1"/><col id="TBL-40-2"/><col id="TBL-40-3"/></colgroup><tr id="TBL-40-1-" style="vertical-align:baseline;"><td class="td01" id="TBL-40-1-1" style="text-align:left;"><!-- l. 34 --><p class="noindent"><span class="ec-lmr-9">MATLAB</span> </p></td><td class="td11" id="TBL-40-1-2" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">fuzzyclust</span> </p></td><td class="td10" id="TBL-40-1-3" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><span class="ec-lmr-9">Chapter</span> </p></td>
+</tr><tr id="TBL-40-2-" style="vertical-align:baseline;"><td class="td01" id="TBL-40-2-1" style="text-align:left;"><!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">Kmeans(data,param)</span> </p></td><td class="td11" id="TBL-40-2-2" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">cluster.KMeans(n_clusters).fit(X)</span> </p></td><td class="td10" id="TBL-40-2-3" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><a href="03-hard-and-fuzzy-partitioning-algorithms.html#x5-330003"><span class="ec-lmr-9">3</span><!-- tex4ht:ref: ch:partitioning  --></a> </p></td>
+</tr><tr id="TBL-40-3-" style="vertical-align:baseline;"><td class="td01" id="TBL-40-3-1" style="text-align:left;"><!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">Kmedoid(data,param)</span> </p></td><td class="td11" id="TBL-40-3-2" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">cluster.KMedoids(n_clusters).fit(X)</span> </p> </td><td class="td10" id="TBL-40-3-3" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><a href="03-hard-and-fuzzy-partitioning-algorithms.html#x5-330003"><span class="ec-lmr-9">3</span><!-- tex4ht:ref: ch:partitioning  --></a> </p></td>
+</tr><tr id="TBL-40-4-" style="vertical-align:baseline;"><td class="td01" id="TBL-40-4-1" style="text-align:left;"><!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">FCMclust(data,param)</span> </p></td><td class="td11" id="TBL-40-4-2" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">cluster.FCM(n_clusters,
+ m).fit(X)</span> </p></td><td class="td10" id="TBL-40-4-3" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><a href="03-hard-and-fuzzy-partitioning-algorithms.html#x5-330003"><span class="ec-lmr-9">3</span><!-- tex4ht:ref: ch:partitioning  --></a> </p></td>
+</tr><tr id="TBL-40-5-" style="vertical-align:baseline;"><td class="td01" id="TBL-40-5-1" style="text-align:left;"><!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">GKclust(data,param)</span> </p></td><td class="td11" id="TBL-40-5-2" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">cluster.GK(n_clusters,
+  m,
+  rho,
+  gamma,
+  beta).fit(X)</span> </p></td><td class="td10" id="TBL-40-5-3" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><a href="03-hard-and-fuzzy-partitioning-algorithms.html#x5-330003"><span class="ec-lmr-9">3</span><!-- tex4ht:ref: ch:partitioning  --></a> </p></td>
+</tr><tr id="TBL-40-6-" style="vertical-align:baseline;"><td class="td01" id="TBL-40-6-1" style="text-align:left;"><!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">GGclust(data,param)</span> </p></td><td class="td11" id="TBL-40-6-2" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">cluster.GG(n_clusters,
+ m).fit(X)</span> </p></td><td class="td10" id="TBL-40-6-3" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><a href="03-hard-and-fuzzy-partitioning-algorithms.html#x5-330003"><span class="ec-lmr-9">3</span><!-- tex4ht:ref: ch:partitioning  --></a> </p></td>
+</tr><tr id="TBL-40-7-" style="vertical-align:baseline;"><td class="td01" id="TBL-40-7-1" style="text-align:left;"><!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">clusteval(new,
+result,
+param)</span> </p></td><td class="td11" id="TBL-40-7-2" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">est.predict_proba(X_new)</span><span class="ec-lmr-9">,
+  </span><span class="ec-lmtt-9">est.transform(X_new)</span><span class="ec-lmr-9">,
+  </span><span class="ec-lmtt-9">plotting.
+ plot_membership_contours</span> </p></td><td class="td10" id="TBL-40-7-3" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><a href="03-hard-and-fuzzy-partitioning-algorithms.html#x5-330003"><span class="ec-lmr-9">3</span><!-- tex4ht:ref: ch:partitioning  --></a> </p></td>
+</tr><tr id="TBL-40-8-" style="vertical-align:baseline;"><td class="td01" id="TBL-40-8-1" style="text-align:left;"><!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">validity(result,
+data,
+param)</span> </p></td><td class="td11" id="TBL-40-8-2" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">validity.validity_indices(X,
+ U,
+ V,
+ m)</span> </p></td><td class="td10" id="TBL-40-8-3" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><a href="04-cluster-validity-and-the-number.html#x6-680004"><span class="ec-lmr-9">4</span><!-- tex4ht:ref: ch:validity  --></a> </p></td>
+</tr><tr id="TBL-40-9-" style="vertical-align:baseline;"><td class="td01" id="TBL-40-9-1" style="text-align:left;"><!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">optnumber
+</span><span class="ec-lmr-9">(demo)</span> </p></td><td class="td11" id="TBL-40-9-2" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">validity.scan_n_clusters</span><span class="ec-lmr-9">,
+  </span><span class="ec-lmtt-9">suggest_n_clusters</span> </p></td><td class="td10" id="TBL-40-9-3" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><a href="04-cluster-validity-and-the-number.html#x6-680004"><span class="ec-lmr-9">4</span><!-- tex4ht:ref: ch:validity  --></a> </p></td>
+</tr><tr id="TBL-40-10-" style="vertical-align:baseline;"><td class="td01" id="TBL-40-10-1" style="text-align:left;"><!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">clust_normalize(data,
+’range’|’var’)</span> </p></td><td class="td11" id="TBL-40-10-2" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">preprocessing.normalize(X,
+  ’range’|’var’)
+ </span><span class="ec-lmr-9">or
+  scikit-learn
+  scalers</span> </p></td><td class="td10" id="TBL-40-10-3" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><a href="02-foundations-of-prototype-based-clustering.html#x4-140002"><span class="ec-lmr-9">2</span><!-- tex4ht:ref: ch:foundations  --></a> </p></td>
+</tr><tr id="TBL-40-11-" style="vertical-align:baseline;"><td class="td01" id="TBL-40-11-1" style="text-align:left;"><!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">clust_denormalize(data)</span> </p></td><td class="td11" id="TBL-40-11-2" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">scaler.
+ inverse_transform(Z)</span> </p></td><td class="td10" id="TBL-40-11-3" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><a href="02-foundations-of-prototype-based-clustering.html#x4-140002"><span class="ec-lmr-9">2</span><!-- tex4ht:ref: ch:foundations  --></a> </p></td>
+</tr><tr id="TBL-40-12-" style="vertical-align:baseline;"><td class="td01" id="TBL-40-12-1" style="text-align:left;"><!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">PCA(data,param,result)</span> </p></td><td class="td11" id="TBL-40-12-2" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">viz.pca_projection(X,
+ n_components,
+ centers)</span> </p></td><td class="td10" id="TBL-40-12-3" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><a href="05-visualization-of-fuzzy-clustering-results.html#x7-870005"><span class="ec-lmr-9">5</span><!-- tex4ht:ref: ch:visualization  --></a> </p></td>
+</tr><tr id="TBL-40-13-" style="vertical-align:baseline;"><td class="td01" id="TBL-40-13-1" style="text-align:left;"><!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">Sammon(proj,
+data,
+result,
+param)</span> </p></td><td class="td11" id="TBL-40-13-2" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">viz.Sammon(n_components).
+ fit_transform(X)</span> </p></td><td class="td10" id="TBL-40-13-3" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><a href="05-visualization-of-fuzzy-clustering-results.html#x7-870005"><span class="ec-lmr-9">5</span><!-- tex4ht:ref: ch:visualization  --></a> </p></td>
+</tr><tr id="TBL-40-14-" style="vertical-align:baseline;"><td class="td01" id="TBL-40-14-1" style="text-align:left;"><!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">FuzSam(proj,
+result,
+param)</span> </p></td><td class="td11" id="TBL-40-14-2" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">viz.FuzzySammon().fit(est,
+ X)</span> </p></td><td class="td10" id="TBL-40-14-3" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><a href="05-visualization-of-fuzzy-clustering-results.html#x7-870005"><span class="ec-lmr-9">5</span><!-- tex4ht:ref: ch:visualization  --></a> </p></td>
+</tr><tr id="TBL-40-15-" style="vertical-align:baseline;"><td class="td01" id="TBL-40-15-1" style="text-align:left;"><!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">projeval(result,param)</span> </p></td><td class="td11" id="TBL-40-15-2" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">viz.projection_quality(U,
+ Y,
+ Z,
+ m)</span> </p></td><td class="td10" id="TBL-40-15-3" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><a href="05-visualization-of-fuzzy-clustering-results.html#x7-870005"><span class="ec-lmr-9">5</span><!-- tex4ht:ref: ch:visualization  --></a> </p></td>
+</tr><tr id="TBL-40-16-" style="vertical-align:baseline;"><td class="td01" id="TBL-40-16-1" style="text-align:left;"><!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">samstr(data,
+result)
+</span><span class="ec-lmr-9">(stress)</span> </p></td><td class="td11" id="TBL-40-16-2" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">viz.sammon_stress(X,
+ Y)</span> </p></td><td class="td10" id="TBL-40-16-3" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><a href="05-visualization-of-fuzzy-clustering-results.html#x7-870005"><span class="ec-lmr-9">5</span><!-- tex4ht:ref: ch:visualization  --></a> </p></td>
+</tr><tr id="TBL-40-17-" style="vertical-align:baseline;"><td class="td01" id="TBL-40-17-1" style="text-align:left;"><!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">nDexample(cx,N,n,seed)</span> </p></td><td class="td11" id="TBL-40-17-2" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">datasets.make_fuzzy_blobs(...)</span> </p></td><td class="td10" id="TBL-40-17-3" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><a href="02-foundations-of-prototype-based-clustering.html#x4-140002"><span class="ec-lmr-9">2</span><!-- tex4ht:ref: ch:foundations  --></a> </p></td>
+</tr><tr id="TBL-40-18-" style="vertical-align:baseline;"><td class="td01" id="TBL-40-18-1" style="text-align:left;"><!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">MotorCycle.txt</span> </p></td><td class="td11" id="TBL-40-18-2" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><span class="ec-lmtt-9">datasets.load_motorcycle()</span> </p></td><td class="td10" id="TBL-40-18-3" style="text-align:left;"> <!-- l. 34 --><p class="noindent"><a href="03-hard-and-fuzzy-partitioning-algorithms.html#x5-330003"><span class="ec-lmr-9">3</span><!-- tex4ht:ref: ch:partitioning  --></a> </p></td>
+</tr><tr id="TBL-40-19-" style="vertical-align:baseline;"><td class="td01" id="TBL-40-19-1" style="text-align:left;"><!-- l. 34 --><p class="noindent"> </p></td></tr></table>
+</figure>
+</div>
+<h3 class="sectionHead"><span class="titlemark">B.2   </span> <a id="x16-281000B.2"></a>Parameters</h3>
+<!-- l. 39 --><p class="noindent">Table <a href="#x16-281001r2">B.2</a> maps the fields of the MATLAB <span class="ec-lmtt-10x-x-109">param </span>structure to the constructor
+arguments of the estimators.
+</p>
+<div class="table">
+<!-- l. 41 --><p class="indent"> </p><figure class="float">
+<a id="x16-281001r2"></a>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Table B.2.  </span></span><span class="content"><span class="ec-lmr-10">Fields  of  the  MATLAB  </span><span class="ec-lmtt-10">param </span><span class="ec-lmr-10">structure  and  the  corresponding
+constructor arguments.</span> </span></figcaption><!-- tex4ht:label?: x16-281001r2  -->
+<table class="tabular" id="TBL-43"><colgroup id="TBL-43-1g"><col id="TBL-43-1"/><col id="TBL-43-2"/><col id="TBL-43-3"/></colgroup><tr id="TBL-43-1-" style="vertical-align:baseline;"><td class="td01" id="TBL-43-1-1" style="text-align:left;"><!-- l. 62 --><p class="noindent"><span class="ec-lmtt-9">param.*</span> </p></td><td class="td11" id="TBL-43-1-2" style="text-align:left;"> <!-- l. 62 --><p class="noindent"><span class="ec-lmr-9">constructor
+  argument</span> </p></td><td class="td10" id="TBL-43-1-3" style="text-align:left;"> <!-- l. 62 --><p class="noindent"><span class="ec-lmr-9">remark</span> </p></td>
+</tr><tr id="TBL-43-2-" style="vertical-align:baseline;"><td class="td01" id="TBL-43-2-1" style="text-align:left;"><!-- l. 62 --><p class="noindent"><span class="ec-lmtt-9">param.c
+</span><span class="ec-lmr-9">(scalar)</span> </p></td><td class="td11" id="TBL-43-2-2" style="text-align:left;"> <!-- l. 62 --><p class="noindent"><span class="ec-lmtt-9">n_clusters</span> </p></td><td class="td10" id="TBL-43-2-3" style="text-align:left;"> <!-- l. 62 --><p class="noindent"><span class="ec-lmr-9">number
+  of
+  clusters</span> </p></td>
+</tr><tr id="TBL-43-3-" style="vertical-align:baseline;"><td class="td01" id="TBL-43-3-1" style="text-align:left;"><!-- l. 62 --><p class="noindent"><span class="ec-lmtt-9">param.c
+</span><span class="ec-lmr-9">(matrix</span>
+<!-- l. 62 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>N</mi> <mo class="MathClass-bin" stretchy="false">×</mo><mi>c</mi></mrow></math><span class="ec-lmr-9">)</span> </p></td><td class="td11" id="TBL-43-3-2" style="text-align:left;"> <!-- l. 62 --><p class="noindent"><span class="ec-lmtt-9">init=U0</span> </p></td><td class="td10" id="TBL-43-3-3" style="text-align:left;"> <!-- l. 62 --><p class="noindent"><span class="ec-lmr-9">initial
+  partition
+  matrix</span> </p></td>
+</tr><tr id="TBL-43-4-" style="vertical-align:baseline;"><td class="td01" id="TBL-43-4-1" style="text-align:left;"><!-- l. 62 --><p class="noindent"><span class="ec-lmtt-9">param.c
+</span><span class="ec-lmr-9">(matrix</span>
+<!-- l. 62 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>c</mi> <mo class="MathClass-bin" stretchy="false">×</mo><mi>n</mi></mrow></math><span class="ec-lmr-9">,
+k-means)</span> </p></td><td class="td11" id="TBL-43-4-2" style="text-align:left;"> <!-- l. 62 --><p class="noindent"><span class="ec-lmtt-9">init=V0</span> </p></td><td class="td10" id="TBL-43-4-3" style="text-align:left;"> <!-- l. 62 --><p class="noindent"><span class="ec-lmr-9">initial
+  centers</span> </p></td>
+</tr><tr id="TBL-43-5-" style="vertical-align:baseline;"><td class="td01" id="TBL-43-5-1" style="text-align:left;"><!-- l. 62 --><p class="noindent"><span class="ec-lmtt-9">param.m</span> </p></td><td class="td11" id="TBL-43-5-2" style="text-align:left;"> <!-- l. 62 --><p class="noindent"><span class="ec-lmtt-9">m</span> </p></td><td class="td10" id="TBL-43-5-3" style="text-align:left;"> <!-- l. 62 --><p class="noindent"><span class="ec-lmr-9">fuzziness
+  exponent
+  (default
+  2)</span> </p></td>
+</tr><tr id="TBL-43-6-" style="vertical-align:baseline;"><td class="td01" id="TBL-43-6-1" style="text-align:left;"><!-- l. 62 --><p class="noindent"><span class="ec-lmtt-9">param.e</span> </p></td><td class="td11" id="TBL-43-6-2" style="text-align:left;"> <!-- l. 62 --><p class="noindent"><span class="ec-lmtt-9">tol</span> </p></td><td class="td10" id="TBL-43-6-3" style="text-align:left;"> <!-- l. 62 --><p class="noindent"><span class="ec-lmr-9">termination
+  tolerance
+  on</span>
+<!-- l. 62 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mtext class="qopname"> max</mtext><mo> ⁡<!-- FUNCTION APPLICATION --> </mo> <mo class="MathClass-rel" stretchy="false">|</mo><mi mathvariant="normal">Δ</mi><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><mo class="MathClass-rel" stretchy="false">|</mo></mrow></math>
+<span class="ec-lmr-9">(default</span>
+<!-- l. 62 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1</mn><msup><mrow><mn>0</mn></mrow><mrow><mo class="MathClass-bin" stretchy="false">−</mo><mn>4</mn></mrow></msup></mrow></math><span class="ec-lmr-9">)</span> </p> </td>
+</tr><tr id="TBL-43-7-" style="vertical-align:baseline;"><td class="td01" id="TBL-43-7-1" style="text-align:left;"><!-- l. 62 --><p class="noindent"><span class="ec-lmtt-9">param.ro</span> </p></td><td class="td11" id="TBL-43-7-2" style="text-align:left;"> <!-- l. 62 --><p class="noindent"><span class="ec-lmtt-9">rho</span> </p></td><td class="td10" id="TBL-43-7-3" style="text-align:left;"> <!-- l. 62 --><p class="noindent"><span class="ec-lmr-9">GK
+  cluster
+  volumes
+  (default
+  all
+  1);
+  MATLAB’s</span>
+<!-- l. 62 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msup><mrow><mo class="MathClass-open" stretchy="false">(</mo><mtext class="qopname">det</mtext><mo> ⁡<!-- FUNCTION APPLICATION --> </mo><msub><mrow> <mstyle mathvariant="bold"><mi>F</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub><mo class="MathClass-bin" stretchy="false">∕</mo><msub><mrow><mi>ρ</mi></mrow><mrow><mi>i</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow><mrow><mn>1</mn><mo class="MathClass-bin" stretchy="false">∕</mo><mi>n</mi></mrow></msup><msubsup><mrow><mstyle mathvariant="bold"><mi>F</mi></mstyle></mrow><mrow>
+<mi>i</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">−</mo><mn>1</mn></mrow></msubsup></mrow></math>
+<span class="ec-lmr-9">gave</span>
+<!-- l. 62 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mtext class="qopname"> det</mtext><mo> ⁡<!-- FUNCTION APPLICATION --> </mo><msub><mrow> <mstyle mathvariant="bold"><mi>A</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>1</mn><mo class="MathClass-bin" stretchy="false">∕</mo><msub><mrow><mi>ρ</mi></mrow><mrow><mi>i</mi></mrow></msub></mrow></math><span class="ec-lmr-9">,
+  </span><span class="ec-lmtt-9">fuzzyclust
+ </span><span class="ec-lmr-9">follows</span>
+<!-- l. 62 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mtext class="qopname"> det</mtext><mo> ⁡<!-- FUNCTION APPLICATION --> </mo><msub><mrow> <mstyle mathvariant="bold"><mi>A</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <msub><mrow><mi>ρ</mi></mrow><mrow><mi>i</mi></mrow></msub></mrow></math></p></td>
+</tr><tr id="TBL-43-8-" style="vertical-align:baseline;"><td class="td01" id="TBL-43-8-1" style="text-align:left;"><!-- l. 62 --><p class="noindent"><span class="ec-lmtt-9">param.gamma</span> </p></td><td class="td11" id="TBL-43-8-2" style="text-align:left;"> <!-- l. 62 --><p class="noindent"><span class="ec-lmtt-9">gamma</span> </p></td><td class="td10" id="TBL-43-8-3" style="text-align:left;"> <!-- l. 62 --><p class="noindent"><span class="ec-lmr-9">covariance
+  regularization
+  weight
+  of
+  GK,
+  here
+  also
+  of
+  GG
+  (default
+  0)</span> </p></td>
+</tr><tr id="TBL-43-9-" style="vertical-align:baseline;"><td class="td01" id="TBL-43-9-1" style="text-align:left;"><!-- l. 62 --><p class="noindent"><span class="ec-lmtt-9">param.beta</span> </p></td><td class="td11" id="TBL-43-9-2" style="text-align:left;"> <!-- l. 62 --><p class="noindent"><span class="ec-lmtt-9">beta</span> </p></td><td class="td10" id="TBL-43-9-3" style="text-align:left;"> <!-- l. 62 --><p class="noindent"><span class="ec-lmr-9">condition-number
+  bound
+  of
+  GK,
+  here
+  also
+  of
+  GG
+  (default</span>
+<!-- l. 62 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1</mn><msup><mrow><mn>0</mn></mrow><mrow><mn>15</mn></mrow></msup></mrow></math><span class="ec-lmr-9">)</span> </p> </td>
+</tr><tr id="TBL-43-10-" style="vertical-align:baseline;"><td class="td01" id="TBL-43-10-1" style="text-align:left;"><!-- l. 62 --><p class="noindent"><span class="ec-lmtt-9">param.val
+</span><span class="ec-lmr-9">(1/2/3)</span> </p></td><td class="td11" id="TBL-43-10-2" style="text-align:left;"> <!-- l. 62 --><p class="noindent"><span class="ec-lmtt-9">indices=[...]
+ </span><span class="ec-lmr-9">of
+  </span><span class="ec-lmtt-9">validity_indices</span> </p></td><td class="td10" id="TBL-43-10-3" style="text-align:left;"> <!-- l. 62 --><p class="noindent"><span class="ec-lmr-9">1:
+  PC,
+  CE;
+  2:
+  SC,
+  S,
+  XB;
+  3:
+  DI,
+  ADI</span> </p></td>
+</tr><tr id="TBL-43-11-" style="vertical-align:baseline;"><td class="td01" id="TBL-43-11-1" style="text-align:left;"><!-- l. 62 --><p class="noindent"><span class="ec-lmtt-9">param.vis</span> </p></td><td class="td11" id="TBL-43-11-2" style="text-align:left;"> <!-- l. 62 --><p class="noindent"><span class="ec-lmtt-9">plotting.*
+ </span><span class="ec-lmr-9">after
+  fitting</span> </p></td><td class="td10" id="TBL-43-11-3" style="text-align:left;"> <!-- l. 62 --><p class="noindent"><span class="ec-lmr-9">plotting
+  is
+  separated
+  from
+  fitting</span> </p></td>
+</tr><tr id="TBL-43-12-" style="vertical-align:baseline;"><td class="td01" id="TBL-43-12-1" style="text-align:left;"><!-- l. 62 --><p class="noindent"><span class="ec-lmtt-9">param.q</span> </p></td><td class="td11" id="TBL-43-12-2" style="text-align:left;"> <!-- l. 62 --><p class="noindent"><span class="ec-lmtt-9">n_components</span> </p></td><td class="td10" id="TBL-43-12-3" style="text-align:left;"> <!-- l. 62 --><p class="noindent"><span class="ec-lmr-9">projection
+  dimension
+  (PCA;
+  Sammon
+  and
+  FuzSam
+  took
+  it
+  from
+  </span><span class="ec-lmtt-9">proj.P</span><span class="ec-lmr-9">)</span> </p></td>
+</tr><tr id="TBL-43-13-" style="vertical-align:baseline;"><td class="td01" id="TBL-43-13-1" style="text-align:left;"><!-- l. 62 --><p class="noindent"><span class="ec-lmtt-9">param.max</span> </p></td><td class="td11" id="TBL-43-13-2" style="text-align:left;"> <!-- l. 62 --><p class="noindent"><span class="ec-lmtt-9">max_iter</span> </p></td><td class="td10" id="TBL-43-13-3" style="text-align:left;"> <!-- l. 62 --><p class="noindent"><span class="ec-lmr-9">iteration
+  count
+  of
+  Sammon
+  and
+  FuzSam
+  (default
+  100)</span> </p></td>
+</tr><tr id="TBL-43-14-" style="vertical-align:baseline;"><td class="td01" id="TBL-43-14-1" style="text-align:left;"><!-- l. 62 --><p class="noindent"><span class="ec-lmtt-9">param.alpha</span> </p></td><td class="td11" id="TBL-43-14-2" style="text-align:left;"> <!-- l. 62 --><p class="noindent"><span class="ec-lmtt-9">alpha</span> </p></td><td class="td10" id="TBL-43-14-3" style="text-align:left;"> <!-- l. 62 --><p class="noindent"><span class="ec-lmr-9">gradient
+  step
+  size
+  of
+  Sammon
+  and
+  FuzSam</span> </p></td>
+</tr><tr id="TBL-43-15-" style="vertical-align:baseline;"><td class="td01" id="TBL-43-15-1" style="text-align:left;"><!-- l. 62 --><p class="noindent"><span class="ec-lmr-9">—</span> </p></td><td class="td11" id="TBL-43-15-2" style="text-align:left;"> <!-- l. 62 --><p class="noindent"><span class="ec-lmtt-9">init</span><span class="ec-lmr-9">,
+  </span><span class="ec-lmtt-9">n_init</span><span class="ec-lmr-9">,
+  </span><span class="ec-lmtt-9">max_iter</span><span class="ec-lmr-9">,
+  </span><span class="ec-lmtt-9">random_state</span> </p></td><td class="td10" id="TBL-43-15-3" style="text-align:left;"> <!-- l. 62 --><p class="noindent"><span class="ec-lmr-9">new
+  in
+  the
+  clustering
+  estimators:
+  initialization
+  strategy,
+  restarts,
+  iteration
+  cap,
+  seed</span> </p></td>
+</tr><tr id="TBL-43-16-" style="vertical-align:baseline;"><td class="td01" id="TBL-43-16-1" style="text-align:left;"><!-- l. 62 --><p class="noindent"> </p></td></tr></table>
+</figure>
+</div>
+<h3 class="sectionHead"><span class="titlemark">B.3   </span> <a id="x16-282000B.3"></a>Results</h3>
+<!-- l. 67 --><p class="noindent">Table <a href="#x16-282001r3">B.3</a> maps the fields of the MATLAB <span class="ec-lmtt-10x-x-109">result </span>structure to the attributes of
+a fitted estimator.
+</p>
+<div class="table">
+<!-- l. 69 --><p class="indent"> </p><figure class="float">
+<a id="x16-282001r3"></a>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Table B.3. </span></span><span class="content"><span class="ec-lmr-10">Fields of the MATLAB </span><span class="ec-lmtt-10">result </span><span class="ec-lmr-10">structure and the fitted attributes.</span> </span></figcaption><!-- tex4ht:label?: x16-282001r3  -->
+<table class="tabular" id="TBL-46"><colgroup id="TBL-46-1g"><col id="TBL-46-1"/><col id="TBL-46-2"/><col id="TBL-46-3"/></colgroup><tr id="TBL-46-1-" style="vertical-align:baseline;"><td class="td01" id="TBL-46-1-1" style="text-align:left;"><!-- l. 91 --><p class="noindent"><span class="ec-lmtt-9">result.*</span> </p></td><td class="td11" id="TBL-46-1-2" style="text-align:left;"> <!-- l. 91 --><p class="noindent"><span class="ec-lmr-9">attribute</span> </p></td><td class="td10" id="TBL-46-1-3" style="text-align:left;"> <!-- l. 91 --><p class="noindent"><span class="ec-lmr-9">shape</span> </p></td>
+</tr><tr id="TBL-46-2-" style="vertical-align:baseline;"><td class="td01" id="TBL-46-2-1" style="text-align:left;"><!-- l. 91 --><p class="noindent"><span class="ec-lmtt-9">result.data.f</span> </p></td><td class="td11" id="TBL-46-2-2" style="text-align:left;"> <!-- l. 91 --><p class="noindent"><span class="ec-lmtt-9">membership_</span> </p></td><td class="td10" id="TBL-46-2-3" style="text-align:left;"> <!-- l. 91 --><p class="noindent"><!-- l. 91 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo class="MathClass-open" stretchy="false">(</mo><mi>N</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>c</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>
+<span class="ec-lmr-9">—
+  same
+  orientation
+  as
+  MATLAB</span> </p></td>
+</tr><tr id="TBL-46-3-" style="vertical-align:baseline;"><td class="td01" id="TBL-46-3-1" style="text-align:left;"><!-- l. 91 --><p class="noindent"><span class="ec-lmtt-9">result.data.d</span> </p></td><td class="td11" id="TBL-46-3-2" style="text-align:left;"> <!-- l. 91 --><p class="noindent"><span class="ec-lmtt-9">distances_</span> </p></td><td class="td10" id="TBL-46-3-3" style="text-align:left;"> <!-- l. 91 --><p class="noindent"><!-- l. 91 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo class="MathClass-open" stretchy="false">(</mo><mi>N</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>c</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></math><span class="ec-lmr-9">,</span>
+<!-- l. 91 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub></math>
+<span class="ec-lmr-9">(not
+  squared)</span> </p></td>
+</tr><tr id="TBL-46-4-" style="vertical-align:baseline;"><td class="td01" id="TBL-46-4-1" style="text-align:left;"><!-- l. 91 --><p class="noindent"><span class="ec-lmtt-9">result.cluster.v</span> </p></td><td class="td11" id="TBL-46-4-2" style="text-align:left;"> <!-- l. 91 --><p class="noindent"><span class="ec-lmtt-9">cluster_centers_</span> </p></td><td class="td10" id="TBL-46-4-3" style="text-align:left;"> <!-- l. 91 --><p class="noindent"><!-- l. 91 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo class="MathClass-open" stretchy="false">(</mo><mi>c</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>n</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></math></p></td>
+</tr><tr id="TBL-46-5-" style="vertical-align:baseline;"><td class="td01" id="TBL-46-5-1" style="text-align:left;"><!-- l. 91 --><p class="noindent"><span class="ec-lmtt-9">result.cluster.P</span> </p></td><td class="td11" id="TBL-46-5-2" style="text-align:left;"> <!-- l. 91 --><p class="noindent"><span class="ec-lmtt-9">covariances_</span> </p></td><td class="td10" id="TBL-46-5-3" style="text-align:left;"> <!-- l. 91 --><p class="noindent"><!-- l. 91 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo class="MathClass-open" stretchy="false">(</mo><mi>c</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>n</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>n</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>
+<span class="ec-lmr-9">(MATLAB:</span>
+<!-- l. 91 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>n</mi> <mo class="MathClass-bin" stretchy="false">×</mo><mi>n</mi> <mo class="MathClass-bin" stretchy="false">×</mo><mi>c</mi></mrow></math><span class="ec-lmr-9">)</span> </p> </td>
+</tr><tr id="TBL-46-6-" style="vertical-align:baseline;"><td class="td01" id="TBL-46-6-1" style="text-align:left;"><!-- l. 91 --><p class="noindent"><span class="ec-lmtt-9">result.cluster.M</span> </p></td><td class="td11" id="TBL-46-6-2" style="text-align:left;"> <!-- l. 91 --><p class="noindent"><span class="ec-lmtt-9">norm_matrices_</span> </p></td><td class="td10" id="TBL-46-6-3" style="text-align:left;"> <!-- l. 91 --><p class="noindent"><!-- l. 91 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo class="MathClass-open" stretchy="false">(</mo><mi>c</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>n</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>n</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></math><span class="ec-lmr-9">,
+  GK
+  only</span> </p></td>
+</tr><tr id="TBL-46-7-" style="vertical-align:baseline;"><td class="td01" id="TBL-46-7-1" style="text-align:left;"><!-- l. 91 --><p class="noindent"><span class="ec-lmtt-9">result.cluster.V</span> </p></td><td class="td11" id="TBL-46-7-2" style="text-align:left;"> <!-- l. 91 --><p class="noindent"><span class="ec-lmtt-9">eigenvectors_</span> </p></td><td class="td10" id="TBL-46-7-3" style="text-align:left;"> <!-- l. 91 --><p class="noindent"><!-- l. 91 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo class="MathClass-open" stretchy="false">(</mo><mi>c</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>n</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>n</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></math><span class="ec-lmr-9">,
+  all
+  eigenvectors
+  as
+  columns,
+  in
+  ascending
+  order
+  of
+  the
+  eigenvalues
+  (MATLAB
+  kept
+  only
+  that
+  of
+  the
+  smallest
+  eigenvalue)</span> </p></td>
+</tr><tr id="TBL-46-8-" style="vertical-align:baseline;"><td class="td01" id="TBL-46-8-1" style="text-align:left;"><!-- l. 91 --><p class="noindent"><span class="ec-lmtt-9">result.cluster.D</span> </p></td><td class="td11" id="TBL-46-8-2" style="text-align:left;"> <!-- l. 91 --><p class="noindent"><span class="ec-lmtt-9">eigenvalues_</span> </p></td><td class="td10" id="TBL-46-8-3" style="text-align:left;"> <!-- l. 91 --><p class="noindent"><!-- l. 91 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo class="MathClass-open" stretchy="false">(</mo><mi>c</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>n</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></math><span class="ec-lmr-9">,
+  ascending</span> </p></td>
+</tr><tr id="TBL-46-9-" style="vertical-align:baseline;"><td class="td01" id="TBL-46-9-1" style="text-align:left;"><!-- l. 91 --><p class="noindent"><span class="ec-lmtt-9">result.cluster.Pi
+</span><span class="ec-lmr-9">(GG)</span> </p></td><td class="td11" id="TBL-46-9-2" style="text-align:left;"> <!-- l. 91 --><p class="noindent"><span class="ec-lmtt-9">priors_</span> </p></td><td class="td10" id="TBL-46-9-3" style="text-align:left;"> <!-- l. 91 --><p class="noindent"><!-- l. 91 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo class="MathClass-open" stretchy="false">(</mo><mi>c</mi><mo class="MathClass-punc" stretchy="false">,</mo><mo class="MathClass-close" stretchy="false">)</mo></mrow></math></p></td>
+</tr><tr id="TBL-46-10-" style="vertical-align:baseline;"><td class="td01" id="TBL-46-10-1" style="text-align:left;"><!-- l. 91 --><p class="noindent"><span class="ec-lmtt-9">result.iter</span> </p></td><td class="td11" id="TBL-46-10-2" style="text-align:left;"> <!-- l. 91 --><p class="noindent"><span class="ec-lmtt-9">n_iter_</span> </p></td><td class="td10" id="TBL-46-10-3" style="text-align:left;"> <!-- l. 91 --><p class="noindent"> </p></td>
+</tr><tr id="TBL-46-11-" style="vertical-align:baseline;"><td class="td01" id="TBL-46-11-1" style="text-align:left;"><!-- l. 91 --><p class="noindent"><span class="ec-lmtt-9">result.cost</span> </p></td><td class="td11" id="TBL-46-11-2" style="text-align:left;"> <!-- l. 91 --><p class="noindent"><span class="ec-lmtt-9">objective_history_</span><span class="ec-lmr-9">,
+  </span><span class="ec-lmtt-9">objective_</span> </p></td><td class="td10" id="TBL-46-11-3" style="text-align:left;"> <!-- l. 91 --><p class="noindent"><!-- l. 91 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>J</mi></math>
+<span class="ec-lmr-9">per
+  iteration,
+  final</span>
+<!-- l. 91 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>J</mi></math><span class="ec-lmr-9">;
+  MATLAB’s
+  </span><span class="ec-lmtt-9">cost
+ </span><span class="ec-lmr-9">summed</span>
+<!-- l. 91 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><msubsup><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup></mrow></math>
+<span class="ec-lmr-9">without
+  the
+  exponent</span>
+<!-- l. 91 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>m</mi></math>
+<span class="ec-lmr-9">(</span><span class="ec-lmtt-9">GGclust</span><span class="ec-lmr-9">:
+  after
+  the
+  distances
+  were
+  transformed),
+  so
+  its
+  values
+  differ</span> </p></td>
+</tr><tr id="TBL-46-12-" style="vertical-align:baseline;"><td class="td01" id="TBL-46-12-1" style="text-align:left;"><!-- l. 91 --><p class="noindent"><span class="ec-lmtt-9">result.validity.PC
+</span><span class="ec-lmr-9">…</span> </p></td><td class="td11" id="TBL-46-12-2" style="text-align:left;"> <!-- l. 91 --><p class="noindent"><span class="ec-lmtt-9">validity_indices(...)
+ [’PC’]</span> </p></td><td class="td10" id="TBL-46-12-3" style="text-align:left;"> <!-- l. 91 --><p class="noindent"><span class="ec-lmr-9">dictionary</span> </p></td>
+</tr><tr id="TBL-46-13-" style="vertical-align:baseline;"><td class="td01" id="TBL-46-13-1" style="text-align:left;"><!-- l. 91 --><p class="noindent"><span class="ec-lmtt-9">eval.f</span><span class="ec-lmr-9">,
+</span><span class="ec-lmtt-9">eval.d
+</span><span class="ec-lmr-9">(</span><span class="ec-lmtt-9">clusteval</span><span class="ec-lmr-9">)</span> </p></td><td class="td11" id="TBL-46-13-2" style="text-align:left;"> <!-- l. 91 --><p class="noindent"><span class="ec-lmtt-9">predict_proba(X)</span><span class="ec-lmr-9">,
+  </span><span class="ec-lmtt-9">transform(X)</span> </p></td><td class="td10" id="TBL-46-13-3" style="text-align:left;"> <!-- l. 91 --><p class="noindent"><!-- l. 91 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mi>N</mi></mrow><mrow><mstyle mathvariant="normal"><mi>new</mi></mstyle></mrow></msub><mo class="MathClass-punc" stretchy="false">,</mo><mi>c</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></math></p></td>
+</tr><tr id="TBL-46-14-" style="vertical-align:baseline;"><td class="td01" id="TBL-46-14-1" style="text-align:left;"><!-- l. 91 --><p class="noindent"><span class="ec-lmtt-9">result.proj.P</span> </p></td><td class="td11" id="TBL-46-14-2" style="text-align:left;"> <!-- l. 91 --><p class="noindent"><span class="ec-lmtt-9">embedding_</span><span class="ec-lmr-9">;
+  first
+  output
+  </span><span class="ec-lmtt-9">Y
+ </span><span class="ec-lmr-9">of
+  </span><span class="ec-lmtt-9">pca_projection</span> </p></td><td class="td10" id="TBL-46-14-3" style="text-align:left;"> <!-- l. 91 --><p class="noindent"><!-- l. 91 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo class="MathClass-open" stretchy="false">(</mo><mi>N</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>q</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></math></p></td>
+</tr><tr id="TBL-46-15-" style="vertical-align:baseline;"><td class="td01" id="TBL-46-15-1" style="text-align:left;"><!-- l. 91 --><p class="noindent"><span class="ec-lmtt-9">result.proj.vp</span> </p></td><td class="td11" id="TBL-46-15-2" style="text-align:left;"> <!-- l. 91 --><p class="noindent"><span class="ec-lmtt-9">embedded_centers_
+ </span><span class="ec-lmr-9">(FuzzySammon);
+  second
+  output
+  </span><span class="ec-lmtt-9">Z
+ </span><span class="ec-lmr-9">of
+  </span><span class="ec-lmtt-9">pca_projection</span> </p></td><td class="td10" id="TBL-46-15-3" style="text-align:left;"> <!-- l. 91 --><p class="noindent"><!-- l. 91 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo class="MathClass-open" stretchy="false">(</mo><mi>c</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>q</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></math></p></td>
+</tr><tr id="TBL-46-16-" style="vertical-align:baseline;"><td class="td01" id="TBL-46-16-1" style="text-align:left;"><!-- l. 91 --><p class="noindent"><span class="ec-lmtt-9">result.proj.e</span> </p></td><td class="td11" id="TBL-46-16-2" style="text-align:left;"> <!-- l. 91 --><p class="noindent"><span class="ec-lmtt-9">stress_
+ </span><span class="ec-lmr-9">(Sammon)
+  or
+  </span><span class="ec-lmtt-9">sammon_stress(X,
+  Y)</span> </p></td><td class="td10" id="TBL-46-16-3" style="text-align:left;"> <!-- l. 91 --><p class="noindent"><span class="ec-lmr-9">float;
+  the
+  function
+  scores
+  any
+  projection</span> </p></td>
+</tr><tr id="TBL-46-17-" style="vertical-align:baseline;"><td class="td01" id="TBL-46-17-1" style="text-align:left;"><!-- l. 91 --><p class="noindent"> </p></td></tr></table>
+</figure>
+</div>
+<h3 class="sectionHead"><span class="titlemark">B.4   </span> <a id="x16-283000B.4"></a>Behavioral differences</h3>
+<dl class="description"><dt class="description">
+<span class="ec-lmbx-10x-x-109">Initialization.</span> </dt><dd class="description">
+<!-- l. 97 --><p class="noindent">  The  fuzzy  algorithms  of  the  MATLAB  toolbox  drew  random
+     prototypes  uniformly  from  the  box  centered  at  the  data  mean
+     whose half-widths are the largest absolute deviations from it, with
+     a  fixed  seed  (<span class="ec-lmtt-10x-x-109">rand(’state’,0)</span>);  <span class="ec-lmtt-10x-x-109">Kmeans  </span>and  <span class="ec-lmtt-10x-x-109">Kmedoid  </span>started
+     from  randomly  chosen  samples.  <span class="ec-lmtt-10x-x-109">fuzzyclust </span>offers  the  same  start
+     (<span class="ec-lmtt-10x-x-109">init="random"</span>,  the  default)  and  k-means++  seeding  for  every
+     estimator,  controls  the  seed  through  <span class="ec-lmtt-10x-x-109">random_state</span>,  and  can  run
+     several  restarts  (<span class="ec-lmtt-10x-x-109">n_init</span>),  keeping  the  partition  with  the  lowest
+     <!-- l. 97 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>J</mi></math>
+     (section <a href="02-foundations-of-prototype-based-clustering.html#x4-220002.2.6">2.2.6</a>).
+     </p></dd><dt class="description">
+<span class="ec-lmbx-10x-x-109">Termination.</span> </dt><dd class="description">
+<!-- l. 98 --><p class="noindent"> MATLAB iterated while the largest membership <span class="ec-lmri-10x-x-109">increase</span>, <!-- l. 98 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mtext class="qopname">max</mtext><mo> ⁡<!-- FUNCTION APPLICATION --> </mo> </mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><mo class="MathClass-open" stretchy="false">(</mo><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mo class="MathClass-open" stretchy="false">(</mo><mi>l</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></msubsup> <mo class="MathClass-bin" stretchy="false">−</mo><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mo class="MathClass-open" stretchy="false">(</mo><mi>l</mi><mo class="MathClass-bin" stretchy="false">−</mo><mn>1</mn><mo class="MathClass-close" stretchy="false">)</mo></mrow></msubsup><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>
+     without the absolute value, exceeded <!-- l. 98 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>𝜖</mi></math>,
+     and had no iteration cap; <span class="ec-lmtt-10x-x-109">fuzzyclust </span>tests <!-- l. 98 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mtext class="qopname">max</mtext><mo> ⁡<!-- FUNCTION APPLICATION --> </mo> </mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><mo class="MathClass-rel" stretchy="false">|</mo><mi mathvariant="normal">Δ</mi><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><mo class="MathClass-rel" stretchy="false">|</mo><mo class="MathClass-rel" stretchy="false">&lt;</mo> <mi>𝜖</mi></mrow></math>
+     and adds <span class="ec-lmtt-10x-x-109">max_iter</span>.
+     </p></dd><dt class="description">
+<span class="ec-lmbx-10x-x-109">Optional parameters.</span> </dt><dd class="description">
+<!-- l. 99 --><p class="noindent"> <span class="ec-lmtt-10x-x-109">FCMclust</span>, <span class="ec-lmtt-10x-x-109">GKclust</span>, and <span class="ec-lmtt-10x-x-109">GGclust </span>tested their optional fields with
+     <span class="ec-lmtt-10x-x-109">exist(’param.m’)==1</span>. <span class="ec-lmtt-10x-x-109">exist </span>looks for a variable or a file of that
+     name,  never  for  a  structure  field,  so  the  test  was  always  false:
+     <span class="ec-lmtt-10x-x-109">m </span>and  <span class="ec-lmtt-10x-x-109">e </span>(and,  in  <span class="ec-lmtt-10x-x-109">GKclust</span>,  <span class="ec-lmtt-10x-x-109">ro</span>,  <span class="ec-lmtt-10x-x-109">gamma</span>,  and  <span class="ec-lmtt-10x-x-109">beta</span>)  always  took
+     their  default  values,  and  <span class="ec-lmtt-10x-x-109">clusteval </span>and  <span class="ec-lmtt-10x-x-109">validity </span>always  used
+     <!-- l. 99 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>m</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>2</mn></mrow></math>
+     for  the  same  reason.  The  tolerance  line  also  read  <span class="ec-lmtt-10x-x-109">param.m </span>where
+     <span class="ec-lmtt-10x-x-109">param.e </span>was  meant.  Results  computed  in  MATLAB  with  other
+     settings  therefore  correspond  to  the  defaults;  <span class="ec-lmtt-10x-x-109">fuzzyclust </span>honors
+     every constructor argument.
+     </p></dd><dt class="description">
+<span class="ec-lmbx-10x-x-109">GK covariance regularization.</span> </dt><dd class="description">
+<!-- l. 100 --><p class="noindent"> The MATLAB code shrank the covariance toward <span class="ec-lmtt-10x-x-109">A0.^(1/n)</span>, and
+     since <span class="ec-lmtt-10x-x-109">A0 </span>already contained <!-- l. 100 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mtext class="qopname">det</mtext><mo> ⁡<!-- FUNCTION APPLICATION --> </mo><msup><mrow><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mstyle mathvariant="bold"><mi>F</mi></mstyle></mrow><mrow><mn>0</mn></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow><mrow><mn>1</mn><mo class="MathClass-bin" stretchy="false">∕</mo><mi>n</mi></mrow></msup></mrow></math>,
+     it computed <!-- l. 100 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mstyle mathvariant="bold"><mi>F</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">←</mo><mo class="MathClass-open" stretchy="false">(</mo><mn>1</mn> <mo class="MathClass-bin" stretchy="false">−</mo><mi>γ</mi><mo class="MathClass-close" stretchy="false">)</mo><msub><mrow><mstyle mathvariant="bold"><mi>F</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">+</mo> <mi>γ</mi><mtext class="qopname">det</mtext><mo> ⁡<!-- FUNCTION APPLICATION --> </mo><msup><mrow><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mstyle mathvariant="bold"><mi>F</mi></mstyle></mrow><mrow><mn>0</mn></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow><mrow><mn>1</mn><mo class="MathClass-bin" stretchy="false">∕</mo><msup><mrow><mi>n</mi></mrow><mrow><mn>2</mn></mrow></msup>
+</mrow></msup><mstyle mathvariant="bold"><mi>I</mi></mstyle></mrow></math>;
+     the Python implementation follows the published formula <!-- l. 100 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mstyle mathvariant="bold"><mi>F</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">←</mo><mo class="MathClass-open" stretchy="false">(</mo><mn>1</mn> <mo class="MathClass-bin" stretchy="false">−</mo><mi>γ</mi><mo class="MathClass-close" stretchy="false">)</mo><msub><mrow><mstyle mathvariant="bold"><mi>F</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">+</mo> <mi>γ</mi><mtext class="qopname">det</mtext><mo> ⁡<!-- FUNCTION APPLICATION --> </mo><msup><mrow><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mstyle mathvariant="bold"><mi>F</mi></mstyle></mrow><mrow><mn>0</mn></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow><mrow><mn>1</mn><mo class="MathClass-bin" stretchy="false">∕</mo><mi>n</mi></mrow></msup><mstyle mathvariant="bold"><mi>I</mi></mstyle></mrow></math>
+     of  Babuška  et  al. [<a id="x16-283001"></a><a href="bibliography.html#cite.0@babuska:2002:covariance">19</a>]  exactly  (section <a href="03-hard-and-fuzzy-partitioning-algorithms.html#x5-400003.2.4">3.2.4</a>).  Since  <span class="ec-lmtt-10x-x-109">gamma </span>was
+     always zero in MATLAB (see above), the difference never showed in
+     MATLAB results.
+     </p></dd><dt class="description">
+<span class="ec-lmbx-10x-x-109">Gath–Geva.</span> </dt><dd class="description">
+<!-- l. 101 --><p class="noindent"> The  exponential  distance  is  evaluated  in  the  logarithmic  domain,
+     so  far-away  samples  no  longer  overflow.  The  covariance  weighting
+     exponent equals <!-- l. 101 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>m</mi></math>,
+     as in MATLAB, but the priors are computed from the memberships
+     themselves, <!-- l. 101 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>α</mi></mrow><mrow><mi>i</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><mn>1</mn></mrow>
+<mrow><mi>N</mi></mrow></mfrac><msub><mrow> <mi class="MathClass-op">∑</mi><mo> ⁡<!-- FUNCTION APPLICATION --></mo>
+<!-- nolimits --></mrow><mrow><mi>k</mi></mrow></msub><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub></mrow></math>,
+     where MATLAB used <!-- l. 101 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mi>m</mi></mrow></msubsup></math>.
+     The regularization of GK (<span class="ec-lmtt-10x-x-109">gamma</span>, <span class="ec-lmtt-10x-x-109">beta</span>) is also available.
+     </p></dd><dt class="description">
+<span class="ec-lmbx-10x-x-109">Validity.</span> </dt><dd class="description">
+<!-- l. 102 --><p class="noindent"> All indices are computed at once from the data, the partition, the
+     centers, and <!-- l. 102 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>m</mi></math>,
+     with Euclidean distances whatever the clustering algorithm (for SC,
+     S,  XB,  and  ADI,  MATLAB  used  the  algorithm’s  distance  matrix
+     <span class="ec-lmtt-10x-x-109">result.data.d</span>). The Fukuyama–Sugeno, PBM-F, Kwon, and PCAES
+     indices, the volume and density indices of Gath and Geva (FHV, PD,
+     APD), MPC, and the silhouette were added. The <span class="ec-lmtt-10x-x-109">param.val </span>groups
+     are reproduced by passing the index names.
+     </p></dd><dt class="description">
+<span class="ec-lmbx-10x-x-109">Plotting.</span> </dt><dd class="description">
+<!-- l. 103 --><p class="noindent"> <span class="ec-lmtt-10x-x-109">param.vis </span>and the contour map of <span class="ec-lmtt-10x-x-109">clusteval </span>are replaced by explicit
+     plotting helpers that draw on a matplotlib <span class="ec-lmtt-10x-x-109">Axes</span>; fitting never opens a
+     figure.
+     </p></dd><dt class="description">
+<span class="ec-lmbx-10x-x-109">Data.</span> </dt><dd class="description">
+<!-- l. 104 --><p class="noindent">  The  data  matrix  is  a  NumPy  array  or  a  pandas  <span class="ec-lmtt-10x-x-109">DataFrame</span>;
+     no   wrapper   structure   is   needed.   Feature   names   are   kept   in
+     <span class="ec-lmtt-10x-x-109">feature_names_in_</span>.
+     </p></dd><dt class="description">
+<span class="ec-lmbx-10x-x-109">Normalization.</span> </dt><dd class="description">
+<!-- l. 105 --><p class="noindent"> <span class="ec-lmtt-10x-x-109">clust_normalize </span>stored the scaling inside the data structure; here
+     the scaler is a separate object (or a step in a scikit-learn <span class="ec-lmtt-10x-x-109">Pipeline</span>)
+                                                                     
+
+                                                                     
+     whose <span class="ec-lmtt-10x-x-109">inverse_transform </span>plays the role of <span class="ec-lmtt-10x-x-109">clust_denormalize</span>. The
+     MATLAB <span class="ec-lmtt-10x-x-109">Kmeans </span>range-normalized its input internally; <span class="ec-lmtt-10x-x-109">KMeans </span>does
+     not scale the data.</p></dd></dl>
+<!-- l. 108 --><p class="noindent">A minimal translation of a typical MATLAB session,
+                                                                     
+
+                                                                     
+</p>
+<pre class="verbatim" id="verbatim-1">
+data = clust_normalize(data,’range’);
+param.c = 3; param.m = 2; param.e = 1e-4;
+result = GKclust(data,param);
+param.val = 2;
+result = validity(result,data,param);
+new.X = (new.X - repmat(data.min,size(new.X,1),1)) ./ ...
+        repmat(data.max - data.min,size(new.X,1),1);
+eval = clusteval(new,result,param);
+</pre>
+<!-- l. 118 --><p class="nopar">reads in Python as </p><!-- l. 120 -->
+<pre class="lstlisting" id="listing-154"><span class="label"><a id="x16-283002r1"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">from</span></span><span style="color:#000000"> <span class="ec-lmtt-9">fuzzyclust.cluster</span> </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">import</span></span><span style="color:#000000"> <span class="ec-lmtt-9">GK</span> 
+</span><span class="label"><a id="x16-283003r2"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">from</span></span><span style="color:#000000"> <span class="ec-lmtt-9">fuzzyclust.preprocessing</span> </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">import</span></span><span style="color:#000000"> <span class="ec-lmtt-9">normalize</span> 
+</span><span class="label"><a id="x16-283004r3"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">from</span></span><span style="color:#000000"> <span class="ec-lmtt-9">fuzzyclust.validity</span> </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">import</span></span><span style="color:#000000"> <span class="ec-lmtt-9">validity_indices</span> 
+</span><span class="label"><a id="x16-283005r4"></a></span> 
+<span class="label"><a id="x16-283006r5"></a></span><span style="color:#000000"><span class="ec-lmtt-9">Xs</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">scaler = normalize(X,</span> </span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">range</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span> 
+<span class="label"><a id="x16-283007r6"></a></span><span style="color:#000000"><span class="ec-lmtt-9">gk</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= GK(n_clusters=3, m=2.0, tol=1e-4, random_state=0).fit(Xs)</span> 
+</span><span class="label"><a id="x16-283008r7"></a></span><span style="color:#000000"><span class="ec-lmtt-9">indices</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= validity_indices(Xs, gk.membership_, gk.cluster_centers_, m=gk.m,</span> 
+</span><span class="label"><a id="x16-283009r8"></a></span><span style="color:#000000">                           <span class="ec-lmtt-9">indices=[</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">SC</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">S</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> </span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">XB</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#000000"><span class="ec-lmtt-9">])</span></span> 
+<span class="label"><a id="x16-283010r9"></a></span><span style="color:#000000"><span class="ec-lmtt-9">U_new</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= gk.predict_proba(scaler.transform(X_new))</span></span></pre>
+<!-- l. 1 -->
+<!-- l. 1 --><p class="indent"> <a id="tailmain_webap2.html"></a> </p>
+<nav class='pager'><a class='prev' href='a-api-reference.html'><small>Previous</small>API reference</a><a class='next' href='c-the-example-gallery.html'><small>Next</small>The example gallery</a></nav>
+</main>
+<aside class="right"><nav class='onpage' aria-label='On this page'><p class='toc-title'>On this page</p><ul><li><a href='#x16-280000B.1'>B.1 Functions</a></li><li><a href='#x16-281000B.2'>B.2 Parameters</a></li><li><a href='#x16-282000B.3'>B.3 Results</a></li><li><a href='#x16-283000B.4'>B.4 Behavioral differences</a></li></ul></nav></aside>
+</div>
+<footer class='foot'>© 2026 János Abonyi, University of Pannonia · licensed under <a href='https://creativecommons.org/licenses/by/4.0/'>CC BY 4.0</a> · web edition of the book, generated from the same LaTeX source as the <a href='../fuzzyclust-book.pdf'>PDF</a> · software: <a href='https://github.com/ComplexSystemsIntelligence/fuzzyclust'>fuzzyclust</a> (MIT) · <code>pip install fuzzyclust</code></footer>
+</body>
+</html>

@@ -1,0 +1,12 @@
+﻿fuzzyclust.validity.stability\_selection
+========================================
+
+.. currentmodule:: fuzzyclust.validity
+
+.. autofunction:: stability_selection
+
+.. include:: fuzzyclust.validity.stability_selection.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

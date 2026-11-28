@@ -1,0 +1,12 @@
+﻿fuzzyclust.validity.fuzzy\_hypervolume
+======================================
+
+.. currentmodule:: fuzzyclust.validity
+
+.. autofunction:: fuzzy_hypervolume
+
+.. include:: fuzzyclust.validity.fuzzy_hypervolume.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

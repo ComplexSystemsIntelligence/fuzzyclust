@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>1 Introduction · Fuzzy Clustering and Data Analysis in Python</title>
+<meta name="description" content="Open-access book on fuzzy clustering and data analysis in Python with the fuzzyclust toolbox: fuzzy c-means, Gustafson-Kessel, Gath-Geva, cluster validity, visualisation, Takagi-Sugeno models, time-series segmentation and more, with runnable Colab examples." />
+<meta name="author" content="János Abonyi" />
+<link rel="canonical" href="https://complexsystemsintelligence.github.io/fuzzyclust/book/01-introduction.html" />
+<meta property="og:title" content="1 Introduction · Fuzzy Clustering and Data Analysis in Python" />
+<meta property="og:type" content="book" />
+<meta property="og:url" content="https://complexsystemsintelligence.github.io/fuzzyclust/book/01-introduction.html" />
+<meta property="og:image" content="https://complexsystemsintelligence.github.io/fuzzyclust/book/cover.png" />
+<meta property="og:description" content="Open-access book on fuzzy clustering and data analysis in Python with the fuzzyclust toolbox: fuzzy c-means, Gustafson-Kessel, Gath-Geva, cluster validity, visualisation, Takagi-Sugeno models, time-series segmentation and more, with runnable Colab examples." />
+<link rel="icon" href="../_static/favicon.png" />
+<link rel="stylesheet" href="main_web.css" />
+<link rel="stylesheet" href="web.css" />
+</head>
+<body class="">
+<header class='topbar'><a class='brand' href='index.html'><img src='logo.svg' alt='' width='34' height='34' /><span><b>Fuzzy Clustering and Data Analysis in Python</b><small>The fuzzyclust toolbox</small></span></a><nav class='toplinks'><a href='../'>Documentation</a><a href='../auto_examples/index.html'>Examples</a><a href='../fuzzyclust-book.pdf'>PDF</a><a href='../fuzzyclust-book.epub'>EPUB</a><a href='https://github.com/ComplexSystemsIntelligence/fuzzyclust'>GitHub</a><a class='hub' href='https://complexsystemsintelligence.github.io/#textbooks'>All textbooks</a></nav></header>
+<div class="layout">
+<aside class="left"><nav class='toc' aria-label='Contents'><p class='toc-title'>Contents</p><ol><li><a href='preface.html'><span class='num'></span>Preface</a></li><li class='current'><a href='01-introduction.html'><span class='num'>1</span>Introduction</a></li><li><a href='02-foundations-of-prototype-based-clustering.html'><span class='num'>2</span>Foundations of prototype-based clustering</a></li><li><a href='03-hard-and-fuzzy-partitioning-algorithms.html'><span class='num'>3</span>Hard and fuzzy partitioning algorithms</a></li><li><a href='04-cluster-validity-and-the-number.html'><span class='num'>4</span>Cluster validity and the number of clusters</a></li><li><a href='05-visualization-of-fuzzy-clustering-results.html'><span class='num'>5</span>Visualization of fuzzy clustering results</a></li><li><a href='06-robust-and-shape-oriented-variants.html'><span class='num'>6</span>Robust and shape-oriented variants of fuzzy c-means</a></li><li><a href='07-graph-based-fuzzy-clustering.html'><span class='num'>7</span>Graph-based fuzzy clustering</a></li><li><a href='08-clustering-for-model-identification.html'><span class='num'>8</span>Clustering for model identification</a></li><li><a href='09-clustering-of-time-series.html'><span class='num'>9</span>Clustering of time series</a></li><li><a href='10-clustering-relational-categorical-and-mixed.html'><span class='num'>10</span>Clustering relational, categorical, and mixed data</a></li><li><a href='11-incomplete-very-large-and-image.html'><span class='num'>11</span>Incomplete, very large, and image data</a></li><li><a href='12-beyond-a-single-unsupervised-run.html'><span class='num'>12</span>Beyond a single unsupervised run: partial supervision,
+co-clustering, collaboration, and ensembles</a></li><li><a href='a-api-reference.html'><span class='num'>A</span>API reference</a></li><li><a href='b-migrating-from-the-matlab-toolbox.html'><span class='num'>B</span>Migrating from the MATLAB toolbox</a></li><li><a href='c-the-example-gallery.html'><span class='num'>C</span>The example gallery</a></li><li><a href='bibliography.html'><span class='num'></span>Bibliography</a></li></ol></nav></aside>
+<main class="content">
+
+<!-- l. 1 -->
+<h2 class="chapterHead"><span class="titlemark">Chapter 1</span><br/><a id="x3-60001"></a>Introduction</h2>
+<div class="box roadmap">
+<!-- l. 3 --><p class="indent">   This chapter explains what clustering is good for, why fuzzy partitions are
+often the more honest description of data, and where the <span class="ec-lmtt-10x-x-109">fuzzyclust </span>toolbox
+comes from. The toolbox is the Python successor of the <span class="ec-lmri-10x-x-109">Fuzzy Clustering and
+Data Analysis Toolbox for MATLAB </span>and puts two decades of clustering-based
+research of the author’s group (model identification, time-series analysis,
+visualization, and graph-based methods) and the classical methods of
+the literature behind one scikit-learn compatible interface. The chapter
+then describes how the book is organized and how to read it, and closes
+with the installation and a short first session. The mathematics starts in
+chapter <a href="02-foundations-of-prototype-based-clustering.html#x4-140002">2</a>.
+</p>
+</div>
+<h3 class="sectionHead"><span class="titlemark">1.1   </span> <a id="x3-70001.1"></a>What clustering is for</h3>
+<!-- l. 8 --><p class="noindent">Cluster analysis groups objects by their mutual similarity: objects in the same
+group should resemble each other more than objects in different groups. It is
+<span class="ec-lmri-10x-x-109">unsupervised</span>—no class labels are used—and this is its main asset. Where a
+classifier reproduces categories that somebody has already defined, clustering
+reveals a structure nobody has defined yet: the operating regimes of a chemical
+reactor, the types of customers behind a sales table, the segments of a long
+measured signal, the local linear behaviors of a nonlinear system. Ruspini [<a id="x3-7001"></a><a href="bibliography.html#cite.0@ruspini:1969">1</a>],
+Dunn [<a id="x3-7002"></a><a href="bibliography.html#cite.0@dunn:1973:fcm">2</a>], and Bezdek [<a id="x3-7003"></a><a href="bibliography.html#cite.0@bezdek:1981">3</a>] formulated fuzzy clustering as the minimization of an
+objective function, and the monographs by Bezdek [<a href="bibliography.html#cite.0@bezdek:1981">3</a>], by Jain and Dubes [<a id="x3-7004"></a><a href="bibliography.html#cite.0@jain:1988:book">4</a>], by
+Kaufman and Rousseeuw [<a id="x3-7005"></a><a href="bibliography.html#cite.0@kaufman:1990:groups">5</a>], and by Höppner et al. [<a id="x3-7006"></a><a href="bibliography.html#cite.0@hoppner:1999:book">6</a>] remain the standard
+references.
+</p><!-- l. 10 --><p class="indent">   In this book the objects are the <!-- l. 10 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>N</mi></math>
+rows <!-- l. 10 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">∈</mo> <msup><mrow><mi>ℝ</mi></mrow><mrow><mi>n</mi></mrow></msup></mrow></math> of a
+data matrix <!-- l. 10 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mstyle mathvariant="bold"><mi>X</mi></mstyle> <mo class="MathClass-rel" stretchy="false">∈</mo> <msup><mrow><mi>ℝ</mi></mrow><mrow><mi>N</mi><mo class="MathClass-bin" stretchy="false">×</mo><mi>n</mi></mrow></msup></mrow></math>;
+the columns are measured variables (<span class="ec-lmri-10x-x-109">features</span>). What the rows mean depends on
+the application, and so does the meaning of a cluster: </p>
+<ul class="itemize1">
+<li class="itemize">In <span class="ec-lmri-10x-x-109">exploratory data analysis </span>the rows are independent observations
+                                                                     
+
+                                                                     
+     (patients,  products,  samples),  and  a  cluster  is  a  group  of  similar
+     observations. The analyst wants to know how many groups there are,
+     how they differ, and which observations lie between them.
+     </li>
+<li class="itemize">In <span class="ec-lmri-10x-x-109">pattern recognition and data reduction </span>the prototypes of the clusters
+     stand in for the data: a few hundred prototypes summarize a million
+     samples, and the memberships of a new sample in the clusters serve
+     as features for a subsequent classifier or regression model.
+     </li>
+<li class="itemize">In <span class="ec-lmri-10x-x-109">system identification </span>the rows <!-- l. 14 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msup><mrow><mo class="MathClass-open" stretchy="false">[</mo><msubsup><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow><mrow><mstyle mathvariant="sans-serif"><mi>T</mi></mstyle></mrow></msubsup><mspace class="thinspace" width="0.17em"></mspace><msub><mrow><mi>y</mi></mrow><mrow><mi>k</mi></mrow></msub><mo class="MathClass-close" stretchy="false">]</mo></mrow><mrow><mstyle mathvariant="sans-serif"><mi>T</mi></mstyle></mrow></msup></math>
+     join a regression vector, built from lagged inputs and outputs of a
+     dynamic  system,  with  the  corresponding  output.  A  cluster  in  this
+     product space is a region where one local linear model fits, and the
+     fuzzy clustering of the product space yields a Takagi–Sugeno model
+     with the memberships as rule firing strengths [<a id="x3-7007"></a><a href="bibliography.html#cite.0@babuska:1998:book">7</a>, <a id="x3-7008"></a><a href="bibliography.html#cite.0@abonyi:2007:book">8</a>]. Here clustering is
+     not the end result but the structure-identification step of a model.
+     </li>
+<li class="itemize">In  <span class="ec-lmri-10x-x-109">time-series  analysis  </span>the  rows  are  consecutive  samples  or  delay
+     vectors of a signal; a cluster is a segment with homogeneous behavior,
+     and the memberships along time show when one regime gives way to
+     the next.</li></ul>
+<!-- l. 17 --><p class="noindent">The toolbox and the book cover all four uses. Chapters <a href="02-foundations-of-prototype-based-clustering.html#x4-140002">2<!-- tex4ht:ref: ch:foundations  --></a>–<a href="04-cluster-validity-and-the-number.html#x6-680004">4<!-- tex4ht:ref: ch:validity  --></a> develop the partitioning
+algorithms and their validation for the first two uses, chapter <a href="08-clustering-for-model-identification.html#x10-1480008">8</a> the identification
+use, and chapter <a href="09-clustering-of-time-series.html#x11-1680009">9</a> the time-series use; the visualization and graph methods of
+chapters <a href="05-visualization-of-fuzzy-clustering-results.html#x7-870005">5</a> and <a href="07-graph-based-fuzzy-clustering.html#x9-1290007">7</a> serve all of them.
+</p><!-- l. 19 --><p class="noindent">
+</p>
+<h3 class="sectionHead"><span class="titlemark">1.2   </span> <a id="x3-80001.2"></a>Hard and fuzzy partitions in one picture</h3>
+<!-- l. 21 --><p class="noindent">A <span class="ec-lmri-10x-x-109">hard </span>(crisp) partition assigns every sample to exactly one cluster; the clusters are disjoint
+subsets of the data. A <span class="ec-lmri-10x-x-109">fuzzy </span>partition [<a id="x3-8001"></a><a href="bibliography.html#cite.0@ruspini:1969">1</a>, <a id="x3-8002"></a><a href="bibliography.html#cite.0@zadeh:1965:fuzzysets">9</a>] assigns every sample a membership degree
+<!-- l. 21 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">∈</mo><mo class="MathClass-open" stretchy="false">[</mo><mn>0</mn><mo class="MathClass-punc" stretchy="false">,</mo><mn>1</mn><mo class="MathClass-close" stretchy="false">]</mo></mrow></math> in every
+cluster, with <!-- l. 21 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi class="MathClass-op">∑</mi><mo> ⁡<!-- FUNCTION APPLICATION --></mo>
+<!-- nolimits --></mrow><mrow><mi>i</mi></mrow></msub><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>1</mn></mrow></math>.
+Figure <a href="#x3-8003r1">1.1</a> shows why the second description is often the more faithful one. Two
+                                                                     
+
+                                                                     
+groups of points overlap. The hard partition (top left) draws a boundary and
+puts every sample on one side of it, although the samples near the boundary are
+no more similar to their own prototype than to the other one. The fuzzy
+partition (top right) preserves the degree of ambiguity of every sample.
+Along the line through the prototypes (bottom), the hard partition is a
+step function at the midpoint, whereas the fuzzy partition is a smooth
+membership function whose steepness is set by the fuzziness exponent
+<!-- l. 21 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>m</mi></math> of
+chapter <a href="03-hard-and-fuzzy-partitioning-algorithms.html#x5-330003">3</a>.
+</p>
+<figure class="figure">
+<!-- l. 24 --><p class="noindent"><img alt="Figure 1.1" src="main_web0x.svg"/>
+<a id="x3-8003r1"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 1.1.   </span></span><span class="content"><span class="ec-lmr-10">Hard   and   fuzzy   partitions   of   two   overlapping   groups.
+Top    left:    a    hard    partition    assigns    every    sample    to    the    nearer
+prototype;    the    dashed    boundary    is    the    perpendicular    bisector    of</span>
+<!-- l. 60 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mn>1</mn></mrow></msub><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mn>2</mn></mrow></msub></mrow></math><span class="ec-lmr-10">.
+Top   right:   the   fuzzy   c-means   partition   of   the   same   data,   with   every
+sample  colored  by  the  blend  of  its  two  memberships;  the  cores  are  pure,
+and  the  overlap  region  is  a  gradient.  Bottom:  along  the  line  through  the
+prototypes,  a  hard  partition  is  a  step  and  a  fuzzy  partition  is  a  smooth
+membership   function   whose   steepness   grows   as   the   fuzziness   exponent</span>
+<!-- l. 60 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>m</mi></math>
+<span class="ec-lmr-10">approaches one.</span>
+</span></figcaption><!-- tex4ht:label?: x3-8003r1  -->
+</figure>
+<!-- l. 64 --><p class="indent">   Three practical consequences follow, and they are the reasons
+this book is about <span class="ec-lmri-10x-x-109">fuzzy </span>clustering. First, the memberships carry
+information that a label cannot: the sample with memberships
+<!-- l. 64 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo class="MathClass-open" stretchy="false">(</mo><mn>0.49</mn><mo class="MathClass-punc" stretchy="false">,</mo><mn>0.51</mn><mo class="MathClass-close" stretchy="false">)</mo></mrow></math> and the
+sample with <!-- l. 64 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo class="MathClass-open" stretchy="false">(</mo><mn>0.02</mn><mo class="MathClass-punc" stretchy="false">,</mo><mn>0.98</mn><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>
+receive the same hard label but mean different things, and a downstream model
+(a classifier, a local linear model, a monitoring rule) can use the difference.
+Second, the fuzzy objective function is differentiable in the memberships, which
+makes closed-form update equations and convergence proofs possible [<a id="x3-8004"></a><a href="bibliography.html#cite.0@bezdek:1980:convergence">10</a>, <a id="x3-8005"></a><a href="bibliography.html#cite.0@bezdek:1987:convergence">11</a>];
+hard partitions have to be searched combinatorially. Third, fuzzy prototypes are
+weighted means over <span class="ec-lmri-10x-x-109">all </span>samples, so they move smoothly when the data
+change, which matters for identification and for tracking slowly drifting
+processes.
+</p>
+<h3 class="sectionHead"><span class="titlemark">1.3   </span> <a id="x3-90001.3"></a>From the MATLAB toolbox to fuzzyclust</h3>
+<!-- l. 68 --><p class="noindent"><span class="ec-lmtt-10x-x-109">fuzzyclust </span>descends from the <span class="ec-lmri-10x-x-109">Fuzzy Clustering and Data Analysis Toolbox for
+MATLAB </span>of Balaskó, Abonyi, and Feil [<a id="x3-9001"></a><a href="bibliography.html#cite.0@balasko:2005:toolbox">12</a>]. That toolbox implemented,
+in the notation of Babuška’s monograph [<a id="x3-9002"></a><a href="bibliography.html#cite.0@babuska:1998:book">7</a>], the hard k-means and
+k-medoids algorithms; the fuzzy c-means (FCM), Gustafson–Kessel (GK),
+and Gath–Geva (GG) algorithms; the evaluation of new data with fitted
+prototypes (<span class="ec-lmtt-10x-x-109">clusteval</span>); seven validity indices; data normalization; and three
+projection methods for the visualization of clustering results: principal
+component analysis, Sammon mapping, and the fuzzy Sammon mapping
+(FUZZSAM) of Kovács and Abonyi. It became the companion of the
+book <span class="ec-lmri-10x-x-109">Cluster Analysis for Data Mining and System Identification </span>[<a id="x3-9003"></a><a href="bibliography.html#cite.0@abonyi:2007:book">8</a>] and
+the basis of a line of research in which clustering is the engine of other
+tasks.
+</p><!-- l. 70 --><p class="indent">   Figure <a href="#x3-9004r2">1.2</a> shows how the Python toolbox grew out of it. The core of the
+MATLAB toolbox maps one-to-one onto the sub-packages <span class="ec-lmtt-10x-x-109">cluster</span>, <span class="ec-lmtt-10x-x-109">validity</span>,
+<span class="ec-lmtt-10x-x-109">preprocessing</span>, <span class="ec-lmtt-10x-x-109">plotting</span>, and <span class="ec-lmtt-10x-x-109">viz </span>(chapter <a href="b-migrating-from-the-matlab-toolbox.html#x16-279000B">B</a> gives the mapping function
+by function). Around this core, four research threads of the group are
+collected:
+     </p><dl class="description"><dt class="description">
+<span class="ec-lmbx-10x-x-109">Identification (</span><span class="ec-lmtk-10x-x-109">fuzzyclust.models</span><span class="ec-lmbx-10x-x-109">).</span> </dt><dd class="description">
+<!-- l. 72 --><p class="noindent"> Takagi–Sugeno fuzzy models identified by clustering the product space
+                                                                     
+
+                                                                     
+     of inputs and outputs with a modified Gath–Geva algorithm, fuzzy
+     c-regression models, supervised fuzzy clustering for classification, fuzzy
+     partitions for decision trees, and hinging-hyperplane trees.
+     </p></dd><dt class="description">
+<span class="ec-lmbx-10x-x-109">Time series (</span><span class="ec-lmtk-10x-x-109">fuzzyclust.timeseries</span><span class="ec-lmbx-10x-x-109">).</span> </dt><dd class="description">
+<!-- l. 73 --><p class="noindent">  Fuzzy  segmentation  of  multivariate  time  series  by  clustering
+     with  time  as  an  extra  dimension,  model-order  selection  with  false
+     nearest neighbors and clustering, state-space reconstruction of chaotic
+     systems, and structure selection for mixed-input models.
+     </p></dd><dt class="description">
+<span class="ec-lmbx-10x-x-109">Visualization (</span><span class="ec-lmtk-10x-x-109">fuzzyclust.viz</span><span class="ec-lmbx-10x-x-109">).</span> </dt><dd class="description">
+<!-- l. 74 --><p class="noindent"> FUZZSAM and its quality measures, the fuzzy self-organizing map
+     as a regularized FCM, and projection diagnostics for the number of
+     clusters.
+     </p></dd><dt class="description">
+<span class="ec-lmbx-10x-x-109">Graph methods (</span><span class="ec-lmtk-10x-x-109">fuzzyclust.graph</span><span class="ec-lmbx-10x-x-109">).</span> </dt><dd class="description">
+<!-- l. 75 --><p class="noindent"> Minimal-spanning-tree clustering with fuzzy hypervolume splitting
+     and Gath–Geva refinement, and geodesic-distance fuzzy c-medoids on
+     neighborhood graphs.</p></dd></dl>
+<!-- l. 77 --><p class="noindent">A fifth sub-package, <span class="ec-lmtt-10x-x-109">fuzzyclust.extensions</span>, adds classical variants that the
+MATLAB toolbox did not have: possibilistic c-means, noise clustering, kernel
+FCM, fuzzy c-varieties and c-shells, volume prototypes, and feature weighting.
+Eight further sub-packages take the methods beyond a complete numeric data
+matrix and a single unsupervised run: <span class="ec-lmtt-10x-x-109">relational</span>, <span class="ec-lmtt-10x-x-109">incomplete</span>, <span class="ec-lmtt-10x-x-109">large</span>, <span class="ec-lmtt-10x-x-109">image</span>,
+<span class="ec-lmtt-10x-x-109">semisupervised</span>, <span class="ec-lmtt-10x-x-109">coclustering</span>, <span class="ec-lmtt-10x-x-109">collaborative</span>, and <span class="ec-lmtt-10x-x-109">ensemble </span>(chapters 10
+to 12).
+</p>
+<figure class="figure">
+<!-- l. 80 --><p class="noindent"><img alt="Figure 1.2" src="main_web1x.svg"/>
+<a id="x3-9004r2"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 1.2.  </span></span><span class="content"><span class="ec-lmr-10">Lineage  of  the  toolbox.  The  functions  of  the  MATLAB  toolbox
+became  the  core  sub-packages  of  </span><span class="ec-lmtt-10">fuzzyclust</span><span class="ec-lmr-10">;  the  clustering-based  research  of
+the group (identification, time series, visualization, and graph methods) and the
+classical extensions are built on the same base class and the same notation.</span>
+</span></figcaption><!-- tex4ht:label?: x3-9004r2  -->
+</figure>
+<!-- l. 113 --><p class="indent">   Two design decisions shape the package. First, almost every clustering
+algorithm is a class derived from one base class that implements the alternating
+optimization once; an algorithm only defines how its prototypes are updated and
+how its distances are measured (chapter <a href="02-foundations-of-prototype-based-clustering.html#x4-140002">2</a>). Second, the estimators follow
+the scikit-learn conventions [<a id="x3-9005"></a><a href="bibliography.html#cite.0@pedregosa:2011:sklearn">13</a>]: <span class="ec-lmtt-10x-x-109">fit</span>, <span class="ec-lmtt-10x-x-109">predict</span>, <span class="ec-lmtt-10x-x-109">predict_proba</span>, and
+<span class="ec-lmtt-10x-x-109">transform </span>behave as in scikit-learn; pipelines, cloning, grid search, and
+pickling work without extra code; and a <span class="ec-lmtt-10x-x-109">pandas </span>data frame is accepted as
+input and, on request, returned by <span class="ec-lmtt-10x-x-109">transform</span>. The MATLAB function
+<span class="ec-lmtt-10x-x-109">clusteval</span>, which evaluated new data with fitted prototypes, has become
+<span class="ec-lmtt-10x-x-109">predict_proba</span>.
+</p>
+<h3 class="sectionHead"><span class="titlemark">1.4   </span> <a id="x3-100001.4"></a>How the book is organized</h3>
+<!-- l. 117 --><p class="noindent">Chapter <a href="02-foundations-of-prototype-based-clustering.html#x4-140002">2</a> lays the common ground: the data matrix; the distance norms; the
+hard, fuzzy, and possibilistic partition spaces; the objective-function view of
+clustering, with alternating optimization as the template of all algorithms;
+initialization, termination, and scaling; and the notation used throughout. It
+ends with the scikit-learn interface that the estimators of the toolbox
+share.
+</p><!-- l. 119 --><p class="indent">   Chapter <a href="03-hard-and-fuzzy-partitioning-algorithms.html#x5-330003">3</a> presents the partitioning algorithms that carry the toolbox:
+k-means and k-medoids as hard reference methods; fuzzy c-means, with the
+derivation of its update equations and the role of the fuzziness exponent; the
+Gustafson–Kessel algorithm, with its adaptive norm, its volume constraint, and
+the covariance regularization of Babuška, van der Veen, and Kaymak; and the
+Gath–Geva algorithm, with its exponential distance, its priors, and its need for a
+good initialization. It closes with alternative fuzzifiers and with mountain and
+subtractive clustering, which estimate the number and location of the
+clusters.
+</p><!-- l. 121 --><p class="indent">   Chapter <a href="04-cluster-validity-and-the-number.html#x6-680004">4</a> asks how many clusters there are. It describes the sixteen validity
+indices of the toolbox (partition-based, compactness and separation, crisp, and
+volume-based) with their optimum directions and weaknesses, the scan over the
+number of clusters, compatible cluster merging and stability-based selection as
+alternatives to the scan, and the evaluation of new data as a form of
+validation.
+</p><!-- l. 123 --><p class="indent">   Chapter <a href="05-visualization-of-fuzzy-clustering-results.html#x7-870005">5</a> puts a clustering on paper: principal component projection, Sammon
+                                                                     
+
+                                                                     
+mapping, the fuzzy Sammon mapping that preserves the sample–prototype
+distances of the algorithm, measures of projection quality, and the fuzzy
+self-organizing map.
+</p><!-- l. 125 --><p class="indent">   Chapter <a href="06-robust-and-shape-oriented-variants.html#x8-1020006">6</a> extends the prototype and the partition: possibilistic and
+noise clustering for data with outliers, kernel FCM, fuzzy c-varieties and
+c-shells for linear and circular clusters, volume prototypes, and feature
+weighting.
+</p><!-- l. 127 --><p class="indent">   Chapter <a href="07-graph-based-fuzzy-clustering.html#x9-1290007">7</a> abandons the prototype as the starting point: minimal-spanning-tree
+clustering with fuzzy hypervolume splitting and Gath–Geva refinement, and
+fuzzy c-medoids with geodesic distances on neighborhood graphs for clusters that
+follow a manifold.
+</p><!-- l. 129 --><p class="indent">   Chapter <a href="08-clustering-for-model-identification.html#x10-1480008">8</a> turns clustering into model identification: Takagi–Sugeno
+models from Gath–Geva clustering of the product space, fuzzy c-regression
+models, supervised fuzzy classifiers, fuzzy partitions for decision trees, and
+hinging-hyperplane trees.
+</p><!-- l. 131 --><p class="indent">   Chapter <a href="09-clustering-of-time-series.html#x11-1680009">9</a> applies clustering to signals: fuzzy segmentation of multivariate
+time series, model-order selection by false nearest neighbors, state-space
+reconstruction of chaotic systems, and structure selection for models with mixed
+inputs.
+</p><!-- l. 133 --><p class="indent">   Chapter <a href="10-clustering-relational-categorical-and-mixed.html#x12-18800010">10</a> gives up the numeric feature vector: relational and NERF
+c-means work from a dissimilarity matrix alone, fuzzy c-medoids accepts any
+dissimilarity, and fuzzy k-modes and k-prototypes cluster categorical and mixed
+records.
+</p><!-- l. 135 --><p class="indent">   Chapter <a href="11-incomplete-very-large-and-image.html#x13-20900011">11</a> adapts fuzzy c-means to incomplete data, to very large data sets
+and streams, and to image segmentation, where the neighborhood of a pixel
+enters the objective function.
+</p><!-- l. 137 --><p class="indent">   Chapter <a href="12-beyond-a-single-unsupervised-run.html#x14-23900012">12</a> goes beyond a single unsupervised run: partial supervision by
+class labels or pairwise constraints, co-clustering of objects and items,
+collaborative clustering across data sites, and fuzzy cluster ensembles.
+</p><!-- l. 139 --><p class="indent">   Three appendices complete the book: a compact reference of every public
+class and function (chapter <a href="a-api-reference.html#x15-259000A">A</a>), the migration table from the MATLAB toolbox
+(chapter <a href="b-migrating-from-the-matlab-toolbox.html#x16-279000B">B</a>), and the catalog of example scripts (chapter <a href="c-the-example-gallery.html#x17-284000C">C</a>).
+</p><!-- l. 141 --><p class="noindent">
+</p>
+<h3 class="sectionHead"><span class="titlemark">1.5   </span> <a id="x3-110001.5"></a>How to read this book</h3>
+<!-- l. 143 --><p class="noindent">Every chapter has the same structure. A <span class="ec-lmri-10x-x-109">roadmap </span>says what the chapter covers
+and how it connects to the previous one. <span class="ec-lmri-10x-x-109">Problem and idea </span>motivates the
+methods in words and with one concept figure. <span class="ec-lmri-10x-x-109">Theory </span>develops the methods in
+the unified notation, states every algorithm in an algorithm box, and
+closes with a summary box. <span class="ec-lmri-10x-x-109">Using it in fuzzyclust </span>lists the parameters
+and attributes of the classes in API boxes, with code snippets taken
+verbatim from the example scripts. <span class="ec-lmri-10x-x-109">Examples </span>discusses the figures that the
+example scripts produce, with emphasis on what happens when the main
+parameters change. <span class="ec-lmri-10x-x-109">Further reading </span>points to the original papers. Theory and
+experiments are kept apart on purpose: the theory sections can be read without
+running anything, and the example sections can be run without reading the
+theory.
+</p>
+<div class="box hintbox">
+<!-- l. 145 --><p class="noindent"><span class="ec-lmbx-10x-x-109">Notation at a glance</span>
+</p><!-- l. 146 --><p class="indent"> <!-- l. 146 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mstyle mathvariant="bold"><mi>X</mi></mstyle> <mo class="MathClass-rel" stretchy="false">∈</mo> <msup><mrow><mi>ℝ</mi></mrow><mrow><mi>N</mi><mo class="MathClass-bin" stretchy="false">×</mo><mi>n</mi></mrow></msup></mrow></math> is the data
+matrix with <!-- l. 146 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>N</mi></math>
+samples <!-- l. 146 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub></math> as rows
+and <!-- l. 146 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>n</mi></math> features;
+<!-- l. 146 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>c</mi></math> is the number of
+clusters; <!-- l. 146 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></math> is the
+prototype of cluster <!-- l. 146 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>i</mi></math>
+and <!-- l. 146 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mstyle mathvariant="bold"><mi>V</mi></mstyle></math> the matrix of
+prototypes; <!-- l. 146 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub></math> is the
+membership of sample <!-- l. 146 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math>
+in cluster <!-- l. 146 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>i</mi></math> and
+<!-- l. 146 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mstyle mathvariant="bold"><mi>U</mi></mstyle> <mo class="MathClass-rel" stretchy="false">=</mo> <mo class="MathClass-open" stretchy="false">[</mo><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><mo class="MathClass-close" stretchy="false">]</mo> <mo class="MathClass-rel" stretchy="false">∈</mo> <msup><mrow><mi>ℝ</mi></mrow><mrow><mi>c</mi><mo class="MathClass-bin" stretchy="false">×</mo><mi>N</mi></mrow></msup></mrow></math> the partition matrix;
+<!-- l. 146 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>m</mi> <mo class="MathClass-rel" stretchy="false">&gt;</mo> <mn>1</mn></mrow></math> is the fuzziness
+exponent; <!-- l. 146 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msubsup><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup></math> is the
+squared distance of <!-- l. 146 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub></math>
+to <!-- l. 146 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></math> in the norm of the
+algorithm; and <!-- l. 146 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>J</mi></math> is
+the objective. Index <!-- l. 146 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>i</mi></math>
+(and <!-- l. 146 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>j</mi></math>) always runs
+over clusters, <!-- l. 146 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math>
+over samples. In code the partition is stored transposed as <span class="ec-lmtt-10x-x-109">membership_ </span>of shape
+<span class="ec-lmtt-10x-x-109">(n_samples, n_clusters)</span>, in line with <span class="ec-lmtt-10x-x-109">predict_proba</span>. The full table is in
+table <a href="02-foundations-of-prototype-based-clustering.html#x4-25001r1">2.1</a>.
+                                                                     
+
+                                                                     
+</p>
+</div>
+<!-- l. 149 --><p class="indent">   The figures that show computed results are produced by the example
+scripts in the <span class="ec-lmtt-10x-x-109">examples/ </span>directory of the repository (see the preface). The
+text names the script behind each such figure, and chapter <a href="c-the-example-gallery.html#x17-284000C">C</a> lists all
+scripts.
+</p><!-- l. 151 --><p class="noindent">
+</p>
+<h3 class="sectionHead"><span class="titlemark">1.6   </span> <a id="x3-120001.6"></a>Installation and a first session</h3>
+<!-- l. 153 --><p class="noindent">The package is installed from the Python Package Index with </p><!-- l. 154 -->
+<pre class="lstlisting" id="listing-1"><span class="label"><a id="x3-12001r1"></a></span><span style="color:#000000"><span class="ec-lmtt-9">pip</span></span><span style="color:#000000"> <span class="ec-lmtt-9">install fuzzyclust</span></span></pre>
+<!-- l. 157 --><p class="indent">   and depends only on <span class="ec-lmtt-10x-x-109">numpy</span>, <span class="ec-lmtt-10x-x-109">scipy</span>, <span class="ec-lmtt-10x-x-109">scikit-learn</span>, <span class="ec-lmtt-10x-x-109">pandas</span>, and <span class="ec-lmtt-10x-x-109">matplotlib</span>.
+A first session generates three Gaussian clusters, fits fuzzy c-means, and inspects
+the result: </p><!-- l. 158 -->
+<pre class="lstlisting" id="listing-2"><span class="label"><a id="x3-12002r1"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">import</span></span><span style="color:#000000"> <span class="ec-lmtt-9">matplotlib.pyplot as plt</span> 
+</span><span class="label"><a id="x3-12003r2"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">from</span></span><span style="color:#000000"> <span class="ec-lmtt-9">fuzzyclust</span> </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">import</span></span><span style="color:#000000"> <span class="ec-lmtt-9">FCM</span> 
+</span><span class="label"><a id="x3-12004r3"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">from</span></span><span style="color:#000000"> <span class="ec-lmtt-9">fuzzyclust.datasets</span> </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">import</span></span><span style="color:#000000"> <span class="ec-lmtt-9">make_fuzzy_blobs</span> 
+</span><span class="label"><a id="x3-12005r4"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">from</span></span><span style="color:#000000"> <span class="ec-lmtt-9">fuzzyclust.plotting</span> </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">import</span></span><span style="color:#000000"> <span class="ec-lmtt-9">plot_clusters, plot_membership_contours</span> 
+</span><span class="label"><a id="x3-12006r5"></a></span> 
+<span class="label"><a id="x3-12007r6"></a></span><span style="color:#000000"><span class="ec-lmtt-9">X</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">y_true = make_fuzzy_blobs(n_clusters=3, n_samples_per_cluster=100, random_state=0)</span> 
+</span><span class="label"><a id="x3-12008r7"></a></span><span style="color:#000000"><span class="ec-lmtt-9">fcm</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= FCM(n_clusters=3, m=2.0, random_state=0).fit(X)</span> 
+</span><span class="label"><a id="x3-12009r8"></a></span> 
+<span class="label"><a id="x3-12010r9"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">print</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">fcm</span></span><span style="color:#000000"><span class="ec-lmtt-9">.</span></span><span style="color:#000000"><span class="ec-lmtt-9">cluster_centers_</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span><span style="color:#000000">          </span><span style="color:#6B7785"><span class="ec-lmtti-10x-x-90">#</span></span><span style="color:#6B7785"> <span class="ec-lmtti-10x-x-90">prototypes v_i, shape (3, 2)</span> 
+</span><span class="label"><a id="x3-12011r10"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">print</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">fcm</span></span><span style="color:#000000"><span class="ec-lmtt-9">.</span></span><span style="color:#000000"><span class="ec-lmtt-9">membership_</span></span><span style="color:#000000"><span class="ec-lmtt-9">[:5].</span></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">round</span></span><span style="color:#000000"><span class="ec-lmtt-9">(3)</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span><span style="color:#000000">  </span><span style="color:#6B7785"><span class="ec-lmtti-10x-x-90">#</span></span><span style="color:#6B7785"> <span class="ec-lmtti-10x-x-90">memberships mu_ik of the first samples</span> 
+</span><span class="label"><a id="x3-12012r11"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">print</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">fcm</span></span><span style="color:#000000"><span class="ec-lmtt-9">.</span></span><span style="color:#000000"><span class="ec-lmtt-9">labels_</span></span><span style="color:#000000"><span class="ec-lmtt-9">[:5])</span></span><span style="color:#000000">               </span><span style="color:#6B7785"><span class="ec-lmtti-10x-x-90">#</span></span><span style="color:#6B7785"> <span class="ec-lmtti-10x-x-90">hard labels, argmax of the memberships</span> 
+</span><span class="label"><a id="x3-12013r12"></a></span> 
+<span class="label"><a id="x3-12014r13"></a></span><span style="color:#000000"><span class="ec-lmtt-9">fig</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">axes = plt.subplots(1, 2, figsize=(11, 4.5))</span> 
+</span><span class="label"><a id="x3-12015r14"></a></span><span style="color:#000000"><span class="ec-lmtt-9">plot_clusters</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">X</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">fcm.labels_, fcm.cluster_centers_, ax=axes[0])</span> 
+</span><span class="label"><a id="x3-12016r15"></a></span><span style="color:#000000"><span class="ec-lmtt-9">plot_membership_contours</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">fcm</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">X, ax=axes[1])</span> 
+</span><span class="label"><a id="x3-12017r16"></a></span><span style="color:#000000"><span class="ec-lmtt-9">plt</span></span><span style="color:#000000"><span class="ec-lmtt-9">.</span></span><span style="color:#000000"><span class="ec-lmtt-9">show</span></span><span style="color:#000000"><span class="ec-lmtt-9">()</span></span></pre>
+<!-- l. 176 --><p class="indent">   The two central lines, which generate the data and fit the model,
+appear verbatim in the first example script, <span class="ec-lmtt-10x-x-109">plot_01_fcm_basics.py</span>:
+</p><!-- l. 177 --><pre class="lstinputlisting" id="listing-3"><span class="label"><a id="x3-12019r33"></a></span><span style="color:#000000"><span class="ec-lmtt-9">X</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">y_true = make_fuzzy_blobs(n_clusters=3, n_samples_per_cluster=100, random_state=0)</span> 
+</span><span class="label"><a id="x3-12020r34"></a></span> 
+<span class="label"><a id="x3-12021r35"></a></span><span style="color:#000000"><span class="ec-lmtt-9">fcm</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= FCM(n_clusters=3, m=2.0, random_state=0).fit(X)</span></span>
+   </pre>
+<!-- l. 178 --><p class="noindent">Figure <a href="#x3-12024r3">1.3</a> shows the result. The level curves of the maximal membership
+<!-- l. 178 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><munder class="msub"><mrow><mtext class="qopname">max</mtext><mo> ⁡<!-- FUNCTION APPLICATION --> </mo> </mrow><mrow><mi>i</mi></mrow></munder><msub><mrow><mi>μ</mi></mrow><mrow><mi>i</mi></mrow></msub><mo class="MathClass-open" stretchy="false">(</mo><mstyle mathvariant="bold"><mi>x</mi></mstyle><mo class="MathClass-close" stretchy="false">)</mo></mrow></math> are
+nearly circular around the prototypes because fuzzy c-means measures every
+distance in the Euclidean norm. The MATLAB toolbox drew the same kind of
+map with <span class="ec-lmtt-10x-x-109">clusteval</span>, and in chapter <a href="03-hard-and-fuzzy-partitioning-algorithms.html#x5-330003">3</a> such maps show how differently the
+algorithms shape their clusters.
+</p>
+<figure class="figure">
+<!-- l. 180 --><p class="noindent"><img alt="Figure 1.3" class="exfig" src="figures/01_clustering/plot_01_fcm_basics_1.png"/> <a id="x3-12024r3"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 1.3. </span></span><span class="content"><span class="ec-lmr-10">The first session: fuzzy c-means on three Gaussian clusters. Left: hard
+labels and prototypes. Right: level curves of the maximal membership, nearly circles
+around the prototypes.</span> </span></figcaption><!-- tex4ht:label?: x3-12024r3  -->
+<p class="runbox"><a class="colab" href="https://colab.research.google.com/github/ComplexSystemsIntelligence/fuzzyclust/blob/gh-pages/notebooks/auto_examples/01_clustering/plot_01_fcm_basics.ipynb">Open in Colab</a><a href="../auto_examples/01_clustering/plot_01_fcm_basics.html">Example <code>plot_01_fcm_basics.py</code> in the gallery</a></p></figure>
+<h3 class="sectionHead"><span class="titlemark">1.7   </span> <a id="x3-130001.7"></a>Further reading</h3>
+<!-- l. 185 --><p class="noindent">The classical monograph on objective-function clustering is Bezdek’s [<a id="x3-13001"></a><a href="bibliography.html#cite.0@bezdek:1981">3</a>].
+Höppner, Klawonn, Kruse, and Runkler [<a id="x3-13002"></a><a href="bibliography.html#cite.0@hoppner:1999:book">6</a>] cover the fuzzy algorithms, including
+shells and varieties; Jain and Dubes [<a id="x3-13003"></a><a href="bibliography.html#cite.0@jain:1988:book">4</a>] and Kaufman and Rousseeuw [<a id="x3-13004"></a><a href="bibliography.html#cite.0@kaufman:1990:groups">5</a>] cover
+the hard and hierarchical methods. Babuška’s <span class="ec-lmri-10x-x-109">Fuzzy Modeling for Control </span>[<a id="x3-13005"></a><a href="bibliography.html#cite.0@babuska:1998:book">7</a>]
+is the source of the notation of this book and a standard reference on
+clustering-based identification; Abonyi and Feil [<a id="x3-13006"></a><a href="bibliography.html#cite.0@abonyi:2007:book">8</a>] collect the research threads
+that became the sub-packages of the toolbox. The MATLAB toolbox manual [<a id="x3-13007"></a><a href="bibliography.html#cite.0@balasko:2005:toolbox">12</a>]
+documents the predecessor, and scikit-learn is described in [<a id="x3-13008"></a><a href="bibliography.html#cite.0@pedregosa:2011:sklearn">13</a>]. Zadeh introduced
+fuzzy sets [<a id="x3-13009"></a><a href="bibliography.html#cite.0@zadeh:1965:fuzzysets">9</a>], Ruspini fuzzy partitions [<a id="x3-13010"></a><a href="bibliography.html#cite.0@ruspini:1969">1</a>], and Dunn the fuzzy c-means
+functional [<a id="x3-13011"></a><a href="bibliography.html#cite.0@dunn:1973:fcm">2</a>].
+                                                                     
+
+                                                                     
+</p>
+<!-- l. 1 -->
+<!-- l. 1 --><p class="indent"> <a id="tailmain_webch1.html"></a> </p>
+<nav class='pager'><a class='prev' href='preface.html'><small>Previous</small>Preface</a><a class='next' href='02-foundations-of-prototype-based-clustering.html'><small>Next</small>Foundations of prototype-based clustering</a></nav>
+</main>
+<aside class="right"><nav class='onpage' aria-label='On this page'><p class='toc-title'>On this page</p><ul><li><a href='#x3-70001.1'>1.1 What clustering is for</a></li><li><a href='#x3-80001.2'>1.2 Hard and fuzzy partitions in one picture</a></li><li><a href='#x3-90001.3'>1.3 From the MATLAB toolbox to fuzzyclust</a></li><li><a href='#x3-100001.4'>1.4 How the book is organized</a></li><li><a href='#x3-110001.5'>1.5 How to read this book</a></li><li><a href='#x3-120001.6'>1.6 Installation and a first session</a></li><li><a href='#x3-130001.7'>1.7 Further reading</a></li></ul></nav></aside>
+</div>
+<footer class='foot'>© 2026 János Abonyi, University of Pannonia · licensed under <a href='https://creativecommons.org/licenses/by/4.0/'>CC BY 4.0</a> · web edition of the book, generated from the same LaTeX source as the <a href='../fuzzyclust-book.pdf'>PDF</a> · software: <a href='https://github.com/ComplexSystemsIntelligence/fuzzyclust'>fuzzyclust</a> (MIT) · <code>pip install fuzzyclust</code></footer>
+</body>
+</html>

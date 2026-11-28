@@ -1,0 +1,12 @@
+﻿fuzzyclust.models.ruspini\_partition
+====================================
+
+.. currentmodule:: fuzzyclust.models
+
+.. autofunction:: ruspini_partition
+
+.. include:: fuzzyclust.models.ruspini_partition.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

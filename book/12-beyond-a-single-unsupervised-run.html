@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>12 Beyond a single unsupervised run: partial supervision,
+co-clustering, collaboration, and ensembles · Fuzzy Clustering and Data Analysis in Python</title>
+<meta name="description" content="Open-access book on fuzzy clustering and data analysis in Python with the fuzzyclust toolbox: fuzzy c-means, Gustafson-Kessel, Gath-Geva, cluster validity, visualisation, Takagi-Sugeno models, time-series segmentation and more, with runnable Colab examples." />
+<meta name="author" content="János Abonyi" />
+<link rel="canonical" href="https://complexsystemsintelligence.github.io/fuzzyclust/book/12-beyond-a-single-unsupervised-run.html" />
+<meta property="og:title" content="12 Beyond a single unsupervised run: partial supervision,
+co-clustering, collaboration, and ensembles · Fuzzy Clustering and Data Analysis in Python" />
+<meta property="og:type" content="book" />
+<meta property="og:url" content="https://complexsystemsintelligence.github.io/fuzzyclust/book/12-beyond-a-single-unsupervised-run.html" />
+<meta property="og:image" content="https://complexsystemsintelligence.github.io/fuzzyclust/book/cover.png" />
+<meta property="og:description" content="Open-access book on fuzzy clustering and data analysis in Python with the fuzzyclust toolbox: fuzzy c-means, Gustafson-Kessel, Gath-Geva, cluster validity, visualisation, Takagi-Sugeno models, time-series segmentation and more, with runnable Colab examples." />
+<link rel="icon" href="../_static/favicon.png" />
+<link rel="stylesheet" href="main_web.css" />
+<link rel="stylesheet" href="web.css" />
+</head>
+<body class="">
+<header class='topbar'><a class='brand' href='index.html'><img src='logo.svg' alt='' width='34' height='34' /><span><b>Fuzzy Clustering and Data Analysis in Python</b><small>The fuzzyclust toolbox</small></span></a><nav class='toplinks'><a href='../'>Documentation</a><a href='../auto_examples/index.html'>Examples</a><a href='../fuzzyclust-book.pdf'>PDF</a><a href='../fuzzyclust-book.epub'>EPUB</a><a href='https://github.com/ComplexSystemsIntelligence/fuzzyclust'>GitHub</a><a class='hub' href='https://complexsystemsintelligence.github.io/#textbooks'>All textbooks</a></nav></header>
+<div class="layout">
+<aside class="left"><nav class='toc' aria-label='Contents'><p class='toc-title'>Contents</p><ol><li><a href='preface.html'><span class='num'></span>Preface</a></li><li><a href='01-introduction.html'><span class='num'>1</span>Introduction</a></li><li><a href='02-foundations-of-prototype-based-clustering.html'><span class='num'>2</span>Foundations of prototype-based clustering</a></li><li><a href='03-hard-and-fuzzy-partitioning-algorithms.html'><span class='num'>3</span>Hard and fuzzy partitioning algorithms</a></li><li><a href='04-cluster-validity-and-the-number.html'><span class='num'>4</span>Cluster validity and the number of clusters</a></li><li><a href='05-visualization-of-fuzzy-clustering-results.html'><span class='num'>5</span>Visualization of fuzzy clustering results</a></li><li><a href='06-robust-and-shape-oriented-variants.html'><span class='num'>6</span>Robust and shape-oriented variants of fuzzy c-means</a></li><li><a href='07-graph-based-fuzzy-clustering.html'><span class='num'>7</span>Graph-based fuzzy clustering</a></li><li><a href='08-clustering-for-model-identification.html'><span class='num'>8</span>Clustering for model identification</a></li><li><a href='09-clustering-of-time-series.html'><span class='num'>9</span>Clustering of time series</a></li><li><a href='10-clustering-relational-categorical-and-mixed.html'><span class='num'>10</span>Clustering relational, categorical, and mixed data</a></li><li><a href='11-incomplete-very-large-and-image.html'><span class='num'>11</span>Incomplete, very large, and image data</a></li><li class='current'><a href='12-beyond-a-single-unsupervised-run.html'><span class='num'>12</span>Beyond a single unsupervised run: partial supervision,
+co-clustering, collaboration, and ensembles</a></li><li><a href='a-api-reference.html'><span class='num'>A</span>API reference</a></li><li><a href='b-migrating-from-the-matlab-toolbox.html'><span class='num'>B</span>Migrating from the MATLAB toolbox</a></li><li><a href='c-the-example-gallery.html'><span class='num'>C</span>The example gallery</a></li><li><a href='bibliography.html'><span class='num'></span>Bibliography</a></li></ol></nav></aside>
+<main class="content">
+
+<!-- l. 1 -->
+<h2 class="chapterHead"><span class="titlemark">Chapter 12</span><br/><a id="x14-23900012"></a>Beyond a single unsupervised run: partial supervision,
+co-clustering, collaboration, and ensembles</h2>
+<div class="box roadmap">
+<!-- l. 3 --><p class="indent">   All algorithms so far take one data matrix, cluster its rows without outside
+knowledge, and return the partition of one run. This chapter relaxes each of
+these restrictions. Partial supervision lets a few class labels (Pedrycz and
+Waletzky) or a few must-link and cannot-link pairs (Grira, Crucianu,
+and Boujemaa) steer the partition toward the structure the user means;
+co-clustering (FCCM of Oh, Honda, and Ichihashi; Fuzzy CoDoK of
+Kummamuru, Dhawale, and Krishnapuram) clusters the rows <span class="ec-lmri-10x-x-109">and </span>the
+columns of an object–item matrix at once; collaborative clustering (Pedrycz)
+reconciles the partitions of several data sites that describe the same objects
+without exchanging their data; and cluster ensembles (Strehl and Ghosh,
+Punera and Ghosh, and Fred and Jain) combine a library of runs into a
+consensus that is typically more accurate than its members and more
+reproducible than a single run, and they read the number of clusters off the
+agreement of the runs. Partial supervision and collaboration add a term
+to the c-means functional of chapter <a href="03-hard-and-fuzzy-partitioning-algorithms.html#x5-330003">3</a>, co-clustering replaces it by an
+aggregation criterion, and ensembles combine its results; the methods live in
+<span class="ec-lmtt-10x-x-109">fuzzyclust.semisupervised</span>, <span class="ec-lmtt-10x-x-109">.coclustering</span>, <span class="ec-lmtt-10x-x-109">.collaborative</span>, and
+<span class="ec-lmtt-10x-x-109">.ensemble</span>.
+</p>
+</div>
+<h3 class="sectionHead"><span class="titlemark">12.1   </span> <a id="x14-24000012.1"></a>Problem and idea</h3>
+<!-- l. 8 --><p class="noindent">Fuzzy c-means finds the partition that the distance and the prototype shape
+make optimal, and that partition is not always the one the user wants. Two
+long parallel bars of points are a simple example (fig. <a href="#x14-240004r1">12.1</a>): with two
+spherical prototypes the c-means functional prefers a split <span class="ec-lmri-10x-x-109">across </span>the
+bars, because the variance along the bars dominates the gap between
+them, whereas the user knows that the bars are the classes. Pedrycz and
+Waletzky [<a id="x14-240001"></a><a href="bibliography.html#cite.0@pedrycz:1997:ssfcm">165</a>] observed that the user often knows the class of a few
+samples, and added to the functional a term that penalizes the difference
+between the memberships of these labeled samples and their labels. Since
+                                                                     
+
+                                                                     
+the labeled and the unlabeled samples share the prototypes, a handful
+of labels moves the prototypes and rotates the whole partition. Labels
+presuppose an agreed list of classes; a weaker and often cheaper kind of
+knowledge says only that two samples belong together (must-link) or not
+(cannot-link): two images show the same scene, two records describe the same
+customer. Grira, Crucianu, and Boujemaa [<a id="x14-240002"></a><a href="bibliography.html#cite.0@grira:2006:pcca">166</a>] penalize the expected
+number of violated pairs and combine the penalty with the competitive
+agglomeration of Frigui and Krishnapuram [<a id="x14-240003"></a><a href="bibliography.html#cite.0@frigui:1997:ca">167</a>], which lets an overestimated
+number of clusters shrink to the number the data and the constraints
+support.
+</p>
+<figure class="figure">
+<!-- l. 11 --><p class="noindent"><img alt="Figure 12.1" src="main_web86x.svg"/>
+<a id="x14-240004r1"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 12.1. </span></span><span class="content"><span class="ec-lmr-10">Two kinds of partial supervision on two parallel bars that FCM splits
+across. (a) Labels: a few samples carry a class label, and the supervision term pulls
+their memberships, and with them the shared prototypes, toward the classes. (b)
+Pairs: must-link and cannot-link constraints say only whether two samples belong
+together; their expected violation is penalized.</span>
+</span></figcaption><!-- tex4ht:label?: x14-240004r1  -->
+</figure>
+<!-- l. 50 --><p class="indent">   A second limitation is the data matrix itself. For a document–term matrix, a
+user–product table, or any other non-negative <span class="ec-lmri-10x-x-109">co-occurrence </span>matrix, the rows
+and the columns are both entities worth clustering, and a cluster is a
+<span class="ec-lmri-10x-x-109">pair</span>: a group of documents and the vocabulary that makes them a group
+(fig. <a href="#x14-240007r2">12.2</a>). Clustering the rows with a distance between sparse count
+vectors misses this duality. Oh, Honda, and Ichihashi [<a id="x14-240005"></a><a href="bibliography.html#cite.0@oh:2001:fccm">168</a>] give each
+co-cluster two membership vectors, one over the objects and one over the
+items, and maximize the <span class="ec-lmri-10x-x-109">aggregation </span>of the matrix entries that both
+memberships select; Kummamuru, Dhawale, and Krishnapuram [<a id="x14-240006"></a><a href="bibliography.html#cite.0@kummamuru:2003:codok">169</a>] solve the
+same problem with a different regularizer that scales to large document
+collections.
+</p>
+<figure class="figure">
+<!-- l. 53 --><p class="noindent"><img alt="Figure 12.2" src="main_web87x.svg"/>
+<a id="x14-240007r2"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 12.2.  </span></span><span class="content"><span class="ec-lmr-10">Co-clustering  of  an  object–item  matrix  (rows  and  columns
+reordered). Every co-cluster has a membership vector over the objects (stacked
+bars, left) and one over the items (bars on top, colored by the co-cluster of largest
+membership); the dense blocks on the diagonal are the co-occurrences that both
+memberships select.</span>
+</span></figcaption><!-- tex4ht:label?: x14-240007r2  -->
+</figure>
+<!-- l. 88 --><p class="indent">   The third limitation is organizational. The same objects—patients, customers,
+production batches—are often described at several <span class="ec-lmri-10x-x-109">data sites </span>by different
+features, and the raw data cannot be pooled for reasons of confidentiality, size, or
+ownership. Pedrycz’s collaborative clustering [<a id="x14-240008"></a><a href="bibliography.html#cite.0@pedrycz:2002:collaborative">170</a>] runs fuzzy c-means
+at every site and lets the sites exchange only their partition matrices
+(fig. <a href="#x14-240009r3">12.3</a>): each site re-clusters its own data with an additional term that
+pulls its memberships toward those of the other sites, weighted by a
+collaboration matrix. The structures are reconciled without moving any data,
+and how far each site has to move tells how much it disagrees with the
+rest.
+</p>
+<figure class="figure">
+<!-- l. 91 --><p class="noindent"><img alt="Figure 12.3" src="main_web88x.svg"/>
+<a id="x14-240009r3"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 12.3.         </span></span><span class="content"><span class="ec-lmr-10">Collaborative         clustering         of         three         data
+sites.     Every     site     clusters     its     own     features     of     the     same</span>
+<!-- l. 106 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>N</mi></math>
+<span class="ec-lmr-10">objects;  the  sites  exchange  only  their  partition  matrices,  and  the  collaboration
+weight </span><!-- l. 106 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">ii</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi mathvariant="italic">jj</mi><mo class="MathClass-close" stretchy="false">]</mo></mrow></math>
+<span class="ec-lmr-10">says how strongly site </span><!-- l. 106 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi mathvariant="italic">ii</mi></mrow></math>
+<span class="ec-lmr-10">is pulled toward the partition of site </span><!-- l. 106 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi mathvariant="italic">jj</mi></mrow></math><span class="ec-lmr-10">.</span>
+</span></figcaption><!-- tex4ht:label?: x14-240009r3  -->
+</figure>
+<!-- l. 110 --><p class="indent">   The last limitation is the single run. An alternating-optimization clusterer
+finds a local optimum that depends on its start, and the partition depends on the
+sample and on the features it saw; restarts (<code class="lstinline"><span style="color:#000000">n_init</span></code>) keep the run with the
+lowest objective but discard the information in the others. A <span class="ec-lmri-10x-x-109">cluster
+ensemble </span>[<a id="x14-240010"></a><a href="bibliography.html#cite.0@strehl:2002:ensembles">171</a>] keeps all of them (fig. <a href="#x14-240013r4">12.4</a>). A library of partitions is
+generated by random starts, sub-samples, feature subsets, or different
+numbers of clusters. It is summarized by the <span class="ec-lmri-10x-x-109">co-association matrix</span>, the
+average similarity of the membership vectors of two objects, which needs no
+matching of cluster labels between the members, and a consensus function
+partitions the objects from this matrix. Punera and Ghosh [<a id="x14-240011"></a><a href="bibliography.html#cite.0@punera:2008:soft">172</a>] showed how
+to use the soft partitions directly instead of hardening them first. Fred
+and Jain [<a id="x14-240012"></a><a href="bibliography.html#cite.0@fred:2005:eac">173</a>] used the co-association matrix to choose the number of
+clusters: when the members over-segment the data, the natural groups
+form the partition of its dendrogram that survives the widest range of
+thresholds.
+</p>
+<figure class="figure">
+<!-- l. 113 --><p class="noindent"><img alt="Figure 12.4" src="main_web89x.svg"/>
+<a id="x14-240013r4"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 12.4.  </span></span><span class="content"><span class="ec-lmr-10">From  a  library  of  soft  partitions  to  a  consensus.  The  members
+may have different numbers of clusters; the co-association matrix compares only
+co-memberships, so their cluster labels need not be matched, and the consensus
+function partitions the objects from it.</span>
+</span></figcaption><!-- tex4ht:label?: x14-240013r4  -->
+</figure>
+<h3 class="sectionHead"><span class="titlemark">12.2   </span> <a id="x14-24100012.2"></a>Theory</h3>
+<!-- l. 147 --><p class="noindent">The notation is that of the book: <!-- l. 147 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mstyle mathvariant="bold"><mi>X</mi></mstyle> <mo class="MathClass-rel" stretchy="false">∈</mo> <msup><mrow><mi>ℝ</mi></mrow><mrow><mi>N</mi><mo class="MathClass-bin" stretchy="false">×</mo><mi>n</mi></mrow></msup></mrow></math>
+with rows <!-- l. 147 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub></math>,
+memberships <!-- l. 147 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub></math> in
+<!-- l. 147 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mstyle mathvariant="bold"><mi>U</mi></mstyle> <mo class="MathClass-rel" stretchy="false">∈</mo> <msup><mrow><mi>ℝ</mi></mrow><mrow><mi>c</mi><mo class="MathClass-bin" stretchy="false">×</mo><mi>N</mi></mrow></msup></mrow></math> (stored transposed in the
+code), prototypes <!-- l. 147 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></math>, squared
+Euclidean distances <!-- l. 147 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msubsup><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup> <mo class="MathClass-rel" stretchy="false">=</mo><msup><mrow> <mrow><mo fence="true" form="prefix"> ‖</mo><mrow><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></mrow><mo fence="true" form="postfix">‖</mo></mrow> </mrow><mrow><mn>2</mn></mrow></msup></mrow></math>,
+index <!-- l. 147 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>i</mi></math> or
+<!-- l. 147 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>j</mi></math> for clusters
+and <!-- l. 147 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math>
+or <!-- l. 147 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>l</mi></math>
+for samples. The starting point is fuzzy c-means with
+<!-- l. 147 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>m</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>2</mn></mrow></math>: the functional
+<!-- l. 147 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>J</mi> <mo class="MathClass-rel" stretchy="false">=</mo><msub><mrow> <mi class="MathClass-op">∑</mi><mo> ⁡<!-- FUNCTION APPLICATION --></mo>
+<!-- nolimits --></mrow><mrow><mi>i</mi></mrow></msub><msub><mrow><mo> ∑</mo>
+<!-- nolimits --></mrow><mrow><mi>k</mi></mrow></msub><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup><msubsup><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup></mrow></math> (<a href="03-hard-and-fuzzy-partitioning-algorithms.html#x5-38003r3">3.3<!-- tex4ht:ref: eq:part:Jfcm  --></a>), its
+membership formula <!-- l. 147 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>1</mn><mo class="MathClass-bin" stretchy="false">∕</mo><msub><mrow><mi class="MathClass-op">∑</mi><mo> ⁡<!-- FUNCTION APPLICATION --></mo>
+<!-- nolimits --></mrow><mrow><mi>j</mi></mrow></msub><mo class="MathClass-open" stretchy="false">(</mo><msubsup><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup><mo class="MathClass-bin" stretchy="false">∕</mo><msubsup><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">jk</mi></mrow><mrow><mn>2</mn></mrow></msubsup><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>
+(<a href="03-hard-and-fuzzy-partitioning-algorithms.html#x5-38006r6">3.6<!-- tex4ht:ref: eq:part:mufcm  --></a>), and its prototype update (<a href="03-hard-and-fuzzy-partitioning-algorithms.html#x5-38007r7">3.7<!-- tex4ht:ref: eq:part:vfcm  --></a>). The supervised and the collaborative algorithms add a
+quadratic term to <!-- l. 147 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>J</mi></math>
+and keep <!-- l. 147 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>m</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>2</mn></mrow></math>,
+the value for which their papers derive closed-form updates. We treat partial
+supervision by labels (section <a href="#x14-24200012.2.1">12.2.1</a>) and by pairs (section <a href="#x14-24300012.2.2">12.2.2</a>), co-clustering
+(section <a href="#x14-24400012.2.3">12.2.3</a>), collaboration (section <a href="#x14-24500012.2.4">12.2.4</a>), and ensembles (sections <a href="#x14-24600012.2.5">12.2.5</a>
+and <a href="#x14-24900012.2.6">12.2.6</a>).
+</p><!-- l. 149 --><p class="noindent">
+</p>
+<h4 class="subsectionHead"><span class="titlemark">12.2.1   </span> <a id="x14-24200012.2.1"></a>Fuzzy c-means with partial supervision</h4>
+<!-- l. 151 --><p class="noindent">Let <!-- l. 151 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>b</mi></mrow><mrow><mi>k</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">∈</mo><mo class="MathClass-open" stretchy="false">{</mo><mn>0</mn><mo class="MathClass-punc" stretchy="false">,</mo><mn>1</mn><mo class="MathClass-close" stretchy="false">}</mo></mrow></math> indicate
+whether sample <!-- l. 151 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math> is
+labeled and let <!-- l. 151 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>f</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">≥</mo><mn>0</mn></mrow></math>,
+<!-- l. 151 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi class="MathClass-op">∑</mi><mo> ⁡<!-- FUNCTION APPLICATION --></mo>
+<!-- nolimits --></mrow><mrow><mi>i</mi></mrow></msub><msub><mrow><mi>f</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>1</mn></mrow></math>, be
+its label—the indicator of its class or, more generally, a fuzzy label vector; class
+<!-- l. 151 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>j</mi></math> is tied to
+cluster <!-- l. 151 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>j</mi></math>,
+                                                                     
+
+                                                                     
+and surplus clusters are unsupervised. Pedrycz and Waletzky [<a id="x14-242001"></a><a href="bibliography.html#cite.0@pedrycz:1997:ssfcm">165</a>] minimize
+</p><table class="equation"><tr><td>
+<!-- l. 152 --><p class="indent">
+</p><!-- l. 152 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x14-242002r1"></mstyle><!-- endlabel --><mi>J</mi> <mo class="MathClass-rel" stretchy="false">=</mo><munderover accent="false" accentunder="false"><mrow><mo> ∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><munderover accent="false" accentunder="false"><mrow><mtext> ∑</mtext></mrow><mrow>
+<mi>k</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>N</mi></mrow></munderover><msubsup><mrow><mi>μ</mi></mrow><mrow>
+<mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup><msubsup><mrow><mi>D</mi></mrow><mrow>
+<mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup> <mo class="MathClass-bin" stretchy="false">+</mo> <mi>α</mi><munderover accent="false" accentunder="false"><mrow><mtext>∑</mtext></mrow><mrow>
+<mi>i</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><munderover accent="false" accentunder="false"><mrow><mtext> ∑</mtext></mrow><mrow>
+<mi>k</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>N</mi></mrow></munderover><mstyle mathsize="1.19em"><mrow><mo fence="true" form="prefix"> (</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle><msub><mrow><mi>μ</mi></mrow><mrow>
+<mi mathvariant="italic">ik</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mi>f</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><msub><mrow><mi>b</mi></mrow><mrow><mi>k</mi></mrow></msub><msup><mrow><mstyle mathsize="1.19em"><mrow><mo fence="true" form="prefix"> )</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle></mrow><mrow><mn>2</mn></mrow></msup><msubsup><mrow><mi>D</mi></mrow><mrow>
+<mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup>
+</mrow></math></td><td class="eq-no">(12.1)</td></tr></table>
+<!-- l. 156 --><p class="indent">   under <!-- l. 156 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi class="MathClass-op">∑</mi><mo> ⁡<!-- FUNCTION APPLICATION --></mo>
+<!-- nolimits --></mrow><mrow><mi>i</mi></mrow></msub><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>1</mn></mrow></math>.
+The second term measures, in the metric of the clustering, how far the memberships
+of the labeled samples are from their labels; for an unlabeled sample it reads
+<!-- l. 156 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup><msubsup><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup></mrow></math> and
+merely rescales the c-means term. Setting the derivative of the Lagrangian to
+zero gives </p><table class="equation"><tr><td>
+<!-- l. 157 --><p class="indent">
+</p><!-- l. 157 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x14-242003r2"></mstyle><!-- endlabel --><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><mn>1</mn></mrow>
+<mrow><mn>1</mn> <mo class="MathClass-bin" stretchy="false">+</mo> <mi>α</mi></mrow></mfrac> <mrow><mo fence="true" form="prefix"> [</mo><mrow><mfrac><mrow><mn>1</mn> <mo class="MathClass-bin" stretchy="false">+</mo> <mi>α</mi><mstyle mathsize="1.19em"><mrow><mo fence="true" form="prefix"> (</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle><mn>1</mn> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mi>b</mi></mrow><mrow><mi>k</mi></mrow></msub><munderover accent="false" accentunder="false"><mrow><mo> ∑</mo>
+</mrow><mrow><mi>j</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><msub><mrow><mi>f</mi></mrow><mrow><mi mathvariant="italic">jk</mi></mrow></msub><mstyle mathsize="1.19em"><mrow><mo fence="true" form="prefix"> )</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle></mrow>
+<mrow><munderover accent="false" accentunder="false"><mrow><mo> ∑</mo>
+</mrow><mrow><mi>j</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><msubsup><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup><mo class="MathClass-bin" stretchy="false">∕</mo><msubsup><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">jk</mi></mrow><mrow><mn>2</mn></mrow></msubsup></mrow></mfrac> <mo class="MathClass-bin" stretchy="false">+</mo> <mi>α</mi><msub><mrow><mi>f</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><msub><mrow><mi>b</mi></mrow><mrow><mi>k</mi></mrow></msub></mrow><mo fence="true" form="postfix">]</mo></mrow> <mo class="MathClass-punc" stretchy="false">,</mo>
+</mrow></math></td><td class="eq-no">(12.2)</td></tr></table>
+<!-- l. 161 --><p class="indent">   which is the FCM membership for an unlabeled
+sample and, for a labeled one, the convex combination
+<!-- l. 161 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow> <mfrac><mrow><mn>1</mn></mrow>
+<mrow><mn>1</mn><mo class="MathClass-bin" stretchy="false">+</mo><mi>α</mi></mrow></mfrac><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mstyle mathvariant="normal"><mi>FCM</mi></mstyle></mrow></msubsup> <mo class="MathClass-bin" stretchy="false">+</mo> <mfrac><mrow><mi>α</mi></mrow>
+<mrow><mn>1</mn><mo class="MathClass-bin" stretchy="false">+</mo><mi>α</mi></mrow></mfrac><msub><mrow><mi>f</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub></mrow></math>: the label is followed
+to the degree <!-- l. 161 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi><mo class="MathClass-bin" stretchy="false">∕</mo><mo class="MathClass-open" stretchy="false">(</mo><mn>1</mn> <mo class="MathClass-bin" stretchy="false">+</mo> <mi>α</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>.
+The prototypes are weighted means with the weights of both terms, </p><table class="equation"><tr><td>
+<!-- l. 162 --><p class="indent">
+</p><!-- l. 162 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x14-242004r3"></mstyle><!-- endlabel --><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><munderover accent="false" accentunder="false"><mrow><mo>∑</mo>
+</mrow><mrow><mi>k</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>N</mi></mrow></munderover><msub><mrow><mi>w</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub></mrow>
+<mrow><munderover accent="false" accentunder="false"><mrow><mo> ∑</mo>
+</mrow><mrow><mi>k</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>N</mi></mrow></munderover><msub><mrow><mi>w</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub></mrow></mfrac> <mo class="MathClass-punc" stretchy="false">,</mo><mspace class="qquad" width="2em"></mspace><msub><mrow><mi>w</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup> <mo class="MathClass-bin" stretchy="false">+</mo> <mi>α</mi><mstyle mathsize="1.19em"><mrow><mo fence="true" form="prefix"> (</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle><msub><mrow><mi>μ</mi></mrow><mrow>
+<mi mathvariant="italic">ik</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mi>f</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><msub><mrow><mi>b</mi></mrow><mrow><mi>k</mi></mrow></msub><msup><mrow><mstyle mathsize="1.19em"><mrow><mo fence="true" form="prefix"> )</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle></mrow><mrow><mn>2</mn></mrow></msup><mo class="MathClass-punc" stretchy="false">.</mo>
+</mrow></math></td><td class="eq-no">(12.3)</td></tr></table>
+<!-- l. 166 --><p class="indent">   The influence of the labels on the prototypes is not monotone in
+<!-- l. 166 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>α</mi></math>. For
+a labeled sample whose membership has reached its label, the supervision weight
+<!-- l. 166 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi><msup><mrow><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mi>f</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow><mrow><mn>2</mn></mrow></msup></mrow></math>
+vanishes, while every unlabeled sample carries the weight
+<!-- l. 166 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo class="MathClass-open" stretchy="false">(</mo><mn>1</mn> <mo class="MathClass-bin" stretchy="false">+</mo> <mi>α</mi><mo class="MathClass-close" stretchy="false">)</mo><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup></mrow></math>; a very
+large <!-- l. 166 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>α</mi></math>
+therefore clamps the labeled memberships but lets the unlabeled
+majority outweigh them in (<a href="#x14-242004r3">12.3<!-- tex4ht:ref: eq:beyond:vss  --></a>). The paper recommends
+<!-- l. 166 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>α</mi></math> proportional to
+<!-- l. 166 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>N</mi><mo class="MathClass-bin" stretchy="false">∕</mo><msub><mrow><mi>N</mi></mrow><mrow><mi>b</mi></mrow></msub></mrow></math>, the ratio of all
+samples to the <!-- l. 166 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>N</mi></mrow><mrow><mi>b</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo><msub><mrow> <mi class="MathClass-op">∑</mi><mo> ⁡<!-- FUNCTION APPLICATION --></mo>
+<!-- nolimits --></mrow><mrow><mi>k</mi></mrow></msub><msub><mrow><mi>b</mi></mrow><mrow><mi>k</mi></mrow></msub></mrow></math>
+labeled ones, so that the labeled minority is not ignored; the examples show that moderate values,
+<!-- l. 166 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">≈</mo><mn>1</mn></mrow></math>, move the partition
+most. Because class <!-- l. 166 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>j</mi></math> is
+tied to cluster <!-- l. 166 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>j</mi></math>, a random
+start that places cluster <!-- l. 166 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>j</mi></math>
+next to the samples of another class makes the supervision fight the geometry;
+starting every supervised prototype at the mean of its labeled samples avoids
+this. New samples carry no label and receive FCM memberships to the
+supervised prototypes.
+</p>
+<p><img alt="Algorithm" class="algobox" src="main_web90x.svg"/><a id="x14-242005r1"></a><a id="x14-242006r46"></a><a id="x14-242007r1"></a><a id="x14-242008r2"></a><a id="x14-242009r3"></a><a id="x14-242010r4"></a><a id="x14-242011r5"></a><a id="x14-242012r6"></a> </p><div class="box summarybox">
+<!-- l. 181 --><p class="noindent"><span class="ec-lmbx-10x-x-109">In a nutshell: Fuzzy c-means with partial supervision</span>
+</p>
+<ul class="itemize1">
+<li class="itemize">Adds  to  the  c-means  functional  the  distance-weighted  squared
+     difference between the memberships of the labeled samples and their
+     labels;  the  labels  act  on  the  whole  partition  through  the  shared
+     prototypes.
+     </li>
+<li class="itemize">Labeled memberships are convex combinations of the FCM membership
+     and the label, with weight <!-- l. 184 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi><mo class="MathClass-bin" stretchy="false">∕</mo><mo class="MathClass-open" stretchy="false">(</mo><mn>1</mn> <mo class="MathClass-bin" stretchy="false">+</mo> <mi>α</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>
+     on the label; unlabeled samples keep the FCM formula.
+     </li>
+<li class="itemize">Parameters: the weight <!-- l. 185 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>α</mi></math>
+     (moderate values move the partition most; <!-- l. 185 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>N</mi><mo class="MathClass-bin" stretchy="false">∕</mo><msub><mrow><mi>N</mi></mrow><mrow><mi>b</mi></mrow></msub></mrow></math>
+     is the paper’s rule), the number of clusters (at least the number of
+     classes), and the start (at the labeled means).
+     </li>
+<li class="itemize">Use when a few samples of every class are known and the unsupervised
+                                                                     
+
+                                                                     
+     optimum differs from the classes; <!-- l. 186 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>m</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>2</mn></mrow></math>.</li></ul>
+</div>
+<!-- l. 190 --><p class="noindent">
+</p>
+<h4 class="subsectionHead"><span class="titlemark">12.2.2   </span> <a id="x14-24300012.2.2"></a>Pairwise constraints and competitive agglomeration</h4>
+<!-- l. 192 --><p class="noindent">Let <!-- l. 192 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mstyle mathvariant="script"><mi>M</mi></mstyle></math> be the set of
+must-link and <!-- l. 192 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mstyle mathvariant="script"><mi>C</mi></mstyle></math> the set
+of cannot-link pairs <!-- l. 192 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo class="MathClass-open" stretchy="false">(</mo><mi>k</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>l</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>.
+Under memberships <!-- l. 192 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub></math>,
+the degree to which a must-link pair is <span class="ec-lmri-10x-x-109">separated </span>is
+<!-- l. 192 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi class="MathClass-op">∑</mi><mo> ⁡<!-- FUNCTION APPLICATION --></mo>
+<!-- nolimits --></mrow><mrow><mi>i</mi></mrow></msub><msub><mrow><mo> ∑</mo>
+<!-- nolimits --></mrow><mrow><mi>j</mi><mo class="MathClass-rel" stretchy="false">≠</mo><mi>i</mi></mrow></msub><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">jl</mi></mrow></msub></mrow></math>
+and the degree to which a cannot-link pair is <span class="ec-lmri-10x-x-109">together </span>is
+<!-- l. 192 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi class="MathClass-op">∑</mi><mo> ⁡<!-- FUNCTION APPLICATION --></mo>
+<!-- nolimits --></mrow><mrow><mi>i</mi></mrow></msub><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">il</mi></mrow></msub></mrow></math>;
+summed over all pairs, these degrees give the expected number of violated
+constraints when every sample is assigned at random according to its memberships.
+Grira, Crucianu, and Boujemaa [<a id="x14-243001"></a><a href="bibliography.html#cite.0@grira:2006:pcca">166</a>] minimize, with the fuzzy cardinalities
+<!-- l. 192 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>N</mi></mrow><mrow><mi>i</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo><msub><mrow> <mi class="MathClass-op">∑</mi><mo> ⁡<!-- FUNCTION APPLICATION --></mo>
+<!-- nolimits --></mrow><mrow><mi>k</mi></mrow></msub><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub></mrow></math>,
+</p><table class="equation"><tr><td>
+<!-- l. 193 --><p class="indent">
+</p><!-- l. 193 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x14-243002r4"></mstyle><!-- endlabel --><mi>J</mi> <mo class="MathClass-rel" stretchy="false">=</mo><munderover accent="false" accentunder="false"><mrow><mo> ∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><munderover accent="false" accentunder="false"><mrow><mtext> ∑</mtext></mrow><mrow>
+<mi>k</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>N</mi></mrow></munderover><msubsup><mrow><mi>μ</mi></mrow><mrow>
+<mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup><msubsup><mrow><mi>D</mi></mrow><mrow>
+<mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup><mo class="MathClass-bin" stretchy="false">+</mo><mi>α</mi><mstyle mathsize="2.45em"><mrow><mo fence="true" form="prefix"> [</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle><msub><mrow><mtext>∑</mtext></mrow><mrow>
+<mo class="MathClass-open" stretchy="false">(</mo><mi>k</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>l</mi><mo class="MathClass-close" stretchy="false">)</mo><mo class="MathClass-rel" stretchy="false">∈</mo><mstyle mathvariant="script"><mi>M</mi></mstyle></mrow></msub><munderover accent="false" accentunder="false"><mrow><mo> ∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><msub><mrow><mtext> ∑</mtext></mrow><mrow>
+<mi>j</mi><mo class="MathClass-rel" stretchy="false">≠</mo><mi>i</mi></mrow></msub><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">jl</mi></mrow></msub><mo class="MathClass-bin" stretchy="false">+</mo><msub><mrow><mo>∑</mo>
+</mrow><mrow><mo class="MathClass-open" stretchy="false">(</mo><mi>k</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>l</mi><mo class="MathClass-close" stretchy="false">)</mo><mo class="MathClass-rel" stretchy="false">∈</mo><mstyle mathvariant="script"><mi>C</mi></mstyle></mrow></msub><munderover accent="false" accentunder="false"><mrow><mo> ∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><msub><mrow><mi>μ</mi></mrow><mrow>
+<mi mathvariant="italic">ik</mi></mrow></msub><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">il</mi></mrow></msub><mstyle mathsize="2.45em"><mrow><mo fence="true" form="prefix"> ]</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle><mo class="MathClass-bin" stretchy="false">−</mo><mi>β</mi><munderover accent="false" accentunder="false"><mrow><mo>∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><msubsup><mrow><mi>N</mi></mrow><mrow>
+<mi>i</mi></mrow><mrow><mn>2</mn></mrow></msubsup><mo class="MathClass-punc" stretchy="false">.</mo>
+</mrow></math></td><td class="eq-no">(12.4)</td></tr></table>
+<!-- l. 197 --><p class="indent">   The last term is the competitive agglomeration bias of Frigui
+and Krishnapuram [<a id="x14-243003"></a><a href="bibliography.html#cite.0@frigui:1997:ca">167</a>]: it rewards large clusters, so the clusters
+compete for samples and those that lose them can be discarded. Let
+<!-- l. 197 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>C</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo><msub><mrow> <mi class="MathClass-op">∑</mi><mo> ⁡<!-- FUNCTION APPLICATION --></mo>
+<!-- nolimits --></mrow><mrow><mi>l</mi><mo class="MathClass-punc" stretchy="false">:</mo><mo class="MathClass-open" stretchy="false">(</mo><mi>k</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>l</mi><mo class="MathClass-close" stretchy="false">)</mo><mo class="MathClass-rel" stretchy="false">∈</mo><mstyle mathvariant="script"><mi>M</mi></mstyle></mrow></msub><mo class="MathClass-open" stretchy="false">(</mo><mn>1</mn> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">il</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo> <mo class="MathClass-bin" stretchy="false">+</mo><msub><mrow><mo> ∑</mo>
+<!-- nolimits --></mrow><mrow><mi>l</mi><mo class="MathClass-punc" stretchy="false">:</mo><mo class="MathClass-open" stretchy="false">(</mo><mi>k</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>l</mi><mo class="MathClass-close" stretchy="false">)</mo><mo class="MathClass-rel" stretchy="false">∈</mo><mstyle mathvariant="script"><mi>C</mi></mstyle></mrow></msub><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">il</mi></mrow></msub></mrow></math> be the cost of
+placing sample <!-- l. 197 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math>
+in cluster <!-- l. 197 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>i</mi></math>:
+                                                                     
+
+                                                                     
+the expected number of constraints it would violate there, given the current
+memberships of its partners. The Lagrange conditions, solved with the cross
+terms held at their previous values, give the FCM membership plus two
+corrections, </p><table class="equation"><tr><td>
+<!-- l. 198 --><p class="indent">
+</p><!-- l. 198 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x14-243004r5"></mstyle><!-- endlabel --><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><mn>1</mn><mo class="MathClass-bin" stretchy="false">∕</mo><msubsup><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup></mrow>
+<mrow><msub><mrow><mo> ∑</mo>
+</mrow><mrow><mi>j</mi></mrow></msub><mn>1</mn><mo class="MathClass-bin" stretchy="false">∕</mo><msubsup><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">jk</mi></mrow><mrow><mn>2</mn></mrow></msubsup></mrow></mfrac> <mo class="MathClass-bin" stretchy="false">+</mo> <mfrac><mrow><mi>α</mi></mrow>
+<mrow><mn>2</mn><msubsup><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup></mrow></mfrac><mstyle mathsize="1.19em"><mrow><mo fence="true" form="prefix"> (</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle><msub><mrow><mover accent="true"><mrow><mi>C</mi></mrow><mo accent="true">¯</mo></mover></mrow><mrow><mi>k</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mi>C</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><mstyle mathsize="1.19em"><mrow><mo fence="true" form="prefix"> )</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle> <mo class="MathClass-bin" stretchy="false">+</mo> <mfrac><mrow><mi>β</mi></mrow>
+<mrow><msubsup><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup></mrow></mfrac><mstyle mathsize="1.19em"><mrow><mo fence="true" form="prefix"> (</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle><msub><mrow><mi>N</mi></mrow><mrow><mi>i</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mover accent="true"><mrow><mi>N</mi></mrow><mo accent="true">¯</mo></mover></mrow><mrow><mi>k</mi></mrow></msub><mstyle mathsize="1.19em"><mrow><mo fence="true" form="prefix"> )</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle><mo class="MathClass-punc" stretchy="false">,</mo>
+</mrow></math></td><td class="eq-no">(12.5)</td></tr></table>
+<!-- l. 202 --><p class="indent">   where <!-- l. 202 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mover accent="true"><mrow><mi>C</mi></mrow><mo accent="true">¯</mo></mover></mrow><mrow><mi>k</mi></mrow></msub></math>
+and <!-- l. 202 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mover accent="true"><mrow><mi>N</mi></mrow><mo accent="true">¯</mo></mover></mrow><mrow><mi>k</mi></mrow></msub></math> are the
+means of <!-- l. 202 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>C</mi></mrow><mrow><mi mathvariant="italic">jk</mi></mrow></msub></math> and
+<!-- l. 202 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>N</mi></mrow><mrow><mi>j</mi></mrow></msub></math> over the clusters,
+weighted by <!-- l. 202 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1</mn><mo class="MathClass-bin" stretchy="false">∕</mo><msubsup><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">jk</mi></mrow><mrow><mn>2</mn></mrow></msubsup></mrow></math>. A
+cluster in which <!-- l. 202 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math>
+violates fewer constraints than on average gains membership, and with
+<!-- l. 202 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>β</mi> <mo class="MathClass-rel" stretchy="false">&gt;</mo> <mn>0</mn></mrow></math> a
+cluster larger than average gains membership. The corrections are weighted by
+<!-- l. 202 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1</mn><mo class="MathClass-bin" stretchy="false">∕</mo><msubsup><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup></mrow></math>
+and cancel for a sample that is much closer to one prototype than to
+the others, so the constraints act most strongly on the ambiguous
+samples near the cluster boundaries. Negative values are clipped and the
+memberships renormalized, as in competitive agglomeration. The penalty
+<!-- l. 202 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>α</mi></math> is in
+the units of the squared distances. Grira et al. renew it at every iteration so
+that the constraint term is commensurate with the data term: the mean
+membership-weighted squared distance, scaled by the ratio of samples to
+constraints, </p><table class="equation-star"><tr><td>
+<!-- l. 203 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mi>α</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><mi>N</mi></mrow>
+<mrow><mo class="MathClass-rel" stretchy="false">|</mo><mstyle mathvariant="script"><mi>M</mi></mstyle><mo class="MathClass-rel" stretchy="false">|</mo><mo class="MathClass-bin" stretchy="false">+</mo> <mo class="MathClass-rel" stretchy="false">|</mo><mstyle mathvariant="script"><mi>C</mi></mstyle><mo class="MathClass-rel" stretchy="false">|</mo></mrow></mfrac><mspace class="thinspace" width="0.17em"></mspace><mfrac><mrow><msub><mrow><mo>∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>k</mi></mrow></msub><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup><msubsup><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup></mrow>
+<mrow><msub><mrow><mo> ∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>k</mi></mrow></msub><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup></mrow></mfrac> <mo class="MathClass-punc" stretchy="false">.</mo>
+</mrow></math></td></tr></table>
+<!-- l. 206 --><p class="indent">   The automatic rule of <span class="ec-lmtt-10x-x-109">fuzzyclust </span>omits the normalization by
+<!-- l. 206 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi class="MathClass-op">∑</mi><mo> ⁡<!-- FUNCTION APPLICATION --></mo>
+<!-- nolimits --></mrow><mrow><mi>i</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>k</mi></mrow></msub><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup></mrow></math> and uses
+<!-- l. 206 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">=</mo><msub><mrow> <mi class="MathClass-op">∑</mi><mo> ⁡<!-- FUNCTION APPLICATION --></mo>
+<!-- nolimits --></mrow><mrow><mi>i</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>k</mi></mrow></msub><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup><msubsup><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup><mo class="MathClass-bin" stretchy="false">∕</mo><mo class="MathClass-open" stretchy="false">(</mo><mo class="MathClass-rel" stretchy="false">|</mo><mstyle mathvariant="script"><mi>M</mi></mstyle><mo class="MathClass-rel" stretchy="false">|</mo><mo class="MathClass-bin" stretchy="false">+</mo> <mo class="MathClass-rel" stretchy="false">|</mo><mstyle mathvariant="script"><mi>C</mi></mstyle><mo class="MathClass-rel" stretchy="false">|</mo><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>, the published
+value times <!-- l. 206 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi class="MathClass-op">∑</mi><mo> ⁡<!-- FUNCTION APPLICATION --></mo>
+<!-- nolimits --></mrow><mrow><mi>i</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>k</mi></mrow></msub><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup><mo class="MathClass-bin" stretchy="false">∕</mo><mi>N</mi> <mo class="MathClass-rel" stretchy="false">∈</mo><mo class="MathClass-open" stretchy="false">[</mo><mn>1</mn><mo class="MathClass-bin" stretchy="false">∕</mo><mi>c</mi><mo class="MathClass-punc" stretchy="false">,</mo><mn>1</mn><mo class="MathClass-close" stretchy="false">]</mo></mrow></math>;
+the two agree for a crisp partition. The agglomeration weight follows the schedule
+of competitive agglomeration, </p><table class="equation"><tr><td>
+<!-- l. 207 --><p class="indent">
+</p><!-- l. 207 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x14-243005r6"></mstyle><!-- endlabel --><mi>β</mi><mo class="MathClass-open" stretchy="false">(</mo><mi>l</mi><mo class="MathClass-close" stretchy="false">)</mo> <mo class="MathClass-rel" stretchy="false">=</mo> <msub><mrow><mi>η</mi></mrow><mrow><mn>0</mn></mrow></msub><mspace class="thinspace" width="0.17em"></mspace><msup><mrow><mi>e</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">−</mo><mi>l</mi><mo class="MathClass-bin" stretchy="false">∕</mo><mi>τ</mi></mrow></msup><mspace class="thinspace" width="0.17em"></mspace><mfrac><mrow><msub><mrow><mo> ∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>k</mi></mrow></msub><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup><msubsup><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup></mrow>
+<mrow><msub><mrow><mo> ∑</mo>
+</mrow><mrow><mi>i</mi></mrow></msub><msubsup><mrow><mi>N</mi></mrow><mrow><mi>i</mi></mrow><mrow><mn>2</mn></mrow></msubsup></mrow></mfrac> <mo class="MathClass-punc" stretchy="false">,</mo>
+</mrow></math></td><td class="eq-no">(12.6)</td></tr></table>
+<!-- l. 211 --><p class="indent">   strong at the start and decaying with the iteration
+<!-- l. 211 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>l</mi></math>, and clusters
+whose cardinality <!-- l. 211 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>N</mi></mrow><mrow><mi>i</mi></mrow></msub></math>
+falls below a minimum are removed. The prototypes are the FCM means
+(<a href="03-hard-and-fuzzy-partitioning-algorithms.html#x5-38007r7">3.7<!-- tex4ht:ref: eq:part:vfcm  --></a>).
+</p>
+<p><img alt="Algorithm" class="algobox" src="main_web91x.svg"/><a id="x14-243006r2"></a><a id="x14-243007r47"></a><a id="x14-243008r1"></a><a id="x14-243009r2"></a><a id="x14-243010r3"></a><a id="x14-243011r4"></a><a id="x14-243012r5"></a><a id="x14-243013r6"></a><a id="x14-243014r7"></a> </p><div class="box summarybox">
+<!-- l. 227 --><p class="noindent"><span class="ec-lmbx-10x-x-109">In a nutshell: Pairwise-constrained competitive agglomeration</span>
+</p>
+<ul class="itemize1">
+<li class="itemize">Penalizes the expected number of violated must-link and cannot-link
+     pairs; the membership update shifts membership toward the clusters
+     in which a sample violates fewer constraints.
+     </li>
+<li class="itemize">Pairs need no list of classes and are cheap to collect; fewer pairs need
+     a larger penalty, and a few pairs may be satisfied by bending the
+     boundary locally.
+     </li>
+<li class="itemize">Optional  competitive  agglomeration:  start  with  too  many  clusters,
+     let them compete, and discard the small ones; the usable window of
+     <!-- l. 231 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>η</mi></mrow><mrow><mn>0</mn></mrow></msub></math>
+     lies between “no competition” and “one cluster takes all”.
+     </li>
+<li class="itemize">Parameters: <!-- l. 232 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>α</mi></math>
+     (or the automatic rule), <!-- l. 232 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>η</mi></mrow><mrow><mn>0</mn></mrow></msub></math>,
+     <!-- l. 232 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>τ</mi></math>,
+     minimal cardinality; <!-- l. 232 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>m</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>2</mn></mrow></math>.</li></ul>
+</div>
+<!-- l. 236 --><p class="noindent">
+</p>
+<h4 class="subsectionHead"><span class="titlemark">12.2.3   </span> <a id="x14-24400012.2.3"></a>Fuzzy co-clustering of objects and items</h4>
+<!-- l. 238 --><p class="noindent">Let <!-- l. 238 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mstyle mathvariant="bold"><mi>R</mi></mstyle> <mo class="MathClass-rel" stretchy="false">=</mo> <mo class="MathClass-open" stretchy="false">[</mo><msub><mrow><mi>r</mi></mrow><mrow><mi mathvariant="italic">kj</mi></mrow></msub><mo class="MathClass-close" stretchy="false">]</mo> <mo class="MathClass-rel" stretchy="false">∈</mo> <msubsup><mrow><mi>ℝ</mi></mrow><mrow><mo class="MathClass-rel" stretchy="false">≥</mo><mn>0</mn></mrow><mrow><mi>N</mi><mo class="MathClass-bin" stretchy="false">×</mo><mi>M</mi></mrow></msubsup></mrow></math>
+be an object–item matrix (counts, frequencies, TF-IDF weights). A co-cluster
+<!-- l. 238 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>i</mi></math> has object
+memberships <!-- l. 238 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>u</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub></math> and
+item memberships <!-- l. 238 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>w</mi></mrow><mrow><mi mathvariant="italic">ij</mi></mrow></msub></math>,
+with the constraints <!-- l. 238 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi class="MathClass-op">∑</mi><mo> ⁡<!-- FUNCTION APPLICATION --></mo>
+<!-- nolimits --></mrow><mrow><mi>i</mi></mrow></msub><msub><mrow><mi>u</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>1</mn></mrow></math>
+for every object (an object is shared among the co-clusters, as in FCM) and
+<!-- l. 238 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi class="MathClass-op">∑</mi><mo> ⁡<!-- FUNCTION APPLICATION --></mo>
+<!-- nolimits --></mrow><mrow><mi>j</mi></mrow></msub><msub><mrow><mi>w</mi></mrow><mrow><mi mathvariant="italic">ij</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>1</mn></mrow></math>
+for every co-cluster (each co-cluster distributes one unit of membership
+over the items). The quantity to be maximized is the <span class="ec-lmri-10x-x-109">aggregation degree</span>
+</p><table class="equation"><tr><td>
+<!-- l. 239 --><p class="indent">
+</p><!-- l. 239 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x14-244001r7"></mstyle><!-- endlabel --><munderover accent="false" accentunder="false"><mrow><mo>∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><munderover accent="false" accentunder="false"><mrow><mtext> ∑</mtext></mrow><mrow>
+<mi>k</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>N</mi></mrow></munderover><munderover accent="false" accentunder="false"><mrow><mtext> ∑</mtext></mrow><mrow>
+<mi>j</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>M</mi></mrow></munderover><msub><mrow><mi>u</mi></mrow><mrow>
+<mi mathvariant="italic">ik</mi></mrow></msub><msub><mrow><mi>w</mi></mrow><mrow><mi mathvariant="italic">ij</mi></mrow></msub><msub><mrow><mi>r</mi></mrow><mrow><mi mathvariant="italic">kj</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo><msub><mrow><mo> ∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>k</mi></mrow></msub><msub><mrow><mi>u</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><msub><mrow><mi>a</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo><msub><mrow><mo> ∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>j</mi></mrow></msub><msub><mrow><mi>w</mi></mrow><mrow><mi mathvariant="italic">ij</mi></mrow></msub><msub><mrow><mi>b</mi></mrow><mrow><mi mathvariant="italic">ij</mi></mrow></msub><mo class="MathClass-punc" stretchy="false">,</mo><mspace class="qquad" width="2em"></mspace><mtable class="aligned"><mtr><mtd columnalign="right"><msub><mrow><mi>a</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub></mtd><mtd columnalign="left"> <mo class="MathClass-rel" stretchy="false">=</mo><msub><mrow><mo> ∑</mo>
+</mrow><mrow><mi>j</mi></mrow></msub><msub><mrow><mi>w</mi></mrow><mrow><mi mathvariant="italic">ij</mi></mrow></msub><msub><mrow><mi>r</mi></mrow><mrow><mi mathvariant="italic">kj</mi></mrow></msub><mo class="MathClass-punc" stretchy="false">,</mo></mtd><mtd columnalign="right"></mtd>
+</mtr><mtr><mtd columnalign="right"><msub><mrow><mi>b</mi></mrow><mrow><mi mathvariant="italic">ij</mi></mrow></msub></mtd> <mtd columnalign="left"> <mo class="MathClass-rel" stretchy="false">=</mo><msub><mrow><mo> ∑</mo>
+</mrow><mrow><mi>k</mi></mrow></msub><msub><mrow><mi>u</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><msub><mrow><mi>r</mi></mrow><mrow><mi mathvariant="italic">kj</mi></mrow></msub><mo class="MathClass-punc" stretchy="false">,</mo></mtd>
+</mtr> </mtable>
+</mrow></math></td><td class="eq-no">(12.7)</td></tr></table>
+<!-- l. 244 --><p class="indent">   large when the objects of a co-cluster cooccur with its items. The aggregation
+<!-- l. 244 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>a</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub></math> is a weighted <span class="ec-lmri-10x-x-109">mean </span>of
+the row of object <!-- l. 244 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math> over
+                                                                     
+
+                                                                     
+the items of co-cluster <!-- l. 244 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>i</mi></math>,
+and <!-- l. 244 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>b</mi></mrow><mrow><mi mathvariant="italic">ij</mi></mrow></msub></math> is a weighted <span class="ec-lmri-10x-x-109">sum</span>
+of the column of item <!-- l. 244 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>j</mi></math>
+over the objects of the co-cluster. The aggregation degree alone is linear in each
+membership set and is maximized by crisp, degenerate memberships, with the
+whole item membership of a co-cluster on its single most frequent item. Oh,
+Honda, and Ichihashi [<a id="x14-244002"></a><a href="bibliography.html#cite.0@oh:2001:fccm">168</a>] regularize both sets by their entropies, the
+device of Miyamoto and Mukaidono for fuzzy c-means [<a id="x14-244003"></a><a href="bibliography.html#cite.0@miyamoto:1997:entropy">23</a>], and maximize
+</p><table class="equation"><tr><td>
+<!-- l. 245 --><p class="indent">
+</p><!-- l. 245 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x14-244004r8"></mstyle><!-- endlabel --><msub><mrow><mi>J</mi></mrow><mrow><mstyle mathvariant="normal"><mi>FCCM</mi></mstyle></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo><msub><mrow><mo> ∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>k</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>j</mi></mrow></msub><msub><mrow><mi>u</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><msub><mrow><mi>w</mi></mrow><mrow><mi mathvariant="italic">ij</mi></mrow></msub><msub><mrow><mi>r</mi></mrow><mrow><mi mathvariant="italic">kj</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mi>λ</mi></mrow><mrow><mi>u</mi></mrow></msub><msub><mrow><mo> ∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>k</mi></mrow></msub><msub><mrow><mi>u</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><mtext class="qopname"> log</mtext><mo> ⁡<!-- FUNCTION APPLICATION --> </mo><!-- nolimits --><msub><mrow><mi>u</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mi>λ</mi></mrow><mrow><mi>w</mi></mrow></msub><msub><mrow><mo> ∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>j</mi></mrow></msub><msub><mrow><mi>w</mi></mrow><mrow><mi mathvariant="italic">ij</mi></mrow></msub><mtext class="qopname"> log</mtext><mo> ⁡<!-- FUNCTION APPLICATION --> </mo><!-- nolimits --><msub><mrow><mi>w</mi></mrow><mrow><mi mathvariant="italic">ij</mi></mrow></msub><mo class="MathClass-punc" stretchy="false">.</mo>
+</mrow></math></td><td class="eq-no">(12.8)</td></tr></table>
+<!-- l. 249 --><p class="indent">   The necessary conditions are soft-max assignments, </p><table class="equation"><tr><td>
+<!-- l. 250 --><p class="indent">
+</p><!-- l. 250 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x14-244005r9"></mstyle><!-- endlabel --><msub><mrow><mi>u</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><mtext class="qopname">exp</mtext><mo> ⁡<!-- FUNCTION APPLICATION --> </mo><!-- nolimits --><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mi>a</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><mo class="MathClass-bin" stretchy="false">∕</mo><msub><mrow><mi>λ</mi></mrow><mrow><mi>u</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow>
+<mrow><munderover accent="false" accentunder="false"><mrow><mo>∑</mo>
+</mrow><mrow><mi>l</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><mtext class="qopname"> exp</mtext><mo> ⁡<!-- FUNCTION APPLICATION --> </mo><!-- nolimits --><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mi>a</mi></mrow><mrow><mi mathvariant="italic">lk</mi></mrow></msub><mo class="MathClass-bin" stretchy="false">∕</mo><msub><mrow><mi>λ</mi></mrow><mrow><mi>u</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow></mfrac><mo class="MathClass-punc" stretchy="false">,</mo><mspace class="qquad" width="2em"></mspace><msub><mrow><mi>w</mi></mrow><mrow><mi mathvariant="italic">ij</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><mtext class="qopname">exp</mtext><mo> ⁡<!-- FUNCTION APPLICATION --> </mo><!-- nolimits --><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mi>b</mi></mrow><mrow><mi mathvariant="italic">ij</mi></mrow></msub><mo class="MathClass-bin" stretchy="false">∕</mo><msub><mrow><mi>λ</mi></mrow><mrow><mi>w</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow>
+<mrow><munderover accent="false" accentunder="false"><mrow><mo>∑</mo>
+</mrow><mrow><mi>l</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>M</mi></mrow></munderover><mtext class="qopname"> exp</mtext><mo> ⁡<!-- FUNCTION APPLICATION --> </mo><!-- nolimits --><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mi>b</mi></mrow><mrow><mi mathvariant="italic">il</mi></mrow></msub><mo class="MathClass-bin" stretchy="false">∕</mo><msub><mrow><mi>λ</mi></mrow><mrow><mi>w</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow></mfrac><mo class="MathClass-punc" stretchy="false">,</mo>
+</mrow></math></td><td class="eq-no">(12.9)</td></tr></table>
+<!-- l. 255 --><p class="indent">   alternated until the object memberships settle. The weights
+are measured in the units of the aggregations they temper:
+<!-- l. 255 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>λ</mi></mrow><mrow><mi>u</mi></mrow></msub></math> like a typical
+entry of <!-- l. 255 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mstyle mathvariant="bold"><mi>R</mi></mstyle></math>,
+and <!-- l. 255 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>λ</mi></mrow><mrow><mi>w</mi></mrow></msub></math> like an
+                                                                     
+
+                                                                     
+entry summed over the objects of a co-cluster, so its scale grows with the size of the data.
+A small <!-- l. 255 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>λ</mi></math>
+makes the corresponding memberships crisp; a large one drives them to the uniform
+values <!-- l. 255 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1</mn><mo class="MathClass-bin" stretchy="false">∕</mo><mi>c</mi></mrow></math>
+and <!-- l. 255 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1</mn><mo class="MathClass-bin" stretchy="false">∕</mo><mi>M</mi></mrow></math>.
+New objects receive memberships by the first formula with the fitted item
+memberships.
+</p>
+<p><img alt="Algorithm" class="algobox" src="main_web92x.svg"/><a id="x14-244006r3"></a><a id="x14-244007r48"></a><a id="x14-244008r1"></a><a id="x14-244009r2"></a><a id="x14-244010r3"></a><a id="x14-244011r4"></a><a id="x14-244012r5"></a> </p><div class="box summarybox">
+<!-- l. 269 --><p class="noindent"><span class="ec-lmbx-10x-x-109">In a nutshell: FCCM</span>
+</p>
+<ul class="itemize1">
+<li class="itemize">Clusters rows and columns of a non-negative co-occurrence matrix at
+     once; a co-cluster is a group of objects with the items that characterize
+     it.
+     </li>
+<li class="itemize">Maximizes  the  aggregation  degree  regularized  by  the  entropies  of
+     both membership sets; the updates are soft-max assignments, and no
+     distance between rows is needed.
+     </li>
+<li class="itemize">Parameters: <!-- l. 273 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>λ</mi></mrow><mrow><mi>u</mi></mrow></msub></math>
+     (in the units of a row mean) and <!-- l. 273 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>λ</mi></mrow><mrow><mi>w</mi></mrow></msub></math>
+     (in the units of a column sum over a co-cluster); outside a window of
+                                                                     
+
+                                                                     
+     <!-- l. 273 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>λ</mi></mrow><mrow><mi>w</mi></mrow></msub></math>
+     the solution degenerates.
+     </li>
+<li class="itemize">Use  for  document–term,  user–item,  or  other  count  tables;  restarts
+     (<code class="lstinline"><span style="color:#000000">n_init</span></code>) keep the largest objective.</li></ul>
+</div>
+<!-- l. 278 --><p class="indent">   Kummamuru, Dhawale, and Krishnapuram [<a id="x14-244013"></a><a href="bibliography.html#cite.0@kummamuru:2003:codok">169</a>] replace the entropies by
+quadratic regularizers, </p><table class="equation"><tr><td>
+<!-- l. 279 --><p class="indent">
+</p><!-- l. 279 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x14-244014r10"></mstyle><!-- endlabel --><msub><mrow><mi>J</mi></mrow><mrow><mstyle mathvariant="normal"><mi>CoDoK</mi></mstyle></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo><msub><mrow><mo> ∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>k</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>j</mi></mrow></msub><msub><mrow><mi>u</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><msub><mrow><mi>w</mi></mrow><mrow><mi mathvariant="italic">ij</mi></mrow></msub><msub><mrow><mi>r</mi></mrow><mrow><mi mathvariant="italic">kj</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mi>T</mi></mrow><mrow><mi>u</mi></mrow></msub><msub><mrow><mo> ∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>k</mi></mrow></msub><msubsup><mrow><mi>u</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mi>T</mi></mrow><mrow>
+<mi>w</mi></mrow></msub><msub><mrow><mo> ∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>j</mi></mrow></msub><msubsup><mrow><mi>w</mi></mrow><mrow><mi mathvariant="italic">ij</mi></mrow><mrow><mn>2</mn></mrow></msubsup><mo class="MathClass-punc" stretchy="false">.</mo>
+</mrow></math></td><td class="eq-no">(12.10)</td></tr></table>
+<!-- l. 283 --><p class="indent">   The necessary conditions are then <span class="ec-lmri-10x-x-109">linear</span>: a membership is the uniform value
+plus a multiple of the deviation of its aggregation from the mean aggregation,
+</p><table class="equation"><tr><td>
+<!-- l. 284 --><p class="indent">
+</p><!-- l. 284 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x14-244015r11"></mstyle><!-- endlabel --><msub><mrow><mi>u</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><mn>1</mn></mrow>
+<mrow><mi>c</mi></mrow></mfrac> <mo class="MathClass-bin" stretchy="false">+</mo> <mfrac><mrow><mn>1</mn></mrow>
+<mrow><mn>2</mn><msub><mrow><mi>T</mi></mrow><mrow><mi>u</mi></mrow></msub></mrow></mfrac><mstyle mathsize="1.61em"><mrow><mo fence="true" form="prefix"> (</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle><msub><mrow><mi>a</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo> <mfrac><mrow><mn>1</mn></mrow>
+<mrow><mi>c</mi></mrow></mfrac><munderover accent="false" accentunder="false"><mrow><mo>∑</mo>
+</mrow><mrow><mi>l</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><msub><mrow><mi>a</mi></mrow><mrow>
+<mi mathvariant="italic">lk</mi></mrow></msub><mstyle mathsize="1.61em"><mrow><mo fence="true" form="prefix"> )</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle><mo class="MathClass-punc" stretchy="false">,</mo><mspace class="qquad" width="2em"></mspace><msub><mrow><mi>w</mi></mrow><mrow><mi mathvariant="italic">ij</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><mn>1</mn></mrow>
+<mrow><mi>M</mi></mrow></mfrac> <mo class="MathClass-bin" stretchy="false">+</mo> <mfrac><mrow><mn>1</mn></mrow>
+<mrow><mn>2</mn><msub><mrow><mi>T</mi></mrow><mrow><mi>w</mi></mrow></msub></mrow></mfrac><mstyle mathsize="1.61em"><mrow><mo fence="true" form="prefix"> (</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle><msub><mrow><mi>b</mi></mrow><mrow><mi mathvariant="italic">ij</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo> <mfrac><mrow><mn>1</mn></mrow>
+<mrow><mi>M</mi></mrow></mfrac><munderover accent="false" accentunder="false"><mrow><mo>∑</mo>
+</mrow><mrow><mi>l</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>M</mi></mrow></munderover><msub><mrow><mi>b</mi></mrow><mrow>
+<mi mathvariant="italic">il</mi></mrow></msub><mstyle mathsize="1.61em"><mrow><mo fence="true" form="prefix"> )</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle><mo class="MathClass-punc" stretchy="false">,</mo>
+</mrow></math></td><td class="eq-no">(12.11)</td></tr></table>
+<!-- l. 289 --><p class="indent">   followed by clipping at zero and renormalization. No exponentials are
+evaluated, which removes the overflow of (<a href="#x14-244005r9">12.9<!-- tex4ht:ref: eq:beyond:ufccm  --></a>) for large aggregations, and the
+clipping sets the item memberships of the irrelevant terms to exactly zero, which
+                                                                     
+
+                                                                     
+gives a sparse and readable result for document collections with large
+vocabularies.
+</p>
+<p><img alt="Algorithm" class="algobox" src="main_web93x.svg"/><a id="x14-244016r4"></a><a id="x14-244017r1"></a><a id="x14-244018r2"></a><a id="x14-244019r3"></a><a id="x14-244020r4"></a> </p><div class="box summarybox">
+<!-- l. 300 --><p class="noindent"><span class="ec-lmbx-10x-x-109">In a nutshell: Fuzzy CoDoK</span>
+</p>
+<ul class="itemize1">
+<li class="itemize">The FCCM aggregation with quadratic instead of entropy regularizers:
+     linear updates, clipping instead of exponentials.
+     </li>
+<li class="itemize">Sparse  item  memberships  (irrelevant  items  get  zero),  no  overflow
+     for large aggregations, and a wider usable range of the item weight
+     <!-- l. 303 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>T</mi></mrow><mrow><mi>w</mi></mrow></msub></math>.
+     </li>
+<li class="itemize">Parameters: <!-- l. 304 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>T</mi></mrow><mrow><mi>u</mi></mrow></msub></math>
+     and <!-- l. 304 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>T</mi></mrow><mrow><mi>w</mi></mrow></msub></math>
+     in the units of FCCM’s <!-- l. 304 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>λ</mi></mrow><mrow><mi>u</mi></mrow></msub></math>
+     and <!-- l. 304 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>λ</mi></mrow><mrow><mi>w</mi></mrow></msub></math>.</li></ul>
+</div>
+<!-- l. 308 --><p class="noindent">
+</p>
+<h4 class="subsectionHead"><span class="titlemark">12.2.4   </span> <a id="x14-24500012.2.4"></a>Collaborative fuzzy clustering</h4>
+<!-- l. 310 --><p class="noindent">The same <!-- l. 310 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>N</mi></math> objects
+are described at <!-- l. 310 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>P</mi></math>
+sites by data <!-- l. 310 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mstyle mathvariant="bold"><mi>X</mi></mstyle><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">ii</mi><mo class="MathClass-close" stretchy="false">]</mo> <mo class="MathClass-rel" stretchy="false">∈</mo> <msup><mrow><mi>ℝ</mi></mrow><mrow><mi>N</mi><mo class="MathClass-bin" stretchy="false">×</mo><msub><mrow><mi>n</mi></mrow><mrow><mi mathvariant="italic">ii</mi></mrow></msub></mrow></msup></mrow></math>,
+<!-- l. 310 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi mathvariant="italic">ii</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>1</mn><mo class="MathClass-punc" stretchy="false">,</mo><mi>…</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>P</mi></mrow></math>. All sites look for
+<!-- l. 310 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>c</mi></math> clusters, with
+memberships <!-- l. 310 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">ii</mi><mo class="MathClass-close" stretchy="false">]</mo></mrow></math>,
+prototypes <!-- l. 310 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">ii</mi><mo class="MathClass-close" stretchy="false">]</mo></mrow></math>
+in their own feature spaces, and squared distances
+<!-- l. 310 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msubsup><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">ii</mi><mo class="MathClass-close" stretchy="false">]</mo></mrow></math>. The collaboration matrix
+<!-- l. 310 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">ii</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi mathvariant="italic">jj</mi><mo class="MathClass-close" stretchy="false">]</mo> <mo class="MathClass-rel" stretchy="false">≥</mo><mn>0</mn></mrow></math> states how strongly
+site <!-- l. 310 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi mathvariant="italic">ii</mi></mrow></math> takes the partition
+of site <!-- l. 310 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi mathvariant="italic">jj</mi></mrow></math> into account.
+Pedrycz [<a id="x14-245001"></a><a href="bibliography.html#cite.0@pedrycz:2002:collaborative">170</a>] lets site <!-- l. 310 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi mathvariant="italic">ii</mi></mrow></math>
+minimize </p><table class="equation"><tr><td>
+<!-- l. 311 --><p class="indent">
+</p><!-- l. 311 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x14-245002r12"></mstyle><!-- endlabel --><mi>Q</mi><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">ii</mi><mo class="MathClass-close" stretchy="false">]</mo> <mo class="MathClass-rel" stretchy="false">=</mo><msub><mrow><mo> ∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>k</mi></mrow></msub><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">ii</mi><mo class="MathClass-close" stretchy="false">]</mo><mspace class="thinspace" width="0.17em"></mspace><msubsup><mrow><mi>D</mi></mrow><mrow>
+<mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">ii</mi><mo class="MathClass-close" stretchy="false">]</mo> <mo class="MathClass-bin" stretchy="false">+</mo><msub><mrow><mtext> ∑</mtext></mrow><mrow>
+<mi mathvariant="italic">jj</mi><mo class="MathClass-rel" stretchy="false">≠</mo><mi mathvariant="italic">ii</mi></mrow></msub><mi>α</mi><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">ii</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi mathvariant="italic">jj</mi><mo class="MathClass-close" stretchy="false">]</mo><msub><mrow><mo>∑</mo>
+</mrow><mrow><mi>i</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>k</mi></mrow></msub><mstyle mathsize="1.19em"><mrow><mo fence="true" form="prefix"> (</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">ii</mi><mo class="MathClass-close" stretchy="false">]</mo> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">jj</mi><mo class="MathClass-close" stretchy="false">]</mo><msup><mrow><mstyle mathsize="1.19em"><mrow><mo fence="true" form="prefix"> )</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle></mrow><mrow><mn>2</mn></mrow></msup><msubsup><mrow><mi>D</mi></mrow><mrow>
+<mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">ii</mi><mo class="MathClass-close" stretchy="false">]</mo><mo class="MathClass-punc" stretchy="false">,</mo>
+</mrow></math></td><td class="eq-no">(12.12)</td></tr></table>
+<!-- l. 315 --><p class="indent">   in which the other sites enter only through their memberships. With
+<!-- l. 315 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mover accent="true"><mrow><mi>α</mi></mrow><mo accent="true">¯</mo></mover><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">ii</mi><mo class="MathClass-close" stretchy="false">]</mo> <mo class="MathClass-rel" stretchy="false">=</mo><msub><mrow> <mi class="MathClass-op">∑</mi><mo> ⁡<!-- FUNCTION APPLICATION --></mo>
+<!-- nolimits --></mrow><mrow><mi mathvariant="italic">jj</mi><mo class="MathClass-rel" stretchy="false">≠</mo><mi mathvariant="italic">ii</mi></mrow></msub><mi>α</mi><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">ii</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi mathvariant="italic">jj</mi><mo class="MathClass-close" stretchy="false">]</mo></mrow></math> and
+the <span class="ec-lmri-10x-x-109">communicated memberships</span> </p><table class="equation"><tr><td>
+<!-- l. 316 --><p class="indent">
+</p><!-- l. 316 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x14-245003r13"></mstyle><!-- endlabel --><msub><mrow><mi>φ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">ii</mi><mo class="MathClass-close" stretchy="false">]</mo> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><msub><mrow><mo>∑</mo>
+</mrow><mrow><mi mathvariant="italic">jj</mi><mo class="MathClass-rel" stretchy="false">≠</mo><mi mathvariant="italic">ii</mi></mrow></msub><mi>α</mi><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">ii</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi mathvariant="italic">jj</mi><mo class="MathClass-close" stretchy="false">]</mo><mspace class="thinspace" width="0.17em"></mspace><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">jj</mi><mo class="MathClass-close" stretchy="false">]</mo></mrow>
+<mrow><mn>1</mn> <mo class="MathClass-bin" stretchy="false">+</mo> <mover accent="true"><mrow><mi>α</mi></mrow><mo accent="true">¯</mo></mover><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">ii</mi><mo class="MathClass-close" stretchy="false">]</mo></mrow></mfrac> <mo class="MathClass-punc" stretchy="false">,</mo>
+</mrow></math></td><td class="eq-no">(12.13)</td></tr></table>
+<!-- l. 320 --><p class="indent">   the Lagrange conditions give
+<!-- tex4ht:inline --></p><!-- l. 321 --><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mtable class="gather" displaystyle="true">
+<mtr>
+<mtd><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">ii</mi><mo class="MathClass-close" stretchy="false">]</mo> <mo class="MathClass-rel" stretchy="false">=</mo> <msub><mrow><mi>φ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">ii</mi><mo class="MathClass-close" stretchy="false">]</mo> <mo class="MathClass-bin" stretchy="false">+</mo> <mfrac><mrow><mn>1</mn> <mo class="MathClass-bin" stretchy="false">−</mo><munderover accent="false" accentunder="false"><mrow><mo>∑</mo>
+</mrow><mrow><mi>l</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><msub><mrow><mi>φ</mi></mrow><mrow><mi mathvariant="italic">lk</mi></mrow></msub><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">ii</mi><mo class="MathClass-close" stretchy="false">]</mo></mrow>
+<mrow><munderover accent="false" accentunder="false"><mrow><mo>∑</mo>
+</mrow><mrow><mi>l</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><msubsup><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">ii</mi><mo class="MathClass-close" stretchy="false">]</mo><mo class="MathClass-bin" stretchy="false">∕</mo><msubsup><mrow><mi>D</mi></mrow><mrow><mi mathvariant="italic">lk</mi></mrow><mrow><mn>2</mn></mrow></msubsup><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">ii</mi><mo class="MathClass-close" stretchy="false">]</mo></mrow></mfrac><mo class="MathClass-punc" stretchy="false">,</mo></mtd>
+<mtd><mstyle class="label" id="x14-245004r14"></mstyle><!-- endlabel --><mstyle class="maketag"><mtext>(12.14)</mtext></mstyle><mspace class="nbsp" width="0.33em"></mspace></mtd>
+</mtr><mtr>
+<mtd><msub><mrow><mstyle mathvariant="bold"><mi>v</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">ii</mi><mo class="MathClass-close" stretchy="false">]</mo> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><msub><mrow><mo>∑</mo>
+</mrow><mrow><mi>k</mi></mrow></msub><msub><mrow><mi>w</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">ii</mi><mo class="MathClass-close" stretchy="false">]</mo><mspace class="thinspace" width="0.17em"></mspace><msub><mrow><mstyle mathvariant="bold"><mi>x</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">ii</mi><mo class="MathClass-close" stretchy="false">]</mo></mrow>
+<mrow><msub><mrow><mo>∑</mo>
+</mrow><mrow><mi>k</mi></mrow></msub><msub><mrow><mi>w</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">ii</mi><mo class="MathClass-close" stretchy="false">]</mo></mrow></mfrac> <mo class="MathClass-punc" stretchy="false">,</mo></mtd>
+<mtd><mstyle class="label" id="x14-245005r15"></mstyle><!-- endlabel --><mstyle class="maketag"><mtext>(12.15)</mtext></mstyle><mspace class="nbsp" width="0.33em"></mspace></mtd>
+</mtr><mtr>
+<mtd><msub><mrow><mi>w</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">ii</mi><mo class="MathClass-close" stretchy="false">]</mo> <mo class="MathClass-rel" stretchy="false">=</mo> <msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mn>2</mn></mrow></msubsup><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">ii</mi><mo class="MathClass-close" stretchy="false">]</mo> <mo class="MathClass-bin" stretchy="false">+</mo><msub><mrow><mtext> ∑</mtext></mrow><mrow>
+<mi mathvariant="italic">jj</mi><mo class="MathClass-rel" stretchy="false">≠</mo><mi mathvariant="italic">ii</mi></mrow></msub><mi>α</mi><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">ii</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi mathvariant="italic">jj</mi><mo class="MathClass-close" stretchy="false">]</mo><mstyle mathsize="1.19em"><mrow><mo fence="true" form="prefix"> (</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">ii</mi><mo class="MathClass-close" stretchy="false">]</mo> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">jj</mi><mo class="MathClass-close" stretchy="false">]</mo><msup><mrow><mstyle mathsize="1.19em"><mrow><mo fence="true" form="prefix"> )</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle></mrow><mrow><mn>2</mn></mrow></msup></mtd>
+<mtd></mtd> </mtr></mtable>
+</mrow></math>
+<!-- l. 327 --><p class="nopar">The membership is a convex combination of the other sites’ memberships, with total
+weight <!-- l. 328 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mover accent="true"><mrow><mi>α</mi></mrow><mo accent="true">¯</mo></mover><mo class="MathClass-bin" stretchy="false">∕</mo><mo class="MathClass-open" stretchy="false">(</mo><mn>1</mn> <mo class="MathClass-bin" stretchy="false">+</mo> <mover accent="true"><mrow><mi>α</mi></mrow><mo accent="true">¯</mo></mover><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>,
+and of the site’s own FCM membership; the prototype weights add to the FCM
+weight the disagreement with the other sites. The algorithm has two phases. In
+the first, every site runs FCM independently, and the clusters of the sites
+are matched by the Hungarian algorithm on the membership overlap
+<!-- l. 328 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mstyle mathvariant="bold"><mi>U</mi></mstyle><mo class="MathClass-open" stretchy="false">[</mo><mn>1</mn><mo class="MathClass-close" stretchy="false">]</mo><mstyle mathvariant="bold"><mi>U</mi></mstyle><msup><mrow><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">jj</mi><mo class="MathClass-close" stretchy="false">]</mo></mrow><mrow><mstyle mathvariant="sans-serif"><mi>T</mi></mstyle></mrow></msup></mrow></math>,
+because the sites must refer to the same clusters. In the second, the sites
+iterate synchronously: each updates its prototypes and memberships
+by (<a href="#x14-245004r14">12.14<!-- tex4ht:ref: eq:beyond:mucfcm  --></a>) and (<a href="#x14-245005r15">12.15<!-- tex4ht:ref: eq:beyond:vcfcm  --></a>) from the partitions the others communicated
+in the previous round, until no membership changes by more than
+                                                                     
+
+                                                                     
+<!-- l. 328 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>𝜖</mi></math>. A
+site whose row of the collaboration matrix is zero keeps minimizing its plain
+FCM functional in the second phase, so it stays at its phase-one solution up to
+the tolerance of the first phase. The collaboration matrix need not be symmetric:
+a site may listen without being listened to.
+</p><!-- l. 330 --><p class="indent">   Two quantities summarize the result. The distance between the partitions of two
+sites, <!-- l. 330 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow> <mfrac><mrow><mn>1</mn></mrow>
+<mrow><mi>N</mi></mrow></mfrac><msub><mrow> <mi class="MathClass-op">∑</mi><mo> ⁡<!-- FUNCTION APPLICATION --></mo>
+<!-- nolimits --></mrow><mrow><mi>i</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>k</mi></mrow></msub><msup><mrow><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">ii</mi><mo class="MathClass-close" stretchy="false">]</mo> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub><mo class="MathClass-open" stretchy="false">[</mo><mi mathvariant="italic">jj</mi><mo class="MathClass-close" stretchy="false">]</mo><mo class="MathClass-close" stretchy="false">)</mo></mrow><mrow><mn>2</mn></mrow></msup></mrow></math>,
+or their fuzzy Rand index (<a href="04-cluster-validity-and-the-number.html#x6-78004r19">4.19<!-- tex4ht:ref: eq:val:fuzzyrand  --></a>), measures how well the sites agree; the mean
+absolute change of a site’s memberships from the first to the second phase
+measures how much the site had to give in, and therefore how much its view of
+the objects differed from the others’.
+</p>
+<p><img alt="Algorithm" class="algobox" src="main_web94x.svg"/><a id="x14-245006r5"></a><a id="x14-245007r49"></a><a id="x14-245008r1"></a><a id="x14-245009r2"></a><a id="x14-245010r3"></a><a id="x14-245011r4"></a><a id="x14-245012r5"></a><a id="x14-245013r6"></a> </p><div class="box summarybox">
+<!-- l. 348 --><p class="noindent"><span class="ec-lmbx-10x-x-109">In a nutshell: Collaborative fuzzy clustering</span>
+</p>
+<ul class="itemize1">
+<li class="itemize">The same objects are described at several sites by different features;
+     the sites exchange only partition matrices, never data.
+     </li>
+<li class="itemize">Each site minimizes its FCM functional plus the distance-weighted
+     disagreement with the other sites’ memberships; memberships become
+     convex combinations of own and communicated memberships.
+     </li>
+<li class="itemize">The collaboration matrix sets how much site <!-- l. 352 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi mathvariant="italic">ii</mi></mrow></math>
+     trusts site <!-- l. 352 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi mathvariant="italic">jj</mi></mrow></math>
+     and may be asymmetric; a larger weight pulls the partitions together
+     monotonically.
+     </li>
+<li class="itemize">The  membership  change  of  a  site  from  the  independent  to  the
+     collaborative phase locates the sites that disagree; <!-- l. 353 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>m</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>2</mn></mrow></math>.</li></ul>
+</div>
+<!-- l. 357 --><p class="noindent">
+</p>
+<h4 class="subsectionHead"><span class="titlemark">12.2.5   </span> <a id="x14-24600012.2.5"></a>Cluster ensembles and consensus functions</h4>
+<!-- l. 359 --><p class="noindent">Consider a library of <!-- l. 359 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>Q</mi></math>
+soft partitions <!-- l. 359 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msup><mrow><mstyle mathvariant="bold"><mi>U</mi></mstyle></mrow><mrow><mo class="MathClass-open" stretchy="false">(</mo><mn>1</mn><mo class="MathClass-close" stretchy="false">)</mo></mrow></msup><mo class="MathClass-punc" stretchy="false">,</mo><mi>…</mi><mo class="MathClass-punc" stretchy="false">,</mo><msup><mrow><mstyle mathvariant="bold"><mi>U</mi></mstyle></mrow><mrow><mo class="MathClass-open" stretchy="false">(</mo><mi>Q</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></msup></mrow></math>
+of the same <!-- l. 359 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>N</mi></math>
+objects; member <!-- l. 359 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>q</mi></math>
+has <!-- l. 359 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>c</mi></mrow><mrow><mi>q</mi></mrow></msub></math> clusters and
+membership vectors <!-- l. 359 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msubsup><mrow><mstyle mathvariant="bold-italic"><mstyle mathvariant="bold"><mi>μ</mi></mstyle></mstyle></mrow><mrow><mi>k</mi></mrow><mrow><mo class="MathClass-open" stretchy="false">(</mo><mi>q</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></msubsup> <mo class="MathClass-rel" stretchy="false">∈</mo> <msup><mrow><mi>ℝ</mi></mrow><mrow><msub><mrow><mi>c</mi></mrow><mrow><mi>q</mi></mrow></msub></mrow></msup></mrow></math>.
+In <span class="ec-lmtt-10x-x-109">fuzzyclust </span>the ensemble generates the library itself: every member is the
+base clusterer (fuzzy c-means by default), fitted with its own random start on a
+random share of the samples and of the features and with a number of clusters
+drawn from a given set, and the memberships of <span class="ec-lmri-10x-x-109">all </span>samples come from its
+<span class="ec-lmtt-10x-x-109">predict_proba</span>. Strehl and Ghosh [<a id="x14-246001"></a><a href="bibliography.html#cite.0@strehl:2002:ensembles">171</a>] call the task of combining such
+partitions without access to the data <span class="ec-lmri-10x-x-109">knowledge reuse</span>; the members’
+cluster labels are arbitrary, so a consensus function must be invariant to
+them.
+</p>
+<!-- l. 361 --><p class="noindent"><span class="paragraphHead"><a id="x14-247000"></a><span class="ec-lmbx-10x-x-109">The co-association matrix.</span></span>
+                                                                     
+
+                                                                     
+   Comparing objects rather than clusters makes the labels irrelevant. The soft
+co-association of two objects is the library average of the similarity of their
+membership vectors, </p><table class="equation"><tr><td>
+<!-- l. 362 --><p class="indent">
+</p><!-- l. 362 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x14-247001r16"></mstyle><!-- endlabel --><msub><mrow><mi>s</mi></mrow><mrow><mi mathvariant="italic">kl</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><mn>1</mn></mrow>
+<mrow><mi>Q</mi></mrow></mfrac><munderover accent="false" accentunder="false"><mrow><mo>∑</mo>
+</mrow><mrow><mi>q</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>Q</mi></mrow></munderover> <mfrac><mrow><mstyle mathsize="1.19em"><mrow><mo fence="true" form="prefix"> ⟨</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle><msubsup><mrow><mstyle mathvariant="bold-italic"><mstyle mathvariant="bold"><mi>μ</mi></mstyle></mstyle></mrow><mrow><mi>k</mi></mrow><mrow><mo class="MathClass-open" stretchy="false">(</mo><mi>q</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></msubsup><mo class="MathClass-punc" stretchy="false">,</mo><msubsup><mrow><mstyle mathvariant="bold-italic"><mstyle mathvariant="bold"><mi>μ</mi></mstyle></mstyle></mrow><mrow><mi>l</mi></mrow><mrow><mo class="MathClass-open" stretchy="false">(</mo><mi>q</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></msubsup><mstyle mathsize="1.19em"><mrow><mo fence="true" form="prefix"> ⟩</mo><mrow></mrow><mo fence="true" form="postfix"></mo></mrow></mstyle></mrow>
+<mrow> <mrow><mo fence="true" form="prefix"> ‖</mo><mrow><msubsup><mrow><mstyle mathvariant="bold-italic"><mstyle mathvariant="bold"><mi>μ</mi></mstyle></mstyle></mrow><mrow><mi>k</mi></mrow><mrow><mo class="MathClass-open" stretchy="false">(</mo><mi>q</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></msubsup></mrow><mo fence="true" form="postfix">‖</mo></mrow> <mspace class="thinspace" width="0.17em"></mspace> <mrow><mo fence="true" form="prefix"> ‖</mo><mrow><msubsup><mrow><mstyle mathvariant="bold-italic"><mstyle mathvariant="bold"><mi>μ</mi></mstyle></mstyle></mrow><mrow><mi>l</mi></mrow><mrow><mo class="MathClass-open" stretchy="false">(</mo><mi>q</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></msubsup></mrow><mo fence="true" form="postfix">‖</mo></mrow> </mrow></mfrac><mspace class="qquad" width="2em"></mspace><mstyle class="text"><mtext>or</mtext></mstyle><mspace class="qquad" width="2em"></mspace><msub><mrow><mi>s</mi></mrow><mrow><mi mathvariant="italic">kl</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><mn>1</mn></mrow>
+<mrow><mi>Q</mi></mrow></mfrac><munderover accent="false" accentunder="false"><mrow><mo>∑</mo>
+</mrow><mrow><mi>q</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>Q</mi></mrow></munderover><munderover accent="false" accentunder="false"><mrow><mtext> ∑</mtext></mrow><mrow>
+<mi>i</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><msub><mrow><mi>c</mi></mrow><mrow><mi>q</mi></mrow></msub>
+</mrow></munderover><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mo class="MathClass-open" stretchy="false">(</mo><mi>q</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></msubsup><msubsup><mrow><mi>μ</mi></mrow><mrow>
+<mi mathvariant="italic">il</mi></mrow><mrow><mo class="MathClass-open" stretchy="false">(</mo><mi>q</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></msubsup><mo class="MathClass-punc" stretchy="false">.</mo>
+</mrow></math></td><td class="eq-no">(12.16)</td></tr></table>
+<!-- l. 368 --><p class="indent">   For crisp members both equal the fraction of members that put
+<!-- l. 368 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math> and
+<!-- l. 368 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>l</mi></math> into
+the same cluster, which is the evidence accumulation matrix of Fred and Jain
+[<a id="x14-247002"></a><a href="bibliography.html#cite.0@fred:2005:eac">173</a>] and the similarity of the CSPA algorithm of Strehl and Ghosh. For soft
+members the inner product (right) is the probability that two independent draws
+from the membership vectors land in the same cluster; it is below one even for
+<!-- l. 368 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>k</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mi>l</mi></mrow></math>, and
+the more so the fuzzier the member. The cosine (left, the default) normalizes the
+membership vectors of every member, so that an object is fully co-associated with
+itself and with every object that has the same membership vector; the scale of
+<!-- l. 368 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mstyle mathvariant="bold"><mi>S</mi></mstyle> <mo class="MathClass-rel" stretchy="false">=</mo> <mo class="MathClass-open" stretchy="false">[</mo><msub><mrow><mi>s</mi></mrow><mrow><mi mathvariant="italic">kl</mi></mrow></msub><mo class="MathClass-close" stretchy="false">]</mo></mrow></math> then does
+not depend on the fuzziness or the number of clusters of the members. The matrix
+<!-- l. 368 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mstyle mathvariant="bold"><mi>S</mi></mstyle></math> is symmetric
+with entries in <!-- l. 368 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo class="MathClass-open" stretchy="false">[</mo><mn>0</mn><mo class="MathClass-punc" stretchy="false">,</mo><mn>1</mn><mo class="MathClass-close" stretchy="false">]</mo></mrow></math>.
+</p>
+<!-- l. 370 --><p class="noindent"><span class="paragraphHead"><a id="x14-248000"></a><span class="ec-lmbx-10x-x-109">Consensus functions.</span></span>
+   Five ways to obtain <!-- l. 370 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>c</mi></math>
+consensus clusters are implemented. (i) <span class="ec-lmri-10x-x-109">FCM on the rows of</span>
+<!-- l. 370 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mstyle mathvariant="bold"><mi>S</mi></mstyle></math>: the row
+<!-- l. 370 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>s</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub></math> is the profile of object
+                                                                     
+
+                                                                     
+<!-- l. 370 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math>’s co-associations
+with all objects, and objects of one consensus cluster have similar profiles; fuzzy c-means with
+<!-- l. 370 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>m</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>2</mn></mrow></math> clusters these
+<!-- l. 370 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>N</mi></math>-dimensional
+rows. In such a high dimension FCM from a random partition drifts to the trivial
+fixed point of all prototypes at the grand mean, so the prototypes are seeded
+with k-means++. (ii) <span class="ec-lmri-10x-x-109">Spectral partitioning </span>[<a id="x14-248001"></a><a href="bibliography.html#cite.0@ng:2002:spectral">174</a>] of the graph with adjacency
+<!-- l. 370 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mstyle mathvariant="bold"><mi>S</mi></mstyle></math>; it
+takes the place of the METIS partitioner [<a id="x14-248002"></a><a href="bibliography.html#cite.0@karypis:1998:metis">175</a>] used in CSPA and in the soft
+sCSPA of Punera and Ghosh [<a id="x14-248003"></a><a href="bibliography.html#cite.0@punera:2008:soft">172</a>]. (iii) <span class="ec-lmri-10x-x-109">Hierarchical clustering </span>of the distance
+<!-- l. 370 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1</mn> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mi>s</mi></mrow><mrow><mi mathvariant="italic">kl</mi></mrow></msub></mrow></math> (evidence
+accumulation, section <a href="#x14-24900012.2.6">12.2.6</a>). (iv) The <span class="ec-lmri-10x-x-109">soft meta-clustering algorithm </span>sMCLA [<a href="bibliography.html#cite.0@punera:2008:soft">172</a>]:
+every cluster of every member is a <span class="ec-lmri-10x-x-109">hyperedge</span>, its membership vector over the
+<!-- l. 370 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>N</mi></math> objects; the
+<!-- l. 370 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi class="MathClass-op">∑</mi><mo> ⁡<!-- FUNCTION APPLICATION --></mo>
+<!-- nolimits --></mrow><mrow><mi>q</mi></mrow></msub><msub><mrow><mi>c</mi></mrow><mrow><mi>q</mi></mrow></msub></mrow></math> hyperedges are
+grouped into <!-- l. 370 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>c</mi></math>
+meta-clusters by the similarity of these vectors (<span class="ec-lmtt-10x-x-109">fuzzyclust </span>uses their cosine
+similarity and spectral partitioning in place of METIS), every meta-cluster is
+collapsed into its mean membership vector, and an object’s consensus membership is
+its collapsed membership normalized over the meta-clusters. (v) <span class="ec-lmri-10x-x-109">Information-theoretic
+k-means </span>ITK [<a href="bibliography.html#cite.0@punera:2008:soft">172</a>]: the concatenated membership vectors of an object, divided by
+<!-- l. 370 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>Q</mi></math>, form a
+distribution <!-- l. 370 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>p</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub></math>
+over all clusters of the library, and k-means with the Kullback–Leibler divergence
+<!-- l. 370 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mstyle mathvariant="normal"><mi>KL</mi></mstyle><mo class="MathClass-open" stretchy="false">(</mo><msub><mrow><mstyle mathvariant="bold"><mi>p</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub><mo class="MathClass-rel" stretchy="false">∥</mo><msub><mrow><mstyle mathvariant="bold"><mi>m</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>
+as distortion partitions these distributions; its centroids
+<!-- l. 370 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mstyle mathvariant="bold"><mi>m</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></math> are
+arithmetic means, and restarts keep the smallest total divergence. The hard
+consensus functions (ii), (iii), and (v) receive soft memberships in the space of the
+co-associations: the mean row of every consensus cluster is its prototype
+<!-- l. 370 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mstyle mathvariant="bold"><mi>z</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo><msub><mrow> <mi class="MathClass-op">∑</mi><mo> ⁡<!-- FUNCTION APPLICATION --></mo>
+<!-- nolimits --></mrow><mrow><mi>k</mi><mo class="MathClass-rel" stretchy="false">∈</mo><mi>i</mi></mrow></msub><msub><mrow><mstyle mathvariant="bold"><mi>s</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub><mo class="MathClass-bin" stretchy="false">∕</mo><mo class="MathClass-rel" stretchy="false">|</mo><mi>i</mi><mo class="MathClass-rel" stretchy="false">|</mo></mrow></math>, and
+every object receives the FCM membership of its row, </p><table class="equation"><tr><td>
+<!-- l. 371 --><p class="indent">
+</p><!-- l. 371 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x14-248004r17"></mstyle><!-- endlabel --><msubsup><mrow><mi>μ</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow><mrow><mo class="MathClass-bin" stretchy="false">∗</mo></mrow></msubsup> <mo class="MathClass-rel" stretchy="false">=</mo> <mfrac><mrow><mn>1</mn></mrow>
+<mrow><munderover accent="false" accentunder="false"><mrow><mo>∑</mo>
+</mrow><mrow><mi>j</mi><mo class="MathClass-rel" stretchy="false">=</mo><mn>1</mn></mrow><mrow><mi>c</mi></mrow></munderover><msup><mrow> <mrow><mo fence="true" form="prefix"> ‖</mo><mrow><msub><mrow><mstyle mathvariant="bold"><mi>s</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mstyle mathvariant="bold"><mi>z</mi></mstyle></mrow><mrow><mi>i</mi></mrow></msub></mrow><mo fence="true" form="postfix">‖</mo></mrow> </mrow><mrow><mn>2</mn></mrow></msup><mo class="MathClass-bin" stretchy="false">∕</mo><msup><mrow> <mrow><mo fence="true" form="prefix"> ‖</mo><mrow><msub><mrow><mstyle mathvariant="bold"><mi>s</mi></mstyle></mrow><mrow><mi>k</mi></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mstyle mathvariant="bold"><mi>z</mi></mstyle></mrow><mrow><mi>j</mi></mrow></msub></mrow><mo fence="true" form="postfix">‖</mo></mrow> </mrow><mrow><mn>2</mn></mrow></msup></mrow></mfrac><mo class="MathClass-punc" stretchy="false">,</mo>
+</mrow></math></td><td class="eq-no">(12.17)</td></tr></table>
+<!-- l. 375 --><p class="indent">   the same rule as for (i), so that all consensus memberships are on one scale. A
+new object is passed through every member, its co-associations with the training
+objects follow from (<a href="#x14-247001r16">12.16<!-- tex4ht:ref: eq:beyond:coassoc  --></a>), and (<a href="#x14-248004r17">12.17<!-- tex4ht:ref: eq:beyond:softconsensus  --></a>) (or the meta-clusters of sMCLA)
+gives its consensus membership. The classical hard consensus functions
+CSPA and MCLA of Strehl and Ghosh are (ii) and (iv) applied to crisp
+members.
+</p>
+<p><img alt="Algorithm" class="algobox" src="main_web95x.svg"/><a id="x14-248005r6"></a><a id="x14-248006r50"></a><a id="x14-248007r1"></a><a id="x14-248008r2"></a><a id="x14-248009r3"></a><a id="x14-248010r4"></a><a id="x14-248011r5"></a><a id="x14-248012r6"></a> </p><div class="box summarybox">
+<!-- l. 391 --><p class="noindent"><span class="ec-lmbx-10x-x-109">In a nutshell: Fuzzy cluster ensemble</span>
+</p>
+<ul class="itemize1">
+<li class="itemize">Combines  a  library  of  soft  partitions  (random  starts,  sub-samples,
+     feature subsets, various <!-- l. 393 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>c</mi></math>)
+     through the co-association matrix, which needs no matching of cluster
+                                                                     
+
+                                                                     
+     labels.
+     </li>
+<li class="itemize">The consensus is typically better than the average member and far
+     more reproducible than a single run; most of the gain comes with the
+     first few members.
+     </li>
+<li class="itemize">Parameters: library size, sample and feature fractions, member cluster
+     numbers, consensus function (FCM on the rows of <!-- l. 395 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mstyle mathvariant="bold"><mi>S</mi></mstyle></math>,
+     spectral,  hierarchical,  sMCLA,  ITK),  similarity  (cosine  or  inner
+     product).
+     </li>
+<li class="itemize">Costs <!-- l. 396 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>Q</mi></math>
+     fits plus an <!-- l. 396 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>N</mi> <mo class="MathClass-bin" stretchy="false">×</mo><mi>N</mi></mrow></math>
+     matrix; use for unstable clusterers, weak views of the data, or to choose
+     <!-- l. 396 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>c</mi></math>
+     (next section).</li></ul>
+</div>
+<!-- l. 400 --><p class="noindent">
+</p>
+<h4 class="subsectionHead"><span class="titlemark">12.2.6   </span> <a id="x14-24900012.2.6"></a>Evidence accumulation and the lifetime criterion</h4>
+<!-- l. 402 --><p class="noindent">Fred and Jain [<a id="x14-249001"></a><a href="bibliography.html#cite.0@fred:2005:eac">173</a>] use the co-association matrix of members that deliberately
+<span class="ec-lmri-10x-x-109">over-segment </span>the data: k-means runs with many more clusters than
+expected and a different number for each run. Objects of one natural
+group are split differently by different members but stay together in most
+of them; objects of different groups are rarely together. The distance
+<!-- l. 402 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>d</mi></mrow><mrow><mi mathvariant="italic">kl</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>1</mn> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mi>s</mi></mrow><mrow><mi mathvariant="italic">kl</mi></mrow></msub></mrow></math>
+is clustered hierarchically (single or average link); let
+<!-- l. 402 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>h</mi></mrow><mrow><mn>1</mn></mrow></msub> <mo class="MathClass-rel" stretchy="false">≤</mo><msub><mrow><mi>h</mi></mrow><mrow><mn>2</mn></mrow></msub> <mo class="MathClass-rel" stretchy="false">≤</mo><mo class="MathClass-rel" stretchy="false">⋯</mo> <mo class="MathClass-rel" stretchy="false">≤</mo><msub><mrow><mi>h</mi></mrow><mrow><mi>N</mi><mo class="MathClass-bin" stretchy="false">−</mo><mn>1</mn></mrow></msub></mrow></math> be the merge heights
+of the dendrogram and <!-- l. 402 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>h</mi></mrow><mrow><mi>N</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>1</mn></mrow></math>
+the largest possible distance. Cutting the dendrogram at a threshold in
+<!-- l. 402 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo class="MathClass-open" stretchy="false">[</mo><msub><mrow><mi>h</mi></mrow><mrow><mi>N</mi><mo class="MathClass-bin" stretchy="false">−</mo><mi>k</mi></mrow></msub><mo class="MathClass-punc" stretchy="false">,</mo><msub><mrow><mi>h</mi></mrow><mrow><mi>N</mi><mo class="MathClass-bin" stretchy="false">−</mo><mi>k</mi><mo class="MathClass-bin" stretchy="false">+</mo><mn>1</mn></mrow></msub><mo class="MathClass-close" stretchy="false">)</mo></mrow></math> yields
+exactly <!-- l. 402 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math>
+clusters, and the length of this interval, </p><table class="equation"><tr><td>
+<!-- l. 403 --><p class="indent">
+</p><!-- l. 403 --><math class="equation" display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow>
+<mstyle class="label" id="x14-249002r18"></mstyle><!-- endlabel --><msub><mrow><mi>τ</mi></mrow><mrow><mi>k</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <msub><mrow><mi>h</mi></mrow><mrow><mi>N</mi><mo class="MathClass-bin" stretchy="false">−</mo><mi>k</mi><mo class="MathClass-bin" stretchy="false">+</mo><mn>1</mn></mrow></msub> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mi>h</mi></mrow><mrow><mi>N</mi><mo class="MathClass-bin" stretchy="false">−</mo><mi>k</mi></mrow></msub><mo class="MathClass-punc" stretchy="false">,</mo><mspace class="qquad" width="2em"></mspace><mi>k</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>1</mn><mo class="MathClass-punc" stretchy="false">,</mo><mn>2</mn><mo class="MathClass-punc" stretchy="false">,</mo><mi>…</mi><mo class="MathClass-punc" stretchy="false">,</mo>
+</mrow></math></td><td class="eq-no">(12.18)</td></tr></table>
+<!-- l. 407 --><p class="indent">   is the <span class="ec-lmri-10x-x-109">lifetime </span>of the <!-- l. 407 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math>-cluster
+partition. The chosen number of clusters is the one of longest lifetime, the
+partition least sensitive to the choice of the threshold. The criterion inherits the
+behavior of the linkage. Average link copes with soft members; single link merges
+two groups as soon as one chain of objects connects them, and since
+the co-associations of soft members between neighboring groups never
+vanish, the one-cluster partition then lives longest. The members must
+also over-segment: a member with fewer clusters than groups merges
+some groups, and no amount of evidence separates what no member
+separates.
+</p>
+<p><img alt="Algorithm" class="algobox" src="main_web96x.svg"/><a id="x14-249003r7"></a><a id="x14-249004r1"></a><a id="x14-249005r2"></a><a id="x14-249006r3"></a><a id="x14-249007r4"></a> </p><div class="box summarybox">
+<!-- l. 418 --><p class="noindent"><span class="ec-lmbx-10x-x-109">In a nutshell: Evidence accumulation</span>
+</p>
+<ul class="itemize1">
+<li class="itemize">The  chosen  number  of  clusters  is  that  of  the  partition  of  the
+     co-association  dendrogram  that  persists  over  the  widest  range  of
+     thresholds.
+     </li>
+<li class="itemize">Needs  over-segmenting  members;  beyond  that,  the  exact  range  of
+     member cluster numbers hardly matters.
+     </li>
+<li class="itemize">Average link works with soft members; single link can be defeated by
+     chains of intermediate objects.
+     </li>
+<li class="itemize">Parameters:  range  of  member  cluster  numbers,  linkage,  largest
+     <!-- l. 423 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math>
+     considered.</li></ul>
+</div>
+<!-- l. 427 --><p class="noindent">
+</p>
+<h3 class="sectionHead"><span class="titlemark">12.3   </span> <a id="x14-25000012.3"></a>Using it in fuzzyclust</h3>
+<!-- l. 429 --><p class="noindent">The four sub-packages follow the conventions of the toolbox. The supervised
+estimators derive from <span class="ec-lmtt-10x-x-109">BaseFuzzyClusterer </span>and take the supervision as
+arguments of <span class="ec-lmtt-10x-x-109">fit</span>; the co-clustering estimators and the ensemble are scikit-learn
+clusterers with <span class="ec-lmtt-10x-x-109">fit(X)</span>; the collaborative estimator takes a <span class="ec-lmri-10x-x-109">list </span>of data sites.
+All accept pandas input and have a <span class="ec-lmtt-10x-x-109">random_state</span>, and their partitions
+can be compared with the fuzzy Rand indices of <span class="ec-lmtt-10x-x-109">fuzzyclust.validity</span>
+(section <a href="04-cluster-validity-and-the-number.html#x6-780004.2.8">4.2.8</a>).
+</p>
+<div class="box apibox">
+<!-- l. 431 --><p class="noindent"><span class="ec-lmtk-10x-x-109">fuzzyclust.semisupervised.SemiSupervisedFCM</span>
+</p><!-- l. 432 --><p class="indent"> <span class="ec-lmtt-10x-x-109">n_clusters=3</span>, <span class="ec-lmtt-10x-x-109">alpha=1.0|"auto"</span>
+(<!-- l. 432 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>N</mi><mo class="MathClass-bin" stretchy="false">∕</mo><msub><mrow><mi>N</mi></mrow><mrow><mi>b</mi></mrow></msub></mrow></math>),
+<span class="ec-lmtt-10x-x-109">m=2.0 </span>(fixed), <span class="ec-lmtt-10x-x-109">tol</span>, <span class="ec-lmtt-10x-x-109">max_iter</span>, <span class="ec-lmtt-10x-x-109">init="labels"|"random"|"kmeans++"|array</span>,
+<span class="ec-lmtt-10x-x-109">n_init</span>, <span class="ec-lmtt-10x-x-109">random_state</span>, <span class="ec-lmtt-10x-x-109">verbose</span>.<br class="newline"/><span class="ec-lmtt-10x-x-109">fit(X, y) </span>with <span class="ec-lmtt-10x-x-109">y </span>a label vector (<span class="ec-lmtt-10x-x-109">-1 </span>= unlabeled) or a label-membership matrix
+<!-- l. 433 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo class="MathClass-open" stretchy="false">(</mo><mi>N</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>c</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>
+whose zero rows mark the unlabeled samples. Attributes <span class="ec-lmtt-10x-x-109">membership_</span>,
+<span class="ec-lmtt-10x-x-109">cluster_centers_</span>, <span class="ec-lmtt-10x-x-109">labels_</span>, <span class="ec-lmtt-10x-x-109">classes_</span>, <span class="ec-lmtt-10x-x-109">label_mapping_ </span>(class of every
+cluster, <span class="ec-lmtt-10x-x-109">-1 </span>for unsupervised ones), <span class="ec-lmtt-10x-x-109">labelled_mask_</span>, <span class="ec-lmtt-10x-x-109">label_membership_</span>,
+<span class="ec-lmtt-10x-x-109">alpha_</span>, <span class="ec-lmtt-10x-x-109">covariances_</span>; methods <span class="ec-lmtt-10x-x-109">predict_classes(X)</span>, <span class="ec-lmtt-10x-x-109">score_labels(X,
+ y)</span>.
+</p>
+</div>
+<div class="box apibox">
+<!-- l. 436 --><p class="noindent"><span class="ec-lmtk-10x-x-109">fuzzyclust.semisupervised.PairwiseConstrainedFCM</span>
+</p><!-- l. 437 --><p class="indent"> <span class="ec-lmtt-10x-x-109">n_clusters=3</span>, <span class="ec-lmtt-10x-x-109">alpha=1.0|"auto"</span>, <span class="ec-lmtt-10x-x-109">agglomeration=0.0</span>
+(<!-- l. 437 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>η</mi></mrow><mrow><mn>0</mn></mrow></msub></math>),
+<span class="ec-lmtt-10x-x-109">agglomeration_decay=10.0 </span>(<!-- l. 437 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>τ</mi></math>),
+<span class="ec-lmtt-10x-x-109">min_cardinality=1.0</span>, <span class="ec-lmtt-10x-x-109">m=2.0 </span>(fixed), <span class="ec-lmtt-10x-x-109">tol</span>, <span class="ec-lmtt-10x-x-109">max_iter</span>, <span class="ec-lmtt-10x-x-109">init</span>, <span class="ec-lmtt-10x-x-109">n_init</span>,
+<span class="ec-lmtt-10x-x-109">random_state</span>, <span class="ec-lmtt-10x-x-109">verbose</span>.<br class="newline"/><span class="ec-lmtt-10x-x-109">fit(X, must_link=pairs, cannot_link=pairs)</span>. Attributes <span class="ec-lmtt-10x-x-109">n_clusters_</span>,
+<span class="ec-lmtt-10x-x-109">membership_</span>, <span class="ec-lmtt-10x-x-109">cluster_centers_</span>, <span class="ec-lmtt-10x-x-109">must_link_</span>, <span class="ec-lmtt-10x-x-109">cannot_link_</span>,
+<span class="ec-lmtt-10x-x-109">must_link_satisfied_</span>, <span class="ec-lmtt-10x-x-109">cannot_link_satisfied_</span>, <span class="ec-lmtt-10x-x-109">alpha_</span>, <span class="ec-lmtt-10x-x-109">cardinalities_</span>.
+Utilities <span class="ec-lmtt-10x-x-109">constraint_satisfaction(labels, must_link, cannot_link)</span>,
+<span class="ec-lmtt-10x-x-109">check_pairwise_constraints</span>; generators <span class="ec-lmtt-10x-x-109">make_partially_labeled_pair</span>,
+<span class="ec-lmtt-10x-x-109">make_partial_labels</span>, <span class="ec-lmtt-10x-x-109">make_pairwise_constraints</span>; plots <span class="ec-lmtt-10x-x-109">plot_label_propagation</span>,
+<span class="ec-lmtt-10x-x-109">plot_pairwise_constraints</span>.
+</p>
+</div>
+<div class="box apibox">
+<!-- l. 441 --><p class="noindent"><span class="ec-lmtk-10x-x-109">fuzzyclust.coclustering.FCCM, FCoDoK</span>
+</p><!-- l. 442 --><p class="indent"> <span class="ec-lmtt-10x-x-109">n_clusters=3</span>, <span class="ec-lmtt-10x-x-109">lambda_u=1.0 </span>(<!-- l. 442 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>λ</mi></mrow><mrow><mi>u</mi></mrow></msub></math>
+or <!-- l. 442 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>T</mi></mrow><mrow><mi>u</mi></mrow></msub></math>),
+<span class="ec-lmtt-10x-x-109">lambda_w=1.0 </span>(<!-- l. 442 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>λ</mi></mrow><mrow><mi>w</mi></mrow></msub></math>
+or <!-- l. 442 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>T</mi></mrow><mrow><mi>w</mi></mrow></msub></math>),
+<span class="ec-lmtt-10x-x-109">tol</span>, <span class="ec-lmtt-10x-x-109">max_iter</span>, <span class="ec-lmtt-10x-x-109">init="random"|"kmeans++"|array</span>, <span class="ec-lmtt-10x-x-109">n_init </span>(largest objective
+kept), <span class="ec-lmtt-10x-x-109">random_state</span>, <span class="ec-lmtt-10x-x-109">verbose</span>.<br class="newline"/><span class="ec-lmtt-10x-x-109">fit(R) </span>with a non-negative matrix. Attributes <span class="ec-lmtt-10x-x-109">membership_</span>
+<!-- l. 443 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo class="MathClass-open" stretchy="false">(</mo><mi>N</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>c</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>, <span class="ec-lmtt-10x-x-109">item_membership_</span>
+<!-- l. 443 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo class="MathClass-open" stretchy="false">(</mo><mi>M</mi><mo class="MathClass-punc" stretchy="false">,</mo><mi>c</mi><mo class="MathClass-close" stretchy="false">)</mo></mrow></math>, <span class="ec-lmtt-10x-x-109">labels_</span>,
+<span class="ec-lmtt-10x-x-109">item_labels_</span>, <span class="ec-lmtt-10x-x-109">aggregation_</span>, <span class="ec-lmtt-10x-x-109">objective_</span>, <span class="ec-lmtt-10x-x-109">objective_history_</span>; <span class="ec-lmtt-10x-x-109">transform </span>returns the
+aggregations <!-- l. 443 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>a</mi></mrow><mrow><mi mathvariant="italic">ik</mi></mrow></msub></math>,
+                                                                     
+
+                                                                     
+<span class="ec-lmtt-10x-x-109">predict_proba </span>the object memberships of new rows. Generator <span class="ec-lmtt-10x-x-109">make_block_matrix</span>;
+plots <span class="ec-lmtt-10x-x-109">plot_coclusters </span>(reordered heat map), <span class="ec-lmtt-10x-x-109">plot_item_memberships</span>.
+</p>
+</div>
+<div class="box apibox">
+<!-- l. 446 --><p class="noindent"><span class="ec-lmtk-10x-x-109">fuzzyclust.collaborative.CollaborativeFCM</span>
+</p><!-- l. 447 --><p class="indent"> <span class="ec-lmtt-10x-x-109">n_clusters=3</span>, <span class="ec-lmtt-10x-x-109">alpha=0.5 </span>(scalar or
+<!-- l. 447 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>P</mi> <mo class="MathClass-bin" stretchy="false">×</mo><mi>P</mi></mrow></math>
+matrix), <span class="ec-lmtt-10x-x-109">m=2.0 </span>(fixed), <span class="ec-lmtt-10x-x-109">tol</span>, <span class="ec-lmtt-10x-x-109">max_iter</span>, <span class="ec-lmtt-10x-x-109">init</span>, <span class="ec-lmtt-10x-x-109">n_init</span>, <span class="ec-lmtt-10x-x-109">random_state</span>,
+<span class="ec-lmtt-10x-x-109">verbose</span>.<br class="newline"/><span class="ec-lmtt-10x-x-109">fit([X_1, ..., X_P])</span>. Attributes (lists over the sites) <span class="ec-lmtt-10x-x-109">memberships_</span>,
+<span class="ec-lmtt-10x-x-109">cluster_centers_</span>, <span class="ec-lmtt-10x-x-109">labels_</span>, <span class="ec-lmtt-10x-x-109">independent_memberships_</span>, <span class="ec-lmtt-10x-x-109">independent_centers_</span>;
+arrays <span class="ec-lmtt-10x-x-109">alpha_</span>, <span class="ec-lmtt-10x-x-109">objective_</span>, <span class="ec-lmtt-10x-x-109">objective_history_</span>, <span class="ec-lmtt-10x-x-109">partition_distances_</span>,
+<span class="ec-lmtt-10x-x-109">collaboration_change_</span>, <span class="ec-lmtt-10x-x-109">consensus_membership_</span>. Methods <span class="ec-lmtt-10x-x-109">predict_proba</span>,
+<span class="ec-lmtt-10x-x-109">predict</span>, <span class="ec-lmtt-10x-x-109">transform </span>on lists of sites, <span class="ec-lmtt-10x-x-109">site_agreement(index=fuzzy_rand_index)</span>.
+Utility <span class="ec-lmtt-10x-x-109">align_partitions</span>; generator <span class="ec-lmtt-10x-x-109">make_collaborative_sites</span>; plots
+<span class="ec-lmtt-10x-x-109">plot_site_partitions</span>, <span class="ec-lmtt-10x-x-109">plot_collaboration_trajectory</span>.
+</p>
+</div>
+<div class="box apibox">
+<!-- l. 451 --><p class="noindent"><span class="ec-lmtk-10x-x-109">fuzzyclust.ensemble.FuzzyClusterEnsemble</span>
+</p><!-- l. 452 --><p class="indent"> <span class="ec-lmtt-10x-x-109">n_clusters=3|None </span>(lifetime criterion), <span class="ec-lmtt-10x-x-109">base_estimator=None </span>(FCM; any
+clusterer with <span class="ec-lmtt-10x-x-109">predict_proba</span>), <span class="ec-lmtt-10x-x-109">n_estimators=10</span>, <span class="ec-lmtt-10x-x-109">base_n_clusters=None|int|
+sequence</span>, <span class="ec-lmtt-10x-x-109">sample_fraction=1.0</span>, <span class="ec-lmtt-10x-x-109">feature_fraction=1.0</span>, <span class="ec-lmtt-10x-x-109">consensus="fcm"|
+"spectral"|"hierarchical"|"smcla"|"itk"</span>, <span class="ec-lmtt-10x-x-109">linkage="average"|
+"single"|"complete"</span>, <span class="ec-lmtt-10x-x-109">similarity="cosine"|"product"</span>, <span class="ec-lmtt-10x-x-109">max_clusters=20</span>,
+<span class="ec-lmtt-10x-x-109">random_state</span>, <span class="ec-lmtt-10x-x-109">verbose</span>.<br class="newline"/>Attributes <span class="ec-lmtt-10x-x-109">base_estimators_</span>, <span class="ec-lmtt-10x-x-109">base_memberships_</span>, <span class="ec-lmtt-10x-x-109">base_feature_subsets_</span>,
+<span class="ec-lmtt-10x-x-109">coassociation_</span>, <span class="ec-lmtt-10x-x-109">consensus_membership_ </span>(= <span class="ec-lmtt-10x-x-109">membership_</span>), <span class="ec-lmtt-10x-x-109">labels_</span>, <span class="ec-lmtt-10x-x-109">n_clusters_</span>,
+<span class="ec-lmtt-10x-x-109">consensus_centers_</span>, <span class="ec-lmtt-10x-x-109">lifetimes_</span>, <span class="ec-lmtt-10x-x-109">linkage_</span>, <span class="ec-lmtt-10x-x-109">meta_cluster_labels_</span>,
+<span class="ec-lmtt-10x-x-109">base_agreement_</span>. Functions <span class="ec-lmtt-10x-x-109">coassociation_matrix</span>, <span class="ec-lmtt-10x-x-109">evidence_accumulation</span>,
+<span class="ec-lmtt-10x-x-109">soft_mcla</span>, <span class="ec-lmtt-10x-x-109">information_theoretic_kmeans</span>, <span class="ec-lmtt-10x-x-109">cspa</span>, <span class="ec-lmtt-10x-x-109">mcla</span>, <span class="ec-lmtt-10x-x-109">stability_curve(X,
+ n_estimators_grid, n_repeats, index)</span>; generator <span class="ec-lmtt-10x-x-109">make_overlapping_blobs</span>;
+plots <span class="ec-lmtt-10x-x-109">plot_coassociation</span>, <span class="ec-lmtt-10x-x-109">plot_lifetimes</span>.
+</p>
+</div>
+<!-- l. 456 --><p class="indent">   Partial labels and pairwise constraints are passed to <span class="ec-lmtt-10x-x-109">fit</span>:  </p><!-- l. 457 --><pre class="lstinputlisting" id="listing-146"><span class="label"><a id="x14-250002r48"></a></span><span style="color:#000000"><span class="ec-lmtt-9">fcm</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= FCM(n_clusters=2, random_state=0).fit(X)</span> 
+</span><span class="label"><a id="x14-250003r49"></a></span><span style="color:#000000"><span class="ec-lmtt-9">ssfcm</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= SemiSupervisedFCM(n_clusters=2, alpha=1.0, random_state=0).fit(X, y_partial)</span> 
+</span><span class="label"><a id="x14-250004r50"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">print</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">f</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">FCM</span></span><span style="color:#008662"> <span class="ec-lmtt-9">ARI = {adjusted_rand_score(y, fcm.labels_):.2f}, "</span> 
+</span><span class="label"><a id="x14-250005r51"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">f</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">SSFCM</span></span><span style="color:#008662"> <span class="ec-lmtt-9">ARI = {adjusted_rand_score(y, ssfcm.labels_):.2f}, "</span> 
+</span><span class="label"><a id="x14-250006r52"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">f</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">accuracy</span></span><span style="color:#008662"> <span class="ec-lmtt-9">of the class prediction = {ssfcm.score_labels(X, y):.2f}"</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span>
+   </pre>
+<!-- l. 458 --><pre class="lstinputlisting" id="listing-147"><span class="label"><a id="x14-250010r46"></a></span><span style="color:#000000"><span class="ec-lmtt-9">must_link</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">cannot_link = make_pairwise_constraints(y, n_must_link=50, n_cannot_link=50, random_state=0)</span> 
+</span><span class="label"><a id="x14-250011r47"></a></span><span style="color:#000000"><span class="ec-lmtt-9">fcm</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= FCM(n_clusters=2, random_state=0).fit(X)</span> 
+</span><span class="label"><a id="x14-250012r48"></a></span><span style="color:#000000"><span class="ec-lmtt-9">pcca</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= PairwiseConstrainedFCM(n_clusters=2, alpha=5.0, random_state=0)</span> 
+</span><span class="label"><a id="x14-250013r49"></a></span><span style="color:#000000"><span class="ec-lmtt-9">pcca</span></span><span style="color:#000000"><span class="ec-lmtt-9">.</span></span><span style="color:#000000"><span class="ec-lmtt-9">fit</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">X</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">must_link=must_link, cannot_link=cannot_link)</span> 
+</span><span class="label"><a id="x14-250014r50"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">print</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">f</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">FCM</span></span><span style="color:#008662">  <span class="ec-lmtt-9">ARI = {adjusted_rand_score(y, fcm.labels_):.2f}"</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span> 
+<span class="label"><a id="x14-250015r51"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">print</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">f</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">PCCA</span></span><span style="color:#008662"> <span class="ec-lmtt-9">ARI = {adjusted_rand_score(y, pcca.labels_):.2f}, satisfied must-link "</span> 
+</span><span class="label"><a id="x14-250016r52"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">f</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">{</span></span><span style="color:#008662"><span class="ec-lmtt-9">pcca</span></span><span style="color:#008662"><span class="ec-lmtt-9">.</span></span><span style="color:#008662"><span class="ec-lmtt-9">must_link_satisfied_</span></span><span style="color:#008662"><span class="ec-lmtt-9">:.2</span></span><span style="color:#008662"><span class="ec-lmtt-9">f</span></span><span style="color:#008662"><span class="ec-lmtt-9">},</span></span><span style="color:#008662"> <span class="ec-lmtt-9">cannot-link {pcca.cannot_link_satisfied_:.2f}"</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span>
+   </pre>
+<!-- l. 459 --><p class="noindent">A co-clustering returns memberships for the rows and for the columns:  </p><!-- l. 460 --><pre class="lstinputlisting" id="listing-148"><span class="label"><a id="x14-250020r48"></a></span><span style="color:#000000"><span class="ec-lmtt-9">fccm</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= FCCM(n_clusters=4, lambda_u=0.1, lambda_w=20.0, n_init=5, random_state=0).fit(R)</span> 
+</span><span class="label"><a id="x14-250021r49"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">print</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">f</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">FCCM</span></span><span style="color:#008662"> <span class="ec-lmtt-9">documents ARI = {adjusted_rand_score(doc_topic, fccm.labels_):.2f}, "</span> 
+</span><span class="label"><a id="x14-250022r50"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">f</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">topical</span></span><span style="color:#008662"> <span class="ec-lmtt-9">terms ARI = {adjusted_rand_score(term_topic[topical], fccm.item_labels_[topical]):.2f}"</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span>
+   </pre>
+<!-- l. 461 --><p class="noindent">The collaborative estimator takes the sites as a list and reports how much every site
+moved:  </p><!-- l. 462 --><pre class="lstinputlisting" id="listing-149"><span class="label"><a id="x14-250026r51"></a></span><span style="color:#000000"><span class="ec-lmtt-9">independent</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= CollaborativeFCM(n_clusters=3, alpha=0.0, random_state=0).fit(Xs)</span> 
+</span><span class="label"><a id="x14-250027r52"></a></span><span style="color:#000000"><span class="ec-lmtt-9">collab</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= CollaborativeFCM(n_clusters=3, alpha=3.0, random_state=0).fit(Xs)</span> 
+</span><span class="label"><a id="x14-250028r53"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">for</span></span><span style="color:#000000"> <span class="ec-lmtt-9">name, model</span> </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">in</span></span><span style="color:#000000"> <span class="ec-lmtt-9">((</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">independent</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">independent), (</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">alpha</span></span><span style="color:#008662"> <span class="ec-lmtt-9">= 3"</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">collab)):</span> 
+</span><span class="label"><a id="x14-250029r54"></a></span><span style="color:#000000">    </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">print</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">f</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">{</span></span><span style="color:#008662"><span class="ec-lmtt-9">name</span></span><span style="color:#008662"><span class="ec-lmtt-9">:12</span></span><span style="color:#008662"><span class="ec-lmtt-9">s</span></span><span style="color:#008662"><span class="ec-lmtt-9">}:</span></span><span style="color:#008662"> <span class="ec-lmtt-9">ARI per site = "</span> 
+</span><span class="label"><a id="x14-250030r55"></a></span><span style="color:#000000">          <span class="ec-lmtt-9">+</span> </span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">,</span></span><span style="color:#008662"> <span class="ec-lmtt-9">"</span></span><span style="color:#000000"><span class="ec-lmtt-9">.</span></span><span style="color:#000000"><span class="ec-lmtt-9">join</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">f</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">{</span></span><span style="color:#008662"><span class="ec-lmtt-9">adjusted_rand_score</span></span><span style="color:#008662"><span class="ec-lmtt-9">(</span></span><span style="color:#008662"><span class="ec-lmtt-9">y</span></span><span style="color:#008662"><span class="ec-lmtt-9">,</span></span><span style="color:#008662"> <span class="ec-lmtt-9">lab):.2f}"</span></span><span style="color:#000000"> </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">for</span></span><span style="color:#000000"> <span class="ec-lmtt-9">lab</span> </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">in</span></span><span style="color:#000000"> <span class="ec-lmtt-9">model.labels_)</span> 
+</span><span class="label"><a id="x14-250031r56"></a></span><span style="color:#000000">          <span class="ec-lmtt-9">+ f</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">;</span></span><span style="color:#008662">  <span class="ec-lmtt-9">membership change = {np.round(model.collaboration_change_, 3)}"</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span>
+   </pre>
+<!-- l. 463 --><p class="noindent">An ensemble is configured by its library and its consensus function; with
+<code class="lstinline"><span style="color:#000000">n_clusters=None</span></code> it chooses the number of clusters, and <span class="ec-lmtt-10x-x-109">stability_curve</span>
+measures its reproducibility:  </p><!-- l. 464 --><pre class="lstinputlisting" id="listing-151"><span class="label"><a id="x14-250035r50"></a></span><span style="color:#000000"><span class="ec-lmtt-9">ens</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= FuzzyClusterEnsemble(n_clusters=4, n_estimators=20, sample_fraction=0.3, feature_fraction=0.34,</span> 
+</span><span class="label"><a id="x14-250036r51"></a></span><span style="color:#000000">                           <span class="ec-lmtt-9">consensus=</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">fcm</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">random_state=0).fit(X)</span> 
+</span><span class="label"><a id="x14-250037r52"></a></span><span style="color:#000000"><span class="ec-lmtt-9">members</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= [adjusted_rand_score(y, U.argmax(axis=1))</span> </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">for</span></span><span style="color:#000000"> <span class="ec-lmtt-9">U</span> </span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">in</span></span><span style="color:#000000"> <span class="ec-lmtt-9">ens.base_memberships_]</span> 
+</span><span class="label"><a id="x14-250038r53"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">print</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">f</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">members</span></span><span style="color:#008662"><span class="ec-lmtt-9">:</span></span><span style="color:#008662"> <span class="ec-lmtt-9">mean ARI = {np.mean(members):.2f}, best = {np.max(members):.2f};  "</span> 
+</span><span class="label"><a id="x14-250039r54"></a></span><span style="color:#000000">      <span class="ec-lmtt-9">f</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">consensus</span></span><span style="color:#008662"> <span class="ec-lmtt-9">ARI = {adjusted_rand_score(y, ens.labels_):.2f}"</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span>
+   </pre>
+<!-- l. 465 --><pre class="lstinputlisting" id="listing-152"><span class="label"><a id="x14-250043r44"></a></span><span style="color:#000000"><span class="ec-lmtt-9">ens</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= FuzzyClusterEnsemble(n_clusters=</span></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">None</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">base_n_clusters=</span></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">range</span></span><span style="color:#000000"><span class="ec-lmtt-9">(6,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">13), n_estimators=30, linkage=</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">average</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span> 
+<span class="label"><a id="x14-250044r45"></a></span><span style="color:#000000">                           <span class="ec-lmtt-9">random_state=0).fit(X)</span> 
+</span><span class="label"><a id="x14-250045r46"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">print</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">f</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">lifetime</span></span><span style="color:#008662"> <span class="ec-lmtt-9">criterion: {ens.n_clusters_} clusters, ARI = {adjusted_rand_score(y, ens.labels_):.2f}"</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span> 
+<span class="label"><a id="x14-250046r47"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">print</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#008662"><span class="ec-lmtt-9">"</span></span><span style="color:#008662"><span class="ec-lmtt-9">lifetimes</span></span><span style="color:#008662"> <span class="ec-lmtt-9">of k = 1..8:"</span></span><span style="color:#000000"><span class="ec-lmtt-9">,</span></span><span style="color:#000000"> <span class="ec-lmtt-9">np.</span></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">round</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">ens</span></span><span style="color:#000000"><span class="ec-lmtt-9">.</span></span><span style="color:#000000"><span class="ec-lmtt-9">lifetimes_</span></span><span style="color:#000000"><span class="ec-lmtt-9">[:8],</span></span><span style="color:#000000"> <span class="ec-lmtt-9">3))</span></span>
+   </pre>
+<!-- l. 466 --><pre class="lstinputlisting" id="listing-153"><span class="label"><a id="x14-250050r124"></a></span><span style="color:#000000"><span class="ec-lmtt-9">table</span></span><span style="color:#000000"> <span class="ec-lmtt-9">= stability_curve(X10, n_estimators_grid=(1, 3, 10, 20), n_repeats=5, n_clusters=10,</span> 
+</span><span class="label"><a id="x14-250051r125"></a></span><span style="color:#000000">                        <span class="ec-lmtt-9">random_state=0, index=fuzzy_adjusted_rand_index)</span> 
+</span><span class="label"><a id="x14-250052r126"></a></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">print</span></span><span style="color:#000000"><span class="ec-lmtt-9">(</span></span><span style="color:#000000"><span class="ec-lmtt-9">table</span></span><span style="color:#000000"><span class="ec-lmtt-9">.</span></span><span style="color:#285780"><span class="ec-lmtk-10x-x-90">round</span></span><span style="color:#000000"><span class="ec-lmtt-9">(3)</span></span><span style="color:#000000"><span class="ec-lmtt-9">)</span></span>
+   </pre>
+<!-- l. 468 --><p class="noindent">
+</p>
+<h3 class="sectionHead"><span class="titlemark">12.4   </span> <a id="x14-25100012.4"></a>Examples</h3>
+<!-- l. 470 --><p class="noindent">
+</p>
+<h4 class="subsectionHead"><span class="titlemark">12.4.1   </span> <a id="x14-25200012.4.1"></a>How many labels, how much weight?</h4>
+<!-- l. 472 --><p class="noindent">The two parallel bars of 150 points each (fig. <a href="#x14-252001r5">12.5</a>) are split by FCM across the bars (ARI
+<!-- l. 472 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.39</mn></mrow></math>). With 10 % labeled
+samples and <!-- l. 472 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>1</mn></mrow></math>
+the prototypes move toward the bars and the ARI rises to
+<!-- l. 472 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.60</mn></mrow></math>;
+<!-- l. 472 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>87</mn><mspace class="thinspace" width="0.17em"></mspace><mi>%</mi></mrow></math> of all
+samples are assigned to their class. Plotted against the position along the bars
+(fig. <a href="#x14-252002r6">12.6</a>), the memberships are clear in the middle of the bars and drift toward
+<!-- l. 472 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.5</mn></mrow></math> at their
+ends, where both prototypes are almost equally far away. At the ends spherical
+prototypes cannot tell the bars apart, and that is where the remaining errors lie.
+The study of fig. <a href="#x14-252003r7">12.7</a> varies the label fraction from 1 to 30 % and the weight. Up to
+<!-- l. 472 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>3</mn></mrow></math> more labels
+always help (<!-- l. 472 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>1</mn></mrow></math>:
+from <!-- l. 472 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.38</mn></mrow></math> at
+1 % to <!-- l. 472 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.77</mn></mrow></math>
+at 30 %), while the weight acts non-monotonically:
+<!-- l. 472 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>10</mn></mrow></math> never exceeds
+<!-- l. 472 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.56</mn></mrow></math>, and the
+paper’s rule <!-- l. 472 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mi>N</mi><mo class="MathClass-bin" stretchy="false">∕</mo><msub><mrow><mi>N</mi></mrow><mrow><mi>b</mi></mrow></msub></mrow></math>,
+which gives a large weight when labels are scarce, does no better than
+<!-- l. 472 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>10</mn></mrow></math> up to 10 % labels
+and approaches <!-- l. 472 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>3</mn></mrow></math>
+                                                                     
+
+                                                                     
+only at 30 % (<!-- l. 472 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.69</mn></mrow></math>).
+The reason is the weighting in (<a href="#x14-242004r3">12.3<!-- tex4ht:ref: eq:beyond:vss  --></a>): once the labeled memberships match their
+labels, their supervision weight vanishes, while the unlabeled samples are weighted
+by <!-- l. 472 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1</mn> <mo class="MathClass-bin" stretchy="false">+</mo> <mi>α</mi></mrow></math>.
+</p>
+<figure class="figure">
+<!-- l. 474 --><p class="noindent"><img alt="Figure 12.5" class="exfig" src="figures/09_beyond_unsupervised/plot_01_ssfcm_partial_labels_1.png"/> <a id="x14-252001r5"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 12.5. </span></span><span class="content"><span class="ec-lmr-10">FCM splits the two bars across (left); with 10 % labeled samples
+(large                                          markers)                                          and</span>
+<!-- l. 474 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>1</mn></mrow></math>
+<span class="ec-lmr-10">the partition turns toward the bars (right).</span> </span></figcaption><!-- tex4ht:label?: x14-252001r5  -->
+<p class="runbox"><a class="colab" href="https://colab.research.google.com/github/ComplexSystemsIntelligence/fuzzyclust/blob/gh-pages/notebooks/auto_examples/09_beyond_unsupervised/plot_01_ssfcm_partial_labels.ipynb">Open in Colab</a><a href="../auto_examples/09_beyond_unsupervised/plot_01_ssfcm_partial_labels.html">Example <code>plot_01_ssfcm_partial_labels.py</code> in the gallery</a></p></figure>
+<figure class="figure">
+<!-- l. 475 --><p class="noindent"><img alt="Figure 12.6" class="exfig" src="figures/09_beyond_unsupervised/plot_01_ssfcm_partial_labels_2.png"/> <a id="x14-252002r6"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 12.6. </span></span><span class="content"><span class="ec-lmr-10">Membership in the upper-bar cluster along the bars: clear in the
+middle, ambiguous at the ends; labeled samples (black) are pulled toward their
+label.</span> </span></figcaption><!-- tex4ht:label?: x14-252002r6  -->
+</figure>
+<figure class="figure">
+<!-- l. 476 --><p class="noindent"><img alt="Figure 12.7" class="exfig" src="figures/09_beyond_unsupervised/plot_01_ssfcm_partial_labels_3.png"/> <a id="x14-252003r7"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 12.7.       </span></span><span class="content"><span class="ec-lmr-10">Agreement       with       the       true       bars       against
+the        share        of        labeled        samples        for        several        weights</span>
+<!-- l. 476 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>α</mi></math><span class="ec-lmr-10">:
+more labels help, and moderate weights help most.</span> </span></figcaption><!-- tex4ht:label?: x14-252003r7  -->
+</figure>
+<h4 class="subsectionHead"><span class="titlemark">12.4.2   </span> <a id="x14-25300012.4.2"></a>Must-link, cannot-link, and competitive agglomeration</h4>
+<!-- l. 480 --><p class="noindent">On the same bars, 50 must-link and 50 cannot-link pairs drawn from
+the classes are given (fig. <a href="#x14-253001r8">12.8</a>). FCM violates 24 of them; PCCA with
+<!-- l. 480 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>5</mn></mrow></math> satisfies all and
+reaches an ARI of <!-- l. 480 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.95</mn></mrow></math>.
+The penalty study (fig. <a href="#x14-253002r9">12.9</a>) shows that the fewer the pairs, the
+larger the penalty needed: 100 pairs of each kind reach an ARI of
+<!-- l. 480 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.99</mn></mrow></math> at
+<!-- l. 480 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>2</mn></mrow></math>, 25 pairs need
+<!-- l. 480 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>10</mn></mrow></math>, and 10 pairs
+reach only <!-- l. 480 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.7</mn></mrow></math>
+even at <!-- l. 480 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>20</mn></mrow></math>,
+although nine tenths of them are satisfied already at
+<!-- l. 480 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>0.5</mn></mrow></math>, because
+a handful of pairs can be honored by bending the boundary locally. The automatic
+penalty, renewed as the FCM term over the number of constraints, ends at
+<!-- l. 480 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>4.3</mn></mrow></math> for 100 pairs and at
+<!-- l. 480 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>42</mn></mrow></math> for 10 pairs, and
+gives ARIs of <!-- l. 480 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.99</mn></mrow></math> and
+<!-- l. 480 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.72</mn></mrow></math>. Started with eight
+clusters on three Gaussian groups (fig. <a href="#x14-253003r10">12.10</a>), competitive agglomeration keeps all eight for
+<!-- l. 480 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>η</mi></mrow><mrow><mn>0</mn></mrow></msub> <mo class="MathClass-rel" stretchy="false">≤</mo><mn>1</mn></mrow></math>, ends with exactly
+three for <!-- l. 480 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>η</mi></mrow><mrow><mn>0</mn></mrow></msub></math> from 5 to 20 at
+the default decay <!-- l. 480 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>τ</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>10</mn></mrow></math>, and
+collapses to one cluster at <!-- l. 480 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>η</mi></mrow><mrow><mn>0</mn></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>40</mn></mrow></math>;
+a longer competition (<!-- l. 480 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>τ</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>30</mn></mrow></math>)
+shifts the window toward weaker weights.
+</p>
+<figure class="figure">
+<!-- l. 482 --><p class="noindent"><img alt="Figure 12.8" class="exfig" src="figures/09_beyond_unsupervised/plot_02_pcca_pairwise_constraints_1.png"/> <a id="x14-253001r8"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 12.8.           </span></span><span class="content"><span class="ec-lmr-10">The           24           constraints           that           FCM
+violates        (top)        and        the        partition        of        PCCA        with</span>
+<!-- l. 482 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>5</mn></mrow></math><span class="ec-lmr-10">,
+which satisfies all 100 constraints (bottom); green: must-link, vermilion dashed:
+cannot-link.</span> </span></figcaption><!-- tex4ht:label?: x14-253001r8  -->
+<p class="runbox"><a class="colab" href="https://colab.research.google.com/github/ComplexSystemsIntelligence/fuzzyclust/blob/gh-pages/notebooks/auto_examples/09_beyond_unsupervised/plot_02_pcca_pairwise_constraints.ipynb">Open in Colab</a><a href="../auto_examples/09_beyond_unsupervised/plot_02_pcca_pairwise_constraints.html">Example <code>plot_02_pcca_pairwise_constraints.py</code> in the gallery</a></p></figure>
+<figure class="figure">
+<!-- l. 483 --><p class="noindent"><img alt="Figure 12.9" class="exfig" src="figures/09_beyond_unsupervised/plot_02_pcca_pairwise_constraints_2.png"/> <a id="x14-253002r9"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 12.9.                                                                 </span></span><span class="content"><span class="ec-lmr-10">Agreement
+with the classes (left) and share of satisfied constraints (right) against the penalty</span>
+<!-- l. 483 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>α</mi></math>
+<span class="ec-lmr-10">for 10 to 100 pairs of each kind.</span> </span></figcaption><!-- tex4ht:label?: x14-253002r9  -->
+</figure>
+<figure class="figure">
+<!-- l. 484 --><p class="noindent"><img alt="Figure 12.10" class="exfig" src="figures/09_beyond_unsupervised/plot_02_pcca_pairwise_constraints_3.png"/> <a id="x14-253003r10"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 12.10.</span>
+</span><span class="content"><span class="ec-lmr-10">Competitive agglomeration from eight clusters: final number of clusters against</span>
+<!-- l. 484 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>η</mi></mrow><mrow><mn>0</mn></mrow></msub></math>
+<span class="ec-lmr-10">for     three     decays     (left)     and     the     three     clusters     found     with</span>
+<!-- l. 484 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>η</mi></mrow><mrow><mn>0</mn></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>5</mn></mrow></math>
+<span class="ec-lmr-10">(right).</span> </span></figcaption><!-- tex4ht:label?: x14-253003r10  -->
+</figure>
+<h4 class="subsectionHead"><span class="titlemark">12.4.3   </span> <a id="x14-25400012.4.3"></a>Co-clustering a document–term matrix</h4>
+<!-- l. 488 --><p class="noindent">A synthetic corpus of 180 documents in four topics of 30 to 60 documents, with topic
+vocabularies of 15 to 30 terms and 20 general terms, has Poisson counts of mean
+<!-- l. 488 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mn>3</mn></math> inside the topic
+blocks and <!-- l. 488 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.3</mn></mrow></math>
+elsewhere; rows and columns are shuffled (fig. <a href="#x14-254001r11">12.11</a>, left). FCCM with
+<!-- l. 488 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>λ</mi></mrow><mrow><mi>u</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>0.1</mn></mrow></math> and
+<!-- l. 488 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>λ</mi></mrow><mrow><mi>w</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>20</mn></mrow></math>
+recovers the topics of the documents and of the topical terms exactly (both ARIs
+<!-- l. 488 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1.0</mn></mrow></math>), and
+the matrix reordered by the co-clusters shows the four blocks (right). The scaled
+item memberships (fig. <a href="#x14-254002r12">12.12</a>) rank every topic’s own terms by frequency and
+give the general terms a membership near zero in all co-clusters. The grid
+study (fig. <a href="#x14-254003r13">12.13</a>) shows the units of the two weights at work. A small
+<!-- l. 488 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>λ</mi></mrow><mrow><mi>u</mi></mrow></msub></math> gives nearly crisp
+document memberships, <!-- l. 488 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>λ</mi></mrow><mrow><mi>u</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">≥</mo><mn>1</mn></mrow></math>
+fuzzy ones, and <!-- l. 488 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>λ</mi></mrow><mrow><mi>u</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>3</mn></mrow></math>
+dissolves them. For <!-- l. 488 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>λ</mi></mrow><mrow><mi>w</mi></mrow></msub></math>
+there is a window, from <!-- l. 488 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>20</mn></mrow></math>
+to <!-- l. 488 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>200</mn></mrow></math> for
+<!-- l. 488 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>λ</mi></mrow><mrow><mi>u</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">≤</mo><mn>0.1</mn></mrow></math>,
+below which a co-cluster concentrates on a few frequent terms and above which
+the term memberships become uniform; the window closes from above as
+<!-- l. 488 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>λ</mi></mrow><mrow><mi>u</mi></mrow></msub></math> grows
+(<!-- l. 488 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>20</mn></mrow></math>–<!-- l. 488 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>50</mn></mrow></math>
+at <!-- l. 488 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>λ</mi></mrow><mrow><mi>u</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>0.3</mn></mrow></math>, only
+<!-- l. 488 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>20</mn></mrow></math> at
+<!-- l. 488 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>λ</mi></mrow><mrow><mi>u</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>1</mn></mrow></math>). Fuzzy CoDoK recovers
+the topics exactly for <!-- l. 488 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>T</mi></mrow><mrow><mi>u</mi></mrow></msub> <mo class="MathClass-rel" stretchy="false">≤</mo><mn>0.3</mn></mrow></math>
+and every <!-- l. 488 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow><mi>T</mi></mrow><mrow><mi>w</mi></mrow></msub></math>
+from <!-- l. 488 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>20</mn></mrow></math>
+to <!-- l. 488 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1000</mn></mrow></math>,
+and its clipped item memberships list the topic vocabularies with exact zeros
+elsewhere (fig. <a href="#x14-254004r14">12.14</a>).
+</p>
+<figure class="figure">
+<!-- l. 490 --><p class="noindent"><img alt="Figure 12.11" class="exfig" src="figures/09_beyond_unsupervised/plot_03_fccm_document_term_1.png"/> <a id="x14-254001r11"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 12.11.  </span></span><span class="content"><span class="ec-lmr-10">A  shuffled  document–term  matrix  (left)  and  the  same  matrix
+reordered by the four FCCM co-clusters (right).</span> </span></figcaption><!-- tex4ht:label?: x14-254001r11  -->
+<p class="runbox"><a class="colab" href="https://colab.research.google.com/github/ComplexSystemsIntelligence/fuzzyclust/blob/gh-pages/notebooks/auto_examples/09_beyond_unsupervised/plot_03_fccm_document_term.ipynb">Open in Colab</a><a href="../auto_examples/09_beyond_unsupervised/plot_03_fccm_document_term.html">Example <code>plot_03_fccm_document_term.py</code> in the gallery</a></p></figure>
+<figure class="figure">
+<!-- l. 491 --><p class="noindent"><img alt="Figure 12.12" class="exfig" src="figures/09_beyond_unsupervised/plot_03_fccm_document_term_2.png"/> <a id="x14-254002r12"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 12.12. </span></span><span class="content"><span class="ec-lmr-10">Scaled term memberships of the four co-clusters: every topic owns
+its vocabulary, and the general terms (right of the dotted line) belong to none.</span> </span></figcaption><!-- tex4ht:label?: x14-254002r12  -->
+</figure>
+<figure class="figure">
+<!-- l. 492 --><p class="noindent"><img alt="Figure 12.13" class="exfig" src="figures/09_beyond_unsupervised/plot_03_fccm_document_term_3.png"/> <a id="x14-254003r13"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 12.13. </span></span><span class="content"><span class="ec-lmr-10">FCCM on a grid of the two entropy weights: agreement with the
+topics (left) and crispness of the document memberships (right).</span> </span></figcaption><!-- tex4ht:label?: x14-254003r13  -->
+</figure>
+<figure class="figure">
+<!-- l. 493 --><p class="noindent"><img alt="Figure 12.14" class="exfig" src="figures/09_beyond_unsupervised/plot_03_fccm_document_term_4.png"/> <a id="x14-254004r14"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 12.14. </span></span><span class="content"><span class="ec-lmr-10">Fuzzy CoDoK: the 40 terms of largest scaled membership, grouped
+by co-cluster.</span> </span></figcaption><!-- tex4ht:label?: x14-254004r14  -->
+</figure>
+<h4 class="subsectionHead"><span class="titlemark">12.4.4   </span> <a id="x14-25500012.4.4"></a>Three collaborating sites</h4>
+<!-- l. 497 --><p class="noindent">Three sites describe the same 300 objects in three groups with feature spreads
+<!-- l. 497 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.6</mn></mrow></math>,
+<!-- l. 497 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1.2</mn></mrow></math>, and
+<!-- l. 497 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1.8</mn></mrow></math>,
+and at the third site 15 % of the objects are moved to another
+group (fig. <a href="#x14-255001r15">12.15</a>). Independently, the sites reach ARIs of
+<!-- l. 497 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1.00</mn></mrow></math>,
+<!-- l. 497 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.93</mn></mrow></math>, and
+<!-- l. 497 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.37</mn></mrow></math>.
+With <!-- l. 497 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>3</mn></mrow></math>
+the clear site keeps its partition, the second improves to
+<!-- l. 497 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.98</mn></mrow></math>,
+and the third follows the majority even on its moved objects (ARI
+<!-- l. 497 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.98</mn></mrow></math>
+with the common groups), so that its clusters now overlap in
+its own feature space. The study of fig. <a href="#x14-255002r16">12.16</a> shows the fuzzy
+Rand index between every pair of sites rising monotonically with
+<!-- l. 497 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>α</mi></math> toward one, site 3 joining
+the majority from <!-- l. 497 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">≈</mo><mn>1</mn></mrow></math>,
+and site 3 giving in most (mean membership change
+<!-- l. 497 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.13</mn></mrow></math> against
+<!-- l. 497 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.10</mn></mrow></math> and
+<!-- l. 497 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.07</mn></mrow></math>);
+every site moves, because a membership pulled toward the others is also
+a softer one. Asymmetric collaboration matrices, whose results the
+example prints, give trust selectively: when only site 3 listens, sites 1 and
+2 keep their independent partitions and site 3 is corrected alone (ARI
+<!-- l. 497 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1.00</mn></mrow></math>);
+when only the clear site 1 listens, it is pulled toward the noisier sites and drops to
+<!-- l. 497 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.91</mn></mrow></math>.
+</p>
+<figure class="figure">
+<!-- l. 499 --><p class="noindent"><img alt="Figure 12.15" class="exfig" src="figures/09_beyond_unsupervised/plot_04_collaborative_sites_1.png"/> <a id="x14-255001r15"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 12.15.   </span></span><span class="content"><span class="ec-lmr-10">The   three   sites   clustered   independently   (top)   and   with
+collaboration</span>
+<!-- l. 499 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>α</mi> <mo class="MathClass-rel" stretchy="false">=</mo> <mn>3</mn></mrow></math>
+<span class="ec-lmr-10">(bottom); colors are the clusters matched across the sites.</span> </span></figcaption><!-- tex4ht:label?: x14-255001r15  -->
+<p class="runbox"><a class="colab" href="https://colab.research.google.com/github/ComplexSystemsIntelligence/fuzzyclust/blob/gh-pages/notebooks/auto_examples/09_beyond_unsupervised/plot_04_collaborative_sites.ipynb">Open in Colab</a><a href="../auto_examples/09_beyond_unsupervised/plot_04_collaborative_sites.html">Example <code>plot_04_collaborative_sites.py</code> in the gallery</a></p></figure>
+<figure class="figure">
+<!-- l. 500 --><p class="noindent"><img alt="Figure 12.16" class="exfig" src="figures/09_beyond_unsupervised/plot_04_collaborative_sites_2.png"/> <a id="x14-255002r16"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 12.16. </span></span><span class="content"><span class="ec-lmr-10">Against the collaboration weight: fuzzy Rand index between the
+sites  (left),  agreement  of  every  site  with  the  true  groups  (middle),  and  mean
+membership change of every site (right).</span> </span></figcaption><!-- tex4ht:label?: x14-255002r16  -->
+</figure>
+<h4 class="subsectionHead"><span class="titlemark">12.4.5   </span> <a id="x14-25600012.4.5"></a>A library beats a single run</h4>
+<!-- l. 504 --><p class="noindent">Four overlapping groups in six dimensions are clustered by an
+ensemble of 20 FCM members, each seeing two random features and
+30 % of the samples (fig. <a href="#x14-256001r17">12.17</a>). The members reach a mean ARI of
+<!-- l. 504 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.37</mn></mrow></math> and at best
+<!-- l. 504 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.77</mn></mrow></math>; their consensus
+reaches <!-- l. 504 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.86</mn></mrow></math>,
+better than every member because the members err in different directions, and close
+to the <!-- l. 504 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.91</mn></mrow></math>
+of one FCM run on all data. The co-association matrix ordered by the
+consensus shows the four blocks. Over the library size (fig. <a href="#x14-256002r18">12.18</a>), a
+single member is as weak as any, three to ten members bring most of
+the gain, and the five consensus functions behave alike, with sMCLA a
+few points behind from ten members on. Accuracy needs ground truth,
+but reproducibility does not: on ten overlapping groups in the plane,
+FCM with ten clusters lands in different local optima, and the fuzzy
+adjusted Rand index between repeated consensus partitions rises from
+<!-- l. 504 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.62</mn> <mo class="MathClass-bin" stretchy="false">±</mo><mn>0.26</mn></mrow></math> for single
+runs to <!-- l. 504 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.86</mn> <mo class="MathClass-bin" stretchy="false">±</mo><mn>0.04</mn></mrow></math>
+for libraries of 20 (fig. <a href="#x14-256003r19">12.19</a>).
+</p>
+<figure class="figure">
+<!-- l. 506 --><p class="noindent"><img alt="Figure 12.17" class="exfig" src="figures/09_beyond_unsupervised/plot_05_ensemble_consensus_1.png"/> <a id="x14-256001r17"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 12.17. </span></span><span class="content"><span class="ec-lmr-10">Twenty weak members and their consensus: distribution of the
+member  ARIs  with  the  consensus  and  the  member  mean  (left),  co-association
+matrix ordered by the consensus (right).</span> </span></figcaption><!-- tex4ht:label?: x14-256001r17  -->
+<p class="runbox"><a class="colab" href="https://colab.research.google.com/github/ComplexSystemsIntelligence/fuzzyclust/blob/gh-pages/notebooks/auto_examples/09_beyond_unsupervised/plot_05_ensemble_consensus.ipynb">Open in Colab</a><a href="../auto_examples/09_beyond_unsupervised/plot_05_ensemble_consensus.html">Example <code>plot_05_ensemble_consensus.py</code> in the gallery</a></p></figure>
+<figure class="figure">
+<!-- l. 507 --><p class="noindent"><img alt="Figure 12.18" class="exfig" src="figures/09_beyond_unsupervised/plot_05_ensemble_consensus_2.png"/> <a id="x14-256002r18"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 12.18. </span></span><span class="content"><span class="ec-lmr-10">ARI of the consensus against the library size for the five consensus
+functions.</span> </span></figcaption><!-- tex4ht:label?: x14-256002r18  -->
+</figure>
+<figure class="figure">
+<!-- l. 508 --><p class="noindent"><img alt="Figure 12.19" class="exfig" src="figures/09_beyond_unsupervised/plot_05_ensemble_consensus_3.png"/> <a id="x14-256003r19"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 12.19. </span></span><span class="content"><span class="ec-lmr-10">Fuzzy adjusted Rand index between repeated consensus partitions
+against the library size: the ensemble makes an unstable clusterer reproducible.</span> </span></figcaption><!-- tex4ht:label?: x14-256003r19  -->
+</figure>
+<h4 class="subsectionHead"><span class="titlemark">12.4.6   </span> <a id="x14-25700012.4.6"></a>Choosing the number of clusters by the lifetime</h4>
+<!-- l. 512 --><p class="noindent">Five groups are clustered by 30 FCM members with 6 to 12
+clusters each (fig. <a href="#x14-257001r20">12.20</a>). The average-link dendrogram of
+<!-- l. 512 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1</mn> <mo class="MathClass-bin" stretchy="false">−</mo><msub><mrow><mi>s</mi></mrow><mrow><mi mathvariant="italic">kl</mi></mrow></msub></mrow></math> gives the five-cluster
+partition a lifetime of <!-- l. 512 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.53</mn></mrow></math>,
+against at most <!-- l. 512 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.06</mn></mrow></math>
+for any other number, and the consensus recovers the groups exactly. The top of
+the dendrogram (fig. <a href="#x14-257002r21">12.21</a>) shows where this comes from: below the band the
+groups fall apart into the fragments the members produced, and above it
+neighboring groups merge. The study of fig. <a href="#x14-257003r22">12.22</a> varies the members’ numbers
+of clusters and the linkage. Members with fewer clusters than groups (2 to 4) give
+three clusters, every over-segmenting range gives five with average link, and
+single link always returns one cluster, because chains of objects between the
+groups merge them at a low height. The repetition on four and six groups,
+printed by the example, finds four groups from every range and six groups from
+members with 6 to 12 or 10 to 20 clusters (five from members with 4 to
+8).
+</p>
+<figure class="figure">
+<!-- l. 514 --><p class="noindent"><img alt="Figure 12.20" class="exfig" src="figures/09_beyond_unsupervised/plot_06_ensemble_lifetime_1.png"/> <a id="x14-257001r20"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 12.20.</span>
+</span><span class="content"><span class="ec-lmr-10">Evidence accumulation on five groups: the consensus with the number of clusters
+chosen by the lifetime (left), the co-association matrix (middle), and the lifetimes of</span>
+<!-- l. 514 --><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mi>k</mi></math>
+<span class="ec-lmr-10">clusters (right).</span> </span></figcaption><!-- tex4ht:label?: x14-257001r20  -->
+<p class="runbox"><a class="colab" href="https://colab.research.google.com/github/ComplexSystemsIntelligence/fuzzyclust/blob/gh-pages/notebooks/auto_examples/09_beyond_unsupervised/plot_06_ensemble_lifetime.ipynb">Open in Colab</a><a href="../auto_examples/09_beyond_unsupervised/plot_06_ensemble_lifetime.html">Example <code>plot_06_ensemble_lifetime.py</code> in the gallery</a></p></figure>
+<figure class="figure">
+<!-- l. 515 --><p class="noindent"><img alt="Figure 12.21" class="exfig" src="figures/09_beyond_unsupervised/plot_06_ensemble_lifetime_2.png"/> <a id="x14-257002r21"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 12.21. </span></span><span class="content"><span class="ec-lmr-10">Top of the average-link dendrogram of the co-association distances;
+the band is the range of thresholds that yields five clusters.</span> </span></figcaption><!-- tex4ht:label?: x14-257002r21  -->
+</figure>
+<figure class="figure">
+<!-- l. 516 --><p class="noindent"><img alt="Figure 12.22" class="exfig" src="figures/09_beyond_unsupervised/plot_06_ensemble_lifetime_3.png"/> <a id="x14-257003r22"></a>
+</p>
+<figcaption class="caption"><span class="id"><span class="ec-lmbx-10">Figure 12.22. </span></span><span class="content"><span class="ec-lmr-10">Number of clusters chosen by the lifetime against the range of the
+members’ numbers of clusters, for average and single link.</span> </span></figcaption><!-- tex4ht:label?: x14-257003r22  -->
+</figure>
+<h3 class="sectionHead"><span class="titlemark">12.5   </span> <a id="x14-25800012.5"></a>Further reading</h3>
+<!-- l. 520 --><p class="noindent">Partial supervision by labels goes back to Pedrycz and Waletzky [<a id="x14-258001"></a><a href="bibliography.html#cite.0@pedrycz:1997:ssfcm">165</a>]; pairwise
+constraints combined with competitive agglomeration are due to Grira, Crucianu,
+and Boujemaa [<a id="x14-258002"></a><a href="bibliography.html#cite.0@grira:2006:pcca">166</a>], and competitive agglomeration itself to Frigui and
+Krishnapuram [<a id="x14-258003"></a><a href="bibliography.html#cite.0@frigui:1997:ca">167</a>]. Fuzzy co-clustering with entropy regularization was
+introduced by Oh, Honda, and Ichihashi [<a id="x14-258004"></a><a href="bibliography.html#cite.0@oh:2001:fccm">168</a>], building on Miyamoto and
+Mukaidono [<a id="x14-258005"></a><a href="bibliography.html#cite.0@miyamoto:1997:entropy">23</a>], and the quadratic variant by Kummamuru, Dhawale, and
+Krishnapuram [<a id="x14-258006"></a><a href="bibliography.html#cite.0@kummamuru:2003:codok">169</a>]. Collaborative clustering is due to Pedrycz [<a id="x14-258007"></a><a href="bibliography.html#cite.0@pedrycz:2002:collaborative">170</a>]. Cluster
+ensembles were framed by Strehl and Ghosh [<a id="x14-258008"></a><a href="bibliography.html#cite.0@strehl:2002:ensembles">171</a>] (CSPA, MCLA, and the
+METIS graph partitioner of Karypis and Kumar [<a id="x14-258009"></a><a href="bibliography.html#cite.0@karypis:1998:metis">175</a>]), extended to soft
+partitions by Punera and Ghosh [<a id="x14-258010"></a><a href="bibliography.html#cite.0@punera:2008:soft">172</a>] (sCSPA, sMCLA, ITK), and turned into a
+criterion for the number of clusters by Fred and Jain [<a id="x14-258011"></a><a href="bibliography.html#cite.0@fred:2005:eac">173</a>]; the spectral
+partitioning follows Ng, Jordan, and Weiss [<a id="x14-258012"></a><a href="bibliography.html#cite.0@ng:2002:spectral">174</a>]. Partitions are compared with
+the fuzzy Rand indices of Hüllermeier et al. [<a id="x14-258013"></a><a href="bibliography.html#cite.0@hullermeier:2012:rand">45</a>] and Campello [<a id="x14-258014"></a><a href="bibliography.html#cite.0@campello:2007:rand">46</a>] and the
+chance correction of Hubert and Arabie [<a id="x14-258015"></a><a href="bibliography.html#cite.0@hubert:1985:ari">44</a>]; the c-means functional is that
+of Bezdek [<a id="x14-258016"></a><a href="bibliography.html#cite.0@bezdek:1981">3</a>], and Jain and Dubes [<a id="x14-258017"></a><a href="bibliography.html#cite.0@jain:1988:book">4</a>] cover hierarchical clustering in
+general.
+                                                                     
+
+                                                                     
+</p>
+<!-- l. 51 -->
+<!-- l. 51 --><p class="indent"> <a id="tailmain_webch12.html"></a> </p>
+<nav class='pager'><a class='prev' href='11-incomplete-very-large-and-image.html'><small>Previous</small>Incomplete, very large, and image data</a><a class='next' href='a-api-reference.html'><small>Next</small>API reference</a></nav>
+</main>
+<aside class="right"><nav class='onpage' aria-label='On this page'><p class='toc-title'>On this page</p><ul><li><a href='#x14-24000012.1'>12.1 Problem and idea</a></li><li><a href='#x14-24100012.2'>12.2 Theory</a></li><li><a href='#x14-25000012.3'>12.3 Using it in fuzzyclust</a></li><li><a href='#x14-25100012.4'>12.4 Examples</a></li><li><a href='#x14-25800012.5'>12.5 Further reading</a></li></ul></nav></aside>
+</div>
+<footer class='foot'>© 2026 János Abonyi, University of Pannonia · licensed under <a href='https://creativecommons.org/licenses/by/4.0/'>CC BY 4.0</a> · web edition of the book, generated from the same LaTeX source as the <a href='../fuzzyclust-book.pdf'>PDF</a> · software: <a href='https://github.com/ComplexSystemsIntelligence/fuzzyclust'>fuzzyclust</a> (MIT) · <code>pip install fuzzyclust</code></footer>
+</body>
+</html>

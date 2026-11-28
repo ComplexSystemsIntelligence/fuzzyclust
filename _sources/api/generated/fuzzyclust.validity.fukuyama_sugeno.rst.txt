@@ -1,0 +1,12 @@
+﻿fuzzyclust.validity.fukuyama\_sugeno
+====================================
+
+.. currentmodule:: fuzzyclust.validity
+
+.. autofunction:: fukuyama_sugeno
+
+.. include:: fuzzyclust.validity.fukuyama_sugeno.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

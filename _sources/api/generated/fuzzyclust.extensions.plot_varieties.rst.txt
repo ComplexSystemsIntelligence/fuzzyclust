@@ -1,0 +1,12 @@
+﻿fuzzyclust.extensions.plot\_varieties
+=====================================
+
+.. currentmodule:: fuzzyclust.extensions
+
+.. autofunction:: plot_varieties
+
+.. include:: fuzzyclust.extensions.plot_varieties.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

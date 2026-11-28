@@ -1,0 +1,76 @@
+
+:orphan:
+
+.. _sphx_glr_auto_examples_01_clustering_sg_execution_times:
+
+
+Computation times
+=================
+**00:34.687** total execution time for 14 files **from auto_examples/01_clustering**:
+
+.. container::
+
+  .. raw:: html
+
+    <style scoped>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+    </style>
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script type="text/javascript" class="init">
+    $(document).ready( function () {
+        $('table.sg-datatable').DataTable({order: [[1, 'desc']]});
+    } );
+    </script>
+
+  .. list-table::
+   :header-rows: 1
+   :class: table table-striped sg-datatable
+
+   * - Example
+     - Time
+     - Mem (MB)
+   * - :ref:`sphx_glr_auto_examples_01_clustering_plot_14_merging_stability.py` (``plot_14_merging_stability.py``)
+     - 00:15.198
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_01_clustering_plot_10_initialisation_restarts.py` (``plot_10_initialisation_restarts.py``)
+     - 00:06.481
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_01_clustering_plot_13_subtractive_clustering.py` (``plot_13_subtractive_clustering.py``)
+     - 00:03.524
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_01_clustering_plot_05_validity_scan.py` (``plot_05_validity_scan.py``)
+     - 00:01.483
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_01_clustering_plot_07_motorcycle_scaling.py` (``plot_07_motorcycle_scaling.py``)
+     - 00:01.288
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_01_clustering_plot_12_fuzzifiers_annealing.py` (``plot_12_fuzzifiers_annealing.py``)
+     - 00:01.015
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_01_clustering_plot_08_sklearn_pandas_workflow.py` (``plot_08_sklearn_pandas_workflow.py``)
+     - 00:00.997
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_01_clustering_plot_11_distance_norms.py` (``plot_11_distance_norms.py``)
+     - 00:00.875
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_01_clustering_plot_04_gg_densities.py` (``plot_04_gg_densities.py``)
+     - 00:00.782
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_01_clustering_plot_03_gk_ellipses.py` (``plot_03_gk_ellipses.py``)
+     - 00:00.707
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_01_clustering_plot_01_fcm_basics.py` (``plot_01_fcm_basics.py``)
+     - 00:00.673
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_01_clustering_plot_06_predict_new_data.py` (``plot_06_predict_new_data.py``)
+     - 00:00.657
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_01_clustering_plot_09_fuzziness_exponent.py` (``plot_09_fuzziness_exponent.py``)
+     - 00:00.567
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_01_clustering_plot_02_hard_vs_fuzzy.py` (``plot_02_hard_vs_fuzzy.py``)
+     - 00:00.441
+     - 0.0

@@ -1,0 +1,12 @@
+﻿fuzzyclust.timeseries.fnn\_model\_order
+=======================================
+
+.. currentmodule:: fuzzyclust.timeseries
+
+.. autofunction:: fnn_model_order
+
+.. include:: fuzzyclust.timeseries.fnn_model_order.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

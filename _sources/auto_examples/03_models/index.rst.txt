@@ -1,0 +1,162 @@
+
+
+.. _sphx_glr_auto_examples_03_models:
+
+Clustering for model identification
+-----------------------------------
+
+Fuzzy clusters in the product space of inputs and outputs are local models:
+Takagi–Sugeno fuzzy models of static functions and of SISO / MIMO dynamic
+systems (modified Gath–Geva clustering), switching regression with fuzzy
+c-regression models, fuzzy classifiers from supervised clustering, supervised
+fuzzy partitions for decision trees, and hinging-hyperplane regression trees.
+
+
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A Takagi–Sugeno (TS) fuzzy model consists of c rules">
+
+.. only:: html
+
+  .. image:: /auto_examples/03_models/images/thumb/sphx_glr_plot_01_ts_sinc_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/03_models/plot_01_ts_sinc`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Takagi–Sugeno model of a static nonlinearity: clusters become rules</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The second benchmark of Abonyi, Babuška, and Szeifert (2002) is the second-order nonlinear plant">
+
+.. only:: html
+
+  .. image:: /auto_examples/03_models/images/thumb/sphx_glr_plot_02_ts_dynamic_plant_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/03_models/plot_02_ts_dynamic_plant`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Identification of a nonlinear dynamic system with free-run validation</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Clustering-based identification is usually applied to multi-input single-output systems, so a process with n_y outputs needs n_y separate rule bases whose interaction remains hidden. Abonyi and Szeifert instead proposed one rule base whose rules carry local MIMO ARX models,">
+
+.. only:: html
+
+  .. image:: /auto_examples/03_models/images/thumb/sphx_glr_plot_03_ts_mimo_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/03_models/plot_03_ts_mimo`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">MIMO Takagi–Sugeno model with local MIMO ARX consequents</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In a switching regression problem, every sample (\mathbf{x}_k, y_k) obeys one of c unknown linear laws, but which one is not known. Hathaway and Bezdek replaced the point prototypes of fuzzy c-means by regression models: the &quot;distance&quot; of a sample to cluster i is the squared residual E_{ik}=(y_k-\mathbf{x}_{e,k}^T\boldsymbol\theta_i)^2 of the i-th model, and the alternating optimization of">
+
+.. only:: html
+
+  .. image:: /auto_examples/03_models/images/thumb/sphx_glr_plot_04_fcrm_switching_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/03_models/plot_04_fcrm_switching`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fuzzy c-regression models: switching regression with crossing lines</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A classical fuzzy classifier has one rule per class and a crisp class label as its consequent, so every class must be a single compact region. Abonyi and Szeifert proposed rules of the form">
+
+.. only:: html
+
+  .. image:: /auto_examples/03_models/images/thumb/sphx_glr_plot_05_supervised_classifier_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/03_models/plot_05_supervised_classifier`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Supervised fuzzy clustering: classifier rules that carry class probabilities</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Rule- and tree-induction methods of the ID3 family work on discrete attributes, so continuous features are partitioned before the tree is grown. The usual a priori partitions (equal-width bins, equal-frequency bins, or a Ruspini partition of triangular sets) ignore the class labels, so their cut points fall anywhere. Abonyi (2010) proposed deriving the partition from the supervised fuzzy clustering of the previous example. Every rule&#x27;s Gaussian antecedent set, projected onto a feature, is a fuzzy set of that feature; the Gaussians are turned into trapezoids with the corner points v-3\sigma,\ v-\sigma/2,\ v+\sigma/2,\ v+3\sigma; similar sets (Jaccard similarity above a threshold \theta) are merged; and a feature left with a single set is a don&#x27;t care variable. The cut points therefore lie where the classes change. This example shows the partitions, feeds their crisp codes and their memberships to a scikit-learn decision tree, and compares the result with unsupervised discretizations.">
+
+.. only:: html
+
+  .. image:: /auto_examples/03_models/images/thumb/sphx_glr_plot_06_fuzzy_partition_tree_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/03_models/plot_06_fuzzy_partition_tree`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Supervised fuzzy partitions as a priori discretization for decision trees</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A hinging hyperplane (Breiman) is the continuous piecewise-linear function h(\mathbf{x})=\max(\mathbf{x}_e^T\boldsymbol\theta_1,\ \mathbf{x}_e^T\boldsymbol\theta_2) or the corresponding \min: two planes glued together along the hinge \{\mathbf{x}:\ \mathbf{x}_e^T(\boldsymbol\theta_1-\boldsymbol\theta_2)=0\}. Kenesei and Abonyi observed that fuzzy c-regression with c=2 finds two local linear models and their fuzzy operating regions at once, that is, one hinge, provided the two planes cross inside the data (a constraint added to the weighted least-squares step). The sign of the hinge function then splits the data into the two operating regions, each of which is again modeled by a hinge, and so on. The result is a binary regression tree with oblique splits whose leaves are hinge functions. No splitting variable has to be chosen, the tree is piecewise linear, and every node reports how well the crisp split agrees with the fuzzy partition. This example fits a surface made of two crossing hinges and studies the depth, the leaf size, and the growth strategy.">
+
+.. only:: html
+
+  .. image:: /auto_examples/03_models/images/thumb/sphx_glr_plot_07_hinging_tree_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/03_models/plot_07_hinging_tree`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Hinging-hyperplane regression tree identified by fuzzy c-regression</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/03_models/plot_01_ts_sinc
+   /auto_examples/03_models/plot_02_ts_dynamic_plant
+   /auto_examples/03_models/plot_03_ts_mimo
+   /auto_examples/03_models/plot_04_fcrm_switching
+   /auto_examples/03_models/plot_05_supervised_classifier
+   /auto_examples/03_models/plot_06_fuzzy_partition_tree
+   /auto_examples/03_models/plot_07_hinging_tree
+

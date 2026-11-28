@@ -1,0 +1,12 @@
+﻿fuzzyclust.viz.plot\_projection
+===============================
+
+.. currentmodule:: fuzzyclust.viz
+
+.. autofunction:: plot_projection
+
+.. include:: fuzzyclust.viz.plot_projection.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

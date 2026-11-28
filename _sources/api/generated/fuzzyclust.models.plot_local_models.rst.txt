@@ -1,0 +1,12 @@
+﻿fuzzyclust.models.plot\_local\_models
+=====================================
+
+.. currentmodule:: fuzzyclust.models
+
+.. autofunction:: plot_local_models
+
+.. include:: fuzzyclust.models.plot_local_models.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

@@ -1,0 +1,151 @@
+
+
+.. _sphx_glr_auto_examples_08_data_realities:
+
+Incomplete, very large and image data
+--------------------------------------
+
+Fuzzy c-means meets three realities of data that the textbook setting
+leaves out. Values are *missing*: the four strategies of Hathaway and
+Bezdek (whole data, partial distances, optimal completion, nearest
+prototype) are compared across missingness rates, and the imputation that
+optimal completion delivers is examined. Data are *very large* or arrive
+as a *stream*: random sample and extend, single-pass and online FCM are
+compared with the literal FCM on 200 000 points in time and agreement, and
+a drifting stream is processed chunk by chunk with ``partial_fit``. The
+data are an *image*: spatially constrained variants (FCM_S, FCM_S1/S2,
+EnFCM, FGFCM, FLICM) are compared with pixel-wise FCM under increasing
+Gaussian and salt-and-pepper noise, and the neighborhood weight and window
+size are studied.
+
+
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Fuzzy c-means needs a complete data matrix: a distance between a sample and a prototype is a sum over all features. When values are missing (``NaN``), Hathaway and Bezdek (2001) distinguish four strategies. The whole-data strategy (WDS) drops every incomplete sample. The partial-distance strategy (PDS) keeps all samples and measures the distance over the observed features only, rescaled to the full dimension, D^2_{ik}=\frac{n}{I_k}\sum_j I_{kj}(x_{kj}-v_{ij})^2. The optimal completion strategy (OCS) treats the missing values as additional variables of the c-means functional and updates them to the membership-weighted mean of the prototype coordinates, so that the data are imputed while they are clustered. The nearest-prototype strategy (NPS) is its hard version: a missing value is copied from the nearest prototype. This example plants values missing completely at random into well-separated Gaussian clusters and asks how far each strategy&#x27;s prototypes drift from those of FCM on the complete data as the missing rate grows.">
+
+.. only:: html
+
+  .. image:: /auto_examples/08_data_realities/images/thumb/sphx_glr_plot_01_missing_strategies_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/08_data_realities/plot_01_missing_strategies`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Clustering incomplete data: the four strategies of Hathaway and Bezdek</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The optimal completion strategy (OCS) of Hathaway and Bezdek treats every missing value x_{kj} as a variable of the c-means functional and sets it to the membership-weighted mean of the prototype coordinates, x_{kj}=\sum_i\mu_{ik}^m v_{ij}/\sum_i\mu_{ik}^m. Clustering thus delivers an imputation of the data as a by-product. The same formula can be applied after a partial-distance (PDS) fit, with memberships that were computed from the observed features only, and the nearest-prototype strategy (NPS) copies the coordinate of the nearest prototype. This example measures how close the completed values come to the truth. Four Gaussian clusters in four dimensions are used because a cluster is then identified by some features better than by others: a sample that lost exactly its discriminating features is ambiguous, and how a strategy treats such samples decides its imputation error. Two baselines put the numbers in perspective: the column mean (what a clustering-free imputer would do) and the oracle, the mean of the sample&#x27;s true cluster, which is the best any prototype-based imputation can achieve.">
+
+.. only:: html
+
+  .. image:: /auto_examples/08_data_realities/images/thumb/sphx_glr_plot_02_ocs_imputation_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/08_data_realities/plot_02_ocs_imputation`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Imputation by clustering: accuracy of the completed values</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Literal fuzzy c-means touches every sample in every iteration and keeps the N\times c partition in memory. Havens, Bezdek, Leckie, Hall and Palaniswami (2012) compared three ways around this. Random sample and extend (rseFCM) clusters a random sample and computes the memberships of all samples in one pass from the fixed prototypes. Single-pass FCM (spFCM) walks through the data in chunks and carries the prototypes of a chunk, weighted by the membership mass they collected, into the next chunk as c heavy samples of weighted FCM. Online FCM (oFCM) clusters every chunk independently and clusters the weighted chunk prototypes at the end. The paper measures the speedup over literal FCM and the agreement of the hardened partitions with the literal FCM partition. This example repeats the experiment on 200 000 two-dimensional samples of five clusters of unequal size; the smallest holds only 5 % of the data, which makes a small random sample risky.">
+
+.. only:: html
+
+  .. image:: /auto_examples/08_data_realities/images/thumb/sphx_glr_plot_03_large_data_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/08_data_realities/plot_03_large_data`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fuzzy c-means for very large data: rseFCM, spFCM and oFCM</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Single-pass and online FCM need only one chunk in memory, so they can consume a stream: partial_fit processes one chunk and keeps a summary of everything seen so far (c weighted prototypes for spFCM, all chunk prototypes for oFCM). Both summaries treat the stream as stationary: an observation from the first chunk counts as much as one from the last. When the clusters drift, the summary lags behind. This example sends a stream of 40 chunks through both algorithms while the three cluster centers move along straight lines, and measures the distance of the model&#x27;s prototypes from the current true centers. A forgetting factor \lambda (``forgetting_factor``, an addition to the published spFCM) multiplies the carried weights before every chunk, so that old data fade geometrically; the parameter study shows that the right \lambda balances lag against noise and depends on how fast the stream drifts.">
+
+.. only:: html
+
+  .. image:: /auto_examples/08_data_realities/images/thumb/sphx_glr_plot_04_stream_drift_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/08_data_realities/plot_04_stream_drift`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Clustering a drifting stream chunk by chunk with partial_fit</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Segmenting a gray-level image with fuzzy c-means means clustering the pixel values. Pixel-wise FCM labels every pixel on its own, so noise that pushes a pixel&#x27;s value across the midpoint between two gray levels produces a wrong label, however clear the surrounding region is. The spatially constrained variants add the neighborhood of every pixel to the functional: FCM_S (Ahmed et al. 2002) adds the distances of the neighbors to the prototype, FCM_S1 and FCM_S2 (Chen and Zhang 2004) replace them by a mean- or median-filtered image computed once, EnFCM (Szilágyi et al. 2003) clusters the gray-level histogram of a linearly smoothed image, FGFCM (Cai, Chen and Zhang 2007) does the same with locally adaptive weights, and FLICM (Krinidis and Chatzis 2010) adds a parameter-free fuzzy local factor. The test image has four regions with equally spaced gray levels and one disc of every class inside another region; it is corrupted by Gaussian noise (every pixel slightly) and by salt-and-pepper noise (a few pixels set to black or white), which call for different remedies.">
+
+.. only:: html
+
+  .. image:: /auto_examples/08_data_realities/images/thumb/sphx_glr_plot_05_image_noise_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/08_data_realities/plot_05_image_noise`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Image segmentation under noise: six spatially constrained FCM variants</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="FCM_S, FCM_S1/S2 and EnFCM mix every pixel with its neighborhood, and two parameters set how much. The weight \alpha balances the pixel against its neighbors (\alpha=0 is pixel-wise FCM, a large \alpha lets the neighborhood decide), and the window size sets how far the neighborhood reaches. Both suppress noise and both erase detail: a structure narrower than the window is outvoted by its surroundings. To make this trade-off visible, the test image of the previous example gets two thin bars, one and two pixels wide, and the accuracy is measured separately on the interior of the regions and on the detail, the pixels within one pixel of a region boundary, which include the bars. The study also shows why \alpha must exceed one for the median variant FCM_S2 to remove impulse noise.">
+
+.. only:: html
+
+  .. image:: /auto_examples/08_data_realities/images/thumb/sphx_glr_plot_06_spatial_alpha_window_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/08_data_realities/plot_06_spatial_alpha_window`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Spatial FCM: the neighborhood weight and the window size</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/08_data_realities/plot_01_missing_strategies
+   /auto_examples/08_data_realities/plot_02_ocs_imputation
+   /auto_examples/08_data_realities/plot_03_large_data
+   /auto_examples/08_data_realities/plot_04_stream_drift
+   /auto_examples/08_data_realities/plot_05_image_noise
+   /auto_examples/08_data_realities/plot_06_spatial_alpha_window
+

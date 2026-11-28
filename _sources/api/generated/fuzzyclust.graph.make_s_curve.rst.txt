@@ -1,0 +1,12 @@
+﻿fuzzyclust.graph.make\_s\_curve
+===============================
+
+.. currentmodule:: fuzzyclust.graph
+
+.. autofunction:: make_s_curve
+
+.. include:: fuzzyclust.graph.make_s_curve.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

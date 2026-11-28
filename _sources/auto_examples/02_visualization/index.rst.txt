@@ -1,0 +1,106 @@
+
+
+.. _sphx_glr_auto_examples_02_visualization:
+
+Visualisation of clustering results
+-----------------------------------
+
+Projecting high-dimensional data and cluster prototypes to the plane (PCA,
+Sammon mapping, fuzzy Sammon mapping), measuring how faithful the picture is,
+and fuzzy self-organizing maps.
+
+
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A clustering of n-dimensional data cannot be inspected directly; the classical remedy is to project the data onto the plane. Principal component analysis (PCA) chooses the plane that retains as much variance as possible, which says nothing about the distances the clustering algorithm works with. Sammon&#x27;s mapping instead places the N points in the plane so that their pairwise distances d^*_{kl} reproduce the original distances d_{kl}; it minimizes the stress">
+
+.. only:: html
+
+  .. image:: /auto_examples/02_visualization/images/thumb/sphx_glr_plot_01_pca_vs_sammon_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/02_visualization/plot_01_pca_vs_sammon`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">PCA versus Sammon mapping: preserving variance or distances</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Sammon mapping preserves the Euclidean distances between all pairs of samples. A fuzzy clustering, however, is defined by the N\times c distances between the samples and the cluster prototypes, measured with the norm of the clustering algorithm (Euclidean for FCM, adaptive Mahalanobis norms for Gustafson–Kessel, and so on). The fuzzy Sammon mapping (FUZZSAM) preserves these distances, weighted by the memberships,">
+
+.. only:: html
+
+  .. image:: /auto_examples/02_visualization/images/thumb/sphx_glr_plot_02_fuzzy_sammon_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/02_visualization/plot_02_fuzzy_sammon`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fuzzy Sammon mapping: projecting clusters, not just data</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Fuzzy c-means places its prototypes wherever the data are dense, in no particular order. The fuzzy self-organizing map of Abonyi, Migály, and Szeifert arranges the prototypes on the nodes of a low-dimensional grid and adds a smoothness penalty to the FCM functional,">
+
+.. only:: html
+
+  .. image:: /auto_examples/02_visualization/images/thumb/sphx_glr_plot_03_fuzzy_som_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/02_visualization/plot_03_fuzzy_som`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Fuzzy self-organizing map: ordered prototypes by regularized FCM</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Validity indices compress a partition into one number. A faithful 2-D picture of the partition tells more: whether the clusters are compact groups around their centers, whether two of them should be merged, or whether a cluster merely collects what the others leave. Since the fuzzy Sammon mapping shows the clustering as the algorithm sees it (every prototype becomes a point, and the recomputed memberships match the fitted ones), it is a natural tool for such user-guided validation. This example clusters the Wisconsin breast cancer data (569 samples, the ten standardized &quot;mean&quot; cell-nucleus features, two diagnoses) with FCM for c=2,3,4 and projects every result with FUZZSAM, as in the FUZZ-IEEE paper. It also reports the quality measures of the maps and the convergence of E_\text{fuzz} for several step sizes.">
+
+.. only:: html
+
+  .. image:: /auto_examples/02_visualization/images/thumb/sphx_glr_plot_04_cluster_number_validation_thumb.png
+    :alt:
+
+  :doc:`/auto_examples/02_visualization/plot_04_cluster_number_validation`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Visual validation of the number of clusters with FUZZSAM</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/02_visualization/plot_01_pca_vs_sammon
+   /auto_examples/02_visualization/plot_02_fuzzy_sammon
+   /auto_examples/02_visualization/plot_03_fuzzy_som
+   /auto_examples/02_visualization/plot_04_cluster_number_validation
+

@@ -1,0 +1,156 @@
+r"""
+Minimal spanning tree clustering: cutting, splitting, and Gath–Geva refinement
+==============================================================================
+
+Prototype-based algorithms describe a cluster by one geometric object and
+fail when the groups have arbitrary shapes. Graph-theoretic methods start
+instead from the *minimal spanning tree* (MST) of the data and obtain
+clusters by removing edges. Zahn's classical criteria for choosing these
+edges compare an edge with the mean edge length of the whole tree (global
+threshold) or with the edges in its own neighborhood (local
+inconsistency). Both find well-separated groups, but a sparse *chain* of
+points between two groups keeps them together: the chaining effect of
+single linkage. The hybrid MST–GG algorithm of Vathy-Fogarassy, Feil, and
+Abonyi adds a third criterion. A subtree is split at the edge that
+minimizes the total *fuzzy hypervolume* :math:`\sum_j\sqrt{\det\mathbf{F}_j}`
+of the resulting parts, which breaks chains and bends because a union of
+two compact groups has a far larger volume than its parts. Finally, the
+crisp tree partition initializes Gath–Geva clustering, which is too
+sensitive to its starting point to be run from a random partition on such
+data but refines a good start into a fuzzy, parametric description
+(centers, covariances, memberships).
+"""
+
+# %%
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.metrics import adjusted_rand_score
+
+from fuzzyclust import GG
+from fuzzyclust.graph import MSTClustering, make_chained_blobs, plot_mst
+from fuzzyclust.plotting import PALETTE, plot_clusters, plot_covariance_ellipses, plot_membership_contours
+
+X, y = make_chained_blobs(n_samples_per_blob=120, n_chain=25, random_state=0)
+blob = y < 2  # the chain points (label 2) have no "true" cluster
+
+# %%
+# The tree and Zahn's criteria: the chaining effect
+# -------------------------------------------------
+# With the splitting phase disabled (``min_gain=1.0`` can never be reached),
+# the estimator is the classical MST clusterer. Without any cut, the tree is
+# one cluster; the local inconsistency criterion flags edges that are much
+# longer than their neighbors. Along the chain every edge is about as long
+# as the next one, so at most one edge near one of the blobs is flagged and
+# the rest of the chain stays attached to the other blob; the groups are not
+# separated from the chain.
+
+# [snippet:tree]
+tree_only = MSTClustering(threshold=None, inconsistency=None, min_gain=1.0, refine=None).fit(X)
+zahn = MSTClustering(inconsistency=2.5, n_hops=2, min_gain=1.0, refine=None).fit(X)
+print("tree only  :", tree_only.n_clusters_, "cluster")
+print("Zahn (f=2.5):", zahn.n_clusters_, "clusters, cut edges:", len(zahn.cut_edges_))
+# [/snippet:tree]
+
+fig, axes = plt.subplots(1, 2, figsize=(11, 4.4), sharex=True, sharey=True)
+plot_mst(X, tree_only, ax=axes[0], labels=np.zeros(len(X), int), legend=False)
+axes[0].set_title("Minimal spanning tree of two blobs joined by a chain")
+plot_mst(X, zahn, ax=axes[1])
+axes[1].set_title(f"Zahn's local criterion: {zahn.n_clusters_} clusters, the chain stays attached")
+plt.tight_layout()
+
+# %%
+# Volume-based splitting breaks the chain
+# ---------------------------------------
+# The hypervolume criterion evaluates every edge of the largest cluster as a
+# cut and keeps the one that lowers the total volume most. The union of the
+# two blobs with the chain is a long, thin cloud with a large determinant,
+# whereas the blobs alone are compact. The volume cuts therefore separate
+# the chain from a blob and cut the chain itself. A Gaussian blob is *not* split, because halving it would increase the
+# summed volume (:math:`2\times0.6>1`).
+
+# [snippet:fit]
+mst = MSTClustering(random_state=0).fit(X)
+print("clusters found:", mst.n_clusters_)
+print("cut phases    :", mst.cut_phases_, " (0 = length criteria, 1 = volume criterion)")
+print("hypervolumes  :", mst.hypervolumes_.round(3))
+# [/snippet:fit]
+
+fig, ax = plt.subplots(figsize=(6.5, 4.6))
+plot_mst(X, mst, ax=ax)
+ax.set_title(f"Volume criterion: {mst.n_clusters_} tree clusters, the chain is cut off")
+plt.tight_layout()
+
+# %%
+# Gath–Geva refinement from the tree partition
+# --------------------------------------------
+# The crisp tree partition initializes GG with as many clusters as there are
+# tree clusters. GG keeps the structure and turns it into a fuzzy partition
+# with covariance matrices (``cluster_centers_``, ``covariances_``,
+# ``membership_``); the same GG started from a random partition typically
+# merges a blob with the chain or splits a blob. The cut adequacy
+# :math:`CP(e)` (``cut_quality_``) checks every cut against the refined
+# memberships: values near 2 mean that the end points of the cut edge
+# clearly belong to different final clusters.
+
+# [snippet:refine]
+gg_random = GG(n_clusters=mst.n_clusters_, random_state=0).fit(X)
+ari_tree = adjusted_rand_score(y[blob], mst.tree_labels_[blob])
+ari_gg = adjusted_rand_score(y[blob], mst.labels_[blob])
+ari_random = adjusted_rand_score(y[blob], gg_random.labels_[blob])
+print(f"ARI of the blobs: tree partition {ari_tree:.2f}, MST-GG {ari_gg:.2f}, GG from random start {ari_random:.2f}")
+print("cut adequacy CP(e):", mst.cut_quality_.round(2))
+# [/snippet:refine]
+
+fig, axes = plt.subplots(1, 2, figsize=(11, 4.4), sharex=True, sharey=True)
+for ax, model, name in zip(axes, (mst, gg_random), ("MST-GG (tree initialization)", "GG from a random start"), strict=True):
+    plot_membership_contours(model, X, ax=ax, labels=False)
+    plot_covariance_ellipses(model.cluster_centers_, model.covariances_, ax=ax)
+    ax.set_title(f"{name}: ARI(blobs) = {adjusted_rand_score(y[blob], model.labels_[blob]):.2f}")
+plt.tight_layout()
+
+# %%
+# Parameter study: greediness of the splitting
+# --------------------------------------------
+# ``min_gain`` is the minimal *relative* decrease of the volume criterion
+# that a split must achieve. Small values accept cosmetic cuts (a few tail
+# points of a blob), whereas large values stop at the coarse clusters;
+# ``min_cluster_size`` forbids tiny fragments altogether. The refinement
+# can also be switched to FCM or turned off. The chain points pull FCM away
+# from the tree partition, but not GG.
+
+# [snippet:scan]
+gains = (0.05, 0.1, 0.15, 0.3, 0.6)
+sizes = (2, 5, 10, 20)
+table = np.array([[MSTClustering(min_gain=g, min_cluster_size=s, refine=None).fit(X).n_clusters_
+                   for s in sizes] for g in gains])
+# [/snippet:scan]
+fig, axes = plt.subplots(1, 2, figsize=(11, 3.8))
+for j, s in enumerate(sizes):
+    axes[0].plot(gains, table[:, j], "o-", color=PALETTE[j], label=f"min_cluster_size = {s}")
+axes[0].set_xlabel("min_gain (relative volume decrease required)")
+axes[0].set_ylabel("number of tree clusters")
+axes[0].set_title("Number of clusters versus the splitting parameters")
+axes[0].legend(frameon=False, fontsize=8)
+axes[0].grid(True, color="0.9")
+
+rows = []
+for refine in ("gg", "fcm", None):
+    model = MSTClustering(refine=refine, random_state=0).fit(X)
+    rows.append((str(refine), adjusted_rand_score(model.tree_labels_, model.labels_),
+                 adjusted_rand_score(y[blob], model.labels_[blob])))
+    print(f"refine={refine!s:5s}: agreement with the tree partition {rows[-1][1]:.2f}, ARI(blobs) {rows[-1][2]:.2f}")
+fcm_refined = MSTClustering(refine="fcm", random_state=0).fit(X)
+plot_clusters(X, fcm_refined.labels_, fcm_refined.cluster_centers_, ax=axes[1], legend=False)
+axes[1].set_title("FCM refinement: the chain pulls the prototypes off the blobs")
+plt.tight_layout()
+
+# %%
+# **Take-away.** The MST turns clustering into the choice of edges to
+# remove. Zahn's length criteria find separated groups but cannot see a
+# chain. The fuzzy hypervolume criterion of the hybrid algorithm splits
+# wherever the parts are much more compact than their union, which breaks
+# chains and bends while leaving Gaussian groups intact; ``min_gain`` and
+# ``min_cluster_size`` set how fine the result is. The tree partition is
+# the initialization that Gath–Geva needs. Started there, GG delivers the
+# fuzzy, parametric description that the tree alone lacks, and the cut
+# adequacy shows which cuts the refinement confirmed.

@@ -1,0 +1,12 @@
+﻿fuzzyclust.plotting.plot\_objective
+===================================
+
+.. currentmodule:: fuzzyclust.plotting
+
+.. autofunction:: plot_objective
+
+.. include:: fuzzyclust.plotting.plot_objective.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

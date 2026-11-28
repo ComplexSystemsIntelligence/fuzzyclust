@@ -1,0 +1,12 @@
+﻿fuzzyclust.semisupervised.plot\_label\_propagation
+==================================================
+
+.. currentmodule:: fuzzyclust.semisupervised
+
+.. autofunction:: plot_label_propagation
+
+.. include:: fuzzyclust.semisupervised.plot_label_propagation.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

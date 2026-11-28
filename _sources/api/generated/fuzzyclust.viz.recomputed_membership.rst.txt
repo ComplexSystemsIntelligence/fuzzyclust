@@ -1,0 +1,12 @@
+﻿fuzzyclust.viz.recomputed\_membership
+=====================================
+
+.. currentmodule:: fuzzyclust.viz
+
+.. autofunction:: recomputed_membership
+
+.. include:: fuzzyclust.viz.recomputed_membership.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

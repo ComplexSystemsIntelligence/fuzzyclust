@@ -1,0 +1,12 @@
+﻿fuzzyclust.timeseries.make\_rossler
+===================================
+
+.. currentmodule:: fuzzyclust.timeseries
+
+.. autofunction:: make_rossler
+
+.. include:: fuzzyclust.timeseries.make_rossler.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>

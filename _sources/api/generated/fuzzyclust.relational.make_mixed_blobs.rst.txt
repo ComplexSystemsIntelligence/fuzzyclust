@@ -1,0 +1,12 @@
+﻿fuzzyclust.relational.make\_mixed\_blobs
+========================================
+
+.. currentmodule:: fuzzyclust.relational
+
+.. autofunction:: make_mixed_blobs
+
+.. include:: fuzzyclust.relational.make_mixed_blobs.examples
+
+.. raw:: html
+
+    <div class="clearer"></div>
